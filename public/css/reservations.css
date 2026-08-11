@@ -1,0 +1,527 @@
+/* =========================================================
+   RESERVASI BUKU
+   ========================================================= */
+
+#page-reservations {
+    width: 100%;
+}
+
+
+/* =========================
+   BUKU STOK HABIS
+========================= */
+
+#page-reservations .reservation-field select option:disabled {
+    color: #999;
+    background: #eeeeee;
+}
+
+
+/* =========================
+   ALERT
+   ========================= */
+
+.reservation-alert {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+}
+
+.reservation-alert.success {
+    background: #e7f4e8;
+    border: 1px solid #b8d9ba;
+    color: #28632c;
+}
+
+.reservation-alert.error {
+    background: #fbeaea;
+    border: 1px solid #e2b8b8;
+    color: #8a2d2d;
+}
+
+.reservation-alert ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+
+/* =========================
+   LAYOUT
+   ========================= */
+
+.reservation-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.65fr;
+    gap: 24px;
+    align-items: start;
+}
+
+
+/* =========================
+   FORM CARD
+   ========================= */
+
+.reservation-form-card {
+    background: #fff;
+
+    border: 1px solid #e1e7e7;
+    border-radius: 8px;
+
+    padding: 18px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.reservation-form-card h3 {
+    margin: 0 0 4px;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    color: #111;
+}
+
+.reservation-form-card p {
+    margin: 0 0 18px;
+
+    font-size: 11px;
+
+    color: #777;
+}
+
+
+/* =========================
+   FORM FIELD
+   ========================= */
+
+.reservation-field {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+
+    margin-bottom: 13px;
+}
+
+.reservation-field label {
+    font-size: 11px;
+    font-weight: 600;
+
+    color: #263b3b;
+}
+
+.reservation-field select,
+.reservation-field input {
+    width: 100%;
+    height: 34px;
+
+    box-sizing: border-box;
+
+    padding: 0 10px;
+
+    border: 1px solid #c9d5d5;
+    border-radius: 5px;
+
+    background: #fff;
+
+    color: #222;
+
+    font-family: inherit;
+    font-size: 11px;
+
+    outline: none;
+}
+
+.reservation-field select:focus,
+.reservation-field input:focus {
+    border-color: #287b7b;
+}
+
+
+/* =========================
+   TANGGAL
+   ========================= */
+
+.reservation-date-row {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 12px;
+}
+
+
+/* =========================
+   SUBMIT
+   ========================= */
+
+.reservation-submit {
+    width: 100%;
+    height: 34px;
+
+    margin-top: 3px;
+
+    border: 1px solid #287b7b;
+    border-radius: 17px;
+
+    background: #287b7b;
+    color: #fff;
+
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.reservation-submit:hover {
+    background: #216969;
+}
+
+
+/* =========================
+   LIST CARD
+========================= */
+
+.reservation-list-card {
+    min-width: 0;
+
+    background: #fff;
+
+    border: 1px solid #e1e7e7;
+    border-radius: 8px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+    overflow: hidden;
+}
+
+
+/* =========================
+   LIST HEADER
+========================= */
+
+.reservation-list-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 15px 18px;
+
+    border-bottom: 1px solid #e2e7e7;
+}
+
+.reservation-list-top h3 {
+    margin: 0;
+
+    font-size: 14px;
+
+    color: #111;
+}
+
+.reservation-list-top input {
+    width: 180px;
+    height: 30px;
+
+    padding: 0 10px;
+
+    border: 1px solid #9fc2c2;
+    border-radius: 15px;
+
+    font-family: inherit;
+    font-size: 10px;
+
+    outline: none;
+}
+
+.reservation-list-top input:focus {
+    border-color: #287b7b;
+}
+
+
+/* =========================
+   TABLE SCROLL
+========================= */
+
+.reservation-table-wrap {
+    width: 100%;
+
+    max-height: 430px;
+
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+
+/* Scrollbar */
+
+.reservation-table-wrap::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+.reservation-table-wrap::-webkit-scrollbar-track {
+    background: #f3f6f6;
+}
+
+.reservation-table-wrap::-webkit-scrollbar-thumb {
+    background: #a7caca;
+    border-radius: 10px;
+}
+
+.reservation-table-wrap::-webkit-scrollbar-thumb:hover {
+    background: #287b7b;
+}
+
+
+/* =========================
+   TABLE
+========================= */
+
+.reservation-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 11px;
+}
+
+.reservation-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    padding: 10px 12px;
+
+    background: #a7caca;
+
+    text-align: left;
+
+    color: #111;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.reservation-table td {
+    padding: 11px 12px;
+
+    border-bottom: 1px solid #e6ebeb;
+
+    color: #263b3b;
+
+    vertical-align: middle;
+}
+
+.reservation-table tbody tr:hover {
+    background: #f8fbfb;
+}
+
+/* =========================
+   STATUS
+   ========================= */
+
+.reservation-status {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 58px;
+
+    padding: 4px 8px;
+
+    border-radius: 10px;
+
+    font-size: 9px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+/* MENUNGGU */
+
+.reservation-status.waiting {
+    background: #eee8c7;
+    color: #665d25;
+}
+
+
+/* DISETUJUI */
+
+.reservation-status.approved {
+    background: #dfead8;
+    color: #3d6433;
+}
+
+
+/* DITOLAK */
+
+.reservation-status.rejected {
+    background: #ead5d5;
+    color: #8a3c3c;
+}
+
+
+/* DIBATALKAN */
+
+.reservation-status.cancelled {
+    background: #e5e5e5;
+    color: #666;
+}
+
+
+/* SELESAI */
+
+.reservation-status.finished {
+    background: #dfe8ed;
+    color: #29485a;
+}
+
+/* telat */
+.reservation-status.late {
+    background: #ead5d5;
+    color: #8a3c3c;
+    border: 1px solid #d3aaaa;
+}
+
+/* aprove */
+.reservation-status.approved {
+    background: #dfead8;
+    color: #3d6433;
+    border: 1px solid #b8cdaa;
+}
+
+/* =========================
+   ACTION
+   ========================= */
+
+.reservation-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+}
+
+.reservation-actions form {
+    margin: 0;
+}
+
+
+/* SETUJUI */
+
+.btn-approve {
+    height: 28px;
+
+    padding: 0 10px;
+
+    border: 1px solid #8fb69a;
+    border-radius: 14px;
+
+    background: #e3efdf;
+    color: #35642f;
+
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.btn-approve:hover {
+    background: #d4e7cf;
+}
+
+
+/* TOLAK */
+
+.btn-reject {
+    height: 28px;
+
+    padding: 0 10px;
+
+    border: 1px solid #d2a4a4;
+    border-radius: 14px;
+
+    background: #f8dddd;
+    color: #8a2d2d;
+
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.btn-reject:hover {
+    background: #efd0d0;
+}
+
+
+/* SUDAH DIPROSES */
+
+.action-done {
+    font-size: 10px;
+
+    color: #777;
+}
+
+
+/* =========================
+   EMPTY STATE
+   ========================= */
+
+.reservation-empty {
+    padding: 30px !important;
+
+    text-align: center;
+
+    color: #777 !important;
+}
+
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 900px) {
+
+    .reservation-layout {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .reservation-date-row {
+        grid-template-columns: 1fr;
+    }
+
+    .reservation-list-top {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .reservation-list-top input {
+        width: 100%;
+    }
+
+    .reservation-table {
+        min-width: 750px;
+    }
+
+    .reservation-actions {
+        flex-wrap: wrap;
+    }
+
+}

@@ -1,0 +1,467 @@
+/* =========================================================
+   BOOKS
+   Manajemen Buku + Tambah Buku + Edit Buku
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+    margin-bottom: 18px;
+}
+
+.page-label {
+    display: block;
+    margin-bottom: 4px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    color: #287b7b;
+}
+
+.page-header h1 {
+    margin: 0;
+
+    font-size: 24px;
+    line-height: 1.2;
+
+    color: #111;
+}
+
+.page-header p {
+    margin: 5px 0 0;
+
+    font-size: 12px;
+
+    color: #555;
+}
+
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.book-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.toolbar-left,
+.toolbar-right {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.book-toolbar select {
+    height: 32px;
+
+    padding: 0 10px;
+
+    border: 1px solid #9bbebe;
+    border-radius: 16px;
+
+    background: #fff;
+
+    font-size: 11px;
+    color: #333;
+
+    outline: none;
+}
+
+.book-toolbar select:focus {
+    border-color: #287b7b;
+}
+
+.book-total {
+    font-size: 11px;
+    color: var(--muted, #777);
+}
+
+
+/* =========================================================
+   BOOK BUTTONS
+   ========================================================= */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 32px;
+
+    padding: 0 13px;
+
+    border: 1px solid #8db6b6;
+    border-radius: 16px;
+
+    font-size: 11px;
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.btn-secondary {
+    background: #fff;
+    color: #287b7b;
+}
+
+.btn-secondary:hover {
+    background: #eef7f7;
+}
+
+.btn-primary {
+    background: #287b7b;
+    border-color: #287b7b;
+
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #216969;
+}
+
+
+/* =========================================================
+   BOOK TABLE
+   ========================================================= */
+
+.table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border-radius: 7px;
+}
+
+.books-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    background: #fff;
+
+    font-size: 11px;
+}
+
+.books-table thead th {
+    padding: 9px 12px;
+
+    background: #a7caca;
+
+    color: #111;
+
+    font-weight: 700;
+    text-align: left;
+
+    white-space: nowrap;
+}
+
+.books-table thead th:first-child {
+    border-radius: 7px 0 0 0;
+}
+
+.books-table thead th:last-child {
+    border-radius: 0 7px 0 0;
+}
+
+.books-table tbody td {
+    padding: 10px 12px;
+
+    border-bottom: 1px solid #e2e7e7;
+
+    color: #333;
+
+    vertical-align: middle;
+}
+
+.books-table tbody tr:hover {
+    background: #f7fbfb;
+}
+
+.books-table tbody td strong {
+    font-weight: 600;
+    color: #222;
+}
+
+
+/* =========================================================
+   BOOK ACTIONS
+   ========================================================= */
+
+.book-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+}
+
+.book-actions form {
+    margin: 0;
+}
+
+.action-edit,
+.action-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    height: 22px;
+
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
+
+    color: #287b7b;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    font-size: 14px;
+}
+
+.action-edit:hover {
+    color: #155c5c;
+}
+
+.action-delete {
+    color: #287b7b;
+}
+
+.action-delete:hover {
+    color: #a33;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-books {
+    padding: 30px !important;
+
+    text-align: center !important;
+
+    color: #777 !important;
+}
+
+
+/* =========================================================
+   FORM BUKU
+   Tambah + Edit
+   ========================================================= */
+
+.book-form-page {
+    padding: 36px 0;
+}
+
+.book-form-card {
+    background: #fff;
+
+    border: 1px solid #d9e3e3;
+    border-radius: 8px;
+
+    padding: 28px 30px 22px;
+}
+
+.book-form-card h2 {
+    margin: 0 0 24px;
+
+    font-size: 22px;
+    font-weight: 700;
+
+    color: #111;
+}
+
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    column-gap: 14px;
+    row-gap: 12px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #222;
+}
+
+.form-group .input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    height: 32px;
+
+    padding: 6px 10px;
+
+    border: 1px solid #aebebe;
+    border-radius: 4px;
+
+    background: #fff;
+
+    font-family: inherit;
+    font-size: 12px;
+
+    color: #222;
+}
+
+.form-group .input:focus {
+    outline: none;
+
+    border-color: #2b7f7f;
+}
+
+.form-group textarea.input {
+    height: auto;
+
+    min-height: 80px;
+
+    resize: vertical;
+}
+
+.form-full {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   FORM ACTIONS
+   ========================================================= */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    margin-top: 18px;
+    padding-top: 14px;
+
+    border-top: 1px solid #d9d9d9;
+}
+
+.btn-cancel,
+.btn-save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 64px;
+    height: 32px;
+
+    padding: 0 14px;
+
+    border-radius: 16px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background: #fff;
+
+    color: #333;
+
+    border: 1px solid #aebebe;
+}
+
+.btn-cancel:hover {
+    background: #f4f6f6;
+}
+
+.btn-save {
+    background: #2b7f7f;
+
+    color: #fff;
+
+    border: 1px solid #2b7f7f;
+}
+
+.btn-save:hover {
+    background: #236b6b;
+}
+
+
+/* =========================================================
+   RESPONSIVE — FORM
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-full {
+        grid-column: auto;
+    }
+
+    .book-form-card {
+        padding: 22px;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLE & TOOLBAR
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .book-toolbar {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+        width: 100%;
+    }
+
+    .toolbar-right {
+        justify-content: space-between;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .books-table {
+        min-width: 700px;
+    }
+}

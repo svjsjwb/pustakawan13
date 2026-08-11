@@ -1,0 +1,276 @@
+/* =========================================================
+   SIRKULASI / PEMINJAMAN BUKU
+   ========================================================= */
+
+#page-circulation {
+    width: 100%;
+}
+
+
+/* =========================================================
+   ALERT
+   ========================================================= */
+
+#page-circulation .alert-success,
+#page-circulation .alert-error {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+#page-circulation .alert-success {
+    background: #e7f4e8;
+    border: 1px solid #b8d9ba;
+    color: #28632c;
+}
+
+#page-circulation .alert-error {
+    background: #fbeaea;
+    border: 1px solid #e2b8b8;
+    color: #8a2d2d;
+}
+
+
+/* =========================================================
+   LAYOUT KHUSUS SIRKULASI
+   ========================================================= */
+
+#page-circulation .two-col {
+    grid-template-columns: 1fr 1.6fr;
+    gap: 20px;
+    align-items: start;
+}
+
+
+/* =========================================================
+   FORM SIRKULASI
+   ========================================================= */
+
+#page-circulation .field {
+    margin-bottom: 13px;
+}
+
+#page-circulation .field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #263b3b;
+}
+
+#page-circulation .field-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+
+/* =========================================================
+   BUKU STOK HABIS
+   ========================================================= */
+
+#page-circulation .field select option:disabled {
+    color: #999;
+    background: #eeeeee;
+}
+
+
+/* =========================================================
+   FILTER SIRKULASI
+   ========================================================= */
+
+#page-circulation .filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+#page-circulation .filters input {
+    height: 32px;
+    min-width: 180px;
+    padding: 0 10px;
+
+    border: 1px solid #9fc2c2;
+    border-radius: 16px;
+
+    font-family: inherit;
+    font-size: 11px;
+
+    outline: none;
+}
+
+#page-circulation .filters input:focus {
+    border-color: #287b7b;
+}
+
+
+/* =========================================================
+   STATUS FILTER
+   ========================================================= */
+
+#page-circulation .seg {
+    display: inline-flex;
+    gap: 4px;
+}
+
+#page-circulation .seg button {
+    height: 30px;
+    padding: 0 11px;
+
+    border: 1px solid #9fc2c2;
+    border-radius: 15px;
+
+    background: #fff;
+    color: #287b7b;
+
+    font-family: inherit;
+    font-size: 10px;
+
+    cursor: pointer;
+}
+
+#page-circulation .seg button:hover {
+    background: #eef7f7;
+}
+
+#page-circulation .seg button.active {
+    background: #287b7b;
+    border-color: #287b7b;
+    color: #fff;
+}
+
+
+/* =========================================================
+   TABLE KHUSUS SIRKULASI
+   ========================================================= */
+
+#page-circulation table th {
+    color: #287b7b;
+    white-space: nowrap;
+}
+
+#page-circulation table td {
+    color: #263b3b;
+    vertical-align: middle;
+}
+
+#page-circulation table tbody tr:hover {
+    background: #f8fbfb;
+}
+
+
+/* =========================================================
+   STATUS BADGE
+   ========================================================= */
+
+#page-circulation .status-badge {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 4px 8px;
+
+    border-radius: 10px;
+
+    font-size: 9px;
+    font-weight: 600;
+}
+
+#page-circulation .status-badge.aktif {
+    background: #e1f0f0;
+    color: #287b7b;
+}
+
+#page-circulation .status-badge.terlambat {
+    background: #f8dddd;
+    color: #9b3333;
+}
+
+#page-circulation .status-badge.kembali {
+    background: #e3efdf;
+    color: #3d7035;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+#page-circulation .empty-state {
+    padding: 30px !important;
+    text-align: center;
+    color: #777;
+}
+
+/* =========================================================
+   FORM ELEMENT TAMBAHAN
+   ========================================================= */
+
+#page-circulation .loan-description {
+    margin: 0 0 16px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+#page-circulation .loan-submit {
+    width: 100%;
+    justify-content: center;
+}
+
+#page-circulation .error-list {
+    margin: 0;
+    padding-left: 18px;
+}
+
+
+/* =========================================================
+   RETURN BUTTON
+   ========================================================= */
+
+#page-circulation .return-form {
+    margin: 0;
+}
+
+#page-circulation .completed-text {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    #page-circulation .two-col {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    #page-circulation .field-row {
+        grid-template-columns: 1fr;
+    }
+
+    #page-circulation .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #page-circulation .filters input {
+        width: 100%;
+    }
+
+    #page-circulation .seg {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    #page-circulation .seg button {
+        flex: 1;
+        white-space: nowrap;
+    }
+
+}

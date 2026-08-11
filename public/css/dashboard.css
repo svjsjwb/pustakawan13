@@ -1,0 +1,282 @@
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+.dashboard-page {
+    width: 100%;
+}
+
+
+/* =========================
+   HEADER
+   ========================= */
+
+.dashboard-header {
+    margin-bottom: 18px;
+}
+
+.dashboard-header span {
+    display: block;
+
+    margin-bottom: 2px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #287b7b;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+
+    font-size: 28px;
+    line-height: 1.1;
+
+    font-weight: 700;
+
+    color: #111;
+}
+
+
+/* =========================
+   STAT CARD
+   ========================= */
+
+.dashboard-stats {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 30px;
+
+    margin: 0 0 30px;
+}
+
+
+.stat-card {
+    position: relative;
+
+    min-height: 78px;
+
+    padding: 12px 12px 10px;
+
+    background: #fff;
+
+    border-radius: 7px;
+
+    box-sizing: border-box;
+}
+
+
+/* dekorasi kecil di atas card */
+
+.stat-icon {
+    width: 60px;
+    height: 16px;
+
+    margin: -24px auto 8px;
+
+    background: #a6caca;
+
+    border-radius: 7px;
+}
+
+
+.stat-title {
+    font-size: 12px;
+    font-weight: 700;
+
+    color: #286666;
+}
+
+
+.stat-value {
+    margin-top: 5px;
+
+    font-size: 20px;
+    line-height: 1;
+
+    font-weight: 700;
+
+    color: #286666;
+}
+
+
+.stat-change {
+    display: inline-block;
+
+    margin-top: 7px;
+
+    padding: 2px 5px;
+
+    background: #dceaea;
+
+    font-size: 8px;
+
+    color: #333;
+}
+
+
+/* =========================
+   RESERVASI
+   ========================= */
+
+.dashboard-section {
+    width: 100%;
+}
+
+
+.dashboard-section h2 {
+    margin: 0 0 8px;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    color: #111;
+}
+
+
+/* =========================
+   TABLE
+   ========================= */
+
+.dashboard-table {
+    width: 100%;
+
+    background: #fff;
+
+    border: 1px solid #8eb1b1;
+
+    border-radius: 6px;
+
+    overflow: hidden;
+}
+
+
+.dashboard-table-head,
+.dashboard-table-row {
+    display: grid;
+
+    grid-template-columns:
+        0.8fr 1fr 1.4fr 1.4fr 1fr;
+
+    align-items: center;
+}
+
+
+/* HEADER */
+
+.dashboard-table-head {
+    padding: 10px 14px 6px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #111;
+}
+
+
+/* DATA */
+
+.dashboard-table-row {
+    padding: 5px 14px;
+
+    font-size: 13px;
+
+    color: #333;
+}
+
+
+.dashboard-table-row>div {
+    min-width: 0;
+}
+
+
+/* =========================
+   STATUS
+   ========================= */
+
+.dashboard-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 3px 8px;
+
+    border-radius: 7px;
+
+    font-size: 11px;
+
+    border: 1px dotted #555;
+}
+
+
+.dashboard-status.borrowed {
+    background: #d9dfc9;
+    color: #333;
+}
+
+
+.dashboard-status.returned {
+    background: #d9e9d5;
+    color: #333;
+}
+
+
+.dashboard-status.late {
+    background: #e3caca;
+    color: #333;
+}
+
+
+/* =========================
+   LIHAT SEMUA
+   ========================= */
+
+.dashboard-see-all {
+    display: flex;
+
+    justify-content: flex-end;
+
+    margin-top: 7px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: #111;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 1000px) {
+
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .dashboard-table {
+        overflow-x: auto;
+    }
+
+    .dashboard-table-head,
+    .dashboard-table-row {
+        min-width: 650px;
+    }
+
+}

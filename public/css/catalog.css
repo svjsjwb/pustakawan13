@@ -1,0 +1,215 @@
+/* =========================
+   KATALOG BUKU
+   ========================= */
+
+.catalog-header {
+    margin-bottom: 18px;
+}
+
+.catalog-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: #287c7c;
+    margin-bottom: 5px;
+}
+
+.catalog-header h1 {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 700;
+    color: #111;
+}
+
+.catalog-header p {
+    margin: 5px 0 0;
+    font-size: 12px;
+    color: #333;
+}
+
+
+/* FILTER */
+
+#page-catalog .filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+#page-catalog .filters input {
+    flex: 1;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid #9fc2c2;
+    border-radius: 17px;
+    font-size: 11px;
+    box-sizing: border-box;
+}
+
+#page-catalog .filters select {
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid #9fc2c2;
+    border-radius: 17px;
+    background: #8fbaba;
+    color: white;
+    font-size: 11px;
+}
+
+
+/* GRID */
+
+.book-grid {
+    display: grid;
+
+    /* 5 buku ke kanan */
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+
+/* CARD */
+
+.book-card {
+    min-width: 0;
+    border: 1px solid #9fc2c2;
+    border-radius: 7px;
+    overflow: hidden;
+    background: white;
+}
+
+.book-cover {
+    height: 120px;
+    margin: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f1f1;
+    color: #222;
+    font-size: 10px;
+}
+
+.book-info {
+    padding: 7px;
+    background: #a7cccc;
+}
+
+.book-info strong {
+    display: block;
+    font-size: 11px;
+    color: #111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-info>span {
+    display: block;
+    font-size: 10px;
+    color: #333;
+    margin-top: 1px;
+}
+
+.book-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.book-meta>span:first-child {
+    font-size: 8px;
+    padding: 2px 5px;
+    border-radius: 5px;
+    background: #78a9a9;
+    color: white;
+}
+
+.book-status {
+    font-size: 8px;
+    padding: 2px 5px;
+    border-radius: 5px;
+}
+
+.book-status.available {
+    background: #d6e8c7;
+    color: #315b28;
+}
+
+.book-status.borrowed {
+    background: #e5aaaa;
+    color: #6c2020;
+}
+
+
+/* PAGINATION */
+
+.catalog-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+    padding-bottom: 20px;
+}
+
+.catalog-pagination nav {
+    display: flex;
+    justify-content: center;
+}
+
+.catalog-pagination svg {
+    width: 15px;
+    height: 15px;
+}
+
+.catalog-pagination a,
+.catalog-pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 30px;
+    height: 30px;
+
+    margin: 0 3px;
+    padding: 0 8px;
+
+    border: 1px solid #9fc2c2;
+    border-radius: 6px;
+
+    font-size: 11px;
+    text-decoration: none;
+}
+
+.catalog-pagination a {
+    color: #287c7c;
+    background: white;
+}
+
+.catalog-pagination span {
+    color: white;
+    background: #287c7c;
+    border-color: #287c7c;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1200px) {
+    .book-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1000px) {
+    .book-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .book-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}

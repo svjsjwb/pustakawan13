@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Book extends Model
+{
+    protected $fillable = [
+        'category_id',
+        'title',
+        'author',
+        'publisher',
+        'publication_year',
+        'isbn',
+        'call_number',
+        'stock',
+        'available_stock',
+        'description',
+        'cover',
+    ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function borrowingDetails(): HasMany
+    {
+        return $this->hasMany(BorrowingDetail::class);
+    }
+}
