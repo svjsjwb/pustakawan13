@@ -41,13 +41,13 @@
                 Pinjaman Buku
             </a>
 
-            <a href="{{ route('reservations') }}"
+            <a href="{{ route('reservations.index') }}"
                 class="{{ request()->routeIs('reservations') ? 'active' : '' }}">
                 Reservasi Buku
             </a>
 
-            <a href="{{ route('reports') }}"
-                class="{{ request()->routeIs('reports') ? 'active' : '' }}">
+            <a href="{{ route('reports.index') }}"
+                class="{{ request()->routeIs('reports.*') ? 'active' : '' }}">
                 Laporan
             </a>
 

@@ -1,12 +1,12 @@
 /* =========================================================
    BOOKS
    Manajemen Buku + Tambah Buku + Edit Buku
-   ========================================================= */
+========================================================= */
 
 
 /* =========================================================
    PAGE HEADER
-   ========================================================= */
+========================================================= */
 
 .page-header {
     margin-bottom: 18px;
@@ -42,24 +42,50 @@
 
 /* =========================================================
    TOOLBAR
-   ========================================================= */
+========================================================= */
 
 .book-toolbar {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
 
     gap: 12px;
     margin-bottom: 12px;
 }
 
-.toolbar-left,
-.toolbar-right {
+
+/* Bagian kiri */
+
+.toolbar-left {
     display: flex;
     align-items: center;
 
     gap: 10px;
 }
+
+
+/* Bagian kanan */
+
+.toolbar-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    gap: 8px;
+}
+
+
+/* Filter kategori + total */
+
+.toolbar-filter {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+/* Select kategori */
 
 .book-toolbar select {
     height: 32px;
@@ -75,21 +101,29 @@
     color: #333;
 
     outline: none;
+
+    cursor: pointer;
 }
 
 .book-toolbar select:focus {
     border-color: #287b7b;
 }
 
+
+/* Total buku */
+
 .book-total {
     font-size: 11px;
+
     color: var(--muted, #777);
+
+    white-space: nowrap;
 }
 
 
 /* =========================================================
    BOOK BUTTONS
-   ========================================================= */
+========================================================= */
 
 .btn {
     display: inline-flex;
@@ -104,6 +138,8 @@
     border-radius: 16px;
 
     font-size: 11px;
+    font-weight: 500;
+
     text-decoration: none;
 
     cursor: pointer;
@@ -111,8 +147,12 @@
     transition: 0.2s ease;
 }
 
+
+/* Tombol secondary */
+
 .btn-secondary {
     background: #fff;
+
     color: #287b7b;
 }
 
@@ -120,8 +160,12 @@
     background: #eef7f7;
 }
 
+
+/* Tombol primary */
+
 .btn-primary {
     background: #287b7b;
+
     border-color: #287b7b;
 
     color: #fff;
@@ -129,12 +173,14 @@
 
 .btn-primary:hover {
     background: #216969;
+
+    border-color: #216969;
 }
 
 
 /* =========================================================
    BOOK TABLE
-   ========================================================= */
+========================================================= */
 
 .table-wrapper {
     width: 100%;
@@ -143,6 +189,7 @@
 
     border-radius: 7px;
 }
+
 
 .books-table {
     width: 100%;
@@ -154,6 +201,9 @@
     font-size: 11px;
 }
 
+
+/* Header tabel */
+
 .books-table thead th {
     padding: 9px 12px;
 
@@ -162,18 +212,28 @@
     color: #111;
 
     font-weight: 700;
+
     text-align: left;
 
     white-space: nowrap;
 }
 
+
+/* Radius header kiri */
+
 .books-table thead th:first-child {
     border-radius: 7px 0 0 0;
 }
 
+
+/* Radius header kanan */
+
 .books-table thead th:last-child {
     border-radius: 0 7px 0 0;
 }
+
+
+/* Isi tabel */
 
 .books-table tbody td {
     padding: 10px 12px;
@@ -185,19 +245,26 @@
     vertical-align: middle;
 }
 
+
+/* Hover baris */
+
 .books-table tbody tr:hover {
     background: #f7fbfb;
 }
 
+
+/* Judul buku */
+
 .books-table tbody td strong {
     font-weight: 600;
+
     color: #222;
 }
 
 
 /* =========================================================
    BOOK ACTIONS
-   ========================================================= */
+========================================================= */
 
 .book-actions {
     display: flex;
@@ -206,9 +273,13 @@
     gap: 7px;
 }
 
+
 .book-actions form {
     margin: 0;
 }
+
+
+/* Tombol edit dan hapus */
 
 .action-edit,
 .action-delete {
@@ -232,11 +303,21 @@
     cursor: pointer;
 
     font-size: 14px;
+
+    transition: 0.2s ease;
 }
+
+
+/* Edit */
 
 .action-edit:hover {
     color: #155c5c;
+
+    transform: scale(1.1);
 }
+
+
+/* Delete */
 
 .action-delete {
     color: #287b7b;
@@ -244,12 +325,14 @@
 
 .action-delete:hover {
     color: #a33;
+
+    transform: scale(1.1);
 }
 
 
 /* =========================================================
    EMPTY STATE
-   ========================================================= */
+========================================================= */
 
 .empty-books {
     padding: 30px !important;
@@ -263,20 +346,23 @@
 /* =========================================================
    FORM BUKU
    Tambah + Edit
-   ========================================================= */
+========================================================= */
 
 .book-form-page {
     padding: 36px 0;
 }
 
+
 .book-form-card {
     background: #fff;
 
     border: 1px solid #d9e3e3;
+
     border-radius: 8px;
 
     padding: 28px 30px 22px;
 }
+
 
 .book-form-card h2 {
     margin: 0 0 24px;
@@ -290,7 +376,7 @@
 
 /* =========================================================
    FORM GRID
-   ========================================================= */
+========================================================= */
 
 .form-grid {
     display: grid;
@@ -301,6 +387,7 @@
     row-gap: 12px;
 }
 
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -308,12 +395,14 @@
     gap: 5px;
 }
 
+
 .form-group label {
     font-size: 12px;
     font-weight: 600;
 
     color: #222;
 }
+
 
 .form-group .input {
     width: 100%;
@@ -325,6 +414,7 @@
     padding: 6px 10px;
 
     border: 1px solid #aebebe;
+
     border-radius: 4px;
 
     background: #fff;
@@ -335,11 +425,13 @@
     color: #222;
 }
 
+
 .form-group .input:focus {
     outline: none;
 
     border-color: #2b7f7f;
 }
+
 
 .form-group textarea.input {
     height: auto;
@@ -349,6 +441,7 @@
     resize: vertical;
 }
 
+
 .form-full {
     grid-column: 1 / -1;
 }
@@ -356,7 +449,7 @@
 
 /* =========================================================
    FORM ACTIONS
-   ========================================================= */
+========================================================= */
 
 .form-actions {
     display: flex;
@@ -365,10 +458,12 @@
     gap: 8px;
 
     margin-top: 18px;
+
     padding-top: 14px;
 
     border-top: 1px solid #d9d9d9;
 }
+
 
 .btn-cancel,
 .btn-save {
@@ -377,6 +472,7 @@
     justify-content: center;
 
     min-width: 64px;
+
     height: 32px;
 
     padding: 0 14px;
@@ -389,7 +485,12 @@
     text-decoration: none;
 
     cursor: pointer;
+
+    transition: 0.2s ease;
 }
+
+
+/* Cancel */
 
 .btn-cancel {
     background: #fff;
@@ -403,6 +504,9 @@
     background: #f4f6f6;
 }
 
+
+/* Save */
+
 .btn-save {
     background: #2b7f7f;
 
@@ -413,12 +517,14 @@
 
 .btn-save:hover {
     background: #236b6b;
+
+    border-color: #236b6b;
 }
 
 
 /* =========================================================
    RESPONSIVE — FORM
-   ========================================================= */
+========================================================= */
 
 @media (max-width: 700px) {
 
@@ -433,12 +539,13 @@
     .book-form-card {
         padding: 22px;
     }
+
 }
 
 
 /* =========================================================
    RESPONSIVE — TABLE & TOOLBAR
-   ========================================================= */
+========================================================= */
 
 @media (max-width: 768px) {
 
@@ -448,20 +555,99 @@
         flex-direction: column;
     }
 
+
     .toolbar-left,
     .toolbar-right {
         width: 100%;
     }
 
-    .toolbar-right {
-        justify-content: space-between;
+
+    .toolbar-left {
+        justify-content: flex-start;
     }
+
+
+    .toolbar-right {
+        align-items: flex-end;
+    }
+
+
+    .toolbar-filter {
+        display: flex;
+
+        justify-content: flex-end;
+
+        width: 100%;
+    }
+
 
     .table-wrapper {
         overflow-x: auto;
     }
 
+
     .books-table {
         min-width: 700px;
     }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .page-header h1 {
+        font-size: 21px;
+    }
+
+
+    .page-header p {
+        font-size: 11px;
+    }
+
+
+    .book-toolbar {
+        gap: 10px;
+    }
+
+
+    .toolbar-right {
+        align-items: stretch;
+    }
+
+
+    .toolbar-right .btn-primary {
+        width: 100%;
+    }
+
+
+    .toolbar-filter {
+        justify-content: space-between;
+
+        width: 100%;
+    }
+
+
+    .book-toolbar select {
+        flex: 1;
+    }
+
+
+    .book-total {
+        font-size: 10px;
+    }
+
+
+    .book-form-card {
+        padding: 18px;
+    }
+
+
+    .book-form-card h2 {
+        font-size: 20px;
+    }
+
 }

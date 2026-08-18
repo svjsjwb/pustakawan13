@@ -63,7 +63,7 @@ body {
     text-align: center;
     text-decoration: none;
 
-    font-size: 13px;
+    font-size: 15spx;
     font-weight: bold;
 
     border-radius: 6px;
@@ -92,7 +92,7 @@ body {
 
     gap: 30px;
 
-    font-size: 8px;
+    font-size: 10px;
 }
 
 .landing-footer>div {
@@ -102,7 +102,7 @@ body {
 }
 
 .landing-footer strong {
-    font-size: 9px;
+    font-size: 13px;
 }
 
 .footer-brand {
@@ -117,7 +117,7 @@ body {
 }
 
 .footer-brand span {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: bold;
 }
 

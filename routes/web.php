@@ -31,9 +31,10 @@ Route::post('/login', function () {
 
 
 // DASHBOARD
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->name('dashboard');
-
+Route::get('/dashboard', [
+    DashboardController::class,
+    'index'
+])->name('dashboard');
 
 // KATEGORI
 Route::resource('categories', CategoryController::class);
@@ -48,6 +49,28 @@ Route::get('/catalog', [CatalogController::class, 'index'])
 Route::resource('books', BookController::class);
 
 
+//Borrowing
+Route::get('/borrowings', [
+    BorrowingController::class,
+    'index'
+])->name('borrowings.index');
+
+Route::post('/borrowings', [
+    BorrowingController::class,
+    'store'
+])->name('borrowings.store');
+
+Route::patch('/borrowings/{borrowing}/return', [
+    BorrowingController::class,
+    'returnBook'
+])->name('borrowings.return');
+
+Route::delete('/borrowings/{borrowing}', [
+    BorrowingController::class,
+    'destroy'
+])->name('borrowings.destroy');
+
+
 // SIRKULASI
 Route::get('/circulation', [CirculationController::class, 'index'])
     ->name('circulation');
@@ -60,24 +83,45 @@ Route::patch('/circulation/{borrowing}/return', [CirculationController::class, '
 
 
 // RESERVASI
-Route::get('/reservations', [ReservationController::class, 'index'])
-    ->name('reservations');
+Route::get('/reservations', [
+    ReservationController::class,
+    'index'
+])->name('reservations.index');
 
-Route::post('/reservations', [ReservationController::class, 'store'])
-    ->name('reservations.store');
+Route::post('/reservations', [
+    ReservationController::class,
+    'store'
+])->name('reservations.store');
 
-Route::patch('/reservations/{reservation}/approve', [ReservationController::class, 'updateStatus'])
-    ->name('reservations.approve');
+Route::patch('/reservations/{reservation}/status', [
+    ReservationController::class,
+    'updateStatus'
+])->name('reservations.updateStatus');
 
-Route::patch('/reservations/{reservation}/reject', [ReservationController::class, 'updateStatus'])
-    ->name('reservations.reject');
+Route::delete('/reservations/{reservation}', [
+    ReservationController::class,
+    'destroy'
+])->name('reservations.destroy');
 
-Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])
-    ->name('reservations.update-status');
 
-Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])
-    ->name('reservations.destroy');
+// LAPORAN
+Route::get('/laporan', [ReportController::class, 'index'])
+    ->name('reports.index');
 
+Route::get('/laporan/create', [ReportController::class, 'create'])
+    ->name('reports.create');
+
+Route::post('/laporan', [ReportController::class, 'store'])
+    ->name('reports.store');
+
+Route::get('/laporan/{id}/edit', [ReportController::class, 'edit'])
+    ->name('reports.edit');
+
+Route::put('/laporan/{id}', [ReportController::class, 'update'])
+    ->name('reports.update');
+
+Route::delete('/laporan/{id}', [ReportController::class, 'destroy'])
+    ->name('reports.destroy');
 
 // DENDA
 Route::get('/fines', [FineController::class, 'index'])
@@ -94,9 +138,6 @@ Route::get('/calendar', [CalendarController::class, 'index'])
     ->name('calendar');
 
 
-// LAPORAN
-Route::get('/reports', [ReportController::class, 'index'])
-    ->name('reports');
 
 
 // PENGATURAN
