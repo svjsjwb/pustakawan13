@@ -30,4 +30,9 @@ class Book extends Model
     {
         return $this->hasMany(BorrowingDetail::class);
     }
+
+    public function copies(): HasMany
+    {
+        return $this->hasMany(BookCopy::class);
+    }
 }

@@ -57,7 +57,11 @@
 
                 @csrf
 
-                {{-- ANGGOTA --}}
+
+                {{-- =========================
+                     ANGGOTA
+                ========================= --}}
+
                 <div class="reservation-field">
 
                     <label>Anggota</label>
@@ -84,7 +88,10 @@
                 </div>
 
 
-                {{-- BUKU --}}
+                {{-- =========================
+                     BUKU
+                ========================= --}}
+
                 <div class="reservation-field">
 
                     <label>Buku</label>
@@ -117,7 +124,10 @@
                 </div>
 
 
-                {{-- TANGGAL --}}
+                {{-- =========================
+                     TANGGAL
+                ========================= --}}
+
                 <div class="reservation-date-row">
 
                     <div class="reservation-field">
@@ -153,7 +163,10 @@
                 </div>
 
 
-                {{-- SUBMIT --}}
+                {{-- =========================
+                     SUBMIT
+                ========================= --}}
+
                 <button
                     type="submit"
                     class="reservation-submit">
@@ -190,12 +203,19 @@
                     <thead>
 
                         <tr>
+
                             <th>ANGGOTA</th>
+
                             <th>BUKU</th>
+
                             <th>RESERVASI</th>
+
                             <th>BERLAKU SAMPAI</th>
+
                             <th>STATUS</th>
+
                             <th>AKSI</th>
+
                         </tr>
 
                     </thead>
@@ -207,25 +227,37 @@
 
                         <tr>
 
-                            {{-- ANGGOTA --}}
+                            {{-- =========================
+                                 ANGGOTA
+                            ========================= --}}
+
                             <td>
                                 {{ $reservation->member->name }}
                             </td>
 
 
-                            {{-- BUKU --}}
+                            {{-- =========================
+                                 BUKU
+                            ========================= --}}
+
                             <td>
                                 {{ $reservation->book->title }}
                             </td>
 
 
-                            {{-- TANGGAL RESERVASI --}}
+                            {{-- =========================
+                                 TANGGAL RESERVASI
+                            ========================= --}}
+
                             <td>
                                 {{ $reservation->reserved_at->format('d/m/Y') }}
                             </td>
 
 
-                            {{-- BERLAKU SAMPAI --}}
+                            {{-- =========================
+                                 BERLAKU SAMPAI
+                            ========================= --}}
+
                             <td>
 
                                 @if($reservation->expires_at)
@@ -241,7 +273,10 @@
                             </td>
 
 
-                            {{-- STATUS --}}
+                            {{-- =========================
+                                 STATUS
+                            ========================= --}}
+
                             <td>
 
                                 @if($reservation->status === 'menunggu')
@@ -280,18 +315,25 @@
 
 
                             {{-- =========================
-                                     AKSI
-                                ========================= --}}
+                                 AKSI
+                            ========================= --}}
 
                             <td>
 
-                                @if($reservation->status === 'menunggu')
-
                                 <div class="reservation-actions">
 
-                                    {{-- SETUJUI --}}
+
+                                    {{-- =========================
+                                         SETUJUI
+                                    ========================= --}}
+
+                                    @if($reservation->status === 'menunggu')
+
                                     <form
-                                        action="{{ route('reservations.approve', $reservation) }}"
+                                        action="{{ route(
+                                                'reservations.approve',
+                                                $reservation
+                                            ) }}"
                                         method="POST">
 
                                         @csrf
@@ -311,10 +353,48 @@
 
                                     </form>
 
+                                    @endif
 
-                                    {{-- TOLAK --}}
+
+                                    {{-- =========================
+                                         BOOK LOCATOR
+                                    ========================= --}}
+
+                                    @if(
+                                    $reservation->book_copy_id &&
+                                    $reservation->bookCopy?->shelf_id &&
+                                    in_array(
+                                    $reservation->status,
+                                    [
+                                    'menunggu',
+                                    'disetujui'
+                                    ]
+                                    )
+                                    )
+
+                                    <a
+                                        href="{{ route(
+                                                'reservations.locator',
+                                                $reservation
+                                            ) }}"
+                                        class="btn btn-primary">
+                                        📍 Temukan Buku
+                                    </a>
+
+                                    @endif
+
+
+                                    {{-- =========================
+                                         TOLAK
+                                    ========================= --}}
+
+                                    @if($reservation->status === 'menunggu')
+
                                     <form
-                                        action="{{ route('reservations.reject', $reservation) }}"
+                                        action="{{ route(
+                                                'reservations.reject',
+                                                $reservation
+                                            ) }}"
                                         method="POST">
 
                                         @csrf
@@ -334,19 +414,41 @@
 
                                     </form>
 
+                                    @endif
+
+
+                                    {{-- =========================
+                                         TIDAK ADA AKSI
+                                    ========================= --}}
+
+                                    @if(
+                                    $reservation->status !== 'menunggu' &&
+                                    !(
+                                    $reservation->book_copy_id &&
+                                    $reservation->bookCopy?->shelf_id &&
+                                    in_array(
+                                    $reservation->status,
+                                    [
+                                    'menunggu',
+                                    'disetujui'
+                                    ]
+                                    )
+                                    )
+                                    )
+
+                                    <span class="action-done">
+                                        —
+                                    </span>
+
+                                    @endif
+
+
                                 </div>
-
-                                @else
-
-                                <span class="action-done">
-                                    —
-                                </span>
-
-                                @endif
 
                             </td>
 
                         </tr>
+
 
                         @empty
 

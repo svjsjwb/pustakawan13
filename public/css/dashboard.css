@@ -1,28 +1,26 @@
 /* =========================================================
    DASHBOARD
-   ========================================================= */
+========================================================= */
 
 .dashboard-page {
     width: 100%;
+    box-sizing: border-box;
 }
-
 
 /* =========================
    HEADER
-   ========================= */
+========================= */
 
 .dashboard-header {
-    margin-bottom: 18px;
+    margin-bottom: 24px;
 }
 
 .dashboard-header span {
     display: block;
-
     margin-bottom: 2px;
 
     font-size: 12px;
     font-weight: 600;
-
     color: #287b7b;
 }
 
@@ -31,83 +29,81 @@
 
     font-size: 28px;
     line-height: 1.1;
-
     font-weight: 700;
 
     color: #111;
 }
 
-
 /* =========================
-   STAT CARD
-   ========================= */
+   STATISTICS
+========================= */
 
 .dashboard-stats {
     display: grid;
 
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 
-    gap: 30px;
+    gap: 28px;
 
-    margin: 0 0 30px;
+    margin-bottom: 34px;
 }
-
 
 .stat-card {
     position: relative;
 
-    min-height: 78px;
+    min-height: 82px;
 
     padding: 12px 12px 10px;
 
-    background: #fff;
+    background: #ffffff;
 
     border-radius: 7px;
 
     box-sizing: border-box;
 }
 
-
-/* dekorasi kecil di atas card */
+/* dekorasi atas */
 
 .stat-icon {
-    width: 60px;
-    height: 16px;
+    width: 56px;
+    height: 14px;
 
-    margin: -24px auto 8px;
+    margin: -21px auto 9px;
 
-    background: #a6caca;
+    background: #a7caca;
 
     border-radius: 7px;
 }
 
+/* title */
 
 .stat-title {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
 
-    color: #286666;
+    color: #287070;
 }
 
+/* angka */
 
 .stat-value {
     margin-top: 5px;
 
-    font-size: 20px;
+    font-size: 21px;
     line-height: 1;
 
     font-weight: 700;
 
-    color: #286666;
+    color: #287070;
 }
 
+/* keterangan */
 
 .stat-change {
     display: inline-block;
 
     margin-top: 7px;
-
-    padding: 2px 5px;
+    padding: 3px 5px;
 
     background: #dceaea;
 
@@ -116,18 +112,16 @@
     color: #333;
 }
 
-
 /* =========================
    RESERVASI
-   ========================= */
+========================= */
 
 .dashboard-section {
     width: 100%;
 }
 
-
 .dashboard-section h2 {
-    margin: 0 0 8px;
+    margin: 0 0 9px;
 
     font-size: 15px;
     font-weight: 700;
@@ -135,10 +129,9 @@
     color: #111;
 }
 
-
 /* =========================
    TABLE
-   ========================= */
+========================= */
 
 .dashboard-table {
     width: 100%;
@@ -146,38 +139,35 @@
     background: #fff;
 
     border: 1px solid #8eb1b1;
-
     border-radius: 6px;
 
     overflow: hidden;
 }
 
+/* header + row */
 
 .dashboard-table-head,
 .dashboard-table-row {
     display: grid;
 
     grid-template-columns:
-        0.8fr 1fr 1.4fr 1.4fr 1fr;
+        0.8fr 1fr 1.35fr 1.35fr 1fr;
 
     align-items: center;
 }
 
-
-/* HEADER */
+/* header */
 
 .dashboard-table-head {
-    padding: 10px 14px 6px;
+    padding: 10px 14px 7px;
 
     font-size: 14px;
-
     font-weight: 700;
 
     color: #111;
 }
 
-
-/* DATA */
+/* data */
 
 .dashboard-table-row {
     padding: 5px 14px;
@@ -187,15 +177,13 @@
     color: #333;
 }
 
-
 .dashboard-table-row>div {
     min-width: 0;
 }
 
-
 /* =========================
    STATUS
-   ========================= */
+========================= */
 
 .dashboard-status {
     display: inline-flex;
@@ -209,30 +197,28 @@
     font-size: 11px;
 
     border: 1px dotted #555;
-}
 
+    white-space: nowrap;
+}
 
 .dashboard-status.borrowed {
     background: #d9dfc9;
     color: #333;
 }
 
-
 .dashboard-status.returned {
     background: #d9e9d5;
     color: #333;
 }
-
 
 .dashboard-status.late {
     background: #e3caca;
     color: #333;
 }
 
-
 /* =========================
    LIHAT SEMUA
-   ========================= */
+========================= */
 
 .dashboard-see-all {
     display: flex;
@@ -249,19 +235,102 @@
     cursor: pointer;
 }
 
+/* =========================================================
+   DASHBOARD OVERRIDE
+========================================================= */
+
+.dashboard-page {
+    width: 100%;
+}
+
+/* Background khusus area dashboard */
+.content:has(.dashboard-page) {
+    background: #f4f4f4;
+}
+
+/* =========================
+   STAT CARD
+========================= */
+
+.dashboard-page .stat-card {
+    position: relative;
+
+    min-height: 82px;
+
+    padding: 14px 12px 11px;
+
+    background: #ffffff;
+
+    border: 1px solid #eeeeee;
+    border-radius: 7px;
+
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+
+    box-sizing: border-box;
+}
+
+/* Dekorasi atas */
+
+.dashboard-page .stat-icon {
+    width: 56px;
+    height: 14px;
+
+    margin: -21px auto 9px;
+
+    background: #a7caca;
+
+    border-radius: 7px;
+}
+
+/* Judul */
+
+.dashboard-page .stat-title {
+    font-size: 11px;
+    font-weight: 700;
+
+    color: #287070;
+}
+
+/* Angka */
+
+.dashboard-page .stat-value {
+    margin-top: 5px;
+
+    font-size: 21px;
+    line-height: 1;
+
+    font-weight: 700;
+
+    color: #287070;
+}
+
+/* Keterangan */
+
+.dashboard-page .stat-change {
+    display: inline-block;
+
+    margin-top: 7px;
+    padding: 3px 5px;
+
+    background: #dceaea;
+
+    font-size: 8px;
+
+    color: #333;
+}
 
 /* =========================
    RESPONSIVE
-   ========================= */
+========================= */
 
 @media (max-width: 1000px) {
 
     .dashboard-stats {
         grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
     }
 
 }
-
 
 @media (max-width: 700px) {
 

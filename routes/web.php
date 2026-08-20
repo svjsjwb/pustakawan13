@@ -13,7 +13,7 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
-
+use App\Http\Controllers\BookCopyController;
 
 // LANDING
 Route::get('/', function () {
@@ -78,6 +78,11 @@ Route::patch('/reservations/{reservation}/status', [ReservationController::class
 Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])
     ->name('reservations.destroy');
 
+Route::get(
+    '/reservations/{reservation}/locator',
+    [ReservationController::class, 'locator']
+)->name('reservations.locator');
+
 
 // DENDA
 Route::get('/fines', [FineController::class, 'index'])
@@ -102,3 +107,34 @@ Route::get('/reports', [ReportController::class, 'index'])
 // PENGATURAN
 Route::get('/settings', [SettingController::class, 'index'])
     ->name('settings');
+
+//Book copies
+Route::prefix('books/{book}/copies')
+    ->name('books.copies.')
+    ->group(function () {
+
+        Route::get('/', [
+            BookCopyController::class,
+            'index'
+        ])->name('index');
+
+        Route::get('/create', [
+            BookCopyController::class,
+            'create'
+        ])->name('create');
+
+        Route::post('/', [
+            BookCopyController::class,
+            'store'
+        ])->name('store');
+
+        Route::get('/{copy}/edit', [
+            BookCopyController::class,
+            'edit'
+        ])->name('edit');
+
+        Route::put('/{copy}', [
+            BookCopyController::class,
+            'update'
+        ])->name('update');
+    });

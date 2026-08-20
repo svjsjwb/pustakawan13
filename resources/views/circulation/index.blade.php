@@ -59,6 +59,42 @@
 
         @csrf
 
+        {{-- RESERVASI --}}
+        <div class="field">
+
+          <label>Reservasi</label>
+
+          <select
+            name="reservation_id"
+            id="reservation_id">
+
+            <option value="">
+              -- Peminjaman Biasa --
+            </option>
+
+            @foreach($reservations as $reservation)
+
+            @if($reservation->bookCopy)
+
+            <option
+              value="{{ $reservation->id }}"
+              @selected(old('reservation_id')==$reservation->id)
+              >
+              {{ $reservation->member->name }}
+              —
+              {{ $reservation->book->title }}
+              —
+              {{ $reservation->bookCopy->barcode }}
+            </option>
+
+            @endif
+
+            @endforeach
+
+          </select>
+
+        </div>
+
 
         {{-- ANGGOTA --}}
         <div class="field">

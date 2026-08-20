@@ -91,6 +91,13 @@
           <div class="book-actions">
 
             <a
+              href="{{ route('books.copies.index', $book) }}"
+              class="action-copy"
+              title="Kelola eksemplar">
+              📚
+            </a>
+
+            <a
               href="{{ route('books.edit', $book) }}"
               class="action-edit"
               title="Edit buku">
