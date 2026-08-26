@@ -19,11 +19,21 @@ class Book extends Model
         'available_stock',
         'description',
         'cover',
+        'no_iventaris',
+        'kode_buku',
+        'ddc',
+        'rak',
+        'edition',
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function rack()
+    {
+        return $this->belongsTo(Rack::class, 'rak', 'code');
     }
 
     public function borrowingDetails(): HasMany

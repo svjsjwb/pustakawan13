@@ -244,6 +244,23 @@
     z-index: 1;
 }
 
+.book-cover.has-image::before,
+.book-cover.has-image::after {
+    display: none;
+}
+
+.book-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.book-card:hover .book-cover-img {
+    transform: scale(1.05);
+}
+
 .book-card:hover .book-cover::before {
     transform: rotate(0deg) scale(1.05);
 

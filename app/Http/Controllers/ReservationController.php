@@ -135,7 +135,7 @@ class ReservationController extends Controller
             ],
 
             'seat_number' => [
-                'required',
+                'nullable',
                 'string',
                 'regex:/^[ABC][1-8]$/'
             ],
@@ -147,33 +147,39 @@ class ReservationController extends Controller
          * =====================================================
          * CEK KURSI
          * =====================================================
+         *
+         * Hanya cek kursi jika tempat duduk dipilih
          */
 
-        $seatAlreadyBooked = Reservation::whereDate(
-            'reserved_at',
-            $validated['reserved_at']
-        )
-            ->where(
-                'seat_number',
-                $validated['seat_number']
+        if (!empty($validated['seat_number'])) {
+
+            $seatAlreadyBooked = Reservation::whereDate(
+                'reserved_at',
+                $validated['reserved_at']
             )
-            ->whereIn('status', [
-                'menunggu',
-                'disetujui'
-            ])
-            ->exists();
+                ->where(
+                    'seat_number',
+                    $validated['seat_number']
+                )
+                ->whereIn('status', [
+                    'menunggu',
+                    'disetujui'
+                ])
+                ->exists();
 
 
-        if ($seatAlreadyBooked) {
+            if ($seatAlreadyBooked) {
 
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    'Kursi ' .
-                    $validated['seat_number'] .
-                    ' sudah dipesan pada tanggal tersebut.'
-                );
+                return back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'Kursi ' .
+                        $validated['seat_number'] .
+                        ' sudah dipesan pada tanggal tersebut.'
+                    );
+            }
+
         }
 
 
@@ -214,31 +220,37 @@ class ReservationController extends Controller
              * =================================================
              * CEK KURSI LAGI
              * =================================================
+             *
+             * Hanya cek kursi jika tempat duduk dipilih
              */
 
-            $seatAlreadyBooked = Reservation::whereDate(
-                'reserved_at',
-                $validated['reserved_at']
-            )
-                ->where(
-                    'seat_number',
-                    $validated['seat_number']
+            if (!empty($validated['seat_number'])) {
+
+                $seatAlreadyBooked = Reservation::whereDate(
+                    'reserved_at',
+                    $validated['reserved_at']
                 )
-                ->whereIn('status', [
-                    'menunggu',
-                    'disetujui'
-                ])
-                ->exists();
+                    ->where(
+                        'seat_number',
+                        $validated['seat_number']
+                    )
+                    ->whereIn('status', [
+                        'menunggu',
+                        'disetujui'
+                    ])
+                    ->exists();
 
 
-            if ($seatAlreadyBooked) {
+                if ($seatAlreadyBooked) {
 
-                abort(
-                    422,
-                    'Kursi ' .
-                    $validated['seat_number'] .
-                    ' baru saja dipesan oleh pengguna lain.'
-                );
+                    abort(
+                        422,
+                        'Kursi ' .
+                        $validated['seat_number'] .
+                        ' baru saja dipesan oleh pengguna lain.'
+                    );
+                }
+
             }
 
 
@@ -260,7 +272,7 @@ class ReservationController extends Controller
                     $validated['expires_at'] ?? null,
 
                 'seat_number' =>
-                    $validated['seat_number'],
+                    $validated['seat_number'] ?? null,
 
                 'status' => 'menunggu',
 

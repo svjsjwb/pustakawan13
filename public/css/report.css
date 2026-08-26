@@ -36,12 +36,10 @@
     border-radius: 12px;
 
     background:
-        linear-gradient(
-            135deg,
+        linear-gradient(135deg,
             #e8f4f4 0%,
             #f7fbfb 55%,
-            #ffffff 100%
-        );
+            #ffffff 100%);
 
     border: 1px solid #d3e5e5;
 
@@ -164,7 +162,6 @@
     border-radius: 8px;
 
     background: #287b7b;
-
     color: #fff;
 
     text-decoration: none;
@@ -172,7 +169,8 @@
     font-size: 11px;
     font-weight: 700;
 
-    box-shadow: 0 5px 14px rgba(40, 123, 123, 0.18);
+    box-shadow:
+        0 5px 14px rgba(40, 123, 123, 0.18);
 
     transition:
         transform 0.2s ease,
@@ -188,7 +186,8 @@
 
     transform: translateY(-2px);
 
-    box-shadow: 0 8px 18px rgba(40, 123, 123, 0.25);
+    box-shadow:
+        0 8px 18px rgba(40, 123, 123, 0.25);
 }
 
 
@@ -214,16 +213,22 @@
 
 .report-section-title {
     display: flex;
+
     align-items: flex-end;
     justify-content: space-between;
 
     margin-bottom: 14px;
+
+    gap: 15px;
 }
 
 
-.report-section-title > div {
+.report-section-title>div {
     display: flex;
+
     flex-direction: column;
+
+    min-width: 0;
 }
 
 
@@ -251,9 +256,121 @@
 }
 
 
+/* =========================================================
+   REPORT PERIOD SELECTOR
+   1 Minggu - 3 Bulan
+========================================================= */
+
+.report-period-form {
+    display: flex;
+
+    align-items: center;
+
+    margin: 0;
+
+    flex-shrink: 0;
+}
+
+
+.report-period-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    width: 135px;
+    height: 36px;
+
+    padding: 0 36px 0 14px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #d4e1e1;
+
+    border-radius: 18px;
+
+    background-color: #fff;
+
+    color: #506363;
+
+    font-family: inherit;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    outline: none;
+
+    background-image:
+        linear-gradient(45deg,
+            transparent 50%,
+            #287b7b 50%),
+        linear-gradient(135deg,
+            #287b7b 50%,
+            transparent 50%);
+
+    background-position:
+        calc(100% - 16px) 15px,
+        calc(100% - 11px) 15px;
+
+    background-size:
+        5px 5px,
+        5px 5px;
+
+    background-repeat: no-repeat;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease,
+        background-color 0.2s ease;
+}
+
+
+.report-period-select:hover {
+    border-color: #9dbebe;
+
+    background-color: #fcfefe;
+
+    transform: translateY(-1px);
+}
+
+
+.report-period-select:focus {
+    border-color: #287b7b;
+
+    box-shadow:
+        0 0 0 3px rgba(40, 123, 123, 0.08);
+}
+
+
+.report-period-select option {
+    padding: 8px;
+
+    background: #fff;
+
+    color: #285858;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+    font-weight: 500;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| OLD PERIOD CLASS
+|--------------------------------------------------------------------------
+| Tetap dipertahankan supaya kode lama tidak rusak.
+*/
+
 .report-period {
     display: inline-flex;
+
     align-items: center;
+    justify-content: center;
 
     height: 27px;
 
@@ -338,6 +455,7 @@
 
 .report-card-top {
     display: flex;
+
     align-items: center;
 
     gap: 10px;
@@ -348,6 +466,7 @@
 
 .report-card-icon {
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -421,6 +540,7 @@
 
 .report-badge {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
 
@@ -482,6 +602,7 @@
 
 .report-chart-wrapper {
     display: flex;
+
     align-items: center;
 
     gap: 14px;
@@ -496,6 +617,7 @@
 
 .chart-value {
     display: flex;
+
     flex-direction: column;
 
     min-width: 72px;
@@ -504,6 +626,7 @@
 
 .chart-value strong {
     font-size: 20px;
+
     line-height: 1.1;
 
     color: #245d5d;
@@ -570,11 +693,13 @@
 
     left: 5px;
     right: 5px;
+
     bottom: 17px;
 
     height: 55px;
 
     display: flex;
+
     align-items: flex-end;
     justify-content: space-around;
 
@@ -586,11 +711,15 @@
     position: relative;
 
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
+
     justify-content: flex-end;
 
     width: 30px;
+
     height: 100%;
 }
 
@@ -756,6 +885,7 @@
 
 .report-card-footer {
     display: flex;
+
     align-items: center;
     justify-content: space-between;
 
@@ -786,9 +916,12 @@
 
 .report-actions {
     display: flex;
+
     align-items: center;
     justify-content: flex-end;
+
     gap: 8px;
+
     flex-shrink: 0;
 }
 
@@ -799,31 +932,44 @@
 
 .report-detail-btn {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
 
     height: 27px;
+
     min-width: 48px;
+
     padding: 0 10px;
+
     box-sizing: border-box;
 
     border: 1px solid #bdd1d1;
+
     border-radius: 6px;
+
     background: #fff;
+
     color: #286868;
 
     text-decoration: none;
+
     font-family: inherit;
+
     font-size: 8px;
     font-weight: 700;
+
     cursor: pointer;
 
     transition: 0.2s ease;
 }
 
+
 .report-detail-btn:hover {
     background: #edf7f7;
+
     border-color: #8fb8b8;
+
     color: #286868;
 }
 
@@ -837,34 +983,50 @@
 
     width: 68px;
     height: 27px;
+
     padding: 0 8px;
+
     box-sizing: border-box;
 
     border: 1px solid #bdd1d1;
+
     border-radius: 6px;
+
     background: #fff;
+
     color: #286868;
 
     font-family: inherit;
+
     font-size: 8px;
     font-weight: 700;
+
     cursor: pointer;
+
     outline: none;
 }
 
+
 .report-format-select:hover {
     background: #f5fafa;
+
     border-color: #8fb8b8;
 }
 
+
 .report-format-select:focus {
     border-color: #287b7b;
-    box-shadow: 0 0 0 2px rgba(40, 123, 123, 0.08);
+
+    box-shadow:
+        0 0 0 2px rgba(40, 123, 123, 0.08);
 }
+
 
 .report-format-select option {
     background: #fff;
+
     color: #285858;
+
     font-size: 10px;
 }
 
@@ -875,30 +1037,42 @@
 
 .report-download-btn {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
 
     height: 27px;
+
     min-width: 58px;
+
     padding: 0 10px;
+
     box-sizing: border-box;
 
     border: 1px solid #287b7b !important;
+
     border-radius: 6px !important;
+
     background: #287b7b;
+
     color: #fff;
 
     font-family: inherit;
+
     font-size: 8px;
     font-weight: 700;
+
     cursor: pointer;
 
     transition: 0.2s ease;
 }
 
+
 .report-download-btn:hover {
     background: #216969;
+
     border-color: #216969 !important;
+
     transform: translateY(-1px);
 }
 
@@ -915,6 +1089,7 @@
     z-index: 9999;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -983,12 +1158,10 @@
     background: #fff;
 
     box-shadow:
-        0 20px 60px
-        rgba(33, 75, 75, 0.18);
+        0 20px 60px rgba(33, 75, 75, 0.18);
 
     transform:
-        translateY(12px)
-        scale(0.98);
+        translateY(12px) scale(0.98);
 
     transition:
         transform 0.22s ease;
@@ -998,8 +1171,7 @@
 .report-modal.active .report-modal-content,
 .report-modal.show .report-modal-content {
     transform:
-        translateY(0)
-        scale(1);
+        translateY(0) scale(1);
 }
 
 
@@ -1053,6 +1225,7 @@
 
 .report-modal-close {
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -1071,6 +1244,7 @@
     color: #557070;
 
     font-size: 20px;
+
     line-height: 1;
 
     cursor: pointer;
@@ -1112,6 +1286,7 @@
 
 .report-modal-summary {
     display: flex;
+
     align-items: center;
 
     margin-bottom: 15px;
@@ -1212,6 +1387,7 @@
 
     left: 35px;
     right: 35px;
+
     bottom: 40px;
 
     height: 190px;
@@ -1259,15 +1435,13 @@
 }
 
 
-.modal-chart-column.active
-.modal-chart-bar {
+.modal-chart-column.active .modal-chart-bar {
     background: #287b7b;
 
     opacity: 1;
 
     box-shadow:
-        0 5px 12px
-        rgba(40, 123, 123, 0.18);
+        0 5px 12px rgba(40, 123, 123, 0.18);
 }
 
 
@@ -1288,6 +1462,7 @@
     top: -22px;
 
     font-size: 9px;
+
     font-weight: 700;
 
     color: #557070;
@@ -1362,14 +1537,51 @@
     }
 
 
+    /* ================================================
+       SECTION TITLE
+    ================================================ */
+
     .report-section-title {
-        align-items: center;
+        align-items: flex-start;
+
+        gap: 12px;
     }
 
 
-    .report-period {
-        display: none;
+    .report-section-title>div {
+        flex: 1;
     }
+
+
+    /* ================================================
+       PERIOD SELECTOR MOBILE
+    ================================================ */
+
+    .report-period-form {
+        width: auto;
+
+        flex-shrink: 0;
+    }
+
+
+    .report-period-select {
+        width: 125px;
+
+        height: 35px;
+
+        font-size: 10px;
+    }
+
+
+    /*
+     * Jangan menggunakan:
+     *
+     * .report-period {
+     *     display: none;
+     * }
+     *
+     * karena dropdown periode baru harus tetap terlihat.
+     */
 
 
     .report-card {
@@ -1405,12 +1617,14 @@
         height: 230px;
 
         padding-left: 10px;
+
         padding-right: 10px;
     }
 
 
     .modal-chart-bars {
         left: 20px;
+
         right: 20px;
 
         height: 160px;
@@ -1496,9 +1710,41 @@
 
     .report-download-btn {
         min-width: 55px;
+
         padding: 0 8px;
     }
 
+
+    /* ================================================
+       PERIOD SELECTOR SMALL MOBILE
+    ================================================ */
+
+    .report-section-title {
+        gap: 10px;
+    }
+
+
+    .report-period-select {
+        width: 115px;
+
+        height: 33px;
+
+        padding-left: 12px;
+
+        padding-right: 30px;
+
+        font-size: 9px;
+
+        border-radius: 17px;
+
+        background-position:
+            calc(100% - 14px) 14px,
+            calc(100% - 9px) 14px;
+
+        background-size:
+            5px 5px,
+            5px 5px;
+    }
 
 }
 
@@ -1536,7 +1782,6 @@
     flex-direction: column;
 
     align-items: center;
-
     justify-content: center;
 
     min-height: 180px;
@@ -1576,13 +1821,13 @@
     display: inline-flex;
 
     align-items: center;
-
     justify-content: center;
 
     text-decoration: none;
 
     box-sizing: border-box;
 }
+
 
 /* =========================================================
    CLICKABLE REPORT CARD
@@ -1591,6 +1836,7 @@
 .report-card {
     cursor: pointer;
 }
+
 
 .report-chart-wrapper,
 .report-chart,
@@ -1609,6 +1855,7 @@
     cursor: default;
 }
 
+
 .report-detail-btn,
 .report-format-select,
 .report-download-btn {
@@ -1624,13 +1871,17 @@
 .report-modal.active,
 .report-modal.show {
     opacity: 1;
+
     visibility: visible;
+
     pointer-events: auto;
 }
 
+
 .report-modal.active .report-modal-content,
 .report-modal.show .report-modal-content {
-    transform: translateY(0) scale(1);
+    transform:
+        translateY(0) scale(1);
 }
 
 
@@ -1640,4 +1891,656 @@
 
 body.report-modal-open {
     overflow: hidden;
+}
+
+/* ============================================================
+   REPORT CALENDAR
+============================================================ */
+
+.report-calendar-wrapper {
+    position: relative;
+    z-index: 1000;
+}
+
+
+/* ============================================================
+   CALENDAR TRIGGER
+============================================================ */
+
+.report-calendar-trigger {
+    min-width: 235px;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 9px 13px;
+
+    border: 1px solid #d7e5e5;
+
+    border-radius: 13px;
+
+    background: #ffffff;
+
+    cursor: pointer;
+
+    transition: all .2s ease;
+
+    box-shadow:
+        0 3px 12px rgba(0, 60, 60, .04);
+}
+
+
+.report-calendar-trigger:hover {
+    border-color: #258487;
+
+    box-shadow:
+        0 6px 18px rgba(37, 132, 135, .12);
+}
+
+
+.calendar-trigger-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #edf8f7;
+
+    font-size: 17px;
+}
+
+
+.calendar-trigger-content {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 2px;
+}
+
+
+.calendar-trigger-content small {
+    color: #849696;
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    letter-spacing: .7px;
+
+    text-transform: uppercase;
+}
+
+
+.calendar-trigger-content strong {
+    color: #173f40;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.calendar-trigger-arrow {
+    color: #278386;
+
+    font-size: 16px;
+}
+
+
+/* ============================================================
+   POPUP
+============================================================ */
+
+.report-calendar-popup {
+    position: absolute;
+
+    top: calc(100% + 10px);
+
+    right: 0;
+
+    width: 355px;
+
+    padding: 18px;
+
+    border:
+        1px solid #dfebeb;
+
+    border-radius: 18px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 20px 50px rgba(0, 50, 50, .16);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform:
+        translateY(-8px) scale(.98);
+
+    transition:
+        opacity .2s ease,
+        transform .2s ease,
+        visibility .2s ease;
+}
+
+
+.report-calendar-popup.show {
+    opacity: 1;
+
+    visibility: visible;
+
+    transform:
+        translateY(0) scale(1);
+}
+
+
+/* ============================================================
+   POPUP HEADER
+============================================================ */
+
+.calendar-popup-header {
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    margin-bottom: 16px;
+}
+
+
+.calendar-popup-header>div {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.calendar-popup-header span {
+    color: #8a9a9a;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: .8px;
+}
+
+
+.calendar-popup-header strong {
+    color: #183f40;
+
+    font-size: 15px;
+}
+
+
+.calendar-close {
+    width: 29px;
+    height: 29px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #f2f7f7;
+
+    color: #607777;
+
+    cursor: pointer;
+
+    font-size: 20px;
+
+    line-height: 1;
+}
+
+
+.calendar-close:hover {
+    background: #e5f1f0;
+
+    color: #1e7779;
+}
+
+
+/* ============================================================
+   MODE
+============================================================ */
+
+.calendar-mode {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 3px;
+
+    padding: 4px;
+
+    margin-bottom: 17px;
+
+    background: #f3f7f7;
+
+    border-radius: 10px;
+}
+
+
+.calendar-mode-btn {
+    border: none;
+
+    padding: 8px 5px;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #718484;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    transition: .2s ease;
+}
+
+
+.calendar-mode-btn:hover {
+    color: #237e80;
+}
+
+
+.calendar-mode-btn.active {
+    background: #ffffff;
+
+    color: #237e80;
+
+    box-shadow:
+        0 2px 8px rgba(0, 60, 60, .08);
+}
+
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+
+.calendar-navigation {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 10px;
+}
+
+
+.calendar-navigation strong {
+    color: #183f40;
+
+    font-size: 14px;
+}
+
+
+.calendar-navigation button {
+    width: 31px;
+    height: 31px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #f1f7f7;
+
+    color: #267d7f;
+
+    cursor: pointer;
+
+    font-size: 21px;
+
+    line-height: 1;
+}
+
+
+.calendar-navigation button:hover {
+    background: #e3f1f0;
+}
+
+
+/* ============================================================
+   WEEK DAYS
+============================================================ */
+
+.calendar-weekdays {
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, 1fr);
+
+    margin-bottom: 4px;
+}
+
+
+.calendar-weekdays span {
+    padding: 5px 0;
+
+    color: #879797;
+
+    text-align: center;
+
+    font-size: 9px;
+
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   DAYS
+============================================================ */
+
+.calendar-days {
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, 1fr);
+
+    gap: 3px;
+}
+
+
+.calendar-day {
+    position: relative;
+
+    width: 100%;
+    height: 37px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #385252;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+    transition:
+        background .15s ease,
+        color .15s ease;
+}
+
+
+.calendar-day:hover {
+    background: #e9f5f4;
+
+    color: #207a7c;
+}
+
+
+.calendar-day.other-month {
+    color: #c4cece;
+}
+
+
+.calendar-day.today::after {
+    content: "";
+
+    position: absolute;
+
+    bottom: 4px;
+
+    width: 4px;
+    height: 4px;
+
+    border-radius: 50%;
+
+    background: #238486;
+}
+
+
+/* ============================================================
+   DAILY
+============================================================ */
+
+.calendar-day.selected {
+    background: #238486;
+
+    color: #ffffff;
+
+    font-weight: 700;
+}
+
+
+.calendar-day.selected:hover {
+    background: #1d7476;
+
+    color: #ffffff;
+}
+
+
+.calendar-day.selected.today::after {
+    background: #ffffff;
+}
+
+
+/* ============================================================
+   WEEKLY
+============================================================ */
+
+.calendar-day.week-range {
+    background: #e2f2f1;
+
+    color: #237a7c;
+
+    border-radius: 5px;
+}
+
+
+.calendar-day.week-start {
+    border-radius:
+        9px 4px 4px 9px;
+}
+
+
+.calendar-day.week-end {
+    border-radius:
+        4px 9px 9px 4px;
+}
+
+
+.calendar-day.week-selected {
+    background: #238486;
+
+    color: #ffffff;
+
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   MONTHLY
+============================================================ */
+
+.calendar-day.month-selected {
+    background: #e2f2f1;
+
+    color: #237a7c;
+
+    font-weight: 600;
+}
+
+
+.calendar-day.month-selected:hover {
+    background: #d5eceb;
+}
+
+
+/* ============================================================
+   INFO
+============================================================ */
+
+.calendar-info {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 14px;
+
+    padding: 9px 11px;
+
+    border-radius: 9px;
+
+    background: #f7faf9;
+
+    color: #617575;
+
+    font-size: 10px;
+}
+
+
+.calendar-info-dot {
+    width: 7px;
+    height: 7px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #238486;
+}
+
+
+/* ============================================================
+   APPLY BUTTON
+============================================================ */
+
+.calendar-apply {
+    width: 100%;
+
+    margin-top: 11px;
+
+    padding: 10px 14px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #238486;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    transition: .2s ease;
+}
+
+
+.calendar-apply:hover {
+    background: #1b7072;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 12px rgba(35, 132, 134, .18);
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 768px) {
+
+    .report-section-title {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+
+    .report-calendar-trigger {
+        width: 100%;
+
+        min-width: 0;
+    }
+
+
+    .report-calendar-popup {
+        position: fixed;
+
+        top: 50%;
+        left: 50%;
+
+        right: auto;
+
+        width:
+            calc(100vw - 30px);
+
+        max-width: 355px;
+
+        transform:
+            translate(-50%, -48%) scale(.98);
+    }
+
+
+    .report-calendar-popup.show {
+        transform:
+            translate(-50%, -50%) scale(1);
+    }
+
+}
+
+
+@media (max-width: 420px) {
+
+    .report-calendar-popup {
+        width:
+            calc(100vw - 20px);
+
+        padding: 14px;
+    }
+
+
+    .calendar-day {
+        height: 34px;
+    }
+
 }

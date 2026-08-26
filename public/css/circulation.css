@@ -152,6 +152,24 @@
         0 0 0 2px rgba(98, 168, 232, .12);
 }
 
+#page-circulation .field input[type="date"] {
+    display: flex;
+
+    align-items: center;
+}
+
+#page-circulation .field input[type="date"]::-webkit-datetime-edit {
+    display: flex;
+
+    align-items: center;
+
+    padding: 0;
+}
+
+#page-circulation .field input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left: auto;
+}
+
 #page-circulation .field select option:disabled {
     color: #999999;
 
@@ -169,457 +187,6 @@
 
 
 /* =========================================================
-   SEAT SECTION
-========================================================= */
-
-#page-circulation .seat-selection-section {
-    width: 100%;
-
-    margin-top: 18px;
-}
-
-#page-circulation .seat-selection-title {
-    margin-bottom: 10px;
-}
-
-#page-circulation .seat-selection-title label {
-    display: block;
-
-    margin-bottom: 3px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    color: #111827;
-}
-
-#page-circulation .seat-selection-title span {
-    display: block;
-
-    color: #6b7280;
-
-    font-size: 11px;
-}
-
-
-/* =========================================================
-   INFO SEAT
-========================================================= */
-
-#page-circulation .seat-info-box {
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    width: 100%;
-
-    min-height: 40px;
-
-    padding: 10px 12px;
-
-    margin-bottom: 10px;
-
-    box-sizing: border-box;
-
-    background: #eff6ff;
-
-    border: 1px solid #60a5fa;
-
-    border-radius: 6px;
-
-    color: #174a7e;
-
-    font-size: 10px;
-
-    line-height: 1.4;
-}
-
-#page-circulation .seat-info-icon {
-    width: 18px;
-
-    height: 18px;
-
-    min-width: 18px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: #e5e7eb;
-
-    color: #17619a;
-
-    font-size: 10px;
-
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   DENAH
-========================================================= */
-
-#page-circulation .seat-map-wrapper {
-    width: 100%;
-
-    padding: 10px;
-
-    box-sizing: border-box;
-
-    background: #ffffff;
-
-    border: 1px solid #d9dee5;
-
-    border-radius: 8px;
-
-    overflow: hidden;
-}
-
-#page-circulation .seat-map-title {
-    margin-bottom: 9px;
-
-    text-align: center;
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-    color: #111827;
-}
-
-
-/* =========================================================
-   3 MEJA
-========================================================= */
-
-#page-circulation .seat-map {
-    width: 100%;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-
-    gap: 10px;
-
-    align-items: start;
-}
-
-#page-circulation .seat-table-group {
-    width: 100%;
-
-    min-width: 0;
-}
-
-#page-circulation .table-name {
-    height: 16px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    margin-bottom: 5px;
-
-    color: #111827;
-
-    font-size: 9px;
-
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   LAYOUT KURSI
-========================================================= */
-
-#page-circulation .table-seat-layout {
-    width: 100%;
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 5px;
-}
-
-#page-circulation .seat-row {
-    width: 100%;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, minmax(0, 1fr));
-
-    gap: 5px;
-}
-
-
-/* =========================================================
-   KURSI
-========================================================= */
-
-#page-circulation .seat {
-    width: 100%;
-
-    height: 32px;
-
-    min-width: 0;
-
-    padding: 0;
-
-    box-sizing: border-box;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border: 1px solid #cfd5dc;
-
-    border-radius: 5px;
-
-    background: #ffffff;
-
-    color: #111827;
-
-    font-family: inherit;
-
-    font-size: 9px;
-
-    font-weight: 500;
-
-    cursor: pointer;
-
-    transition:
-        background .15s ease,
-        border-color .15s ease,
-        transform .15s ease;
-}
-
-#page-circulation .seat:hover:not(:disabled) {
-    background: #f3f4f6;
-
-    border-color: #9ca3af;
-
-    transform: translateY(-1px);
-}
-
-
-/* =========================================================
-   KURSI DIPILIH
-========================================================= */
-
-#page-circulation .seat.selected {
-    background: #83c341 !important;
-
-    border-color: #65a30d !important;
-
-    color: #ffffff !important;
-
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   KURSI SUDAH DIGUNAKAN
-========================================================= */
-
-#page-circulation .seat.booked,
-#page-circulation .seat:disabled {
-    background: #f2b0b0 !important;
-
-    border-color: #e38c8c !important;
-
-    color: #8f3d3d !important;
-
-    cursor: not-allowed;
-
-    opacity: 1;
-}
-
-
-/* =========================================================
-   MEJA
-========================================================= */
-
-#page-circulation .table-middle {
-    width: 100%;
-
-    height: 34px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    box-sizing: border-box;
-
-    background:
-        linear-gradient(to bottom,
-            #c48722 0%,
-            #b87813 100%);
-
-    border-radius: 5px;
-
-    color: #ffffff;
-
-    font-size: 8px;
-
-    font-weight: 700;
-
-    text-transform: uppercase;
-
-    box-shadow:
-        0 2px 3px rgba(0, 0, 0, .12);
-}
-
-
-/* =========================================================
-   LEGEND
-========================================================= */
-
-#page-circulation .seat-legend {
-    width: 100%;
-
-    min-height: 34px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 18px;
-
-    margin-top: 10px;
-
-    padding: 6px 5px;
-
-    box-sizing: border-box;
-
-    background: #f7f7f7;
-
-    border-radius: 5px;
-
-    font-size: 9px;
-
-    color: #4b5563;
-}
-
-#page-circulation .seat-legend-item {
-    display: flex;
-
-    align-items: center;
-
-    gap: 5px;
-
-    white-space: nowrap;
-}
-
-#page-circulation .legend-seat {
-    width: 17px;
-
-    height: 17px;
-
-    display: inline-block;
-
-    box-sizing: border-box;
-
-    border-radius: 4px;
-
-    border: 1px solid #d1d5db;
-}
-
-#page-circulation .legend-seat.available {
-    background: #ffffff;
-}
-
-#page-circulation .legend-seat.selected {
-    background: #83c341;
-
-    border-color: #65a30d;
-}
-
-#page-circulation .legend-seat.booked {
-    background: #f2b0b0;
-
-    border-color: #e38c8c;
-}
-
-
-/* =========================================================
-   HASIL PILIHAN KURSI
-========================================================= */
-
-#page-circulation .seat-selected-result {
-    width: 100%;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 10px;
-
-    margin-top: 8px;
-
-    padding: 9px 10px;
-
-    box-sizing: border-box;
-
-    background: #f0fdf4;
-
-    border: 1px solid #bbf7d0;
-
-    border-radius: 5px;
-
-    color: #166534;
-
-    font-size: 10px;
-}
-
-#page-circulation .seat-selected-result strong {
-    color: #166534;
-}
-
-#page-circulation .separator {
-    margin: 0 5px;
-
-    color: #9ca3af;
-}
-
-#page-circulation .reset-seat-button {
-    border: none;
-
-    background: transparent;
-
-    color: #dc2626;
-
-    font-size: 9px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-#page-circulation .reset-seat-button:hover {
-    text-decoration: underline;
-}
-
-
-/* =========================================================
    SUBMIT
 ========================================================= */
 
@@ -628,7 +195,7 @@
 
     height: 40px;
 
-    margin-top: 15px;
+    margin-top: 5px;
 
     border: none;
 
@@ -754,7 +321,7 @@
 #page-circulation table {
     width: 100%;
 
-    min-width: 850px;
+    min-width: 700px;
 
     border-collapse: collapse;
 }
@@ -777,104 +344,37 @@
     white-space: nowrap;
 }
 
+#page-circulation table th:nth-child(3),
+#page-circulation table th:nth-child(4) {
+    text-align: center;
+}
+
 #page-circulation table td {
     padding: 13px 10px;
 
     border-bottom: 1px solid #eef0f2;
 
-    color: #263b3b;
+    color: #263b3b !important;
 
     font-size: 10px;
 
     vertical-align: middle;
 }
 
+#page-circulation table td:nth-child(3),
+#page-circulation table td:nth-child(4) {
+    text-align: center;
+}
+
+#page-circulation table td,
+#page-circulation table td span:not(.status-badge) {
+    color: #263b3b !important;
+
+    text-decoration: none !important;
+}
+
 #page-circulation table tbody tr:hover {
     background: #f8fbfb;
-}
-
-
-/* =========================================================
-   TEMPAT DUDUK DI TABEL
-   SAMA SEPERTI RESERVASI
-========================================================= */
-
-#page-circulation .borrowing-seat {
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: flex-start;
-
-    gap: 4px;
-}
-
-
-/* MEJA */
-
-#page-circulation .seat-table-badge {
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    min-width: 72px;
-
-    height: 28px;
-
-    padding: 0 10px;
-
-    box-sizing: border-box;
-
-    background: #eaf6f6;
-
-    border: 1px solid #b7dada;
-
-    border-radius: 7px;
-
-    color: #287b7b;
-
-    font-size: 9px;
-
-    font-weight: 600;
-}
-
-
-/* KURSI */
-
-#page-circulation .seat-number-badge {
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    min-width: 72px;
-
-    height: 28px;
-
-    padding: 0 10px;
-
-    box-sizing: border-box;
-
-    background: #f3f9fa;
-
-    border: 1px solid #c4dfe1;
-
-    border-radius: 7px;
-
-    color: #287b7b;
-
-    font-size: 9px;
-
-    font-weight: 600;
-}
-
-#page-circulation .no-seat {
-    color: #9ca3af;
-
-    font-size: 10px;
 }
 
 
@@ -1000,15 +500,6 @@
         grid-template-columns: 1fr;
     }
 
-    #page-circulation .seat-map {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    #page-circulation .seat-legend {
-        flex-wrap: wrap;
-    }
-
     #page-circulation .borrowing-header {
         align-items: flex-start;
 
@@ -1030,14 +521,6 @@
 
     #page-circulation .card-pad {
         padding: 15px;
-    }
-
-    #page-circulation .seat-map-wrapper {
-        padding: 8px;
-    }
-
-    #page-circulation .seat {
-        height: 34px;
     }
 
 }

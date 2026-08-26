@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="{{ asset('css/circulation.css') }}">
 @endpush
 
-
 @section('content')
 
 <section class="page" id="page-circulation">
@@ -66,9 +65,13 @@
                 <h3>Pinjam Buku</h3>
 
                 <p class="loan-description">
-                    Pilih anggota, buku, tanggal, serta tempat duduk yang tersedia.
+                    Pilih anggota, buku, dan tanggal peminjaman.
                 </p>
 
+
+                {{-- =================================================
+                     FORM PEMINJAMAN
+                ================================================== --}}
 
                 <form
                     action="{{ route('circulation.store') }}"
@@ -143,9 +146,7 @@
                                     @disabled($book->available_stock <= 0)
                                 >
 
-                                    {{ $book->title }}
-
-                                    —
+                                    {{ $book->title }} —
 
                                     @if($book->available_stock > 0)
                                         Stok {{ $book->available_stock }}
@@ -188,7 +189,7 @@
                         <div class="field">
 
                             <label for="due_at">
-                                Jatuh Tempo
+                                Tanggal Pengembalian
                             </label>
 
                             <input
@@ -197,394 +198,6 @@
                                 id="due_at"
                                 value="{{ old('due_at', now()->addDays(7)->format('Y-m-d')) }}"
                                 required
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    {{-- =================================================
-                         PILIH TEMPAT DUDUK
-                    ================================================== --}}
-
-                    <div class="seat-selection-section">
-
-                        <div class="seat-selection-title">
-
-                            <label>
-                                Pilih Tempat Duduk
-                            </label>
-
-                            <span>
-                                Pilih satu kursi yang masih tersedia.
-                            </span>
-
-                        </div>
-
-
-                        {{-- INFO BOX --}}
-
-                        <div class="seat-info-box">
-
-                            <div class="seat-info-icon">
-                                i
-                            </div>
-
-                            <div>
-                                Kursi berwarna merah sudah digunakan.
-                                Kursi hijau merupakan kursi yang dipilih.
-                            </div>
-
-                        </div>
-
-
-                        {{-- =================================================
-                             DENAH TEMPAT DUDUK
-                        ================================================== --}}
-
-                        <div class="seat-map-wrapper">
-
-                            <div class="seat-map-title">
-                                Denah Tempat Duduk
-                            </div>
-
-
-                            <div class="seat-map">
-
-
-                                {{-- =========================================
-                                     MEJA A
-                                ========================================== --}}
-
-                                <div class="seat-table-group">
-
-                                    <div class="table-name">
-                                        MEJA A
-                                    </div>
-
-                                    <div class="table-seat-layout">
-
-
-                                        {{-- A1 - A4 --}}
-
-                                        <div class="seat-row">
-
-                                            @for($i = 1; $i <= 4; $i++)
-
-                                                @php
-                                                    $seat = 'A' . $i;
-
-                                                    $isBooked = in_array(
-                                                        $seat,
-                                                        $bookedSeats ?? []
-                                                    );
-                                                @endphp
-
-                                                <button
-                                                    type="button"
-                                                    class="seat {{ $isBooked ? 'booked' : '' }}"
-                                                    data-seat="{{ $seat }}"
-                                                    data-table="Meja A"
-                                                    {{ $isBooked ? 'disabled' : '' }}
-                                                >
-                                                    {{ $seat }}
-                                                </button>
-
-                                            @endfor
-
-                                        </div>
-
-
-                                        {{-- MEJA A --}}
-
-                                        <div class="table-middle">
-                                            MEJA A
-                                        </div>
-
-
-                                        {{-- A5 - A8 --}}
-
-                                        <div class="seat-row">
-
-                                            @for($i = 5; $i <= 8; $i++)
-
-                                                @php
-                                                    $seat = 'A' . $i;
-
-                                                    $isBooked = in_array(
-                                                        $seat,
-                                                        $bookedSeats ?? []
-                                                    );
-                                                @endphp
-
-                                                <button
-                                                    type="button"
-                                                    class="seat {{ $isBooked ? 'booked' : '' }}"
-                                                    data-seat="{{ $seat }}"
-                                                    data-table="Meja A"
-                                                    {{ $isBooked ? 'disabled' : '' }}
-                                                >
-                                                    {{ $seat }}
-                                                </button>
-
-                                            @endfor
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-
-                                {{-- =========================================
-                                     MEJA B
-                                ========================================== --}}
-
-                                <div class="seat-table-group">
-
-                                    <div class="table-name">
-                                        MEJA B
-                                    </div>
-
-                                    <div class="table-seat-layout">
-
-
-                                        {{-- B1 - B4 --}}
-
-                                        <div class="seat-row">
-
-                                            @for($i = 1; $i <= 4; $i++)
-
-                                                @php
-                                                    $seat = 'B' . $i;
-
-                                                    $isBooked = in_array(
-                                                        $seat,
-                                                        $bookedSeats ?? []
-                                                    );
-                                                @endphp
-
-                                                <button
-                                                    type="button"
-                                                    class="seat {{ $isBooked ? 'booked' : '' }}"
-                                                    data-seat="{{ $seat }}"
-                                                    data-table="Meja B"
-                                                    {{ $isBooked ? 'disabled' : '' }}
-                                                >
-                                                    {{ $seat }}
-                                                </button>
-
-                                            @endfor
-
-                                        </div>
-
-
-                                        {{-- MEJA B --}}
-
-                                        <div class="table-middle">
-                                            MEJA B
-                                        </div>
-
-
-                                        {{-- B5 - B8 --}}
-
-                                        <div class="seat-row">
-
-                                            @for($i = 5; $i <= 8; $i++)
-
-                                                @php
-                                                    $seat = 'B' . $i;
-
-                                                    $isBooked = in_array(
-                                                        $seat,
-                                                        $bookedSeats ?? []
-                                                    );
-                                                @endphp
-
-                                                <button
-                                                    type="button"
-                                                    class="seat {{ $isBooked ? 'booked' : '' }}"
-                                                    data-seat="{{ $seat }}"
-                                                    data-table="Meja B"
-                                                    {{ $isBooked ? 'disabled' : '' }}
-                                                >
-                                                    {{ $seat }}
-                                                </button>
-
-                                            @endfor
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-
-                                {{-- =========================================
-                                     MEJA C
-                                ========================================== --}}
-
-                                <div class="seat-table-group">
-
-                                    <div class="table-name">
-                                        MEJA C
-                                    </div>
-
-                                    <div class="table-seat-layout">
-
-
-                                        {{-- C1 - C4 --}}
-
-                                        <div class="seat-row">
-
-                                            @for($i = 1; $i <= 4; $i++)
-
-                                                @php
-                                                    $seat = 'C' . $i;
-
-                                                    $isBooked = in_array(
-                                                        $seat,
-                                                        $bookedSeats ?? []
-                                                    );
-                                                @endphp
-
-                                                <button
-                                                    type="button"
-                                                    class="seat {{ $isBooked ? 'booked' : '' }}"
-                                                    data-seat="{{ $seat }}"
-                                                    data-table="Meja C"
-                                                    {{ $isBooked ? 'disabled' : '' }}
-                                                >
-                                                    {{ $seat }}
-                                                </button>
-
-                                            @endfor
-
-                                        </div>
-
-
-                                        {{-- MEJA C --}}
-
-                                        <div class="table-middle">
-                                            MEJA C
-                                        </div>
-
-
-                                        {{-- C5 - C8 --}}
-
-                                        <div class="seat-row">
-
-                                            @for($i = 5; $i <= 8; $i++)
-
-                                                @php
-                                                    $seat = 'C' . $i;
-
-                                                    $isBooked = in_array(
-                                                        $seat,
-                                                        $bookedSeats ?? []
-                                                    );
-                                                @endphp
-
-                                                <button
-                                                    type="button"
-                                                    class="seat {{ $isBooked ? 'booked' : '' }}"
-                                                    data-seat="{{ $seat }}"
-                                                    data-table="Meja C"
-                                                    {{ $isBooked ? 'disabled' : '' }}
-                                                >
-                                                    {{ $seat }}
-                                                </button>
-
-                                            @endfor
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            {{-- =================================================
-                                 LEGEND
-                            ================================================== --}}
-
-                            <div class="seat-legend">
-
-                                <div class="seat-legend-item">
-
-                                    <span class="legend-seat available"></span>
-
-                                    Tersedia
-
-                                </div>
-
-
-                                <div class="seat-legend-item">
-
-                                    <span class="legend-seat selected"></span>
-
-                                    Dipilih
-
-                                </div>
-
-
-                                <div class="seat-legend-item">
-
-                                    <span class="legend-seat booked"></span>
-
-                                    Sudah Digunakan
-
-                                </div>
-
-                            </div>
-
-
-                            {{-- =================================================
-                                 HASIL PILIHAN
-                            ================================================== --}}
-
-                            <div
-                                class="seat-selected-result"
-                                id="seatSelectedResult"
-                                style="display: none;"
-                            >
-
-                                <div>
-
-                                    Meja:
-                                    <strong id="selectedTable">-</strong>
-
-                                    <span class="separator">|</span>
-
-                                    Kursi:
-                                    <strong id="selectedSeat">-</strong>
-
-                                </div>
-
-
-                                <button
-                                    type="button"
-                                    class="reset-seat-button"
-                                    id="resetSeatButton"
-                                >
-                                    Batalkan Pilihan
-                                </button>
-
-                            </div>
-
-
-                            {{-- =================================================
-                                 INPUT YANG DIKIRIM KE CONTROLLER
-                            ================================================== --}}
-
-                            <input
-                                type="hidden"
-                                name="seat_number"
-                                id="seat_number"
-                                value="{{ old('seat_number') }}"
                             >
 
                         </div>
@@ -670,9 +283,7 @@
 
                             <th>PINJAM</th>
 
-                            <th>JATUH TEMPO</th>
-
-                            <th>TEMPAT DUDUK</th>
+                            <th>TANGGAL PENGEMBALIAN</th>
 
                             <th>STATUS</th>
 
@@ -691,7 +302,7 @@
 
                                 /*
                                 |--------------------------------------------------------------------------
-                                | STATUS
+                                | STATUS PEMINJAMAN
                                 |--------------------------------------------------------------------------
                                 */
 
@@ -704,53 +315,11 @@
                                         )->startOfDay()
                                     );
 
+
                                 $displayStatus =
                                     $isLate
                                     ? 'terlambat'
                                     : $borrowing->status;
-
-
-                                /*
-                                |--------------------------------------------------------------------------
-                                | SEAT
-                                |--------------------------------------------------------------------------
-                                */
-
-                                $seatNumber = $borrowing->seat_number ?? null;
-
-
-                                /*
-                                |--------------------------------------------------------------------------
-                                | TABLE NAME
-                                |--------------------------------------------------------------------------
-                                */
-
-                                $tableName = match (true) {
-
-                                    $seatNumber
-                                    && str_starts_with(
-                                        strtoupper($seatNumber),
-                                        'A'
-                                    )
-                                        => 'Meja A',
-
-                                    $seatNumber
-                                    && str_starts_with(
-                                        strtoupper($seatNumber),
-                                        'B'
-                                    )
-                                        => 'Meja B',
-
-                                    $seatNumber
-                                    && str_starts_with(
-                                        strtoupper($seatNumber),
-                                        'C'
-                                    )
-                                        => 'Meja C',
-
-                                    default => null,
-
-                                };
 
                             @endphp
 
@@ -808,7 +377,7 @@
 
 
                                 {{-- =========================================
-                                     JATUH TEMPO
+                                     TANGGAL PENGEMBALIAN
                                 ========================================== --}}
 
                                 <td>
@@ -816,38 +385,6 @@
                                     {{ \Carbon\Carbon::parse(
                                         $borrowing->due_at
                                     )->format('d/m/Y') }}
-
-                                </td>
-
-
-                                {{-- =========================================
-                                     TEMPAT DUDUK
-                                     SAMA SEPERTI RESERVASI
-                                ========================================== --}}
-
-                                <td>
-
-                                    @if($seatNumber)
-
-                                        <div class="borrowing-seat">
-
-                                            <span class="seat-table-badge">
-                                                {{ $tableName ?? '-' }}
-                                            </span>
-
-                                            <span class="seat-number-badge">
-                                                Kursi {{ $seatNumber }}
-                                            </span>
-
-                                        </div>
-
-                                    @else
-
-                                        <span class="no-seat">
-                                            -
-                                        </span>
-
-                                    @endif
 
                                 </td>
 
@@ -861,7 +398,7 @@
                                     @if($displayStatus === 'dipinjam')
 
                                         <span class="status-badge aktif">
-                                            ● Aktif
+                                            Aktif
                                         </span>
 
                                     @elseif($displayStatus === 'terlambat')
@@ -929,7 +466,7 @@
                             <tr>
 
                                 <td
-                                    colspan="7"
+                                    colspan="6"
                                     class="empty-state"
                                 >
                                     Belum ada transaksi peminjaman.
@@ -954,7 +491,7 @@
 
 {{-- =========================================================
      JAVASCRIPT
-     TEMPAT DUDUK + SEARCH
+     SEARCH DAFTAR PEMINJAMAN
 ========================================================= --}}
 
 <script>
@@ -964,232 +501,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ELEMENT
-    |--------------------------------------------------------------------------
-    */
-
-    const form =
-        document.getElementById('circulationForm');
-
-    const seatInput =
-        document.getElementById('seat_number');
-
-    const selectedResult =
-        document.getElementById('seatSelectedResult');
-
-    const selectedSeat =
-        document.getElementById('selectedSeat');
-
-    const selectedTable =
-        document.getElementById('selectedTable');
-
-    const resetSeatButton =
-        document.getElementById('resetSeatButton');
-
-    const seats =
-        document.querySelectorAll(
-            '#page-circulation .seat:not(:disabled)'
-        );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | FUNGSI MENAMPILKAN KURSI
-    |--------------------------------------------------------------------------
-    */
-
-    function showSelectedSeat(seatElement) {
-
-        if (!seatElement) {
-            return;
-        }
-
-        const seatNumber =
-            seatElement.dataset.seat;
-
-        const tableName =
-            seatElement.dataset.table;
-
-
-        /*
-        | Hapus selected sebelumnya
-        */
-
-        document
-            .querySelectorAll('#page-circulation .seat.selected')
-            .forEach(function (oldSeat) {
-
-                oldSeat.classList.remove('selected');
-
-            });
-
-
-        /*
-        | Tandai kursi
-        */
-
-        seatElement.classList.add('selected');
-
-
-        /*
-        | Simpan nilai seat ke input
-        */
-
-        seatInput.value = seatNumber;
-
-
-        /*
-        | Tampilkan informasi
-        */
-
-        selectedSeat.textContent =
-            seatNumber;
-
-        selectedTable.textContent =
-            tableName;
-
-
-        selectedResult.style.display =
-            'flex';
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | KLIK KURSI
-    |--------------------------------------------------------------------------
-    */
-
-    seats.forEach(function (seat) {
-
-        seat.addEventListener('click', function () {
-
-            showSelectedSeat(seat);
-
-        });
-
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | RESET KURSI
-    |--------------------------------------------------------------------------
-    */
-
-    if (resetSeatButton) {
-
-        resetSeatButton.addEventListener(
-            'click',
-            function () {
-
-                document
-                    .querySelectorAll(
-                        '#page-circulation .seat.selected'
-                    )
-                    .forEach(function (seat) {
-
-                        seat.classList.remove(
-                            'selected'
-                        );
-
-                    });
-
-
-                seatInput.value = '';
-
-
-                selectedSeat.textContent =
-                    '-';
-
-                selectedTable.textContent =
-                    '-';
-
-
-                selectedResult.style.display =
-                    'none';
-
-            }
-        );
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDASI FORM
-    |--------------------------------------------------------------------------
-    */
-
-    if (form) {
-
-        form.addEventListener(
-            'submit',
-            function (event) {
-
-                if (!seatInput.value) {
-
-                    event.preventDefault();
-
-                    alert(
-                        'Silakan pilih tempat duduk terlebih dahulu.'
-                    );
-
-                    return false;
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | RESTORE OLD INPUT
-    |--------------------------------------------------------------------------
-    */
-
-    const oldSeat =
-        seatInput.value;
-
-
-    if (oldSeat) {
-
-        const oldSeatElement =
-            document.querySelector(
-                '#page-circulation .seat[data-seat="' +
-                oldSeat +
-                '"]'
-            );
-
-
-        if (
-            oldSeatElement &&
-            !oldSeatElement.disabled
-        ) {
-
-            showSelectedSeat(
-                oldSeatElement
-            );
-
-        }
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
     | SEARCH DAFTAR PEMINJAMAN
     |--------------------------------------------------------------------------
     */
 
     const searchInput =
-        document.getElementById(
-            'borrowingSearch'
-        );
+        document.getElementById('borrowingSearch');
+
 
     const rows =
         document.querySelectorAll(
@@ -1216,17 +534,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             .toLowerCase();
 
 
-                    if (
-                        text.includes(keyword)
-                    ) {
+                    if (text.includes(keyword)) {
 
-                        row.style.display =
-                            '';
+                        row.style.display = '';
 
                     } else {
 
-                        row.style.display =
-                            'none';
+                        row.style.display = 'none';
 
                     }
 
