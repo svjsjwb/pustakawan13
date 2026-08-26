@@ -1,91 +1,217 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { CONFIG } from './config.js';
 
-export function createCamera(container, renderer) {
-    const camera = new THREE.PerspectiveCamera(
-        42,
-        container.clientWidth / Math.max(container.clientHeight, 1),
-        0.1,
-        1000
-    );
+import {
+    OrbitControls
+} from 'three/addons/controls/OrbitControls.js';
 
-    // FREECAM / ORBITAL — tetap dipertahankan.
-    const orbitControls = new OrbitControls(
-        camera,
-        renderer.domElement
-    );
+import {
+    PointerLockControls
+} from 'three/addons/controls/PointerLockControls.js';
 
-    orbitControls.enableDamping = true;
-    orbitControls.dampingFactor = 0.08;
-    orbitControls.enablePan = true;
-    orbitControls.enableZoom = true;
-    orbitControls.minDistance = 5;
-    orbitControls.maxDistance = 70;
-    orbitControls.maxPolarAngle = Math.PI * 0.82;
-    orbitControls.minPolarAngle = Math.PI * 0.12;
-    orbitControls.enabled = true;
+import {
+    CONFIG
+} from './config.js';
 
-    // FPS / WALK MODE.
-    const fpsControls = new PointerLockControls(
-        camera,
-        renderer.domElement
-    );
 
-    fpsControls.enabled = false;
+export function createCamera(
+    container,
+    renderer
+) {
+
+    const camera =
+        new THREE.PerspectiveCamera(
+
+            42,
+
+            container.clientWidth /
+            Math.max(
+                container.clientHeight,
+                1
+            ),
+
+            0.1,
+
+            1000
+
+        );
+
+
+    /* =========================================================
+       ORBIT / FREECAM
+    ========================================================== */
+
+    const orbitControls =
+        new OrbitControls(
+
+            camera,
+
+            renderer.domElement
+
+        );
+
+
+    orbitControls.enableDamping =
+        true;
+
+
+    orbitControls.dampingFactor =
+        0.08;
+
+
+    orbitControls.enablePan =
+        true;
+
+
+    orbitControls.enableZoom =
+        true;
+
+
+    orbitControls.minDistance =
+        5;
+
+
+    orbitControls.maxDistance =
+        70;
+
+
+    orbitControls.maxPolarAngle =
+        Math.PI * 0.82;
+
+
+    orbitControls.minPolarAngle =
+        Math.PI * 0.12;
+
+
+    orbitControls.enabled =
+        true;
+
+
+    /* =========================================================
+       FPS / WALK MODE
+    ========================================================== */
+
+    const fpsControls =
+        new PointerLockControls(
+
+            camera,
+
+            renderer.domElement
+
+        );
+
+
+    /*
+     * PointerLockControls tetap dibuat
+     * supaya kompatibel dengan sistem player
+     * yang sudah ada.
+     *
+     * Tetapi mode FPS kita sekarang
+     * TIDAK menggunakan lock().
+     */
+
+    fpsControls.enabled =
+        false;
+
 
     return {
+
         camera,
+
         orbitControls,
+
         fpsControls
+
     };
+
 }
+
+
+/* =============================================================
+   INITIAL CAMERA
+============================================================= */
 
 export function applyInitialCamera(
     camera,
     orbitControls,
     view
 ) {
-    const {
-        cameraTargetX,
-        cameraTargetY,
-        cameraTargetZ,
-        targetSide
-    } = view;
 
-    const viewTargetY =
-        cameraTargetY - 4.0;
+    /*
+    |--------------------------------------------------------------------------
+    | SPAWN FIXED
+    |--------------------------------------------------------------------------
+    |
+    | Jangan gunakan posisi target buku.
+    |
+    | Target buku boleh berada di Rak A/B/C,
+    | tetapi kamera awal selalu berada di
+    | titik spawn yang sama.
+    |
+    */
 
-    orbitControls.target.set(
-        cameraTargetX,
-        viewTargetY,
-        cameraTargetZ
-    );
+    const spawnX = 0;
 
-    const cameraOffset =
+    const spawnY =
+        CONFIG.rackHeight * 0.72;
+
+    const spawnZ =
         CONFIG.cameraDistance;
 
-    if (targetSide !== 'back') {
 
-        camera.position.set(
-            cameraTargetX,
-            cameraTargetY +
-            CONFIG.rackHeight * 0.10,
-            cameraTargetZ +
-            cameraOffset
-        );
+    /*
+    |--------------------------------------------------------------------------
+    | TARGET VIEW FIXED
+    |--------------------------------------------------------------------------
+    |
+    | Kamera melihat ke area Rak A.
+    |
+    | Tidak peduli buku target berada
+    | di rak mana.
+    |
+    */
 
-    } else {
+    const targetX = 0;
 
-        camera.position.set(
-            cameraTargetX,
-            cameraTargetY +
-            CONFIG.rackHeight * 0.10,
-            cameraTargetZ -
-            cameraOffset
-        );
-    }
+    const targetY =
+        CONFIG.rackHeight / 2;
+
+    const targetZ = 0;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SET CAMERA
+    |--------------------------------------------------------------------------
+    */
+
+    camera.position.set(
+
+        spawnX,
+
+        spawnY,
+
+        spawnZ
+
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SET ORBIT TARGET
+    |--------------------------------------------------------------------------
+    */
+
+    orbitControls.target.set(
+
+        targetX,
+
+        targetY,
+
+        targetZ
+
+    );
+
 
     orbitControls.update();
+
 }

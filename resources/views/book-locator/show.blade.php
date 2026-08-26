@@ -39,7 +39,7 @@ $targetShelf = $targetCopy->shelf;
 
 $physicalRacks = $shelves->groupBy(function ($shelf) {
 
-    return substr($shelf->code, 0, 1);
+return substr($shelf->code, 0, 1);
 
 });
 
@@ -52,19 +52,19 @@ $physicalRacks = $shelves->groupBy(function ($shelf) {
 
 $shelves3d = $shelves->map(function ($shelf) {
 
-    return [
+return [
 
-        'id' => (int) $shelf->id,
+'id' => (int) $shelf->id,
 
-        'code' => $shelf->code,
+'code' => $shelf->code,
 
-        'row_count' =>
-            (int) ($shelf->row_count ?? 3),
+'row_count' =>
+(int) ($shelf->row_count ?? 3),
 
-        'column_count' =>
-            (int) ($shelf->column_count ?? 30),
+'column_count' =>
+(int) ($shelf->column_count ?? 30),
 
-    ];
+];
 
 })->values()->toArray();
 
@@ -223,22 +223,21 @@ $shelves3d = $shelves->map(function ($shelf) {
             ================================================== --}}
 
             <script>
-                window.bookLocatorShelves = @json($shelves3d);
+    window.bookLocatorShelves = @json($shelves3d);
 
-                window.bookLocatorCopies = @json($bookCopies);
+    window.bookLocatorCopies = @json($bookCopies);
 
-                window.bookLocatorTargetCopyId = {{ (int) $reservation->book_copy_id }};
+    window.bookLocatorTargetCopyId = {{ (int) $reservation->book_copy_id }};
 
-
-                console.log('====================================');
-                console.log('3D LOCATOR DATA');
-                console.log('Jumlah Shelf:', window.bookLocatorShelves.length);
-                console.log('Jumlah BookCopy:', window.bookLocatorCopies.length);
-                console.log('Target BookCopy:', window.bookLocatorTargetCopyId);
-                console.log('Shelves:', window.bookLocatorShelves);
-                console.log('BookCopies:', window.bookLocatorCopies);
-                console.log('====================================');
-            </script>
+    console.log('====================================');
+    console.log('3D LOCATOR DATA');
+    console.log('Jumlah Shelf:', window.bookLocatorShelves.length);
+    console.log('Jumlah BookCopy:', window.bookLocatorCopies.length);
+    console.log('Target BookCopy:', window.bookLocatorTargetCopyId);
+    console.log('Shelves:', window.bookLocatorShelves);
+    console.log('BookCopies:', window.bookLocatorCopies);
+    console.log('====================================');
+</script>
 
 
 
@@ -645,130 +644,53 @@ $shelves3d = $shelves->map(function ($shelf) {
 
     <div class="locator-modal-card">
 
-
         <button
             type="button"
             class="locator-modal-close"
             id="locatorModalClose">
-
             &times;
-
         </button>
 
-
         <div class="locator-modal-eyebrow">
-
             EKSEMPLAR BUKU
-
         </div>
-
 
         <h2 id="locatorModalTitle">
-
             Detail Eksemplar
-
         </h2>
 
-
         <div class="locator-modal-detail">
-
-            <span>
-
-                Judul Buku
-
-            </span>
-
-            <strong id="locatorModalBookTitle">
-
-                -
-
-            </strong>
-
+            <span>Judul Buku</span>
+            <strong id="locatorModalBookTitle">-</strong>
         </div>
 
-
         <div class="locator-modal-detail">
-
-            <span>
-
-                Eksemplar
-
-            </span>
-
-            <strong id="locatorModalCopyNumber">
-
-                -
-
-            </strong>
-
+            <span>Eksemplar</span>
+            <strong id="locatorModalCopyNumber">-</strong>
         </div>
 
-
         <div class="locator-modal-detail">
-
-            <span>
-
-                Barcode
-
-            </span>
-
-            <strong id="locatorModalBarcode">
-
-                -
-
-            </strong>
-
+            <span>Barcode</span>
+            <strong id="locatorModalBarcode">-</strong>
         </div>
 
-
         <div class="locator-modal-detail">
-
-            <span>
-
-                Status
-
-            </span>
-
-            <strong id="locatorModalStatus">
-
-                -
-
-            </strong>
-
+            <span>Status</span>
+            <strong id="locatorModalStatus">-</strong>
         </div>
 
-
         <div class="locator-modal-detail">
-
-            <span>
-
-                Rak
-
-            </span>
-
-            <strong id="locatorModalShelf">
-
-                -
-
-            </strong>
-
+            <span>Rak</span>
+            <strong id="locatorModalShelf">-</strong>
         </div>
 
-
         <div class="locator-modal-detail">
+            <span>Posisi</span>
+            <strong id="locatorModalPosition">-</strong>
+        </div>
 
-            <span>
-
-                Posisi
-
-            </span>
-
-            <strong id="locatorModalPosition">
-
-                -
-
-            </strong>
-
+        <div class="locator-modal-hint">
+            Klik × untuk menutup informasi buku
         </div>
 
     </div>

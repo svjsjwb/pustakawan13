@@ -6,7 +6,9 @@
 
         @foreach($errors->all() as $error)
 
-        <li>{{ $error }}</li>
+        <li>
+            {{ $error }}
+        </li>
 
         @endforeach
 
@@ -16,6 +18,10 @@
 
 @endif
 
+
+{{-- =========================================================
+     BARCODE
+========================================================= --}}
 
 <div class="form-group">
 
@@ -33,6 +39,10 @@
 </div>
 
 
+{{-- =========================================================
+     STATUS
+========================================================= --}}
+
 <div class="form-group">
 
     <label for="status">
@@ -41,41 +51,72 @@
 
     <select
         name="status"
-        id="status">
+        id="status"
+        required>
 
         <option
             value="available"
-            @selected(old('status', $copy->status ?? 'available') === 'available')>
+            @selected(
+            old( 'status' ,
+            $copy->status ?? 'available'
+            ) === 'available'
+            )
+            >
             Tersedia
         </option>
 
         <option
             value="reserved"
-            @selected(old('status', $copy->status ?? '') === 'reserved')>
+            @selected(
+            old( 'status' ,
+            $copy->status ?? ''
+            ) === 'reserved'
+            )
+            >
             Direservasi
         </option>
 
         <option
             value="borrowed"
-            @selected(old('status', $copy->status ?? '') === 'borrowed')>
+            @selected(
+            old( 'status' ,
+            $copy->status ?? ''
+            ) === 'borrowed'
+            )
+            >
             Dipinjam
         </option>
 
         <option
             value="lost"
-            @selected(old('status', $copy->status ?? '') === 'lost')>
+            @selected(
+            old( 'status' ,
+            $copy->status ?? ''
+            ) === 'lost'
+            )
+            >
             Hilang
         </option>
 
         <option
             value="damaged"
-            @selected(old('status', $copy->status ?? '') === 'damaged')>
+            @selected(
+            old( 'status' ,
+            $copy->status ?? ''
+            ) === 'damaged'
+            )
+            >
             Rusak
         </option>
 
         <option
             value="maintenance"
-            @selected(old('status', $copy->status ?? '') === 'maintenance')>
+            @selected(
+            old( 'status' ,
+            $copy->status ?? ''
+            ) === 'maintenance'
+            )
+            >
             Maintenance
         </option>
 
@@ -84,10 +125,18 @@
 </div>
 
 
+{{-- =========================================================
+     LOKASI BUKU
+========================================================= --}}
+
 <h3>
     Lokasi Buku
 </h3>
 
+
+{{-- =========================================================
+     RAK
+========================================================= --}}
 
 <div class="form-group">
 
@@ -113,11 +162,13 @@
 
             <option
                 value="{{ $shelf->id }}"
+
                 @selected(
                 old( 'shelf_id' ,
                 $copy->shelf_id ?? ''
                 ) == $shelf->id
-                )>
+                )
+                >
 
                 {{ $zone->name }}
                 —
@@ -138,6 +189,94 @@
 </div>
 
 
+{{-- =========================================================
+     SECTION
+========================================================= --}}
+
+<div class="form-group">
+
+    <label for="section">
+        Section Rak
+    </label>
+
+    <select
+        name="section"
+        id="section"
+        required>
+
+        <option
+            value="1"
+            @selected(
+            old( 'section' ,
+            $copy->section ?? 1
+            ) == 1
+            )
+            >
+            Section 1 — A-01
+        </option>
+
+        <option
+            value="2"
+            @selected(
+            old( 'section' ,
+            $copy->section ?? 1
+            ) == 2
+            )
+            >
+            Section 2 — A-02
+        </option>
+
+    </select>
+
+</div>
+
+
+{{-- =========================================================
+     MUKA RAK
+========================================================= --}}
+
+<div class="form-group">
+
+    <label for="side">
+        Muka Rak
+    </label>
+
+    <select
+        name="side"
+        id="side"
+        required>
+
+        <option
+            value="front"
+            @selected(
+            old( 'side' ,
+            $copy->side ?? 'front'
+            ) === 'front'
+            )
+            >
+            Depan
+        </option>
+
+        <option
+            value="back"
+            @selected(
+            old( 'side' ,
+            $copy->side ?? 'front'
+            ) === 'back'
+            )
+            >
+            Belakang
+        </option>
+
+    </select>
+
+</div>
+
+
+{{-- =========================================================
+     BARIS
+========================================================= --}}
+
 <div class="form-group">
 
     <label for="row">
@@ -149,10 +288,16 @@
         id="row"
         name="row"
         min="1"
-        value="{{ old('row', $copy->row ?? '') }}">
+        max="3"
+        value="{{ old('row', $copy->row ?? '') }}"
+        placeholder="1 - 3">
 
 </div>
 
+
+{{-- =========================================================
+     KOLOM
+========================================================= --}}
 
 <div class="form-group">
 
@@ -165,6 +310,8 @@
         id="column"
         name="column"
         min="1"
-        value="{{ old('column', $copy->column ?? '') }}">
+        max="30"
+        value="{{ old('column', $copy->column ?? '') }}"
+        placeholder="1 - 30">
 
 </div>

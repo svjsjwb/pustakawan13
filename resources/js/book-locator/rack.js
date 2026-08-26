@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import { CONFIG } from './config.js';
+import {
+    createFurnitureSystem
+} from './furniture.js';
 
 export function buildRackSystem({ locatorGroup, shelves, bookCopies, targetCopyId }) {
     /*
@@ -439,11 +442,37 @@ export function buildRackSystem({ locatorGroup, shelves, bookCopies, targetCopyI
                 1
             ),
 
+            section: Number(
+                copy.section ??
+                1
+            ),
+
             side:
                 String(
                     copy.side ??
                     'front'
-                ).toLowerCase()
+                )
+                    .trim()
+                    .toLowerCase(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | DATA BUKU
+            |--------------------------------------------------------------------------
+            */
+
+            title:
+                copy.title ??
+                copy.book?.title ??
+                'Buku',
+
+            barcode:
+                copy.barcode ??
+                '-',
+
+            status:
+                copy.status ??
+                'available'
 
         };
 
@@ -909,6 +938,12 @@ export function buildRackSystem({ locatorGroup, shelves, bookCopies, targetCopyI
 
             type: 'book',
 
+            /*
+            |--------------------------------------------------------------------------
+            | IDENTITAS COPY
+            |--------------------------------------------------------------------------
+            */
+
             copyId:
                 isDummy
                     ? null
@@ -916,6 +951,12 @@ export function buildRackSystem({ locatorGroup, shelves, bookCopies, targetCopyI
 
             shelfId:
                 Number(copy.shelf_id),
+
+            /*
+            |--------------------------------------------------------------------------
+            | POSISI
+            |--------------------------------------------------------------------------
+            */
 
             row:
                 Number(copy.row),
@@ -925,7 +966,38 @@ export function buildRackSystem({ locatorGroup, shelves, bookCopies, targetCopyI
 
             physicalColumn,
 
+            /*
+            |--------------------------------------------------------------------------
+            | MUKA RAK
+            |--------------------------------------------------------------------------
+            */
+
             side,
+
+            /*
+            |--------------------------------------------------------------------------
+            | DATA BUKU
+            |--------------------------------------------------------------------------
+            */
+
+            title:
+                copy.title ??
+                copy.book?.title ??
+                'Buku',
+
+            barcode:
+                copy.barcode ??
+                '-',
+
+            status:
+                copy.status ??
+                'available',
+
+            /*
+            |--------------------------------------------------------------------------
+            | TARGET
+            |--------------------------------------------------------------------------
+            */
 
             target:
                 isTarget
@@ -1707,6 +1779,19 @@ export function buildRackSystem({ locatorGroup, shelves, bookCopies, targetCopyI
         locatorGroup.add(
             rackGroup
         );
+
+        /*
+|--------------------------------------------------------------------------
+| ADD MEJA + 8 KURSI
+|--------------------------------------------------------------------------
+*/
+
+        createFurnitureSystem({
+            locatorGroup,
+            rackGroup,
+            rackWidth: CONFIG.rackWidth,
+            rackDepth: CONFIG.rackDepth
+        });
 
         console.log(
             `Rak ${rackCode} berhasil dibuat`,

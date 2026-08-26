@@ -538,6 +538,82 @@
     font-size: 14px;
 }
 
+#locator3d {
+    position: relative;
+}
+
+.locator-crosshair {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%,
+            -50%);
+
+    z-index: 500;
+
+    color: white;
+
+    font-size: 24px;
+
+    font-weight: 400;
+
+    line-height: 1;
+
+    pointer-events: none;
+
+    text-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.8);
+
+    user-select: none;
+}
+
+/* =========================================================
+   FPS MODE - HIDE REAL MOUSE CURSOR
+========================================================= */
+
+#locator3d.fps-mode,
+#locator3d.fps-mode *,
+#locator3d.fps-mode canvas {
+    cursor: none !important;
+}
+
+.locator-modal-hint {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+}
+
+.locator-3d.modal-active,
+.locator-3d.modal-active canvas {
+    cursor: default !important;
+}
+
+.locator-modal-close {
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.locator-modal-close:hover {
+    background-color: #dedede;
+    color: #1f2937;
+    transform: scale(1.08);
+}
+
+.locator-modal-close:active {
+    transform: scale(0.96);
+}
+
+.locator-modal-close {
+    cursor: pointer;
+}
 
 /* =========================================================
    RESPONSIVE

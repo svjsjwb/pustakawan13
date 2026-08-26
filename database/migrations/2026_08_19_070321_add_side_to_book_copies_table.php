@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('side')
                 ->default('front')
                 ->after('column');
-
         });
     }
 
@@ -22,7 +21,6 @@ return new class extends Migration
         Schema::table('book_copies', function (Blueprint $table) {
 
             $table->dropColumn('side');
-
         });
     }
 };

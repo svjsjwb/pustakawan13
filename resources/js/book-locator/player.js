@@ -8,6 +8,7 @@ const DEFAULT_PLAYER = {
     gravity: 42.0
 };
 
+
 export function createPlayer({
     camera,
     renderer,
@@ -16,14 +17,23 @@ export function createPlayer({
     orbitControls,
     collision
 }) {
+
     const player = {
+
         ...DEFAULT_PLAYER,
 
         enabled: false,
+
+        modalPaused: false,
+
+        sitting: false,
+
+        sittingChair: null,
+
         velocityY: 0,
+
         grounded: true,
 
-        // Posisi kaki player. Kamera berada di +height.
         position: {
             x: camera.position.x,
             y: 0,
@@ -36,31 +46,105 @@ export function createPlayer({
             left: false,
             right: false
         }
+
     };
 
-    function setKey(code, value) {
-        if (code === 'KeyW' || code === 'ArrowUp') {
-            player.keys.forward = value;
-        }
 
-        if (code === 'KeyS' || code === 'ArrowDown') {
-            player.keys.backward = value;
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | GLOBAL REFERENCE
+    |--------------------------------------------------------------------------
+    */
 
-        if (code === 'KeyA' || code === 'ArrowLeft') {
-            player.keys.left = value;
-        }
+    window.bookLocatorPlayer =
+        player;
 
-        if (code === 'KeyD' || code === 'ArrowRight') {
-            player.keys.right = value;
-        }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESET MOVEMENT
+    |--------------------------------------------------------------------------
+    */
+
+    function resetKeys() {
+
+        player.keys.forward = false;
+        player.keys.backward = false;
+        player.keys.left = false;
+        player.keys.right = false;
+
     }
 
-    function onKeyDown(event) {
-        setKey(event.code, true);
+
+    /*
+    |--------------------------------------------------------------------------
+    | KEYBOARD
+    |--------------------------------------------------------------------------
+    */
+
+    function setKey(code, value) {
 
         if (
-            player.enabled &&
+            code === 'KeyW' ||
+            code === 'ArrowUp'
+        ) {
+
+            player.keys.forward = value;
+
+        }
+
+
+        if (
+            code === 'KeyS' ||
+            code === 'ArrowDown'
+        ) {
+
+            player.keys.backward = value;
+
+        }
+
+
+        if (
+            code === 'KeyA' ||
+            code === 'ArrowLeft'
+        ) {
+
+            player.keys.left = value;
+
+        }
+
+
+        if (
+            code === 'KeyD' ||
+            code === 'ArrowRight'
+        ) {
+
+            player.keys.right = value;
+
+        }
+
+    }
+
+
+    function onKeyDown(event) {
+
+        if (
+            !player.enabled ||
+            player.modalPaused
+        ) {
+
+            return;
+
+        }
+
+
+        setKey(
+            event.code,
+            true
+        );
+
+
+        if (
             [
                 'KeyW',
                 'KeyA',
@@ -72,250 +156,767 @@ export function createPlayer({
                 'ArrowRight'
             ].includes(event.code)
         ) {
+
             event.preventDefault();
+
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | JUMP
+        |--------------------------------------------------------------------------
+        */
 
         if (
             event.code === 'Space' &&
-            player.enabled &&
             player.grounded
         ) {
 
             player.velocityY =
                 player.jumpPower;
 
-            player.grounded = false;
+            player.grounded =
+                false;
 
             event.preventDefault();
+
         }
+
     }
+
 
     function onKeyUp(event) {
-        setKey(event.code, false);
+
+        setKey(
+            event.code,
+            false
+        );
+
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | ENTER FPS
+    |--------------------------------------------------------------------------
+    */
+
     function enterWalkMode() {
+
         if (player.enabled) {
             return;
         }
 
-        // Simpan posisi horizontal orbital saat masuk FPS.
-        player.position.x = camera.position.x;
-        player.position.z = camera.position.z;
 
-        // Untuk tahap 1, player berdiri di lantai.
-        player.position.y = 0;
+        player.modalPaused =
+            false;
+
+
+        player.position.x =
+            camera.position.x;
+
+        player.position.z =
+            camera.position.z;
+
+        player.position.y =
+            0;
+
 
         camera.position.set(
+
             player.position.x,
-            player.position.y + player.height,
+
+            player.position.y +
+            player.height,
+
             player.position.z
+
         );
 
-        orbitControls.enabled = false;
-        fpsControls.enabled = true;
-        player.enabled = true;
 
-        fpsControls.lock();
+        orbitControls.enabled =
+            false;
+
+
+        player.enabled =
+            true;
+
+
+        container.classList.add(
+            'fps-mode'
+        );
+
+
+        container.style.cursor =
+            'none';
+
+
+        if (fpsControls) {
+
+            fpsControls.enabled =
+                true;
+
+            fpsControls.lock();
+
+        }
+
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXIT FPS
+    |--------------------------------------------------------------------------
+    */
+
     function exitWalkMode() {
+
+        if (
+            !player.enabled &&
+            !player.modalPaused
+        ) {
+
+            return;
+
+        }
+
+
+        player.modalPaused =
+            false;
+
+        player.enabled =
+            false;
+
+
+        resetKeys();
+
+
+        if (fpsControls) {
+
+            fpsControls.unlock();
+
+            fpsControls.enabled =
+                false;
+
+        }
+
+
+        orbitControls.enabled =
+            true;
+
+
+        orbitControls.target.set(
+
+            camera.position.x,
+
+            camera.position.y - 2,
+
+            camera.position.z
+
+        );
+
+
+        orbitControls.update();
+
+
+        container.classList.remove(
+            'fps-mode'
+        );
+
+
+        container.style.cursor =
+            'default';
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PAUSE FPS UNTUK MODAL
+    |--------------------------------------------------------------------------
+    */
+
+    function pauseForModal() {
+
         if (!player.enabled) {
             return;
         }
 
-        fpsControls.unlock();
+        player.modalPaused = true;
 
-        player.enabled = false;
-        fpsControls.enabled = false;
+        resetKeys();
 
-        // Kembalikan OrbitControls pada posisi kamera terakhir.
-        orbitControls.enabled = true;
-        orbitControls.target.set(
-            camera.position.x,
-            camera.position.y - 2,
-            camera.position.z
+        /*
+        |--------------------------------------------------------------------------
+        | LEPAS POINTER LOCK
+        |--------------------------------------------------------------------------
+        */
+
+        if (fpsControls) {
+
+            fpsControls.enabled = false;
+
+            fpsControls.unlock();
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | MATIKAN STATE FPS VISUAL
+        |--------------------------------------------------------------------------
+        |
+        | Penting supaya CSS cursor:none
+        | dari .fps-mode tidak tetap aktif.
+        |
+        */
+
+        container.classList.remove(
+            'fps-mode'
         );
-        orbitControls.update();
+
+        container.classList.add(
+            'modal-active'
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | TAMPILKAN CURSOR
+        |--------------------------------------------------------------------------
+        */
+
+        container.style.cursor =
+            'default';
+
+        renderer.domElement.style.cursor =
+            'default';
+
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESUME FPS SETELAH MODAL
+    |--------------------------------------------------------------------------
+    */
+
+    function resumeAfterModal() {
+
+        if (!player.modalPaused) {
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | KALAU FULLSCREEN SUDAH KELUAR
+        |--------------------------------------------------------------------------
+        */
+
+        if (!document.fullscreenElement) {
+
+            player.modalPaused = false;
+            player.enabled = false;
+
+            resetKeys();
+
+            container.classList.remove(
+                'modal-active'
+            );
+
+            container.classList.remove(
+                'fps-mode'
+            );
+
+            container.style.cursor =
+                'default';
+
+            renderer.domElement.style.cursor =
+                'default';
+
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | KEMBALI FPS
+        |--------------------------------------------------------------------------
+        */
+
+        player.modalPaused = false;
+        player.enabled = true;
+
+        orbitControls.enabled = false;
+
+        container.classList.remove(
+            'modal-active'
+        );
+
+        container.classList.add(
+            'fps-mode'
+        );
+
+        container.style.cursor =
+            'none';
+
+        renderer.domElement.style.cursor =
+            'none';
+
+        if (fpsControls) {
+
+            fpsControls.enabled =
+                true;
+
+            fpsControls.lock();
+
+        }
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | POINTER LOCK CHANGE
+    |--------------------------------------------------------------------------
+    */
 
     function onPointerLockChange() {
-        if (!document.pointerLockElement) {
-            player.enabled = false;
-            fpsControls.enabled = false;
-            orbitControls.enabled = true;
-            orbitControls.update();
+
+        /*
+        |--------------------------------------------------------------------------
+        | MODAL SEDANG TERBUKA
+        |--------------------------------------------------------------------------
+        |
+        | unlock() dari pauseForModal()
+        | jangan dianggap sebagai exit FPS.
+        |
+        */
+
+        if (
+            player.modalPaused
+        ) {
+
+            container.style.cursor =
+                'default';
+
+            return;
+
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | POINTER LOCK AKTIF
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            document.pointerLockElement ===
+            renderer.domElement
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | POINTER LOCK LEPAS NORMAL
+        |--------------------------------------------------------------------------
+        |
+        | Misalnya user tekan ESC.
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            player.enabled
+        ) {
+
+            player.enabled =
+                false;
+
+
+            resetKeys();
+
+
+            if (fpsControls) {
+
+                fpsControls.enabled =
+                    false;
+
+            }
+
+
+            orbitControls.enabled =
+                true;
+
+
+            container.classList.remove(
+                'fps-mode'
+            );
+
+
+            container.style.cursor =
+                'default';
+
+
+            orbitControls.target.set(
+
+                camera.position.x,
+
+                camera.position.y - 2,
+
+                camera.position.z
+
+            );
+
+
+            orbitControls.update();
+
+        }
+
     }
 
-    // Klik area 3D = masuk mode jalan.
-    container.addEventListener('click', () => {
-        if (!player.enabled) {
-            enterWalkMode();
-        }
-    });
 
-    fpsControls.addEventListener(
-        'unlock',
-        () => {
-            player.enabled = false;
-            fpsControls.enabled = false;
-            orbitControls.enabled = true;
-            orbitControls.update();
-        }
-    );
+    /*
+    |--------------------------------------------------------------------------
+    | FPS UNLOCK EVENT
+    |--------------------------------------------------------------------------
+    */
 
-    document.addEventListener(
-        'keydown',
-        onKeyDown
-    );
+    if (fpsControls) {
 
-    document.addEventListener(
-        'keyup',
-        onKeyUp
-    );
+        fpsControls.addEventListener(
+            'unlock',
+            () => {
+
+                /*
+                |--------------------------------------------------------------------------
+                | JANGAN MATIKAN FPS SAAT MODAL
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    player.modalPaused
+                ) {
+
+                    return;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | NORMAL UNLOCK
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    !player.enabled
+                ) {
+
+                    return;
+
+                }
+
+
+                player.enabled =
+                    false;
+
+
+                resetKeys();
+
+
+                fpsControls.enabled =
+                    false;
+
+
+                orbitControls.enabled =
+                    true;
+
+
+                container.classList.remove(
+                    'fps-mode'
+                );
+
+
+                container.style.cursor =
+                    'default';
+
+
+                orbitControls.target.set(
+
+                    camera.position.x,
+
+                    camera.position.y - 2,
+
+                    camera.position.z
+
+                );
+
+
+                orbitControls.update();
+
+            }
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EVENTS
+    |--------------------------------------------------------------------------
+    */
 
     document.addEventListener(
         'pointerlockchange',
         onPointerLockChange
     );
 
-    function update(delta) {
+
+    document.addEventListener(
+        'keydown',
+        onKeyDown
+    );
+
+
+    document.addEventListener(
+        'keyup',
+        onKeyUp
+    );
+
+
+    /*duduk*/
+    function sitOnChair(chair) {
+
         if (!player.enabled) {
-            return;
+            return false;
         }
 
-        // ================================
-        // GRAVITASI & JUMP
-        // ================================
+        if (!chair) {
+            return false;
+        }
 
-        player.velocityY -=
-            player.gravity * delta;
+        if (player.sitting) {
+            return false;
+        }
 
-        player.position.y +=
-            player.velocityY * delta;
-
-
-        // ================================
-        // BATAS LANTAI
-        // ================================
-
-        if (player.position.y <= 0) {
-
-            player.position.y = 0;
-
-            player.velocityY = 0;
-
-            player.grounded = true;
+        if (
+            chair.userData?.interactionType !== 'sit'
+        ) {
+            return false;
         }
 
 
-        // ================================
-        // UPDATE POSISI KAMERA
-        // ================================
+        const chairPosition =
+            new THREE.Vector3();
+
+        chair.getWorldPosition(
+            chairPosition
+        );
+
+
+        const seatHeight =
+            Number(
+                chair.userData?.seatHeight ?? 1.25
+            );
+
+
+        player.position.x =
+            chairPosition.x;
+
+        player.position.z =
+            chairPosition.z;
+
+        player.position.y =
+            0;
+
+
+        player.velocityY =
+            0;
+
+        player.grounded =
+            true;
+
+
+        /*
+        |----------------------------------------------------------------------
+        | KAMERA DITURUNKAN KE POSISI DUDUK
+        |----------------------------------------------------------------------
+        */
+
+        camera.position.x =
+            chairPosition.x;
 
         camera.position.y =
-            player.position.y +
-            player.height;
+            seatHeight + 2.65;
 
-        let moveX = 0;
-        let moveZ = 0;
+        camera.position.z =
+            chairPosition.z;
 
-        if (player.keys.forward) {
-            moveZ += 1;
+
+        /*
+        |----------------------------------------------------------------------
+        | HADAP MENGIKUTI ARAH KURSI
+        |----------------------------------------------------------------------
+        */
+
+        const forward =
+            new THREE.Vector3(
+                0,
+                0,
+                1
+            );
+
+        const quaternion =
+            new THREE.Quaternion();
+
+
+        chair.getWorldQuaternion(
+            quaternion
+        );
+
+
+        forward.applyQuaternion(
+            quaternion
+        );
+
+        forward.y = 0;
+
+
+        if (
+            forward.lengthSq() > 0
+        ) {
+
+            forward.normalize();
+
+
+            const lookTarget =
+                camera.position.clone();
+
+            lookTarget.add(
+                forward
+            );
+
+            camera.lookAt(
+                lookTarget
+            );
+
         }
 
-        if (player.keys.backward) {
-            moveZ -= 1;
+
+        /*
+        |----------------------------------------------------------------------
+        | STATE
+        |----------------------------------------------------------------------
+        */
+
+        player.sitting =
+            true;
+
+        player.sittingChair =
+            chair;
+
+
+        /*
+        |----------------------------------------------------------------------
+        | RESET WASD
+        |----------------------------------------------------------------------
+        */
+
+        player.keys.forward = false;
+        player.keys.backward = false;
+        player.keys.left = false;
+        player.keys.right = false;
+
+
+        return true;
+    }
+
+
+    function standFromChair() {
+
+        if (!player.sitting) {
+            return false;
         }
 
-        if (player.keys.left) {
-            moveX -= 1;
-        }
 
-        if (player.keys.right) {
-            moveX += 1;
-        }
+        const chair =
+            player.sittingChair;
 
-        const length =
-            Math.hypot(moveX, moveZ);
 
-        if (length > 0) {
+        if (chair) {
 
-            moveX /= length;
-            moveZ /= length;
+            const chairPosition =
+                new THREE.Vector3();
 
-            const speed =
-                player.speed * delta;
+            chair.getWorldPosition(
+                chairPosition
+            );
 
-            // ============================================
-            // ARAH KAMERA
-            // ============================================
 
-            const direction =
-                fpsControls.getDirection(
-                    _direction
+            const forward =
+                new THREE.Vector3(
+                    0,
+                    0,
+                    1
                 );
 
-            direction.y = 0;
-            direction.normalize();
-
-            const forwardX =
-                direction.x;
-
-            const forwardZ =
-                direction.z;
-
-            const forwardLength =
-                Math.hypot(
-                    forwardX,
-                    forwardZ
-                ) || 1;
-
-            const fx =
-                forwardX / forwardLength;
-
-            const fz =
-                forwardZ / forwardLength;
-
-            const rx = -fz;
-            const rz = fx;
+            const quaternion =
+                new THREE.Quaternion();
 
 
-            // ============================================
-            // HITUNG POSISI BERIKUTNYA
-            // ============================================
+            chair.getWorldQuaternion(
+                quaternion
+            );
+
+
+            forward.applyQuaternion(
+                quaternion
+            );
+
+            forward.y = 0;
+
+
+            if (
+                forward.lengthSq() > 0
+            ) {
+
+                forward.normalize();
+
+            }
+
+
+            const standDistance =
+                1.8;
+
 
             const nextX =
-                player.position.x +
-                (fx * moveZ + rx * moveX) *
-                speed;
+                chairPosition.x -
+                forward.x *
+                standDistance;
 
             const nextZ =
-                player.position.z +
-                (fz * moveZ + rz * moveX) *
-                speed;
+                chairPosition.z -
+                forward.z *
+                standDistance;
 
-
-            // ============================================
-            // CEK COLLISION
-            // ============================================
 
             const blocked =
                 collision.check(
+
                     {
                         x: nextX,
-                        y: player.position.y,
+                        y: 0,
                         z: nextZ
                     },
+
                     player.radius,
                     player.height
+
                 );
 
-
-            // ============================================
-            // BOLEH BERGERAK JIKA TIDAK MENABRAK
-            // ============================================
 
             if (!blocked) {
 
@@ -325,21 +926,443 @@ export function createPlayer({
                 player.position.z =
                     nextZ;
 
-                camera.position.x =
-                    nextX;
-
-                camera.position.z =
-                    nextZ;
             }
+
         }
+
+
+        player.position.y =
+            0;
+
+        player.velocityY =
+            0;
+
+        player.grounded =
+            true;
+
+
+        camera.position.x =
+            player.position.x;
+
+        camera.position.y =
+            player.height;
+
+        camera.position.z =
+            player.position.z;
+
+
+        player.sitting =
+            false;
+
+        player.sittingChair =
+            null;
+
+
+        return true;
     }
 
-    return {
-        ...player,
-        enterWalkMode,
-        exitWalkMode,
-        update
-    };
-}
 
-const _direction = new THREE.Vector3();
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
+
+    function update(delta) {
+
+        if (
+            !player.enabled ||
+            player.modalPaused ||
+            player.sitting
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GRAVITY
+        |--------------------------------------------------------------------------
+        */
+
+        player.velocityY -=
+            player.gravity *
+            delta;
+
+
+        player.position.y +=
+            player.velocityY *
+            delta;
+
+
+        // ================================
+        // COLLISION PERMUKAAN / LANTAI
+        // ================================
+
+        const surfaceY =
+            collision.getSurfaceY(
+                player.position,
+                player.radius,
+                player.position.y
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | lantai normal
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            player.position.y <= 0
+        ) {
+
+            player.position.y =
+                0;
+
+            player.velocityY =
+                0;
+
+            player.grounded =
+                true;
+
+        }
+
+        /*
+|--------------------------------------------------------------------------
+| MENDARAT DI ATAS OBJECT
+|--------------------------------------------------------------------------
+*/
+
+        else if (
+            player.velocityY <= 0 &&
+            surfaceY > 0 &&
+            player.position.y <=
+            surfaceY + 0.35
+        ) {
+
+            player.position.y =
+                surfaceY;
+
+            player.velocityY =
+                0;
+
+            player.grounded =
+                true;
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CAMERA HEIGHT
+        |--------------------------------------------------------------------------
+        */
+
+        camera.position.y =
+            player.position.y +
+            player.height;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MOVEMENT
+        |--------------------------------------------------------------------------
+        */
+
+        let moveX = 0;
+
+        let moveZ = 0;
+
+
+        if (player.keys.forward) {
+            moveZ += 1;
+        }
+
+
+        if (player.keys.backward) {
+            moveZ -= 1;
+        }
+
+
+        if (player.keys.left) {
+            moveX -= 1;
+        }
+
+
+        if (player.keys.right) {
+            moveX += 1;
+        }
+
+
+        const length =
+            Math.hypot(
+                moveX,
+                moveZ
+            );
+
+
+        if (length <= 0) {
+            return;
+        }
+
+
+        moveX /=
+            length;
+
+        moveZ /=
+            length;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CAMERA DIRECTION
+        |--------------------------------------------------------------------------
+        */
+
+        const direction =
+            new THREE.Vector3();
+
+
+        camera.getWorldDirection(
+            direction
+        );
+
+
+        direction.y =
+            0;
+
+
+        if (
+            direction.lengthSq() === 0
+        ) {
+
+            return;
+
+        }
+
+
+        direction.normalize();
+
+
+        const forwardX =
+            direction.x;
+
+        const forwardZ =
+            direction.z;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RIGHT VECTOR
+        |--------------------------------------------------------------------------
+        */
+
+        const rightX =
+            -forwardZ;
+
+        const rightZ =
+            forwardX;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | NEXT POSITION
+        |--------------------------------------------------------------------------
+        */
+
+        const speed =
+            player.speed *
+            delta;
+
+
+        const nextX =
+            player.position.x +
+            (
+                forwardX * moveZ +
+                rightX * moveX
+            ) *
+            speed;
+
+
+        const nextZ =
+            player.position.z +
+            (
+                forwardZ * moveZ +
+                rightZ * moveX
+            ) *
+            speed;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLLISION
+        |--------------------------------------------------------------------------
+        */
+
+        /*
+|--------------------------------------------------------------------------
+| COLLISION SLIDING
+|--------------------------------------------------------------------------
+|
+| Jangan cek X + Z sekaligus.
+| Cek masing-masing sumbu secara terpisah.
+|
+| Kalau X terhalang tetapi Z tidak:
+|   → tetap bergerak di Z
+|
+| Kalau Z terhalang tetapi X tidak:
+|   → tetap bergerak di X
+|
+| Hasilnya player terasa "meluncur"
+| sepanjang permukaan rak.
+|
+*/
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK GERAK X
+        |--------------------------------------------------------------------------
+        */
+
+        const blockedX =
+            collision.check(
+                {
+                    x: nextX,
+                    y: player.position.y,
+                    z: player.position.z
+                },
+                player.radius,
+                player.height
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK GERAK Z
+        |--------------------------------------------------------------------------
+        */
+
+        const blockedZ =
+            collision.check(
+                {
+                    x: player.position.x,
+                    y: player.position.y,
+                    z: nextZ
+                },
+                player.radius,
+                player.height
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GERAK X
+        |--------------------------------------------------------------------------
+        */
+
+        if (!blockedX) {
+
+            player.position.x =
+                nextX;
+
+            camera.position.x =
+                nextX;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GERAK Z
+        |--------------------------------------------------------------------------
+        */
+
+        if (!blockedZ) {
+
+            player.position.z =
+                nextZ;
+
+            camera.position.z =
+                nextZ;
+
+        }
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CLEANUP
+    |--------------------------------------------------------------------------
+    */
+
+    function destroy() {
+
+        document.removeEventListener(
+            'keydown',
+            onKeyDown
+        );
+
+
+        document.removeEventListener(
+            'keyup',
+            onKeyUp
+        );
+
+
+        document.removeEventListener(
+            'pointerlockchange',
+            onPointerLockChange
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RETURN API
+    |--------------------------------------------------------------------------
+    */
+
+    return {
+
+        get enabled() {
+
+            return player.enabled;
+
+        },
+
+        get sitting() {
+
+            return player.sitting;
+
+        },
+
+        get sittingChair() {
+
+            return player.sittingChair;
+
+        },
+
+        enterWalkMode,
+
+        exitWalkMode,
+
+        sitOnChair,
+
+        standFromChair,
+
+        pauseForModal,
+
+        resumeAfterModal,
+
+        update,
+
+        destroy
+
+    };
+
+}

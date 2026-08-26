@@ -26,6 +26,7 @@ class BookCopyController extends Controller
         ));
     }
 
+
     /**
      * Form tambah eksemplar.
      */
@@ -33,7 +34,9 @@ class BookCopyController extends Controller
     {
         $floors = LibraryFloor::with(
             'zones.shelves'
-        )->orderBy('floor_number')->get();
+        )
+            ->orderBy('floor_number')
+            ->get();
 
         return view('book_copies.create', compact(
             'book',
@@ -41,12 +44,22 @@ class BookCopyController extends Controller
         ));
     }
 
+
     /**
      * Simpan eksemplar baru.
      */
-    public function store(Request $request, Book $book)
-    {
+    public function store(
+        Request $request,
+        Book $book
+    ) {
         $validated = $request->validate([
+
+            /*
+            |--------------------------------------------------------------------------
+            | BARCODE
+            |--------------------------------------------------------------------------
+            */
+
             'barcode' => [
                 'nullable',
                 'string',
@@ -54,8 +67,16 @@ class BookCopyController extends Controller
                 'unique:book_copies,barcode',
             ],
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS
+            |--------------------------------------------------------------------------
+            */
+
             'status' => [
                 'required',
+
                 Rule::in([
                     'available',
                     'reserved',
@@ -66,10 +87,30 @@ class BookCopyController extends Controller
                 ]),
             ],
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | SHELF
+            |--------------------------------------------------------------------------
+            */
+
             'shelf_id' => [
                 'nullable',
                 'exists:shelves,id',
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SECTION
+            |--------------------------------------------------------------------------
+            |
+            | 1 = A-01
+            | 2 = A-02
+            |
+            | Tetap menggunakan sistem section lama.
+            |--------------------------------------------------------------------------
+            */
 
             'section' => [
                 'required',
@@ -77,49 +118,198 @@ class BookCopyController extends Controller
                 'in:1,2',
             ],
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | SIDE / MUKA RAK
+            |--------------------------------------------------------------------------
+            */
+
+            'side' => [
+                'required',
+                Rule::in([
+                    'front',
+                    'back',
+                ]),
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ROW
+            |--------------------------------------------------------------------------
+            |
+            | 3 baris:
+            |
+            | 1 = atas
+            | 2 = tengah
+            | 3 = bawah
+            |--------------------------------------------------------------------------
+            */
+
             'row' => [
                 'nullable',
                 'integer',
                 'min:1',
+                'max:3',
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | COLUMN
+            |--------------------------------------------------------------------------
+            |
+            | Setiap section:
+            |
+            | 30 kolom.
+            |--------------------------------------------------------------------------
+            */
 
             'column' => [
                 'nullable',
                 'integer',
                 'min:1',
+                'max:30',
             ],
+
         ]);
 
-        $book->copies()->create($validated);
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK POSISI
+        |--------------------------------------------------------------------------
+        |
+        | Satu posisi fisik tidak boleh ditempati
+        | oleh dua BookCopy.
+        |
+        | Identitas posisi:
+        |
+        | shelf_id
+        | section
+        | side
+        | row
+        | column
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !empty($validated['shelf_id']) &&
+            !empty($validated['row']) &&
+            !empty($validated['column'])
+        ) {
+
+            $positionExists =
+                BookCopy::query()
+                ->where(
+                    'shelf_id',
+                    $validated['shelf_id']
+                )
+                ->where(
+                    'section',
+                    $validated['section']
+                )
+                ->where(
+                    'side',
+                    $validated['side']
+                )
+                ->where(
+                    'row',
+                    $validated['row']
+                )
+                ->where(
+                    'column',
+                    $validated['column']
+                )
+                ->exists();
+
+
+            if (
+                $positionExists
+            ) {
+
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'column' =>
+                        'Posisi rak tersebut sudah ditempati buku lain.',
+                    ]);
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN
+        |--------------------------------------------------------------------------
+        */
+
+        $book->copies()->create(
+            $validated
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
-            ->route('books.copies.index', $book)
+            ->route(
+                'books.copies.index',
+                $book
+            )
             ->with(
                 'success',
                 'Eksemplar buku berhasil ditambahkan.'
             );
     }
 
+
     /**
      * Form edit lokasi/status eksemplar.
      */
-    public function edit(Book $book, BookCopy $copy)
-    {
+    public function edit(
+        Book $book,
+        BookCopy $copy
+    ) {
+        /*
+        |--------------------------------------------------------------------------
+        | PASTIKAN COPY MILIK BUKU
+        |--------------------------------------------------------------------------
+        */
+
         abort_unless(
             $copy->book_id === $book->id,
             404
         );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA LANTAI / ZONA / RAK
+        |--------------------------------------------------------------------------
+        */
+
         $floors = LibraryFloor::with(
             'zones.shelves'
-        )->orderBy('floor_number')->get();
+        )
+            ->orderBy('floor_number')
+            ->get();
 
-        return view('book_copies.edit', compact(
-            'book',
-            'copy',
-            'floors'
-        ));
+
+        return view(
+            'book_copies.edit',
+            compact(
+                'book',
+                'copy',
+                'floors'
+            )
+        );
     }
+
 
     /**
      * Update eksemplar.
@@ -129,22 +319,55 @@ class BookCopyController extends Controller
         Book $book,
         BookCopy $copy
     ) {
+        /*
+        |--------------------------------------------------------------------------
+        | PASTIKAN COPY MILIK BUKU
+        |--------------------------------------------------------------------------
+        */
+
         abort_unless(
             $copy->book_id === $book->id,
             404
         );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI
+        |--------------------------------------------------------------------------
+        */
+
         $validated = $request->validate([
+
+            /*
+            |--------------------------------------------------------------------------
+            | BARCODE
+            |--------------------------------------------------------------------------
+            */
+
             'barcode' => [
                 'nullable',
                 'string',
                 'max:100',
-                Rule::unique('book_copies', 'barcode')
-                    ->ignore($copy->id),
+
+                Rule::unique(
+                    'book_copies',
+                    'barcode'
+                )->ignore(
+                    $copy->id
+                ),
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS
+            |--------------------------------------------------------------------------
+            */
 
             'status' => [
                 'required',
+
                 Rule::in([
                     'available',
                     'reserved',
@@ -155,28 +378,165 @@ class BookCopyController extends Controller
                 ]),
             ],
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | SHELF
+            |--------------------------------------------------------------------------
+            */
+
             'shelf_id' => [
                 'nullable',
                 'exists:shelves,id',
             ],
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | SECTION
+            |--------------------------------------------------------------------------
+            */
+
+            'section' => [
+                'required',
+                'integer',
+                'in:1,2',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SIDE
+            |--------------------------------------------------------------------------
+            */
+
+            'side' => [
+                'required',
+                Rule::in([
+                    'front',
+                    'back',
+                ]),
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ROW
+            |--------------------------------------------------------------------------
+            */
+
             'row' => [
                 'nullable',
                 'integer',
                 'min:1',
+                'max:3',
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | COLUMN
+            |--------------------------------------------------------------------------
+            */
 
             'column' => [
                 'nullable',
                 'integer',
                 'min:1',
+                'max:30',
             ],
+
         ]);
 
-        $copy->update($validated);
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK DUPLIKASI POSISI
+        |--------------------------------------------------------------------------
+        |
+        | Copy yang sedang diedit dikecualikan.
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !empty($validated['shelf_id']) &&
+            !empty($validated['row']) &&
+            !empty($validated['column'])
+        ) {
+
+            $positionExists =
+                BookCopy::query()
+
+                ->where(
+                    'shelf_id',
+                    $validated['shelf_id']
+                )
+
+                ->where(
+                    'section',
+                    $validated['section']
+                )
+
+                ->where(
+                    'side',
+                    $validated['side']
+                )
+
+                ->where(
+                    'row',
+                    $validated['row']
+                )
+
+                ->where(
+                    'column',
+                    $validated['column']
+                )
+
+                ->where(
+                    'id',
+                    '!=',
+                    $copy->id
+                )
+
+                ->exists();
+
+
+            if (
+                $positionExists
+            ) {
+
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'column' =>
+                        'Posisi rak tersebut sudah ditempati buku lain.',
+                    ]);
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE
+        |--------------------------------------------------------------------------
+        */
+
+        $copy->update(
+            $validated
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
-            ->route('books.copies.index', $book)
+            ->route(
+                'books.copies.index',
+                $book
+            )
             ->with(
                 'success',
                 'Eksemplar buku berhasil diperbarui.'
