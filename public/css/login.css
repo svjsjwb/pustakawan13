@@ -46,9 +46,12 @@ body {
 
 .login-logo {
     width: 100px;
-    margin-right: 35px;
+    margin-right: 220px;
     margin-bottom: 55px;
 }
+
+
+
 
 /* CARD */
 
@@ -64,13 +67,14 @@ body {
 
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
 
-    margin-right: 5px;
+    margin-right: 120px;
 }
 
 .login-card h1 {
-    font-size: 15px;
-    color: #23406b;
+    font-size: 20px;
+    color: #287879;
     margin-bottom: 5px;
+    font-weight: 700;
 }
 
 .login-card>p {
@@ -85,9 +89,9 @@ body {
 
 .form-group label {
     display: block;
-
-    font-size: 9px;
-    color: #34405b;
+    font-weight: 500;
+    font-size: 12px;
+    color: #287879;
 
     margin-bottom: 8px;
 }
@@ -102,7 +106,7 @@ body {
 
     padding: 0 10px;
 
-    font-size: 8px;
+    font-size: 10px;
 
     outline: none;
 }
@@ -118,7 +122,7 @@ body {
 }
 
 .forgot a {
-    font-size: 8px;
+    font-size: 10px;
     color: #e3ad47;
     text-decoration: underline;
 }
@@ -133,7 +137,7 @@ body {
     background: #286f70;
     color: white;
 
-    font-size: 9px;
+    font-size: 12px;
     font-weight: bold;
 
     cursor: pointer;

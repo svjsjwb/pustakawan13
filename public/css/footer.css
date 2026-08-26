@@ -33,7 +33,6 @@
 .footer-brand {
     display: flex;
     align-items: center;
-
     gap: 8px;
 }
 
@@ -55,14 +54,15 @@
 
 
 .footer-brand strong {
-    font-size: 9px;
+    font-size: 15px;
+    margin-left: 10px;
 }
 
 
 .footer-brand span {
     margin-top: 2px;
-
-    font-size: 10px;
+    margin-left: 8px;
+    font-size: 15px;
     font-weight: 700;
 }
 
@@ -82,12 +82,12 @@
 .footer-column strong {
     margin-bottom: 2px;
 
-    font-size: 9px;
+    font-size: 13px;
 }
 
 
 .footer-column span {
-    font-size: 7px;
+    font-size: 10px;
 
     color: rgba(255, 255, 255, 0.9);
 }

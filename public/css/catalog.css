@@ -201,17 +201,20 @@
    BOOK dummy di dalam cover
    Dibuat menyerupai cover buku pada referensi
 */
-
 .book-cover::before {
+
     content: "TIGA\A SERANGKAI";
 
     white-space: pre;
 
     width: 82px;
+
     height: 112px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     text-align: center;
@@ -227,6 +230,7 @@
     border-radius: 5px;
 
     font-size: 9px;
+
     font-weight: 800;
 
     line-height: 1.25;
@@ -241,57 +245,119 @@
         box-shadow 0.3s ease;
 
     position: relative;
+
     z-index: 1;
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| COVER DENGAN GAMBAR
+|--------------------------------------------------------------------------
+*/
+
+.book-cover.has-image::before,
+.book-cover.has-image::after {
+
+    display: none;
+
+}
+
+
+.book-cover-img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+
+    transition:
+        transform 0.3s ease;
+
+}
+
+
+.book-card:hover .book-cover-img {
+
+    transform:
+        scale(1.05);
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| HOVER COVER
+|--------------------------------------------------------------------------
+*/
+
 .book-card:hover .book-cover::before {
-    transform: rotate(0deg) scale(1.05);
+
+    transform:
+        rotate(0deg) scale(1.05);
 
     box-shadow:
         -5px 8px 18px rgba(0, 0, 0, 0.25);
+
 }
+
 
 /* =========================
    BOOK INFORMATION
 ========================= */
 
 .book-info {
+
     min-height: 105px;
 
     padding: 13px 14px;
 
     background: #e6f0ef;
 
-    border-top: 1px solid rgba(40, 124, 124, 0.10);
+    border-top:
+        1px solid rgba(40, 124, 124, 0.10);
 
     display: flex;
+
     flex-direction: column;
 
     gap: 5px;
 
     box-sizing: border-box;
+
 }
 
+
 .book-info strong {
+
     display: -webkit-box;
 
     -webkit-line-clamp: 1;
+
     -webkit-box-orient: vertical;
 
     overflow: hidden;
 
     font-size: 13px;
+
     font-weight: 700;
 
     line-height: 1.3;
 
     color: #12403e;
+
 }
 
+
 .book-info>span {
+
     display: -webkit-box;
 
     -webkit-line-clamp: 1;
+
     -webkit-box-orient: vertical;
 
     overflow: hidden;
@@ -301,6 +367,7 @@
     color: #475569;
 
     font-weight: 500;
+
 }
 
 /* =========================
@@ -360,586 +427,1125 @@
     background: #fee2e2;
     color: #b91c1c;
 }
-
 /* =========================
    PAGINATION
 ========================= */
 
 .catalog-pagination {
-    display: flex;
-
-    justify-content: center;
-
-    margin-top: 10px;
-
-    padding: 16px 20px;
-
-    background: #fff;
-
-    border: 1px solid #e2e8f0;
-
-    border-radius: 14px;
-
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.catalog-pagination nav {
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-}
-
-.catalog-pagination svg {
-    width: 14px;
-    height: 14px;
-}
-
-.catalog-pagination a,
-.catalog-pagination span {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    min-width: 32px;
-    height: 32px;
-
-    margin: 0 3px;
-
-    padding: 0 8px;
-
-    border: 1px solid #e2e8f0;
-
-    border-radius: 8px;
-
-    background: #fff;
-
-    color: #1e293b;
-
-    font-size: 11px;
-    font-weight: 600;
-
-    text-decoration: none;
-
-    transition: all 0.2s ease;
-}
-
-.catalog-pagination a:hover {
-    border-color: #287c7c;
-
-    color: #287c7c;
-
-    background: #e6f0ef;
-}
-
-.catalog-pagination span {
-    background: #287c7c;
-
-    border-color: #287c7c;
-
-    color: #fff;
-
-    box-shadow:
-        0 4px 10px rgba(40, 124, 124, 0.20);
-}
-
-/* =========================
-   EMPTY
-========================= */
-
-.catalog-empty {
-    grid-column: 1 / -1;
-
-    padding: 60px 20px;
-
-    text-align: center;
-
-    color: #64748b;
-
-    background: #fff;
-
-    border: 1px solid #e2e8f0;
-
-    border-radius: 14px;
-
-    font-size: 13px;
-}
-
-/* =========================================================
-   BOOK DETAIL MODAL
-========================================================= */
-
-.catalog-modal {
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 9999;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 20px;
-
-    background: rgba(15, 23, 42, 0.60);
-
-    backdrop-filter: blur(5px);
-
-    opacity: 0;
-    visibility: hidden;
-
-    transition:
-        opacity 0.25s ease,
-        visibility 0.25s ease;
-}
-
-.catalog-modal.open {
-    opacity: 1;
-    visibility: visible;
-}
-
-
-/* =========================
-   MODAL CONTAINER
-========================= */
-
-.catalog-modal-container {
-    position: relative;
 
     width: 100%;
-    max-width: 700px;
 
-    max-height: 90vh;
+    margin-top: 20px;
 
-    overflow-y: auto;
+    padding: 14px 24px;
 
     background: #fff;
 
-    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
 
     box-shadow:
-        0 20px 50px rgba(0, 0, 0, 0.20);
-
-    transform: scale(0.92);
-
-    transition:
-        transform 0.25s ease;
-}
-
-.catalog-modal.open .catalog-modal-container {
-    transform: scale(1);
-}
-
-
-/* =========================
-   CLOSE
-========================= */
-
-.catalog-modal-close {
-    position: absolute;
-
-    top: 14px;
-    right: 14px;
-
-    z-index: 5;
-
-    width: 34px;
-    height: 34px;
-
-    border: none;
-
-    border-radius: 50%;
-
-    background: #f1f5f9;
-
-    color: #64748b;
-
-    font-size: 22px;
-
-    line-height: 1;
-
-    cursor: pointer;
-}
-
-.catalog-modal-close:hover {
-    background: #e2e8f0;
-    color: #12403e;
-}
-
-
-/* =========================
-   BODY
-========================= */
-
-.catalog-modal-body {
-    display: grid;
-
-    grid-template-columns: 200px 1fr;
-
-    gap: 28px;
-
-    padding: 32px;
-}
-
-
-/* =========================
-   COVER
-========================= */
-
-.catalog-modal-cover {
-    display: flex;
-
-    align-items: flex-start;
-    justify-content: center;
-}
-
-.catalog-modal-book {
-    width: 170px;
-    height: 235px;
-
-    padding: 20px;
+        0 2px 8px
+        rgba(0, 0, 0, 0.04);
 
     box-sizing: border-box;
 
+}
+
+
+.catalog-pagination-wrapper {
+
     display: flex;
-    flex-direction: column;
+
+    align-items: center;
+
     justify-content: space-between;
 
-    background:
-        linear-gradient(135deg,
-            #1a5c5a,
-            #2b7a78);
+    width: 100%;
 
-    border-radius: 10px;
+    gap: 16px;
 
-    color: #fff;
-
-    box-shadow:
-        -6px 12px 25px rgba(0, 0, 0, 0.20);
-
-    position: relative;
-
-    overflow: hidden;
-}
-
-.catalog-modal-book::before {
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    top: 0;
-    bottom: 0;
-
-    width: 10px;
-
-    background: rgba(0, 0, 0, 0.20);
-}
-
-.catalog-modal-brand {
-    margin-left: 8px;
-
-    font-size: 9px;
-
-    font-weight: 700;
-
-    letter-spacing: 1px;
-
-    color: #e7d39b;
-}
-
-.catalog-modal-book-title {
-    margin-left: 8px;
-
-    font-size: 17px;
-
-    font-weight: 800;
-
-    line-height: 1.3;
-}
-
-.catalog-modal-book-footer {
-    margin-left: 8px;
-
-    font-size: 9px;
-
-    opacity: 0.75;
 }
 
 
-/* =========================
-   INFO
-========================= */
+.catalog-pagination svg {
 
-.catalog-modal-info {
-    display: flex;
+    width: 14px;
 
-    flex-direction: column;
+    height: 14px;
+
 }
 
-.catalog-modal-badges {
-    display: flex;
 
-    gap: 8px;
+.catalog-pagination a,
+.catalog-pagination span {
 
-    margin-bottom: 12px;
-}
-
-.catalog-modal-category,
-.catalog-modal-status {
     display: inline-flex;
 
     align-items: center;
 
-    padding: 4px 10px;
+    justify-content: center;
 
-    border-radius: 12px;
-
-    font-size: 10px;
-
-    font-weight: 700;
 }
 
-.catalog-modal-category {
-    background: #fff;
-
-    color: #287c7c;
-
-    border: 1px solid rgba(40, 124, 124, 0.20);
-}
-
-.catalog-modal-status.available {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.catalog-modal-status.borrowed {
-    background: #fee2e2;
-    color: #b91c1c;
-}
-
-.catalog-modal-info h2 {
-    margin: 0 0 6px;
-
-    color: #12403e;
-
-    font-size: 22px;
-
-    font-weight: 800;
-
-    line-height: 1.3;
-}
-
-.catalog-modal-author {
-    margin-bottom: 20px;
-
-    color: #64748b;
-
-    font-size: 13px;
-
-    font-weight: 600;
-}
-
-
-/* =========================
-   DESCRIPTION
-========================= */
-
-.catalog-modal-description-title {
-    margin-bottom: 7px;
-
-    color: #12403e;
-
-    font-size: 12px;
-
-    font-weight: 700;
-}
-
-.catalog-modal-description {
-    padding: 13px;
-
-    margin-bottom: 20px;
-
-    background: #f8fafc;
-
-    border: 1px solid #f1f5f9;
-
-    border-radius: 9px;
-
-    color: #475569;
-
-    font-size: 12px;
-
-    line-height: 1.6;
-}
-
-
-/* =========================
-   META
-========================= */
-
-.catalog-modal-meta {
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 14px 20px;
-
-    padding-top: 16px;
-
-    border-top: 1px solid #e2e8f0;
-}
-
-.catalog-modal-meta div {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 3px;
-}
-
-.catalog-modal-meta span {
-    color: #64748b;
-
-    font-size: 10px;
-}
-
-.catalog-modal-meta strong {
-    color: #1e293b;
-
-    font-size: 12px;
-}
-
-
-/* =========================
-   ACTION
-========================= */
-
-.catalog-modal-actions {
-    display: flex;
-
-    margin-top: 25px;
-}
-
-.catalog-modal-button {
-    width: 100%;
-
-    height: 38px;
-
-    border: 1px solid #287c7c;
-
-    border-radius: 9px;
-
-    background: #287c7c;
-
-    color: #fff;
-
-    font-family: inherit;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-}
-
-.catalog-modal-button:hover {
-    background: #216969;
-}
-
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 700px) {
-
-    .catalog-modal-body {
-        grid-template-columns: 1fr;
-
-        padding: 24px;
+    /* KIRI: Select Tampilkan per halaman */
+    .catalog-pagination-per-page {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 500;
     }
 
-    .catalog-modal-cover {
+    .catalog-pagination-per-page label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .catalog-pagination-per-page select {
+        height: 32px;
+        padding: 0 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #fff;
+        color: #12403e;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .catalog-pagination-per-page select:hover,
+    .catalog-pagination-per-page select:focus {
+        border-color: #287c7c;
+        box-shadow: 0 0 0 3px rgba(40, 124, 124, 0.08);
+    }
+
+    /* TENGAH: Teks Info Menampilkan X - Y dari Z hasil */
+    .catalog-pagination-info {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+        text-align: center;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .catalog-pagination-info strong,
+    .catalog-pagination-info span {
+        color: #12403e;
+        font-weight: 700;
+    }
+
+    /* KANAN: Navigasi Tombol Halaman */
+    .catalog-pagination-nav {
+        display: flex;
         align-items: center;
+        gap: 6px;
+    }
+
+    .catalog-pagination a,
+    .catalog-pagination nav span[aria-current="page"],
+    .catalog-pagination nav span[aria-disabled="true"],
+    .catalog-pagination .page-link {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 32px !important;
+        height: 32px !important;
+        margin: 0 2px !important;
+        padding: 0 10px !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        background: #fff !important;
+        color: #1e293b !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+        box-sizing: border-box !important;
+    }
+
+    .catalog-pagination a:hover {
+        border-color: #287c7c !important;
+        color: #287c7c !important;
+        background: #e6f0ef !important;
+    }
+
+    /* Tombol Aktif (Teal Gelap sesuai screenshot) */
+    .catalog-pagination nav span[aria-current="page"],
+    .catalog-pagination nav span[aria-current="page"] span,
+    .catalog-pagination .page-link.active {
+        background: #1a5c5a !important;
+        border-color: #1a5c5a !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 2px 6px rgba(26, 92, 90, 0.2) !important;
+    }
+
+    /* Tombol Disabled (pucat / grayed out sesuai screenshot) */
+    .catalog-pagination nav span[aria-disabled="true"],
+    .catalog-pagination .page-link.disabled {
+        background: #fff !important;
+        border-color: #e2e8f0 !important;
+        color: #cbd5e1 !important;
+        cursor: not-allowed !important;
+        box-shadow: none !important;
+    }
+
+    @media (max-width: 850px) {
+        .catalog-pagination-wrapper {
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            gap: 12px;
+        }
+    }
+
+    /* =========================
+   EMPTY
+========================= */
+
+    .catalog-empty {
+        grid-column: 1 / -1;
+
+        padding: 60px 20px;
+
+        text-align: center;
+
+        color: #64748b;
+
+        background: #fff;
+
+        border: 1px solid #e2e8f0;
+
+        border-radius: 14px;
+
+        font-size: 13px;
+    }
+
+    /* =========================================================
+   BOOK DETAIL MODAL
+========================================================= */
+
+    .catalog-modal {
+        position: fixed;
+
+        inset: 0;
+
+        z-index: 9999;
+
+        display: flex;
+        >>>>>>>origin/Moreno align-items: center;
+        justify-content: center;
+
+        <<<<<<< HEAD min-width: 32px;
+        height: 32px;
+
+        margin: 0 3px;
+
+        padding: 0 8px;
+
+        border: 1px solid #e2e8f0;
+
+        border-radius: 8px;
+
+        background: #fff;
+
+        color: #1e293b;
+
+        font-size: 11px;
+        font-weight: 600;
+
+        text-decoration: none;
+
+        transition: all 0.2s ease;
+    }
+
+    .catalog-pagination a:hover {
+        border-color: #287c7c;
+
+        color: #287c7c;
+
+        background: #e6f0ef;
+    }
+
+    .catalog-pagination span {
+        background: #287c7c;
+
+        border-color: #287c7c;
+
+        color: #fff;
+
+        box-shadow:
+            0 4px 10px rgba(40, 124, 124, 0.20);
+    }
+
+    /* =========================
+   EMPTY
+========================= */
+
+    .catalog-empty {
+        grid-column: 1 / -1;
+
+        padding: 60px 20px;
+
+        text-align: center;
+
+        color: #64748b;
+
+        background: #fff;
+
+        border: 1px solid #e2e8f0;
+
+        border-radius: 14px;
+
+        font-size: 13px;
+    }
+
+    /* =========================================================
+   BOOK DETAIL MODAL
+========================================================= */
+
+    .catalog-modal {
+        position: fixed;
+
+        inset: 0;
+
+        z-index: 9999;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        padding: 20px;
+
+        background: rgba(15, 23, 42, 0.60);
+
+        backdrop-filter: blur(5px);
+
+        opacity: 0;
+        visibility: hidden;
+
+        transition:
+            opacity 0.25s ease,
+            visibility 0.25s ease;
+    }
+
+    .catalog-modal.open {
+        opacity: 1;
+        visibility: visible;
+        =======padding: 20px;
+
+        background: rgba(15, 23, 42, 0.60);
+
+        backdrop-filter: blur(5px);
+
+        opacity: 0;
+        visibility: hidden;
+
+        transition:
+            opacity 0.25s ease,
+            visibility 0.25s ease;
+    }
+
+    .catalog-modal.open {
+        opacity: 1;
+        visibility: visible;
+    }
+
+
+    /* =========================
+   MODAL CONTAINER
+========================= */
+
+    .catalog-modal-container {
+        position: relative;
+
+        width: 100%;
+        max-width: 700px;
+
+        max-height: 90vh;
+
+        overflow-y: auto;
+
+        background: #fff;
+
+        border-radius: 16px;
+
+        box-shadow:
+            0 20px 50px rgba(0, 0, 0, 0.20);
+
+        transform: scale(0.92);
+
+        transition:
+            transform 0.25s ease;
+    }
+
+    .catalog-modal.open .catalog-modal-container {
+        transform: scale(1);
+    }
+
+
+    /* =========================
+   CLOSE
+========================= */
+
+    .catalog-modal-close {
+        position: absolute;
+
+        top: 14px;
+        right: 14px;
+
+        z-index: 5;
+
+        width: 34px;
+        height: 34px;
+
+        border: none;
+
+        border-radius: 50%;
+
+        background: #f1f5f9;
+
+        color: #64748b;
+
+        font-size: 22px;
+
+        line-height: 1;
+
+        cursor: pointer;
+    }
+
+    .catalog-modal-close:hover {
+        background: #e2e8f0;
+        color: #12403e;
+    }
+
+
+    /* =========================
+   BODY
+========================= */
+
+    .catalog-modal-body {
+        display: grid;
+
+        grid-template-columns: 200px 1fr;
+
+        gap: 28px;
+
+        padding: 32px;
+    }
+
+
+    /* =========================
+   COVER
+========================= */
+
+    .catalog-modal-cover {
+        display: flex;
+
+        align-items: flex-start;
+        justify-content: center;
     }
 
     .catalog-modal-book {
-        width: 150px;
-        height: 210px;
-    }
+        width: 170px;
+        height: 235px;
 
-}
-
-@media (max-width: 450px) {
-
-    .catalog-modal {
-        padding: 10px;
-    }
-
-    .catalog-modal-body {
         padding: 20px;
+
+        box-sizing: border-box;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        background:
+            linear-gradient(135deg,
+                #1a5c5a,
+                #2b7a78);
+
+        border-radius: 10px;
+
+        color: #fff;
+
+        box-shadow:
+            -6px 12px 25px rgba(0, 0, 0, 0.20);
+
+        position: relative;
+
+        overflow: hidden;
     }
+
+    .catalog-modal-book::before {
+        content: "";
+
+        position: absolute;
+
+        left: 0;
+        top: 0;
+        bottom: 0;
+
+        width: 10px;
+
+        background: rgba(0, 0, 0, 0.20);
+    }
+
+    .catalog-modal-brand {
+        margin-left: 8px;
+
+        font-size: 9px;
+
+        font-weight: 700;
+
+        letter-spacing: 1px;
+
+        color: #e7d39b;
+    }
+
+    .catalog-modal-book-title {
+        margin-left: 8px;
+
+        font-size: 17px;
+
+        font-weight: 800;
+
+        line-height: 1.3;
+    }
+
+    .catalog-modal-book-footer {
+        margin-left: 8px;
+
+        font-size: 9px;
+
+        opacity: 0.75;
+    }
+
+
+    /* =========================
+   INFO
+========================= */
+
+    .catalog-modal-info {
+        display: flex;
+
+        flex-direction: column;
+    }
+
+    .catalog-modal-badges {
+        display: flex;
+
+        gap: 8px;
+
+        margin-bottom: 12px;
+    }
+
+    .catalog-modal-category,
+    .catalog-modal-status {
+        display: inline-flex;
+
+        align-items: center;
+
+        padding: 4px 10px;
+
+        border-radius: 12px;
+
+        font-size: 10px;
+
+        font-weight: 700;
+    }
+
+    .catalog-modal-category {
+        background: #fff;
+
+        color: #287c7c;
+
+        border: 1px solid rgba(40, 124, 124, 0.20);
+    }
+
+    .catalog-modal-status.available {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .catalog-modal-status.borrowed {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .catalog-modal-info h2 {
+        margin: 0 0 6px;
+
+        color: #12403e;
+
+        font-size: 22px;
+
+        font-weight: 800;
+
+        line-height: 1.3;
+    }
+
+    .catalog-modal-author {
+        margin-bottom: 20px;
+
+        color: #64748b;
+
+        font-size: 13px;
+
+        font-weight: 600;
+    }
+
+
+    /* =========================
+   DESCRIPTION
+========================= */
+
+    .catalog-modal-description-title {
+        margin-bottom: 7px;
+
+        color: #12403e;
+
+        font-size: 12px;
+
+        font-weight: 700;
+    }
+
+    .catalog-modal-description {
+        padding: 13px;
+
+        margin-bottom: 20px;
+
+        background: #f8fafc;
+
+        border: 1px solid #f1f5f9;
+
+        border-radius: 9px;
+
+        color: #475569;
+
+        font-size: 12px;
+
+        line-height: 1.6;
+    }
+
+
+    /* =========================
+   META
+========================= */
 
     .catalog-modal-meta {
-        grid-template-columns: 1fr;
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 14px 20px;
+
+        padding-top: 16px;
+
+        border-top: 1px solid #e2e8f0;
     }
 
-}
+    .catalog-modal-meta div {
+        display: flex;
 
-/* =========================
+        flex-direction: column;
+
+        gap: 3px;
+    }
+
+    .catalog-modal-meta span {
+        color: #64748b;
+
+        font-size: 10px;
+    }
+
+    .catalog-modal-meta strong {
+        color: #1e293b;
+
+        font-size: 12px;
+    }
+
+
+    /* =========================
+   ACTION
+========================= */
+
+    .catalog-modal-actions {
+        display: flex;
+
+        margin-top: 25px;
+    }
+
+    .catalog-modal-button {
+        width: 100%;
+
+        height: 38px;
+
+        border: 1px solid #287c7c;
+
+        border-radius: 9px;
+
+        background: #287c7c;
+
+        color: #fff;
+
+        font-family: inherit;
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        cursor: pointer;
+    }
+
+    .catalog-modal-button:hover {
+        background: #216969;
+    }
+
+
+
+    .catalog-modal-container {
+        position: relative;
+
+        width: 100%;
+        max-width: 700px;
+
+        max-height: 90vh;
+
+        overflow-y: auto;
+
+        background: #fff;
+
+        border-radius: 16px;
+
+        box-shadow:
+            0 20px 50px rgba(0, 0, 0, 0.20);
+
+        transform: scale(0.92);
+
+        transition:
+            transform 0.25s ease;
+    }
+
+    .catalog-modal.open .catalog-modal-container {
+        transform: scale(1);
+    }
+
+    =======RESPONSIVE=========================*/>>>>>>>origin/Moreno
+    /* =========================
+   CLOSE
+========================= */
+
+    .catalog-modal-close {
+        position: absolute;
+
+        top: 14px;
+        right: 14px;
+
+        z-index: 5;
+
+        width: 34px;
+        height: 34px;
+
+        border: none;
+
+        border-radius: 50%;
+
+        background: #f1f5f9;
+
+        color: #64748b;
+
+        font-size: 22px;
+
+        line-height: 1;
+
+        cursor: pointer;
+    }
+
+    .catalog-modal-close:hover {
+        background: #e2e8f0;
+        color: #12403e;
+    }
+
+
+    /* =========================
+   BODY
+========================= */
+
+    .catalog-modal-body {
+        display: grid;
+
+        grid-template-columns: 200px 1fr;
+
+        gap: 28px;
+
+        padding: 32px;
+    }
+
+
+    /* =========================
+   COVER
+========================= */
+
+    .catalog-modal-cover {
+        display: flex;
+
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .catalog-modal-book {
+        width: 170px;
+        height: 235px;
+
+        padding: 20px;
+
+        box-sizing: border-box;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        background:
+            linear-gradient(135deg,
+                #1a5c5a,
+                #2b7a78);
+
+        border-radius: 10px;
+
+        color: #fff;
+
+        box-shadow:
+            -6px 12px 25px rgba(0, 0, 0, 0.20);
+
+        position: relative;
+
+        overflow: hidden;
+    }
+
+    .catalog-modal-book::before {
+        content: "";
+
+        position: absolute;
+
+        left: 0;
+        top: 0;
+        bottom: 0;
+
+        width: 10px;
+
+        background: rgba(0, 0, 0, 0.20);
+    }
+
+    .catalog-modal-brand {
+        margin-left: 8px;
+
+        font-size: 9px;
+
+        font-weight: 700;
+
+        letter-spacing: 1px;
+
+        color: #e7d39b;
+    }
+
+    .catalog-modal-book-title {
+        margin-left: 8px;
+
+        font-size: 17px;
+
+        font-weight: 800;
+
+        line-height: 1.3;
+    }
+
+    .catalog-modal-book-footer {
+        margin-left: 8px;
+
+        font-size: 9px;
+
+        opacity: 0.75;
+    }
+
+
+    /* =========================
+   INFO
+========================= */
+
+    .catalog-modal-info {
+        display: flex;
+
+        flex-direction: column;
+    }
+
+    .catalog-modal-badges {
+        display: flex;
+
+        gap: 8px;
+
+        margin-bottom: 12px;
+    }
+
+    .catalog-modal-category,
+    .catalog-modal-status {
+        display: inline-flex;
+
+        align-items: center;
+
+        padding: 4px 10px;
+
+        border-radius: 12px;
+
+        font-size: 10px;
+
+        font-weight: 700;
+    }
+
+    .catalog-modal-category {
+        background: #fff;
+
+        color: #287c7c;
+
+        border: 1px solid rgba(40, 124, 124, 0.20);
+    }
+
+    .catalog-modal-status.available {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .catalog-modal-status.borrowed {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .catalog-modal-info h2 {
+        margin: 0 0 6px;
+
+        color: #12403e;
+
+        font-size: 22px;
+
+        font-weight: 800;
+
+        line-height: 1.3;
+    }
+
+    .catalog-modal-author {
+        margin-bottom: 20px;
+
+        color: #64748b;
+
+        font-size: 13px;
+
+        font-weight: 600;
+    }
+
+
+    /* =========================
+   DESCRIPTION
+========================= */
+
+    .catalog-modal-description-title {
+        margin-bottom: 7px;
+
+        color: #12403e;
+
+        font-size: 12px;
+
+        font-weight: 700;
+    }
+
+    .catalog-modal-description {
+        padding: 13px;
+
+        margin-bottom: 20px;
+
+        background: #f8fafc;
+
+        border: 1px solid #f1f5f9;
+
+        border-radius: 9px;
+
+        color: #475569;
+
+        font-size: 12px;
+
+        line-height: 1.6;
+    }
+
+
+    /* =========================
+   META
+========================= */
+
+    .catalog-modal-meta {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 14px 20px;
+
+        padding-top: 16px;
+
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .catalog-modal-meta div {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 3px;
+    }
+
+    .catalog-modal-meta span {
+        color: #64748b;
+
+        font-size: 10px;
+    }
+
+    .catalog-modal-meta strong {
+        color: #1e293b;
+
+        font-size: 12px;
+    }
+
+
+    /* =========================
+   ACTION
+========================= */
+
+    .catalog-modal-actions {
+        display: flex;
+
+        margin-top: 25px;
+    }
+
+    .catalog-modal-button {
+        width: 100%;
+
+        height: 38px;
+
+        border: 1px solid #287c7c;
+
+        border-radius: 9px;
+
+        background: #287c7c;
+
+        color: #fff;
+
+        font-family: inherit;
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        cursor: pointer;
+    }
+
+    .catalog-modal-button:hover {
+        background: #216969;
+    }
+
+
+    /* =========================
    RESPONSIVE
 ========================= */
 
-@media (max-width: 1200px) {
+    @media (max-width: 700px) {
 
-    .book-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        .catalog-modal-body {
+            grid-template-columns: 1fr;
+
+            padding: 24px;
+        }
+
+        .catalog-modal-cover {
+            align-items: center;
+        }
+
+        .catalog-modal-book {
+            width: 150px;
+            height: 210px;
+        }
+
     }
 
-}
+    @media (max-width: 450px) {
 
-@media (max-width: 950px) {
+        .catalog-modal {
+            padding: 10px;
+        }
 
-    .book-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        .catalog-modal-body {
+            padding: 20px;
+        }
+
+        .catalog-modal-meta {
+            grid-template-columns: 1fr;
+        }
+
     }
 
-}
+    /* =========================
+   RESPONSIVE
+========================= */
 
-@media (max-width: 700px) {
+    @media (max-width: 1200px) {
 
-    #page-catalog .filters {
-        flex-direction: column;
+        .book-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
 
-        align-items: stretch;
     }
 
-    #page-catalog .filters input,
-    #page-catalog .filters select {
-        width: 100%;
+    @media (max-width: 950px) {
+
+        .book-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
     }
 
-    .book-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    @media (max-width: 700px) {
 
-        gap: 12px;
+        #page-catalog .filters {
+            flex-direction: column;
+
+            align-items: stretch;
+        }
+
+        #page-catalog .filters input,
+        #page-catalog .filters select {
+            width: 100%;
+        }
+
+        .book-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+            gap: 12px;
+        }
+
+        .book-cover {
+            height: 150px;
+        }
+
     }
 
-    .book-cover {
-        height: 150px;
+    @media (max-width: 450px) {
+
+        .book-grid {
+            grid-template-columns: 1fr;
+        }
+
     }
-
-}
-
-@media (max-width: 450px) {
-
-    .book-grid {
-        grid-template-columns: 1fr;
-    }
-
-}

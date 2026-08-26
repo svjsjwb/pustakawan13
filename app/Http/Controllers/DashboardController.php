@@ -7,237 +7,231 @@ use App\Models\Member;
 use App\Models\Borrowing;
 use App\Models\Reservation;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function index()
+    /**
+     * ============================================================
+     * HALAMAN DASHBOARD
+     * ============================================================
+     *
+     * Grafik "Statistik Peminjaman" pada dashboard ini sekarang
+     * MENGIKUTI PERIODE OTOMATIS yang sama dengan periode default
+     * halaman Laporan (ReportController::getPeriod), yaitu:
+     *
+     *      bulan berjalan (tanggal 1 - akhir bulan)
+     *
+     * Tidak ada lagi pilihan manual "7 Hari Terakhir" / "1 Bulan
+     * Terakhir" seperti sebelumnya.
+     */
+    public function index(Request $request)
     {
-        // =========================
-        // STATISTIK
-        // =========================
+        /*
+         * ========================================================
+         * STATISTIK CARD (TOTAL, REALTIME - TIDAK DIBATASI PERIODE)
+         * ========================================================
+         */
 
-        $totalBooks = Book::count();
+        $totalBooks =
+            Book::count();
 
-        $borrowedBooks = Borrowing::where(
-            'status',
-            'dipinjam'
-        )->count();
+        $borrowedBooks =
+            Borrowing::where(
+                'status',
+                'dipinjam'
+            )->count();
 
-        $activeMembers = Member::where(
-            'status',
-            'aktif'
-        )->count();
+        $activeMembers =
+            Member::where(
+                'status',
+                'aktif'
+            )->count();
 
-        $lateBorrowings = Borrowing::where(
-            'status',
-            'dipinjam'
-        )
-            ->whereDate(
+        $lateBorrowings =
+            Borrowing::where(
+                'status',
+                'dipinjam'
+            )
+            ->where(
                 'due_at',
                 '<',
-                now()->startOfDay()
+                now()
             )
             ->count();
 
 
-        // =========================
-        // 5 RESERVASI TERBARU
-        // =========================
+        /*
+         * ========================================================
+         * PERIODE OTOMATIS (SAMA DENGAN DEFAULT HALAMAN LAPORAN)
+         * ========================================================
+         *
+         * ReportController::getPeriod() default-nya adalah
+         * rangeType = 'month' dengan selectedDate = hari ini,
+         * sehingga rentangnya selalu bulan berjalan.
+         */
 
-        $reservations = Reservation::with([
-            'member',
-            'book'
-        ])
-            ->latest()
-            ->take(5)
-            ->get();
+        $startDate =
+            now()->startOfMonth()->startOfDay();
 
-
-        // =========================
-        // STATUS UNTUK DASHBOARD
-        // =========================
-
-        foreach ($reservations as $reservation) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | DEFAULT
-            |--------------------------------------------------------------------------
-            */
-
-            $reservation->display_status = $reservation->status;
+        $endDate =
+            now()->endOfMonth()->endOfDay();
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | MENUNGGU
-            |--------------------------------------------------------------------------
-            */
+        /*
+         * ========================================================
+         * GRAFIK STATISTIK PEMINJAMAN (BULAN BERJALAN)
+         * ========================================================
+         */
 
-            if ($reservation->status === 'menunggu') {
-                continue;
-            }
+        $chart7Days =
+            $this->generateBorrowChart(
+                $startDate,
+                $endDate
+            );
 
+        $max7 =
+            !empty($chart7Days)
+                ? max(array_column($chart7Days, 'count'))
+                : 0;
 
-            /*
-            |--------------------------------------------------------------------------
-            | DITOLAK
-            |--------------------------------------------------------------------------
-            */
-
-            if ($reservation->status === 'ditolak') {
-                continue;
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DIBATALKAN
-            |--------------------------------------------------------------------------
-            */
-
-            if ($reservation->status === 'dibatalkan') {
-                continue;
-            }
+        $max7 =
+            $max7 > 0
+                ? $max7
+                : 5;
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | SELESAI
-            |--------------------------------------------------------------------------
-            */
+        /*
+         * ========================================================
+         * RESERVASI (UNTUK PANEL BUKU TERPOPULER, AKTIVITAS
+         * TERBARU, DAN TABEL RESERVASI TERBARU)
+         * ========================================================
+         */
 
-            if ($reservation->status === 'selesai') {
-                continue;
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DISETUJUI
-            |--------------------------------------------------------------------------
-            */
-
-            if ($reservation->status !== 'disetujui') {
-                continue;
-            }
-
-
-            // Cari transaksi peminjaman
-            $borrowing = Borrowing::where(
-                'member_id',
-                $reservation->member_id
-            )
-                ->whereHas('details', function ($query) use ($reservation) {
-
-                    $query->where(
-                        'book_id',
-                        $reservation->book_id
-                    );
-                })
+        $reservations =
+            Reservation::with(['member', 'book'])
                 ->latest()
-                ->first();
+                ->take(20)
+                ->get();
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | SUDAH ADA PEMINJAMAN
-            |--------------------------------------------------------------------------
-            */
+        /*
+         * ========================================================
+         * KIRIM DATA KE VIEW
+         * ========================================================
+         */
 
-            if ($borrowing) {
+        return view(
+            'dashboard.index',
+            compact(
+                'totalBooks',
+                'borrowedBooks',
+                'activeMembers',
+                'lateBorrowings',
 
-                // -------------------------
-                // SUDAH DIKEMBALIKAN
-                // -------------------------
+                'chart7Days',
+                'max7',
 
-                if ($borrowing->status === 'dikembalikan') {
-
-                    $reservation->display_status = 'selesai';
-
-                    continue;
-                }
-
-
-                // -------------------------
-                // MASIH DIPINJAM
-                // -------------------------
-
-                if ($borrowing->status === 'dipinjam') {
-
-                    $dueDate = Carbon::parse(
-                        $borrowing->due_at
-                    )->startOfDay();
-
-                    $today = now()->startOfDay();
+                'reservations'
+            )
+        );
+    }
 
 
-                    // Terlambat
-                    if ($today->gt($dueDate)) {
+    /**
+     * ============================================================
+     * GENERATE GRAFIK PEMINJAMAN PER MINGGU (BULAN BERJALAN)
+     * ============================================================
+     *
+     * Logika pembagian minggu ini SAMA dengan
+     * ReportController::generateDateChart() untuk periode 'month',
+     * supaya angka pada dashboard selalu konsisten dengan Laporan.
+     *
+     * Return: array of ['label' => .., 'count' => .., 'height' => ..]
+     */
+    private function generateBorrowChart(
+        Carbon $startDate,
+        Carbon $endDate
+    ) {
+        $labels = [];
 
-                        $daysLate = $dueDate->diffInDays($today);
+        $counts = [];
 
-                        $reservation->display_status =
-                            'terlambat ' . $daysLate . ' hari';
-                    } else {
+        $cursor =
+            $startDate->copy();
 
-                        $reservation->display_status =
-                            'dipinjam';
-                    }
+        $weekNumber = 1;
 
-                    continue;
-                }
+
+        while (
+            $cursor->lte($endDate)
+        ) {
+
+            $weekStart =
+                $cursor->copy()
+                    ->startOfDay();
+
+            $weekEnd =
+                $cursor->copy()
+                    ->addDays(6)
+                    ->endOfDay();
+
+
+            if (
+                $weekEnd->gt($endDate)
+            ) {
+                $weekEnd =
+                    $endDate->copy();
             }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | BELUM DIPINJAM
-            |--------------------------------------------------------------------------
-            */
+            $labels[] =
+                'M' . $weekNumber;
 
-            if ($reservation->expires_at) {
-
-                $expiresDate = Carbon::parse(
-                    $reservation->expires_at
-                )->startOfDay();
-
-                $today = now()->startOfDay();
+            $counts[] =
+                Borrowing::whereBetween(
+                    'created_at',
+                    [
+                        $weekStart,
+                        $weekEnd
+                    ]
+                )->count();
 
 
-                // Masa reservasi sudah lewat
-                if ($today->gt($expiresDate)) {
+            $cursor =
+                $weekEnd->copy()
+                    ->addSecond();
 
-                    $daysLate = $expiresDate->diffInDays($today);
-
-                    $reservation->display_status =
-                        'terlambat ' . $daysLate . ' hari';
-
-                    continue;
-                }
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | MASIH DISETUJUI
-            |--------------------------------------------------------------------------
-            */
-
-            $reservation->display_status = 'disetujui';
+            $weekNumber++;
         }
 
 
-        // =========================
-        // KIRIM KE VIEW
-        // =========================
+        $max =
+            !empty($counts)
+                ? max($counts)
+                : 0;
 
-        return view('dashboard.index', compact(
-            'totalBooks',
-            'borrowedBooks',
-            'activeMembers',
-            'lateBorrowings',
-            'reservations'
-        ));
+
+        $chart = [];
+
+        foreach ($labels as $index => $label) {
+
+            $count =
+                $counts[$index] ?? 0;
+
+            $height =
+                $max > 0
+                    ? max(8, round(($count / $max) * 100))
+                    : 8;
+
+            $chart[] = [
+                'label' => $label,
+                'count' => $count,
+                'height' => $height,
+            ];
+        }
+
+
+        return $chart;
     }
 }

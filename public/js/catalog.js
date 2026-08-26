@@ -1,10 +1,18 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    const modal = document.getElementById('book-modal');
+    const modal =
+        document.getElementById('book-modal');
 
     if (!modal) {
         return;
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ELEMENT MODAL
+    |--------------------------------------------------------------------------
+    */
 
     const modalClose =
         document.getElementById('modal-close');
@@ -17,6 +25,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const modalCoverTitle =
         document.getElementById('modal-cover-title');
+
+    const modalCoverImage =
+        document.getElementById('modal-cover-image');
+
+    const modalBookBox =
+        document.getElementById('modal-book-box');
 
     const modalAuthor =
         document.getElementById('modal-author');
@@ -42,120 +56,371 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalStatusDetail =
         document.getElementById('modal-status-detail');
 
+    const modalPublisher =
+        document.getElementById('modal-publisher');
 
-    /* =========================
-       BUKA MODAL
-    ========================= */
+    const modalYear =
+        document.getElementById('modal-year');
 
-    document.querySelectorAll('.book-card').forEach(function (card) {
+    const modalCallNumber =
+        document.getElementById('modal-call-number');
 
-        card.addEventListener('click', function () {
-
-            const title = card.dataset.title;
-            const author = card.dataset.author;
-            const category = card.dataset.category;
-            const stock = card.dataset.stock;
-            const status = card.dataset.status;
+    const modalIsbn =
+        document.getElementById('modal-isbn');
 
 
-            modalTitle.textContent = title;
+    /*
+    |--------------------------------------------------------------------------
+    | BUKA MODAL
+    |--------------------------------------------------------------------------
+    */
 
-            modalCoverTitle.textContent = title;
+    document
+        .querySelectorAll('.book-card')
+        .forEach(function (card) {
 
-            modalAuthor.textContent =
-                'Penulis: ' + author;
+            card.addEventListener(
+                'click',
+                function () {
 
-            modalCategory.textContent =
-                category;
+                    /*
+                    |--------------------------------------------------------------------------
+                    | DATA BUKU
+                    |--------------------------------------------------------------------------
+                    */
 
-            modalStock.textContent =
-                stock;
+                    const title =
+                        card.dataset.title ||
+                        '-';
 
-            modalCategoryDetail.textContent =
-                category;
+                    const author =
+                        card.dataset.author ||
+                        '-';
 
-            modalAuthorDetail.textContent =
-                author;
+                    const category =
+                        card.dataset.category ||
+                        '-';
 
-            modalStatusDetail.textContent =
-                status;
+                    const stock =
+                        card.dataset.stock ||
+                        '0';
+
+                    const status =
+                        card.dataset.status ||
+                        'Tersedia';
+
+                    const description =
+                        card.dataset.description ||
+                        'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.';
+
+                    const cover =
+                        card.dataset.cover ||
+                        '';
+
+                    const publisher =
+                        card.dataset.publisher ||
+                        '-';
+
+                    const year =
+                        card.dataset.year ||
+                        '-';
+
+                    const callNumber =
+                        card.dataset.callNumber ||
+                        '-';
+
+                    const isbn =
+                        card.dataset.isbn ||
+                        '-';
 
 
-            /* STATUS */
+                    /*
+                    |--------------------------------------------------------------------------
+                    | INFORMASI UTAMA
+                    |--------------------------------------------------------------------------
+                    */
 
-            modalStatus.textContent = status;
+                    if (modalTitle) {
 
-            modalStatus.classList.remove(
-                'available',
-                'borrowed'
+                        modalTitle.textContent =
+                            title;
+
+                    }
+
+
+                    if (modalCoverTitle) {
+
+                        modalCoverTitle.textContent =
+                            title;
+
+                    }
+
+
+                    if (modalAuthor) {
+
+                        modalAuthor.textContent =
+                            'Penulis: ' +
+                            author;
+
+                    }
+
+
+                    if (modalCategory) {
+
+                        modalCategory.textContent =
+                            category;
+
+                    }
+
+
+                    if (modalStock) {
+
+                        modalStock.textContent =
+                            stock;
+
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | DETAIL
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (modalCategoryDetail) {
+
+                        modalCategoryDetail.textContent =
+                            category;
+
+                    }
+
+
+                    if (modalAuthorDetail) {
+
+                        modalAuthorDetail.textContent =
+                            author;
+
+                    }
+
+
+                    if (modalStatusDetail) {
+
+                        modalStatusDetail.textContent =
+                            status;
+
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | INFORMASI TAMBAHAN
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (modalPublisher) {
+
+                        modalPublisher.textContent =
+                            publisher;
+
+                    }
+
+
+                    if (modalYear) {
+
+                        modalYear.textContent =
+                            year;
+
+                    }
+
+
+                    if (modalCallNumber) {
+
+                        modalCallNumber.textContent =
+                            callNumber;
+
+                    }
+
+
+                    if (modalIsbn) {
+
+                        modalIsbn.textContent =
+                            isbn;
+
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | DESKRIPSI
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (modalDescription) {
+
+                        modalDescription.textContent =
+                            description;
+
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | COVER IMAGE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        cover &&
+                        modalCoverImage &&
+                        modalBookBox
+                    ) {
+
+                        modalCoverImage.src =
+                            cover;
+
+                        modalCoverImage.style.display =
+                            'block';
+
+                        modalBookBox.style.display =
+                            'none';
+
+                    } else if (
+                        modalCoverImage &&
+                        modalBookBox
+                    ) {
+
+                        modalCoverImage.style.display =
+                            'none';
+
+                        modalBookBox.style.display =
+                            'flex';
+
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | STATUS
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (modalStatus) {
+
+                        modalStatus.textContent =
+                            status;
+
+
+                        modalStatus.classList.remove(
+                            'available',
+                            'borrowed'
+                        );
+
+
+                        if (
+                            status ===
+                            'Tersedia'
+                        ) {
+
+                            modalStatus.classList.add(
+                                'available'
+                            );
+
+                        } else {
+
+                            modalStatus.classList.add(
+                                'borrowed'
+                            );
+
+                        }
+
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | BUKA MODAL
+                    |--------------------------------------------------------------------------
+                    */
+
+                    modal.classList.add(
+                        'open'
+                    );
+
+
+                    document.body.style.overflow =
+                        'hidden';
+
+                }
             );
-
-            if (status === 'Tersedia') {
-
-                modalStatus.classList.add(
-                    'available'
-                );
-
-            } else {
-
-                modalStatus.classList.add(
-                    'borrowed'
-                );
-
-            }
-
-
-            /* DESKRIPSI */
-
-            modalDescription.textContent =
-                'Informasi lengkap mengenai "' +
-                title +
-                '" belum tersedia dalam database.';
-
-
-            /* BUKA */
-
-            modal.classList.add('open');
-
-            document.body.style.overflow = 'hidden';
 
         });
 
-    });
 
-
-    /* =========================
-       TUTUP MODAL
-    ========================= */
+    /*
+    |--------------------------------------------------------------------------
+    | TUTUP MODAL
+    |--------------------------------------------------------------------------
+    */
 
     function closeModal() {
 
-        modal.classList.remove('open');
+        modal.classList.remove(
+            'open'
+        );
 
-        document.body.style.overflow = '';
+
+        document.body.style.overflow =
+            '';
 
     }
 
 
-    modalClose.addEventListener(
-        'click',
-        closeModal
-    );
+    /*
+    |--------------------------------------------------------------------------
+    | TOMBOL CLOSE
+    |--------------------------------------------------------------------------
+    */
+
+    if (modalClose) {
+
+        modalClose.addEventListener(
+            'click',
+            closeModal
+        );
+
+    }
 
 
-    modalAction.addEventListener(
-        'click',
-        closeModal
-    );
+    /*
+    |--------------------------------------------------------------------------
+    | TOMBOL ACTION
+    |--------------------------------------------------------------------------
+    */
+
+    if (modalAction) {
+
+        modalAction.addEventListener(
+            'click',
+            closeModal
+        );
+
+    }
 
 
-    /* Klik luar modal */
+    /*
+    |--------------------------------------------------------------------------
+    | KLIK LUAR MODAL
+    |--------------------------------------------------------------------------
+    */
 
     modal.addEventListener(
         'click',
         function (event) {
 
-            if (event.target === modal) {
+            if (
+                event.target ===
+                modal
+            ) {
 
                 closeModal();
 
@@ -165,7 +430,11 @@ document.addEventListener('DOMContentLoaded', function () {
     );
 
 
-    /* ESC */
+    /*
+    |--------------------------------------------------------------------------
+    | ESC
+    |--------------------------------------------------------------------------
+    */
 
     document.addEventListener(
         'keydown',
@@ -173,7 +442,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (
                 event.key === 'Escape' &&
-                modal.classList.contains('open')
+                modal.classList.contains(
+                    'open'
+                )
             ) {
 
                 closeModal();

@@ -26,11 +26,13 @@
                 {{ $books->total() }} buku terdaftar
             </div>
 
-            <h1>Katalog Buku</h1>
+            <h1>
+                Katalog Buku
+            </h1>
 
             <p>
                 Telusuri seluruh koleksi perpustakaan berdasarkan judul,
-                kategori, atau ketersediaan.
+                kategori, atau ketersediaan stok.
             </p>
 
         </div>
@@ -39,41 +41,72 @@
 
 
     {{-- =========================
-         FILTER
+         FILTER FORM
     ========================= --}}
 
-    <div class="filters">
+    <form
+        method="GET"
+        action="{{ route('catalog') }}"
+        class="filters"
+    >
 
         <input
             type="text"
-            placeholder="Cari judul atau pengarang...">
+            name="search"
+            value="{{ request('search') }}"
+            placeholder="Cari judul atau pengarang..."
+        >
 
-        <select>
 
-            <option>
+        <select
+            name="category"
+            onchange="this.form.submit()"
+        >
+
+            <option value="">
                 Semua Kategori
             </option>
+
+            @foreach($categories as $category)
+
+                <option
+                    value="{{ $category->name }}"
+                    {{ request('category') == $category->name ? 'selected' : '' }}
+                >
+                    {{ $category->name }}
+                </option>
+
+            @endforeach
 
         </select>
 
 
-        <select>
+        <select
+            name="status"
+            onchange="this.form.submit()"
+        >
 
-            <option>
+            <option value="">
                 Semua Status
             </option>
 
-            <option>
+            <option
+                value="Tersedia"
+                {{ request('status') == 'Tersedia' ? 'selected' : '' }}
+            >
                 Tersedia
             </option>
 
-            <option>
+            <option
+                value="Dipinjam"
+                {{ request('status') == 'Dipinjam' ? 'selected' : '' }}
+            >
                 Sedang Dipinjam
             </option>
 
         </select>
 
-    </div>
+    </form>
 
 
     {{-- =========================
@@ -84,72 +117,103 @@
 
         @forelse($books as $book)
 
-        <div
-            class="book-card"
+            <div
+                class="book-card"
 
-            data-title="{{ $book->title }}"
+                data-title="{{ $book->title }}"
 
-            data-author="{{ $book->author }}"
+                data-author="{{ $book->author ?? '-' }}"
 
-            data-category="{{ $book->category->name }}"
+                data-category="{{ $book->category->name ?? '-' }}"
 
-            data-stock="{{ $book->available_stock }}"
+                data-stock="{{ $book->available_stock ?? 0 }}"
 
-            data-status="{{ $book->available_stock > 0 ? 'Tersedia' : 'Dipinjam' }}">
+                data-status="{{ $book->available_stock > 0 ? 'Tersedia' : 'Dipinjam' }}"
 
-            {{-- COVER --}}
+                data-description="{{ $book->description ?? 'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.' }}"
 
-            <div class="book-cover">
-                BOOK
-            </div>
+                data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}"
 
+                data-publisher="{{ $book->publisher ?? '-' }}"
 
-            {{-- INFORMATION --}}
+                data-year="{{ $book->publication_year ?? '-' }}"
 
-            <div class="book-info">
+                data-isbn="{{ $book->isbn ?? '-' }}"
 
-                <strong>
-                    {{ $book->title }}
-                </strong>
+                data-call-number="{{ $book->call_number ?? '-' }}"
+            >
 
+                {{-- =========================
+                     COVER
+                ========================= --}}
 
-                <span>
-                    {{ $book->author }}
-                </span>
+                <div
+                    class="book-cover {{ $book->cover ? 'has-image' : '' }}"
+                >
 
+                    @if($book->cover)
 
-                <div class="book-meta">
-
-                    <span>
-                        {{ $book->category->name }}
-                    </span>
-
-
-                    @if($book->available_stock > 0)
-
-                    <span class="book-status available">
-                        Tersedia
-                    </span>
-
-                    @else
-
-                    <span class="book-status borrowed">
-                        Dipinjam
-                    </span>
+                        <img
+                            src="{{ asset('storage/' . $book->cover) }}"
+                            alt="{{ $book->title }}"
+                            class="book-cover-img"
+                        >
 
                     @endif
 
                 </div>
 
-            </div>
 
-        </div>
+                {{-- =========================
+                     INFORMATION
+                ========================= --}}
+
+                <div class="book-info">
+
+                    <strong>
+                        {{ $book->title }}
+                    </strong>
+
+                    <span>
+                        {{ $book->author ?? '-' }}
+                    </span>
+
+
+                    <div class="book-meta">
+
+                        <span>
+                            {{ $book->category->name ?? '-' }}
+                        </span>
+
+
+                        @if($book->available_stock > 0)
+
+                            <span class="book-status available">
+                                Tersedia ({{ $book->available_stock }})
+                            </span>
+
+                        @else
+
+                            <span class="book-status borrowed">
+                                Dipinjam
+                            </span>
+
+                        @endif
+
+                    </div>
+
+                </div>
+
+            </div>
 
         @empty
 
-        <div class="catalog-empty">
-            Belum ada buku.
-        </div>
+            <div class="catalog-empty">
+
+                Belum ada koleksi buku yang sesuai
+                dengan pencarian atau filter.
+
+            </div>
 
         @endforelse
 
@@ -160,19 +224,17 @@
          PAGINATION
     ========================= --}}
 
-    @if($books->hasPages())
+    @if($books->total() > 0)
 
-    <div class="catalog-pagination">
+        <div class="catalog-pagination">
 
-        {{ $books->links() }}
+            {{ $books->links('partials.pagination') }}
 
-    </div>
+        </div>
 
     @endif
 
-
 </section>
-
 
 
 {{-- =========================================================
@@ -181,18 +243,22 @@
 
 <div
     class="catalog-modal"
-    id="book-modal">
+    id="book-modal"
+>
 
     <div class="catalog-modal-container">
 
 
-        {{-- CLOSE BUTTON --}}
+        {{-- =========================
+             CLOSE BUTTON
+        ========================= --}}
 
         <button
             type="button"
             class="catalog-modal-close"
             id="modal-close"
-            aria-label="Tutup">
+            aria-label="Tutup"
+        >
             &times;
         </button>
 
@@ -206,7 +272,12 @@
 
             <div class="catalog-modal-cover">
 
-                <div class="catalog-modal-book">
+                {{-- COVER DEFAULT --}}
+
+                <div
+                    class="catalog-modal-book"
+                    id="modal-book-box"
+                >
 
                     <div class="catalog-modal-brand">
                         TIGA SERANGKAI
@@ -215,7 +286,8 @@
 
                     <div
                         class="catalog-modal-book-title"
-                        id="modal-cover-title">
+                        id="modal-cover-title"
+                    >
                     </div>
 
 
@@ -225,8 +297,26 @@
 
                 </div>
 
-            </div>
 
+                {{-- COVER IMAGE --}}
+
+                <img
+                    id="modal-cover-image"
+                    src="#"
+                    alt="Cover Buku"
+                    style="
+                        display: none;
+                        width: 170px;
+                        height: 235px;
+                        object-fit: cover;
+                        border-radius: 10px;
+                        box-shadow:
+                            -6px 12px 25px
+                            rgba(0,0,0,0.20);
+                    "
+                >
+
+            </div>
 
 
             {{-- =========================
@@ -242,13 +332,15 @@
 
                     <span
                         class="catalog-modal-category"
-                        id="modal-category">
+                        id="modal-category"
+                    >
                     </span>
 
 
                     <span
                         class="catalog-modal-status"
-                        id="modal-status">
+                        id="modal-status"
+                    >
                     </span>
 
                 </div>
@@ -264,20 +356,24 @@
 
                 <div
                     class="catalog-modal-author"
-                    id="modal-author">
+                    id="modal-author"
+                >
                 </div>
 
 
                 {{-- DESCRIPTION --}}
 
                 <div class="catalog-modal-description-title">
-                    Informasi Buku
+
+                    Sinopsis / Deskripsi
+
                 </div>
 
 
                 <div
                     class="catalog-modal-description"
-                    id="modal-description">
+                    id="modal-description"
+                >
                     Informasi buku belum tersedia.
                 </div>
 
@@ -305,10 +401,10 @@
                     <div>
 
                         <span>
-                            Kategori
+                            Penerbit
                         </span>
 
-                        <strong id="modal-category-detail">
+                        <strong id="modal-publisher">
                             -
                         </strong>
 
@@ -318,10 +414,10 @@
                     <div>
 
                         <span>
-                            Penulis
+                            Tahun Terbit
                         </span>
 
-                        <strong id="modal-author-detail">
+                        <strong id="modal-year">
                             -
                         </strong>
 
@@ -331,15 +427,27 @@
                     <div>
 
                         <span>
-                            Status
+                            No. Panggil
                         </span>
 
-                        <strong id="modal-status-detail">
+                        <strong id="modal-call-number">
                             -
                         </strong>
 
                     </div>
 
+
+                    <div>
+
+                        <span>
+                            ISBN
+                        </span>
+
+                        <strong id="modal-isbn">
+                            -
+                        </strong>
+
+                    </div>
 
                 </div>
 
@@ -353,12 +461,12 @@
                     <button
                         type="button"
                         class="catalog-modal-button"
-                        id="modal-action">
+                        id="modal-action"
+                    >
                         Tutup
                     </button>
 
                 </div>
-
 
             </div>
 

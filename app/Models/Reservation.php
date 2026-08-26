@@ -14,6 +14,7 @@ class Reservation extends Model
         'reserved_at',
         'expires_at',
         'status',
+        'seat_number',
     ];
 
     protected $casts = [

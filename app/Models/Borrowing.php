@@ -14,6 +14,7 @@ class Borrowing extends Model
         'due_at',
         'returned_at',
         'status',
+        'seat_number',
     ];
 
     protected $casts = [

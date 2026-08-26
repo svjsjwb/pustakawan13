@@ -1,0 +1,377 @@
+/* =========================================================
+   REPORT FORM
+========================================================= */
+
+.report-form-page {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   FORM CARD
+========================================================= */
+
+.report-form-card {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 14px 23px 32px;
+
+    border: 1px solid #a8c4c4;
+
+    border-radius: 9px;
+
+    background: #fff;
+
+    box-shadow:
+        0 3px 12px rgba(33, 75, 75, 0.04);
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.report-form-card h1 {
+    margin: 0 0 23px;
+
+    font-size: 16px;
+
+    line-height: 1.2;
+
+    font-weight: 700;
+
+    color: #111;
+}
+
+
+/* =========================================================
+   FORM GROUP
+========================================================= */
+
+.report-form-group {
+    margin-bottom: 14px;
+}
+
+
+.report-form-group label {
+    display: block;
+
+    margin:
+        0 0 5px 16px;
+
+    font-size: 15px;
+
+    line-height: 1.2;
+
+    font-weight: 600;
+
+    color: #161616;
+}
+
+
+/* =========================================================
+   SELECT + DATE
+========================================================= */
+
+.report-form-group select,
+.report-form-group input[type="date"] {
+    width: 100%;
+
+    height: 28px;
+
+    box-sizing: border-box;
+
+    padding: 0 15px;
+
+    border:
+        1px solid #a6a6a6;
+
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #fff;
+
+    color: #3e3e3e;
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.report-form-group select {
+    appearance: none;
+
+    padding-right: 40px;
+
+    background-image:
+        linear-gradient(
+            45deg,
+            transparent 50%,
+            #777 50%
+        ),
+        linear-gradient(
+            135deg,
+            #777 50%,
+            transparent 50%
+        );
+
+    background-position:
+        calc(100% - 18px) 11px,
+        calc(100% - 13px) 11px;
+
+    background-size:
+        6px 6px,
+        6px 6px;
+
+    background-repeat: no-repeat;
+}
+
+
+.report-form-group select:focus,
+.report-form-group input[type="date"]:focus {
+    border-color: #287b7b;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(40, 123, 123, 0.08);
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+.report-date-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        150px
+        minmax(0, 1fr);
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.report-date-row span {
+    text-align: center;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: #151515;
+}
+
+
+.report-date-row input[type="date"] {
+    padding-right: 8px;
+}
+
+
+/* =========================================================
+   ALERT
+========================================================= */
+
+.report-form-alert {
+    margin:
+        0 0 18px;
+
+    padding:
+        10px 14px;
+
+    border:
+        1px solid #e2b6b6;
+
+    border-radius: 7px;
+
+    background: #fff5f5;
+
+    color: #9b4141;
+
+    font-size: 10px;
+}
+
+
+.report-form-alert strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 11px;
+}
+
+
+.report-form-alert ul {
+    margin: 0;
+
+    padding-left: 17px;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.report-form-actions {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 12px;
+
+    margin-top: 20px;
+}
+
+
+/* =========================================================
+   BATAL
+========================================================= */
+
+.report-form-cancel {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    height: 27px;
+
+    padding: 0 13px;
+
+    box-sizing: border-box;
+
+    border:
+        1px solid #7ea1a1;
+
+    border-radius: 15px;
+
+    background: #fff;
+
+    color: #315f5f;
+
+    text-decoration: none;
+
+    font-size: 11px;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.report-form-cancel:hover {
+    background: #f2f8f8;
+
+    border-color: #287b7b;
+
+    color: #285858;
+}
+
+
+/* =========================================================
+   SIMPAN
+========================================================= */
+
+.report-form-submit {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    height: 27px;
+
+    padding: 0 15px;
+
+    border:
+        1px solid #287b7b;
+
+    border-radius: 15px;
+
+    background: #287b7b;
+
+    color: #fff;
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.report-form-submit:hover {
+    background: #216969;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .report-form-card {
+        padding:
+            18px;
+    }
+
+
+    .report-form-card h1 {
+        font-size: 16px;
+
+        margin-bottom: 20px;
+    }
+
+
+    .report-form-group label {
+        margin-left: 8px;
+
+        font-size: 13px;
+    }
+
+
+    .report-date-row {
+        grid-template-columns: 1fr;
+
+        gap: 7px;
+    }
+
+
+    .report-date-row span {
+        order: 2;
+    }
+
+
+    .report-date-row input:last-child {
+        order: 3;
+    }
+
+
+    .report-form-actions {
+        margin-top: 24px;
+    }
+
+}

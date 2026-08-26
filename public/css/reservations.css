@@ -1,25 +1,15 @@
 /* =========================================================
    RESERVASI BUKU
-   ========================================================= */
+========================================================= */
 
 #page-reservations {
     width: 100%;
 }
 
 
-/* =========================
-   BUKU STOK HABIS
-========================= */
-
-#page-reservations .reservation-field select option:disabled {
-    color: #999;
-    background: #eeeeee;
-}
-
-
-/* =========================
+/* =========================================================
    ALERT
-   ========================= */
+========================================================= */
 
 .reservation-alert {
     margin-bottom: 14px;
@@ -33,12 +23,14 @@
 .reservation-alert.success {
     background: #e7f4e8;
     border: 1px solid #b8d9ba;
+
     color: #28632c;
 }
 
 .reservation-alert.error {
     background: #fbeaea;
     border: 1px solid #e2b8b8;
+
     color: #8a2d2d;
 }
 
@@ -48,43 +40,49 @@
 }
 
 
-/* =========================
+/* =========================================================
    LAYOUT
-   ========================= */
+========================================================= */
 
 .reservation-layout {
     display: grid;
+
     grid-template-columns: 1fr 1.65fr;
+
     gap: 24px;
+
     align-items: start;
 }
 
 
-/* =========================
+/* =========================================================
    FORM CARD
-   ========================= */
+========================================================= */
 
 .reservation-form-card {
     background: #fff;
 
     border: 1px solid #e1e7e7;
+
     border-radius: 8px;
 
     padding: 18px;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .reservation-form-card h3 {
     margin: 0 0 4px;
 
     font-size: 15px;
+
     font-weight: 700;
 
     color: #111;
 }
 
-.reservation-form-card p {
+.reservation-form-card>p {
     margin: 0 0 18px;
 
     font-size: 11px;
@@ -93,12 +91,13 @@
 }
 
 
-/* =========================
+/* =========================================================
    FORM FIELD
-   ========================= */
+========================================================= */
 
 .reservation-field {
     display: flex;
+
     flex-direction: column;
 
     gap: 5px;
@@ -108,6 +107,7 @@
 
 .reservation-field label {
     font-size: 11px;
+
     font-weight: 600;
 
     color: #263b3b;
@@ -116,6 +116,7 @@
 .reservation-field select,
 .reservation-field input {
     width: 100%;
+
     height: 34px;
 
     box-sizing: border-box;
@@ -123,6 +124,7 @@
     padding: 0 10px;
 
     border: 1px solid #c9d5d5;
+
     border-radius: 5px;
 
     background: #fff;
@@ -130,6 +132,7 @@
     color: #222;
 
     font-family: inherit;
+
     font-size: 11px;
 
     outline: none;
@@ -140,10 +143,16 @@
     border-color: #287b7b;
 }
 
+.reservation-field select option:disabled {
+    color: #999;
 
-/* =========================
+    background: #eeeeee;
+}
+
+
+/* =========================================================
    TANGGAL
-   ========================= */
+========================================================= */
 
 .reservation-date-row {
     display: grid;
@@ -154,27 +163,494 @@
 }
 
 
-/* =========================
+/* =========================================================
+   PILIH TEMPAT DUDUK
+========================================================= */
+
+.seat-selection-section {
+    margin-top: 5px;
+
+    margin-bottom: 14px;
+}
+
+.seat-selection-title {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    margin-bottom: 6px;
+}
+
+.seat-selection-title label {
+    font-size: 11px;
+
+    font-weight: 700;
+
+    color: #263b3b;
+}
+
+.seat-selection-title span {
+    font-size: 9px;
+
+    color: #888;
+}
+
+
+/* =========================================================
+   INFO BOX
+========================================================= */
+
+.seat-info-box {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    min-height: 36px;
+
+    padding: 7px 10px;
+
+    box-sizing: border-box;
+
+    margin-bottom: 9px;
+
+    border: 1px solid #8bc5ff;
+
+    border-radius: 5px;
+
+    background: #eaf5ff;
+
+    color: #315c7a;
+
+    font-size: 9px;
+}
+
+.seat-info-icon {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 16px;
+
+    height: 16px;
+
+    border-radius: 50%;
+
+    color: #1976d2;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   SEAT MAP WRAPPER
+========================================================= */
+
+.seat-map-wrapper {
+    border: 1px solid #dce5e5;
+
+    border-radius: 7px;
+
+    padding: 8px;
+
+    background: #fff;
+}
+
+
+/* =========================================================
+   JUDUL DENAH
+========================================================= */
+
+.seat-map-title {
+    margin-bottom: 9px;
+
+    text-align: center;
+
+    color: #111;
+
+    font-size: 9px;
+
+    font-weight: 700;
+}
+
+.seat-map-title span {
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   DENAH
+========================================================= */
+
+.seat-map {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 10px;
+
+    align-items: start;
+}
+
+
+/* =========================================================
+   GROUP MEJA
+========================================================= */
+
+.seat-table-group {
+    min-width: 0;
+}
+
+.table-name {
+    margin-bottom: 5px;
+
+    text-align: center;
+
+    color: #222;
+
+    font-size: 8px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   LAYOUT KURSI + MEJA
+========================================================= */
+
+.table-seat-layout {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+/* =========================================================
+   BARIS KURSI
+========================================================= */
+
+.seat-row {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 4px;
+}
+
+
+/* =========================================================
+   KURSI
+========================================================= */
+
+.seat {
+    position: relative;
+
+    width: 100%;
+
+    height: 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #c4cece;
+
+    border-radius: 4px;
+
+    background: #fff;
+
+    color: #333;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        border-color .15s ease,
+        box-shadow .15s ease;
+}
+
+.seat span {
+    font-size: 8px;
+
+    font-weight: 700;
+}
+
+.seat:hover:not(:disabled) {
+    transform: translateY(-1px);
+
+    border-color: #287b7b;
+
+    background: #eef8f8;
+
+    box-shadow:
+        0 2px 5px rgba(40, 123, 123, .12);
+}
+
+
+/* =========================================================
+   KURSI DIPILIH
+========================================================= */
+
+.seat.selected {
+    transform: translateY(-1px);
+
+    background: #8bc34a;
+
+    border-color: #6da52d;
+
+    color: #fff;
+
+    box-shadow:
+        0 2px 7px rgba(100, 160, 40, .25);
+}
+
+
+/* =========================================================
+   KURSI BOOKED
+========================================================= */
+
+.seat.booked {
+    background: #f2bcbc;
+
+    border-color: #d89595;
+
+    color: #8a4040;
+
+    cursor: not-allowed;
+
+    opacity: .9;
+}
+
+.seat.booked::after {
+    content: "X";
+
+    position: absolute;
+
+    right: 2px;
+
+    top: 1px;
+
+    font-size: 6px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   MEJA PANJANG
+========================================================= */
+
+.table-middle {
+    height: 28px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px solid #9a6b22;
+
+    border-radius: 4px;
+
+    background:
+        linear-gradient(to bottom,
+            #bd8125,
+            #a86e17);
+
+    color: rgba(255, 255, 255, .85);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .15),
+        0 2px 4px rgba(0, 0, 0, .08);
+}
+
+.table-middle span {
+    font-size: 6px;
+
+    font-weight: 700;
+
+    letter-spacing: .3px;
+
+    opacity: .75;
+}
+
+
+/* =========================================================
+   LEGEND
+========================================================= */
+
+.seat-legend {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 14px;
+
+    margin-top: 9px;
+
+    padding: 7px 5px;
+
+    border-radius: 5px;
+
+    background: #f7f8f8;
+}
+
+.seat-legend-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    color: #666;
+
+    font-size: 8px;
+}
+
+.legend-seat {
+    width: 14px;
+
+    height: 14px;
+
+    display: inline-block;
+
+    box-sizing: border-box;
+
+    border-radius: 3px;
+
+    border: 1px solid #c4cece;
+}
+
+.legend-seat.available {
+    background: #fff;
+}
+
+.legend-seat.selected {
+    background: #8bc34a;
+
+    border-color: #6da52d;
+}
+
+.legend-seat.booked {
+    background: #f2bcbc;
+
+    border-color: #d89595;
+}
+
+
+/* =========================================================
+   HASIL PILIHAN
+========================================================= */
+
+.seat-selected-result {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 8px;
+
+    margin-top: 7px;
+
+    padding: 7px;
+
+    border: 1px solid #cfe1b9;
+
+    border-radius: 5px;
+
+    background: #f1f8e9;
+
+    color: #567044;
+
+    font-size: 8px;
+}
+
+.seat-selected-result strong {
+    color: #4c7d29;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+.reset-seat-button {
+    height: 26px;
+
+    padding: 0 8px;
+
+    border: 1px solid #e3a1a1;
+
+    border-radius: 4px;
+
+    background: #fff;
+
+    color: #c04c4c;
+
+    font-family: inherit;
+
+    font-size: 8px;
+
+    cursor: pointer;
+}
+
+.reset-seat-button:hover {
+    background: #fff0f0;
+}
+
+
+/* =========================================================
    SUBMIT
-   ========================= */
+========================================================= */
 
 .reservation-submit {
     width: 100%;
+
     height: 34px;
 
-    margin-top: 3px;
+    margin-top: 2px;
 
     border: 1px solid #287b7b;
+
     border-radius: 17px;
 
     background: #287b7b;
+
     color: #fff;
 
     font-family: inherit;
+
     font-size: 11px;
+
     font-weight: 600;
 
     cursor: pointer;
+
+    transition: .2s;
 }
 
 .reservation-submit:hover {
@@ -182,9 +658,9 @@
 }
 
 
-/* =========================
+/* =========================================================
    LIST CARD
-========================= */
+========================================================= */
 
 .reservation-list-card {
     min-width: 0;
@@ -192,21 +668,25 @@
     background: #fff;
 
     border: 1px solid #e1e7e7;
+
     border-radius: 8px;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, .04);
 
     overflow: hidden;
 }
 
 
-/* =========================
+/* =========================================================
    LIST HEADER
-========================= */
+========================================================= */
 
 .reservation-list-top {
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     gap: 12px;
@@ -224,16 +704,29 @@
     color: #111;
 }
 
+.reservation-list-subtitle {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #888;
+
+    font-size: 8px;
+}
+
 .reservation-list-top input {
     width: 180px;
+
     height: 30px;
 
     padding: 0 10px;
 
     border: 1px solid #9fc2c2;
+
     border-radius: 15px;
 
     font-family: inherit;
+
     font-size: 10px;
 
     outline: none;
@@ -244,9 +737,9 @@
 }
 
 
-/* =========================
+/* =========================================================
    TABLE SCROLL
-========================= */
+========================================================= */
 
 .reservation-table-wrap {
     width: 100%;
@@ -254,14 +747,13 @@
     max-height: 430px;
 
     overflow-y: auto;
+
     overflow-x: auto;
 }
 
-
-/* Scrollbar */
-
 .reservation-table-wrap::-webkit-scrollbar {
     width: 7px;
+
     height: 7px;
 }
 
@@ -271,6 +763,7 @@
 
 .reservation-table-wrap::-webkit-scrollbar-thumb {
     background: #a7caca;
+
     border-radius: 10px;
 }
 
@@ -279,57 +772,121 @@
 }
 
 
-/* =========================
+/* =========================================================
    TABLE
-========================= */
+========================================================= */
 
 .reservation-table {
     width: 100%;
 
     border-collapse: collapse;
 
-    font-size: 11px;
+    font-size: 10px;
 }
 
 .reservation-table th {
     position: sticky;
+
     top: 0;
+
     z-index: 2;
 
-    padding: 10px 12px;
+    padding: 10px 10px;
 
     background: #a7caca;
 
     text-align: left;
 
     color: #111;
+
     font-weight: 700;
 
     white-space: nowrap;
 }
 
 .reservation-table td {
-    padding: 11px 12px;
+    padding: 10px;
 
     border-bottom: 1px solid #e6ebeb;
 
     color: #263b3b;
 
     vertical-align: middle;
+
+    white-space: nowrap;
 }
 
 .reservation-table tbody tr:hover {
     background: #f8fbfb;
 }
 
-/* =========================
+
+/* =========================================================
+   TEMPAT DUDUK DI TABEL
+========================================================= */
+
+.reservation-seat-info {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    min-width: 70px;
+}
+
+.reservation-seat-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: fit-content;
+
+    min-width: 50px;
+
+    height: 22px;
+
+    padding: 0 7px;
+
+    box-sizing: border-box;
+
+    border-radius: 5px;
+
+    background: #e2f0f0;
+
+    color: #287b7b;
+
+    font-size: 8px;
+
+    font-weight: 700;
+}
+
+.reservation-table-name {
+    color: #777;
+
+    font-size: 8px;
+
+    font-weight: 600;
+}
+
+.no-seat {
+    color: #aaa;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
    STATUS
-   ========================= */
+========================================================= */
 
 .reservation-status {
     display: inline-flex;
 
     align-items: center;
+
     justify-content: center;
 
     min-width: 58px;
@@ -339,68 +896,48 @@
     border-radius: 10px;
 
     font-size: 9px;
+
     font-weight: 600;
 
     white-space: nowrap;
 }
 
-
-/* MENUNGGU */
-
 .reservation-status.waiting {
     background: #eee8c7;
+
     color: #665d25;
 }
 
-
-/* DISETUJUI */
-
 .reservation-status.approved {
     background: #dfead8;
+
     color: #3d6433;
-}
 
-
-/* DITOLAK */
-
-.reservation-status.rejected {
-    background: #ead5d5;
-    color: #8a3c3c;
-}
-
-
-/* DIBATALKAN */
-
-.reservation-status.cancelled {
-    background: #e5e5e5;
-    color: #666;
-}
-
-
-/* SELESAI */
-
-.reservation-status.finished {
-    background: #dfe8ed;
-    color: #29485a;
-}
-
-/* telat */
-.reservation-status.late {
-    background: #ead5d5;
-    color: #8a3c3c;
-    border: 1px solid #d3aaaa;
-}
-
-/* aprove */
-.reservation-status.approved {
-    background: #dfead8;
-    color: #3d6433;
     border: 1px solid #b8cdaa;
 }
 
-/* =========================
+.reservation-status.rejected {
+    background: #ead5d5;
+
+    color: #8a3c3c;
+}
+
+.reservation-status.cancelled {
+    background: #e5e5e5;
+
+    color: #666;
+}
+
+.reservation-status.finished {
+    background: #dfe8ed;
+
+    color: #29485a;
+}
+
+
+/* =========================================================
    ACTION
-   ========================= */
+========================================================= */
 
 .reservation-actions {
     display: flex;
@@ -414,22 +951,23 @@
     margin: 0;
 }
 
-
-/* SETUJUI */
-
 .btn-approve {
     height: 28px;
 
     padding: 0 10px;
 
     border: 1px solid #8fb69a;
+
     border-radius: 14px;
 
     background: #e3efdf;
+
     color: #35642f;
 
     font-family: inherit;
+
     font-size: 9px;
+
     font-weight: 600;
 
     cursor: pointer;
@@ -439,22 +977,23 @@
     background: #d4e7cf;
 }
 
-
-/* TOLAK */
-
 .btn-reject {
     height: 28px;
 
     padding: 0 10px;
 
     border: 1px solid #d2a4a4;
+
     border-radius: 14px;
 
     background: #f8dddd;
+
     color: #8a2d2d;
 
     font-family: inherit;
+
     font-size: 9px;
+
     font-weight: 600;
 
     cursor: pointer;
@@ -464,9 +1003,6 @@
     background: #efd0d0;
 }
 
-
-/* SUDAH DIPROSES */
-
 .action-done {
     font-size: 10px;
 
@@ -474,9 +1010,9 @@
 }
 
 
-/* =========================
-   EMPTY STATE
-   ========================= */
+/* =========================================================
+   EMPTY
+========================================================= */
 
 .reservation-empty {
     padding: 30px !important;
@@ -486,23 +1022,287 @@
     color: #777 !important;
 }
 
+/* =========================================================
+   BADGE MEJA
+   ========================================================= */
 
-/* =========================
+.seat-table-badge {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    background: #e8f2f2;
+    border: 1px solid #b9d4d4;
+
+    color: #287b7b;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   BADGE KURSI
+   ========================================================= */
+
+.seat-number-badge {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 58px;
+    height: 24px;
+
+    padding: 0 8px;
+
+    box-sizing: border-box;
+
+    border-radius: 6px;
+
+    background: #f1f6f6;
+    border: 1px solid #c7dada;
+
+    color: #287b7b;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+/* =========================================================
+   DAFTAR RESERVASI - TEMPAT DUDUK
+========================================================= */
+
+.reservation-seat-info {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 4px;
+
+    min-width: 85px;
+}
+
+
+/* =========================================================
+   BADGE MEJA
+========================================================= */
+
+.seat-table-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 58px;
+
+    height: 22px;
+
+    padding: 0 8px;
+
+    box-sizing: border-box;
+
+    border-radius: 6px;
+
+    background: #e8f2f2;
+
+    border: 1px solid #b9d4d4;
+
+    color: #287b7b;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   BADGE KURSI
+========================================================= */
+
+.seat-number-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 58px;
+
+    height: 22px;
+
+    padding: 0 8px;
+
+    box-sizing: border-box;
+
+    border-radius: 6px;
+
+    background: #f1f6f6;
+
+    border: 1px solid #c7dada;
+
+    color: #287b7b;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   TIDAK ADA KURSI
+========================================================= */
+
+.no-seat {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #aaa;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   SEAT HOVER
+========================================================= */
+
+.seat:not(:disabled):hover {
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   SEAT YANG DIPILIH
+========================================================= */
+
+.seat.selected {
+    background: #8bc34a;
+
+    border-color: #6da52d;
+
+    color: #fff;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 2px 7px rgba(100, 160, 40, .25);
+}
+
+
+/* =========================================================
+   SEAT BOOKED
+========================================================= */
+
+.seat.booked {
+    background: #f2bcbc;
+
+    border-color: #d89595;
+
+    color: #8a4040;
+
+    cursor: not-allowed;
+
+    opacity: .9;
+}
+
+
+/* =========================================================
+   INFO HASIL PILIHAN
+========================================================= */
+
+.seat-selected-result {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-top: 8px;
+
+    padding: 8px 10px;
+
+    border: 1px solid #cfe1b9;
+
+    border-radius: 6px;
+
+    background: #f1f8e9;
+
+    color: #567044;
+
+    font-size: 8px;
+}
+
+.seat-selected-result strong {
+    color: #4c7d29;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   RESPONSIVE CARD RESERVASI
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .reservation-seat-info {
+        min-width: 70px;
+    }
+
+    .seat-table-badge,
+    .seat-number-badge {
+        min-width: 52px;
+    }
+
+}
+
+/* =========================================================
    RESPONSIVE
-   ========================= */
+========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
 
     .reservation-layout {
         grid-template-columns: 1fr;
     }
 
+    .seat-map {
+        grid-template-columns:
+            repeat(3, minmax(140px, 1fr));
+    }
+
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
     .reservation-date-row {
+        grid-template-columns: 1fr;
+    }
+
+    .seat-map {
         grid-template-columns: 1fr;
     }
 
@@ -517,11 +1317,26 @@
     }
 
     .reservation-table {
-        min-width: 750px;
+        min-width: 850px;
     }
 
     .reservation-actions {
         flex-wrap: wrap;
+    }
+
+}
+
+
+@media (max-width: 450px) {
+
+    .seat-selected-result {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .reset-seat-button {
+        width: 100%;
     }
 
 }

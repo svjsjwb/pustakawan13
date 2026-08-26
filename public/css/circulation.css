@@ -1,21 +1,22 @@
 /* =========================================================
    SIRKULASI / PEMINJAMAN BUKU
-   ========================================================= */
+========================================================= */
 
 #page-circulation {
     width: 100%;
+    box-sizing: border-box;
 }
 
 
 /* =========================================================
    ALERT
-   ========================================================= */
+========================================================= */
 
 #page-circulation .alert-success,
 #page-circulation .alert-error {
     margin-bottom: 14px;
     padding: 10px 14px;
-    border-radius: 6px;
+    border-radius: 7px;
     font-size: 11px;
 }
 
@@ -31,126 +32,345 @@
     color: #8a2d2d;
 }
 
+#page-circulation .error-list {
+    margin: 0;
+    padding-left: 18px;
+}
+
 
 /* =========================================================
-   LAYOUT KHUSUS SIRKULASI
-   ========================================================= */
+   TWO COLUMN
+========================================================= */
 
 #page-circulation .two-col {
-    grid-template-columns: 1fr 1.6fr;
-    gap: 20px;
+    display: grid;
+
+    grid-template-columns:
+        548px minmax(0, 1fr);
+
+    gap: 24px;
+
+    width: 100%;
+
     align-items: start;
 }
 
 
 /* =========================================================
-   FORM SIRKULASI
-   ========================================================= */
+   CARD
+========================================================= */
+
+#page-circulation .card {
+    background: #ffffff;
+
+    border: 1px solid #e1e5e9;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+}
+
+#page-circulation .form-card {
+    min-width: 0;
+}
+
+#page-circulation .card-pad {
+    padding: 20px;
+}
+
+#page-circulation h3 {
+    margin: 0 0 5px;
+
+    font-size: 18px;
+
+    color: #111827;
+}
+
+#page-circulation .loan-description {
+    margin: 0 0 20px;
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
 
 #page-circulation .field {
-    margin-bottom: 13px;
+    margin-bottom: 15px;
 }
 
 #page-circulation .field label {
-    font-size: 11px;
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 12px;
+
     font-weight: 600;
-    color: #263b3b;
+
+    color: #111827;
+}
+
+#page-circulation .field select,
+#page-circulation .field input {
+    width: 100%;
+
+    height: 40px;
+
+    padding: 0 11px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #111827;
+
+    outline: none;
+
+    font-family: inherit;
+
+    font-size: 12px;
+}
+
+#page-circulation .field select:focus,
+#page-circulation .field input:focus {
+    border-color: #62a8e8;
+
+    box-shadow:
+        0 0 0 2px rgba(98, 168, 232, .12);
+}
+
+#page-circulation .field input[type="date"] {
+    display: flex;
+
+    align-items: center;
+}
+
+#page-circulation .field input[type="date"]::-webkit-datetime-edit {
+    display: flex;
+
+    align-items: center;
+
+    padding: 0;
+}
+
+#page-circulation .field input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left: auto;
+}
+
+#page-circulation .field select option:disabled {
+    color: #999999;
+
+    background: #eeeeee;
 }
 
 #page-circulation .field-row {
-    grid-template-columns: 1fr 1fr;
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
     gap: 12px;
 }
 
 
 /* =========================================================
-   BUKU STOK HABIS
-   ========================================================= */
+   SUBMIT
+========================================================= */
 
-#page-circulation .field select option:disabled {
-    color: #999;
-    background: #eeeeee;
-}
+#page-circulation .loan-submit {
+    width: 100%;
 
+    height: 40px;
 
-/* =========================================================
-   FILTER SIRKULASI
-   ========================================================= */
+    margin-top: 5px;
 
-#page-circulation .filters {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-}
+    border: none;
 
-#page-circulation .filters input {
-    height: 32px;
-    min-width: 180px;
-    padding: 0 10px;
+    border-radius: 20px;
 
-    border: 1px solid #9fc2c2;
-    border-radius: 16px;
+    background: #278486;
+
+    color: #ffffff;
 
     font-family: inherit;
-    font-size: 11px;
 
-    outline: none;
-}
+    font-size: 12px;
 
-#page-circulation .filters input:focus {
-    border-color: #287b7b;
-}
-
-
-/* =========================================================
-   STATUS FILTER
-   ========================================================= */
-
-#page-circulation .seg {
-    display: inline-flex;
-    gap: 4px;
-}
-
-#page-circulation .seg button {
-    height: 30px;
-    padding: 0 11px;
-
-    border: 1px solid #9fc2c2;
-    border-radius: 15px;
-
-    background: #fff;
-    color: #287b7b;
-
-    font-family: inherit;
-    font-size: 10px;
+    font-weight: 700;
 
     cursor: pointer;
+
+    transition:
+        background .2s ease,
+        transform .15s ease;
 }
 
-#page-circulation .seg button:hover {
-    background: #eef7f7;
-}
+#page-circulation .loan-submit:hover {
+    background: #217174;
 
-#page-circulation .seg button.active {
-    background: #287b7b;
-    border-color: #287b7b;
-    color: #fff;
+    transform: translateY(-1px);
 }
 
 
 /* =========================================================
-   TABLE KHUSUS SIRKULASI
-   ========================================================= */
+   HEADER DAFTAR PEMINJAMAN
+========================================================= */
+
+#page-circulation .borrowing-header {
+    min-height: 68px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 14px 18px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+}
+
+#page-circulation .borrowing-header h3 {
+    margin: 0 0 3px;
+
+    font-size: 16px;
+
+    color: #111827;
+}
+
+#page-circulation .borrowing-header p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+#page-circulation .search-box {
+    flex-shrink: 0;
+}
+
+#page-circulation .search-box input {
+    width: 205px;
+
+    height: 32px;
+
+    padding: 0 12px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #9fc2c2;
+
+    border-radius: 18px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #374151;
+
+    font-family: inherit;
+
+    font-size: 10px;
+}
+
+#page-circulation .search-box input::placeholder {
+    color: #9ca3af;
+}
+
+#page-circulation .search-box input:focus {
+    border-color: #287b7b;
+
+    box-shadow:
+        0 0 0 2px rgba(40, 123, 123, .08);
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+#page-circulation .table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+#page-circulation table {
+    width: 100%;
+
+    min-width: 700px;
+
+    border-collapse: collapse;
+}
 
 #page-circulation table th {
-    color: #287b7b;
+    padding: 12px 10px;
+
+    background: #a8cfd0;
+
+    border-bottom: 1px solid #d9e0e3;
+
+    color: #174a4c;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-align: left;
+
     white-space: nowrap;
 }
 
+#page-circulation table th:nth-child(3),
+#page-circulation table th:nth-child(4) {
+    text-align: center;
+}
+
 #page-circulation table td {
-    color: #263b3b;
+    padding: 13px 10px;
+
+    border-bottom: 1px solid #eef0f2;
+
+    color: #263b3b !important;
+
+    font-size: 10px;
+
     vertical-align: middle;
+}
+
+#page-circulation table td:nth-child(3),
+#page-circulation table td:nth-child(4) {
+    text-align: center;
+}
+
+#page-circulation table td,
+#page-circulation table td span:not(.status-badge) {
+    color: #263b3b !important;
+
+    text-decoration: none !important;
 }
 
 #page-circulation table tbody tr:hover {
@@ -159,87 +379,113 @@
 
 
 /* =========================================================
-   STATUS BADGE
-   ========================================================= */
+   STATUS
+========================================================= */
 
 #page-circulation .status-badge {
     display: inline-flex;
+
     align-items: center;
 
-    padding: 4px 8px;
+    justify-content: center;
 
-    border-radius: 10px;
+    padding: 5px 9px;
+
+    border-radius: 999px;
 
     font-size: 9px;
+
     font-weight: 600;
+
+    white-space: nowrap;
 }
 
 #page-circulation .status-badge.aktif {
     background: #e1f0f0;
+
     color: #287b7b;
 }
 
 #page-circulation .status-badge.terlambat {
     background: #f8dddd;
+
     color: #9b3333;
 }
 
 #page-circulation .status-badge.kembali {
     background: #e3efdf;
+
     color: #3d7035;
 }
 
 
 /* =========================================================
-   EMPTY STATE
-   ========================================================= */
-
-#page-circulation .empty-state {
-    padding: 30px !important;
-    text-align: center;
-    color: #777;
-}
-
-/* =========================================================
-   FORM ELEMENT TAMBAHAN
-   ========================================================= */
-
-#page-circulation .loan-description {
-    margin: 0 0 16px;
-    font-size: 12px;
-    color: var(--muted);
-}
-
-#page-circulation .loan-submit {
-    width: 100%;
-    justify-content: center;
-}
-
-#page-circulation .error-list {
-    margin: 0;
-    padding-left: 18px;
-}
-
-
-/* =========================================================
-   RETURN BUTTON
-   ========================================================= */
+   BUTTON KEMBALIKAN
+========================================================= */
 
 #page-circulation .return-form {
     margin: 0;
 }
 
+#page-circulation .btn-secondary {
+    padding: 8px 12px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #f3f4f6;
+
+    color: #374151;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+#page-circulation .btn-secondary:hover {
+    background: #e5e7eb;
+}
+
 #page-circulation .completed-text {
-    font-size: 11px;
-    color: var(--muted);
+    color: #6b7280;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+#page-circulation .empty-state {
+    padding: 30px !important;
+
+    text-align: center;
+
+    color: #9ca3af !important;
 }
 
 
 /* =========================================================
    RESPONSIVE
-   ========================================================= */
+========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
+
+    #page-circulation .two-col {
+        grid-template-columns:
+            500px minmax(0, 1fr);
+    }
+
+}
+
+
+@media (max-width: 1050px) {
 
     #page-circulation .two-col {
         grid-template-columns: 1fr;
@@ -248,29 +494,33 @@
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
     #page-circulation .field-row {
         grid-template-columns: 1fr;
     }
 
-    #page-circulation .filters {
+    #page-circulation .borrowing-header {
+        align-items: flex-start;
+
         flex-direction: column;
-        align-items: stretch;
     }
 
-    #page-circulation .filters input {
+    #page-circulation .search-box {
         width: 100%;
     }
 
-    #page-circulation .seg {
+    #page-circulation .search-box input {
         width: 100%;
-        overflow-x: auto;
     }
 
-    #page-circulation .seg button {
-        flex: 1;
-        white-space: nowrap;
+}
+
+
+@media (max-width: 480px) {
+
+    #page-circulation .card-pad {
+        padding: 15px;
     }
 
 }

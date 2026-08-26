@@ -5,7 +5,7 @@
   --card: #FFFFFF;
   --line: #E4E0D4;
   --line-soft: #ECE9DD;
-  --primary: #1E3A5F;
+  --primary: #287879;
   --primary-soft: #EAF0F6;
   --brass: #B8863B;
   --brass-soft: #F7EEDC;
@@ -42,7 +42,7 @@ h1,
 h2,
 h3,
 .serif {
-  font-family: 'Source Serif 4', serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .mono {
@@ -162,6 +162,7 @@ button {
   position: relative;
   overflow: hidden;
   padding: 18px 18px 16px;
+  margin-top: 20px;
 }
 
 .stat-top {

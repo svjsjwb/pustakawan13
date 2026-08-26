@@ -26,6 +26,7 @@
         href="{{ asset('css/footer.css') }}">
 
     @stack('styles')
+    @stack('scripts')
 
 </head>
 

@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\Rack;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
     public function index()
     {
-        $books = Book::with('category')->get();
+        $books = Book::with('category')->latest()->get();
 
         return view('books.index', compact('books'));
     }
@@ -18,21 +19,23 @@ class BookController extends Controller
     public function create()
     {
         $categories = Category::all();
+        $racks = Rack::orderBy('code')->get();
 
-        return view('books.create', compact('categories'));
+        return view('books.create', compact('categories', 'racks'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'category_id' => 'required',
-            'title' => 'required',
-            'author' => 'required',
-            'publisher' => 'required',
+            'category_id'      => 'required',
+            'title'            => 'required',
+            'author'           => 'required',
+            'publisher'        => 'required',
             'publication_year' => 'required',
-            'isbn' => 'required|unique:books',
-            'call_number' => 'required|unique:books',
-            'stock' => 'required|integer|min:1',
+            'isbn'             => 'required|unique:books',
+            'call_number'      => 'required|unique:books',
+            'stock'            => 'required|integer|min:1',
+            'rak'              => 'required|exists:racks,code',
         ]);
 
         $cover = null;
@@ -42,17 +45,22 @@ class BookController extends Controller
         }
 
         Book::create([
-            'category_id' => $request->category_id,
-            'title' => $request->title,
-            'author' => $request->author,
-            'publisher' => $request->publisher,
+            'category_id'      => $request->category_id,
+            'title'            => $request->title,
+            'author'           => $request->author,
+            'publisher'        => $request->publisher,
             'publication_year' => $request->publication_year,
-            'isbn' => $request->isbn,
-            'call_number' => $request->call_number,
-            'stock' => $request->stock,
-            'available_stock' => $request->stock,
-            'description' => $request->description,
-            'cover' => $cover,
+            'isbn'             => $request->isbn,
+            'call_number'      => $request->call_number,
+            'stock'            => $request->stock,
+            'available_stock'  => $request->stock,
+            'description'      => $request->description,
+            'cover'            => $cover,
+            'no_iventaris'     => $request->no_iventaris,
+            'kode_buku'        => $request->kode_buku,
+            'ddc'              => $request->ddc,
+            'rak'              => $request->rak,
+            'edition'          => $request->edition,
         ]);
 
         return redirect()
@@ -63,21 +71,23 @@ class BookController extends Controller
     public function edit(Book $book)
     {
         $categories = Category::all();
+        $racks = Rack::orderBy('code')->get();
 
-        return view('books.edit', compact('book', 'categories'));
+        return view('books.edit', compact('book', 'categories', 'racks'));
     }
 
     public function update(Request $request, Book $book)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'publisher' => 'required|string|max:255',
+            'category_id'      => 'required|exists:categories,id',
+            'title'            => 'required|string|max:255',
+            'author'           => 'required|string|max:255',
+            'publisher'        => 'required|string|max:255',
             'publication_year' => 'required|integer',
-            'isbn' => 'required|unique:books,isbn,' . $book->id,
-            'call_number' => 'required|unique:books,call_number,' . $book->id,
-            'stock' => 'required|integer|min:1',
+            'isbn'             => 'required|unique:books,isbn,' . $book->id,
+            'call_number'      => 'required|unique:books,call_number,' . $book->id,
+            'stock'            => 'required|integer|min:1',
+            'rak'              => 'required|exists:racks,code',
         ]);
 
         // Jumlah buku yang sedang dipinjam
@@ -102,17 +112,22 @@ class BookController extends Controller
         }
 
         $book->update([
-            'category_id' => $request->category_id,
-            'title' => $request->title,
-            'author' => $request->author,
-            'publisher' => $request->publisher,
+            'category_id'      => $request->category_id,
+            'title'            => $request->title,
+            'author'           => $request->author,
+            'publisher'        => $request->publisher,
             'publication_year' => $request->publication_year,
-            'isbn' => $request->isbn,
-            'call_number' => $request->call_number,
-            'stock' => $request->stock,
-            'available_stock' => $availableStock,
-            'description' => $request->description,
-            'cover' => $cover,
+            'isbn'             => $request->isbn,
+            'call_number'      => $request->call_number,
+            'stock'            => $request->stock,
+            'available_stock'  => $availableStock,
+            'description'      => $request->description,
+            'cover'            => $cover,
+            'no_iventaris'     => $request->no_iventaris,
+            'kode_buku'        => $request->kode_buku,
+            'ddc'              => $request->ddc,
+            'rak'              => $request->rak,
+            'edition'          => $request->edition,
         ]);
 
         return redirect()
