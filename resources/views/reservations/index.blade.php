@@ -4,6 +4,132 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/reservations.css') }}">
+    <!-- Flatpickr CSS untuk Kalender Rentang Tanggal Interaktif -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <style>
+        .reservation-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 14px;
+            margin-bottom: 14px;
+            padding: 0;
+            background: transparent;
+            border: none;
+        }
+
+        .date-range-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-range-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .date-range-icon {
+            position: absolute;
+            left: 15px;
+            color: #64748b;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .date-range-input {
+            margin-left: 8px;
+            padding: 7px 12px 7px 32px;
+            font-size: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background-color: #fff;
+            color: #1e293b;
+            min-width: 230px;
+            cursor: pointer;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .date-range-input:focus {
+            border-color: #287b7b;
+            outline: 0;
+            box-shadow: 0 0 0 2px rgba(40, 123, 123, 0.15);
+        }
+
+        .btn-filter-submit {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            background-color: #287b7b;
+            border: 1px solid #287b7b;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .btn-filter-submit:hover {
+            background-color: #287b7b;
+            border-color: #287b7b;
+        }
+
+        .btn-filter-reset {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748b;
+            background-color: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-filter-reset:hover {
+            background-color: #f1f5f9;
+            color: #334155;
+            border-color: #94a3b8;
+        }
+
+        .filter-badge-active {
+            display: inline-flex;
+            align-items: center;
+            font-size: 11px;
+            padding: 3px 8px;
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border-radius: 4px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .reservation-search-wrapper {
+            flex-grow: 1;
+            max-width: 250px;
+            margin-right: 8px;
+        }
+
+        .reservation-search-wrapper input {
+            width: 100%;
+            
+            padding: 7px 12px;
+            font-size: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -217,7 +343,7 @@
 
 
             {{-- =============================================
-                 HEADER
+                 HEADER & FILTER BAR RENTANG TANGGAL
             ============================================== --}}
 
             <div class="reservation-list-top">
@@ -232,14 +358,79 @@
                         Daftar buku yang telah direservasi.
                     </span>
 
+                    @if(request('start_date') && request('end_date'))
+                        <div>
+                            <span class="filter-badge-active">
+                                📅 Filter: {{ \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') }} - {{ \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') }}
+                            </span>
+                        </div>
+                    @endif
+
                 </div>
 
+            </div>
 
-                <input
-                    type="text"
-                    id="reservationSearch"
-                    placeholder="Cari reservasi..."
+            {{-- =============================================
+                 FILTER KALENDER RENTANG TANGGAL (DATE RANGE PICKER)
+            ============================================== --}}
+            <div class="reservation-filter-bar">
+
+                <form
+                    action="{{ route('reservations.index') }}"
+                    method="GET"
+                    class="date-range-form"
+                    id="dateRangeFilterForm"
                 >
+                    {{-- Input Kalender Pemilih Rentang Tanggal Interaktif --}}
+                    <div class="date-range-wrapper">
+                        <span class="date-range-icon">📅</span>
+                        <input
+                            type="text"
+                            id="dateRangePicker"
+                            class="date-range-input"
+                            placeholder="Pilih rentang tanggal..."
+                            readonly
+                        >
+                        {{-- Hidden Input untuk dikirim ke Controller --}}
+                        <input
+                            type="hidden"
+                            name="start_date"
+                            id="startDateInput"
+                            value="{{ request('start_date') }}"
+                        >
+                        <input
+                            type="hidden"
+                            name="end_date"
+                            id="endDateInput"
+                            value="{{ request('end_date') }}"
+                        >
+                    </div>
+
+                    {{-- Tombol Filter --}}
+                    <button type="submit" class="btn-filter-submit">
+                        Terapkan
+                    </button>
+
+                    {{-- Tombol Reset Filter --}}
+                    @if(request('start_date') || request('end_date'))
+                        <a
+                            href="{{ route('reservations.index') }}"
+                            class="btn-filter-reset"
+                            title="Reset Filter"
+                        >
+                            Reset
+                        </a>
+                    @endif
+                </form>
+
+                {{-- Live Search Input --}}
+                <div class="reservation-search-wrapper">
+                    <input
+                        type="text"
+                        id="reservationSearch"
+                        placeholder="Cari di tabel..."
+                    >
+                </div>
 
             </div>
 
@@ -446,7 +637,11 @@
                                     colspan="5"
                                     class="reservation-empty"
                                 >
-                                    Belum ada reservasi.
+                                    @if(request('start_date') && request('end_date'))
+                                        Tidak ada data reservasi pada rentang tanggal {{ \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') }} s/d {{ \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') }}.
+                                    @else
+                                        Belum ada reservasi.
+                                    @endif
                                 </td>
 
                             </tr>
@@ -465,15 +660,61 @@
 
 </section>
 
+@endsection
 
-{{-- =========================================================
-     JAVASCRIPT
-========================================================= --}}
+@push('scripts')
+<!-- Flatpickr JS & Bahasa Indonesia -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
 
 <script>
-
 document.addEventListener('DOMContentLoaded', function () {
 
+    /*
+     * =========================================================
+     * INISIALISASI FLATPICKR MODE RANGE (KALENDER RENTANG BEBAS)
+     * =========================================================
+     */
+    const startDateVal = "{{ request('start_date') }}";
+    const endDateVal = "{{ request('end_date') }}";
+
+    let defaultDateRange = [];
+    if (startDateVal && endDateVal) {
+        defaultDateRange = [startDateVal, endDateVal];
+    } else if (startDateVal) {
+        defaultDateRange = [startDateVal];
+    }
+
+    const picker = flatpickr("#dateRangePicker", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "j M Y",
+        locale: typeof flatpickr.l10ns.id !== "undefined" ? flatpickr.l10ns.id : "default",
+        defaultDate: defaultDateRange,
+        allowInput: false,
+        onChange: function (selectedDates, dateStr, instance) {
+            const startInput = document.getElementById('startDateInput');
+            const endInput = document.getElementById('endDateInput');
+
+            if (selectedDates.length === 2) {
+                startInput.value = instance.formatDate(selectedDates[0], "Y-m-d");
+                endInput.value = instance.formatDate(selectedDates[1], "Y-m-d");
+            } else if (selectedDates.length === 1) {
+                startInput.value = instance.formatDate(selectedDates[0], "Y-m-d");
+                endInput.value = "";
+            } else {
+                startInput.value = "";
+                endInput.value = "";
+            }
+        }
+    });
+
+    /*
+     * =========================================================
+     * LIVE SEARCH FILTER PADA TABEL
+     * =========================================================
+     */
     const searchInput = document.getElementById('reservationSearch');
     const rows = document.querySelectorAll('#reservationTable tbody tr.reservation-row');
 
@@ -494,7 +735,5 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 });
-
 </script>
-
-@endsection
+@endpush

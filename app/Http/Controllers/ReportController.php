@@ -95,141 +95,67 @@ class ReportController extends Controller
      * month = tanggal 1 - akhir bulan
      * ============================================================
      */
+    /**
+     * ============================================================
+     * TENTUKAN PERIODE DARI CALENDAR / DATE RANGE PICKER
+     * ============================================================
+     */
     private function getPeriod(Request $request)
     {
-        $rangeType = $request->query(
-            'range_type',
-            'month'
-        );
+        $startDateInput = $request->query('start_date');
+        $endDateInput = $request->query('end_date');
 
-        if (!in_array(
-            $rangeType,
-            ['day', 'week', 'month']
-        )) {
-            $rangeType = 'month';
+        if ($startDateInput && $endDateInput) {
+            try {
+                $startDate = Carbon::createFromFormat('Y-m-d', $startDateInput)->startOfDay();
+                $endDate = Carbon::createFromFormat('Y-m-d', $endDateInput)->endOfDay();
+
+                if ($startDate->gt($endDate)) {
+                    $temp = $startDate;
+                    $startDate = $endDate->copy()->startOfDay();
+                    $endDate = $temp->copy()->endOfDay();
+                }
+
+                $diffDays = $startDate->diffInDays($endDate) + 1;
+                $label = $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y');
+
+                if ($diffDays <= 1) {
+                    $rangeType = 'day';
+                } elseif ($diffDays <= 7) {
+                    $rangeType = 'week';
+                } else {
+                    $rangeType = 'month';
+                }
+
+                return [
+                    'type' => $rangeType,
+                    'label' => $label,
+                    'start' => $startDate,
+                    'end' => $endDate,
+                    'selectedDate' => $startDate->format('Y-m-d'),
+                    'startDateInput' => $startDate->format('Y-m-d'),
+                    'endDateInput' => $endDate->format('Y-m-d'),
+                ];
+            } catch (\Exception $e) {
+                // Lanjut ke default jika parsing error
+            }
         }
-
-
-        $selectedDate =
-            $request->query(
-                'selected_date'
-            );
-
 
         /*
-         * Default tanggal = hari ini.
+         * Default periode: Awal bulan s/d Akhir bulan ini
          */
-        if (!$selectedDate) {
-            $selectedDate =
-                now()->format('Y-m-d');
-        }
-
-
-        /*
-         * Validasi tanggal.
-         */
-        try {
-
-            $date = Carbon::createFromFormat(
-                'Y-m-d',
-                $selectedDate
-            );
-
-        } catch (\Exception $e) {
-
-            $date = now();
-        }
-
-
-        /*
-         * ========================================================
-         * HARIAN
-         * ========================================================
-         */
-        if ($rangeType === 'day') {
-
-            $startDate =
-                $date->copy()
-                    ->startOfDay();
-
-            $endDate =
-                $date->copy()
-                    ->endOfDay();
-
-            $label =
-                $date->translatedFormat(
-                    'd F Y'
-                );
-        }
-
-
-        /*
-         * ========================================================
-         * MINGGUAN
-         * ========================================================
-         */
-        elseif ($rangeType === 'week') {
-
-            $startDate =
-                $date->copy()
-                    ->startOfWeek(
-                        Carbon::MONDAY
-                    )
-                    ->startOfDay();
-
-            $endDate =
-                $date->copy()
-                    ->endOfWeek(
-                        Carbon::SUNDAY
-                    )
-                    ->endOfDay();
-
-            $label =
-                $startDate->translatedFormat(
-                    'd M Y'
-                )
-                . ' - ' .
-                $endDate->translatedFormat(
-                    'd M Y'
-                );
-        }
-
-
-        /*
-         * ========================================================
-         * BULANAN
-         * ========================================================
-         */
-        else {
-
-            $startDate =
-                $date->copy()
-                    ->startOfMonth()
-                    ->startOfDay();
-
-            $endDate =
-                $date->copy()
-                    ->endOfMonth()
-                    ->endOfDay();
-
-            $label =
-                $date->translatedFormat(
-                    'F Y'
-                );
-        }
-
+        $startDate = now()->startOfMonth()->startOfDay();
+        $endDate = now()->endOfMonth()->endOfDay();
+        $label = $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y');
 
         return [
-            'type' => $rangeType,
-
+            'type' => 'month',
             'label' => $label,
-
             'start' => $startDate,
-
             'end' => $endDate,
-
-            'selectedDate' =>
-                $date->format('Y-m-d'),
+            'selectedDate' => now()->format('Y-m-d'),
+            'startDateInput' => $startDate->format('Y-m-d'),
+            'endDateInput' => $endDate->format('Y-m-d'),
         ];
     }
 
@@ -269,22 +195,41 @@ class ReportController extends Controller
         $selectedDate =
             $period['selectedDate'];
 
+        $startDateInput =
+            $period['startDateInput'];
+
+        $endDateInput =
+            $period['endDateInput'];
+
 
         /*
          * ========================================================
-         * PEMINJAMAN
+         * DATA PEMINJAMAN BUKU
          * ========================================================
          *
-         * Data dihitung berdasarkan created_at.
+         * Filter query database menggunakan whereBetween pada kolom borrowed_at / created_at.
          */
-        $borrowedBooks =
-            Borrowing::whereBetween(
-                'created_at',
+        $borrowings = Borrowing::with(['member', 'details.book'])
+            ->whereBetween(
+                'borrowed_at',
                 [
                     $startDate,
                     $endDate
                 ]
-            )->count();
+            )
+            ->latest('borrowed_at')
+            ->get();
+
+        $borrowedBooks = $borrowings->count();
+
+        // Ringkasan metrik peminjaman
+        $totalBorrowed = $borrowings->count();
+        $totalReturned = $borrowings->where('status', 'dikembalikan')->count();
+        $totalActiveBorrow = $borrowings->where('status', 'dipinjam')->count();
+        $totalLate = $borrowings->where('status', 'dipinjam')
+            ->filter(function ($item) {
+                return $item->due_at && Carbon::parse($item->due_at)->isPast();
+            })->count();
 
 
         /*
@@ -393,6 +338,30 @@ class ReportController extends Controller
 
 
         /*
+         * Format data untuk kebutuhan ekspor PDF / Excel
+         */
+        $borrowingsExportData = $borrowings->map(function ($item, $index) {
+            $bookTitles = $item->details->map(function ($d) {
+                return ($d->book->title ?? 'Buku') . ($d->quantity > 1 ? ' (' . $d->quantity . 'x)' : '');
+            })->implode(', ');
+
+            $isLate = ($item->status === 'dipinjam' && $item->due_at && Carbon::parse($item->due_at)->isPast());
+            $statusText = $item->status === 'dikembalikan' ? 'Dikembalikan' : ($isLate ? 'Terlambat' : 'Dipinjam');
+
+            return [
+                'no' => $index + 1,
+                'member_name' => $item->member->name ?? ('Anggota #' . $item->member_id),
+                'member_code' => $item->member->member_code ?? '-',
+                'books' => $bookTitles ?: 'Tidak ada rincian',
+                'borrowed_at' => Carbon::parse($item->borrowed_at)->translatedFormat('d M Y'),
+                'due_at' => $item->due_at ? Carbon::parse($item->due_at)->translatedFormat('d M Y') : '-',
+                'returned_at' => $item->returned_at ? Carbon::parse($item->returned_at)->translatedFormat('d M Y') : '-',
+                'status' => $statusText,
+            ];
+        })->values()->toArray();
+
+
+        /*
          * ========================================================
          * KIRIM DATA KE VIEW
          * ========================================================
@@ -402,6 +371,13 @@ class ReportController extends Controller
             compact(
                 'reports',
 
+                'borrowings',
+                'borrowingsExportData',
+                'totalBorrowed',
+                'totalReturned',
+                'totalActiveBorrow',
+                'totalLate',
+
                 'totalBooks',
                 'borrowedBooks',
                 'activeMembers',
@@ -410,6 +386,10 @@ class ReportController extends Controller
                 'periodLabel',
                 'periodType',
                 'selectedDate',
+                'startDateInput',
+                'endDateInput',
+                'startDate',
+                'endDate',
 
                 'borrowChartLabels',
                 'borrowChartBars',
@@ -439,7 +419,7 @@ class ReportController extends Controller
     ) {
         return $this->generateDateChart(
             Borrowing::query(),
-            'created_at',
+            'borrowed_at',
             $startDate,
             $endDate,
             $type,
