@@ -37,10 +37,9 @@
         stroke="currentColor"
         stroke-width="2.5"
         stroke-linecap="round"
-        stroke-linejoin="round"
-    >
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-        <polyline points="22 4 12 14.01 9 11.01"/>
+        stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
     </svg>
 
     <span>
@@ -63,8 +62,7 @@
         {{-- Tambah Buku Baru --}}
         <a
             href="{{ route('books.create') }}"
-            class="book-toolbar-btn book-toolbar-add"
-        >
+            class="book-toolbar-btn book-toolbar-add">
             + Tambah Buku Baru
         </a>
 
@@ -79,20 +77,17 @@
                 stroke="currentColor"
                 stroke-width="2"
                 stroke-linecap="round"
-                stroke-linejoin="round"
-            >
+                stroke-linejoin="round">
                 <circle
                     cx="11"
                     cy="11"
-                    r="8"
-                ></circle>
+                    r="8"></circle>
 
                 <line
                     x1="21"
                     y1="21"
                     x2="16.65"
-                    y2="16.65"
-                ></line>
+                    y2="16.65"></line>
 
             </svg>
 
@@ -102,8 +97,7 @@
                 id="books-search"
                 class="book-search-input"
                 placeholder="Cari buku..."
-                autocomplete="off"
-            >
+                autocomplete="off">
 
         </div>
 
@@ -135,21 +129,20 @@
 
             <select
                 id="books-filter-kategori"
-                class="books-category-filter"
-            >
+                class="books-category-filter">
 
                 <option value="">
                     Semua Kategori
                 </option>
 
                 @foreach(
-                    $books->pluck('category')->unique('id')->filter()
-                    as $category
+                $books->pluck('category')->unique('id')->filter()
+                as $category
                 )
 
-                    <option value="{{ $category->id }}">
-                        {{ $category->name }}
-                    </option>
+                <option value="{{ $category->id }}">
+                    {{ $category->name }}
+                </option>
 
                 @endforeach
 
@@ -207,308 +200,303 @@
 
         </thead>
 
-<tbody>
 
-    @forelse($books as $book)
+        <tbody>
 
-        <tr
-            data-category="{{ $book->category_id }}"
-        >
+            @forelse($books as $book)
 
-            {{-- Judul --}}
-            <td>
+            <tr
+                data-category="{{ $book->category_id }}">
 
-                <strong>
-                    {{ $book->title }}
-                </strong>
+                {{-- Judul --}}
+                <td>
 
-            </td>
+                    <strong>
+                        {{ $book->title }}
+                    </strong>
 
-
-            {{-- Penulis --}}
-            <td>
-
-                {{ $book->author ?? '-' }}
-
-            </td>
+                </td>
 
 
-            {{-- ISBN --}}
-            <td>
+                {{-- Penulis --}}
+                <td>
 
-                {{ $book->isbn ?? '-' }}
+                    {{ $book->author ?? '-' }}
 
-            </td>
-
-
-            {{-- Kategori --}}
-            <td>
-
-                {{ $book->category->name ?? '-' }}
-
-            </td>
+                </td>
 
 
-            {{-- Stok --}}
-            <td>
+                {{-- ISBN --}}
+                <td>
 
-                {{ $book->available_stock ?? 0 }}
+                    {{ $book->isbn ?? '-' }}
 
-            </td>
-
-
-            {{-- Aksi --}}
-            <td>
-
-                <div class="book-actions">
+                </td>
 
 
-                    {{-- Kelola Eksemplar --}}
-                    <a
-                        href="{{ route('books.copies.index', $book) }}"
-                        class="action-copy"
-                        title="Kelola eksemplar"
-                    >
-                        📚
-                    </a>
+                {{-- Kategori --}}
+                <td>
+
+                    {{ $book->category->name ?? '-' }}
+
+                </td>
 
 
-                    {{-- Edit --}}
-                    <a
-                        href="{{ route('books.edit', $book) }}"
-                        class="action-edit"
-                        title="Edit buku"
-                    >
-                        ✎
-                    </a>
+                {{-- Stok --}}
+                <td>
+
+                    {{ $book->available_stock ?? 0 }}
+
+                </td>
 
 
-                    {{-- Hapus --}}
-                    <form
-                        action="{{ route('books.destroy', $book) }}"
-                        method="POST"
-                        onsubmit="return confirm('Yakin ingin menghapus buku ini?')"
-                    >
+                {{-- Aksi --}}
+                <td>
 
-                        @csrf
-
-                        @method('DELETE')
-
-                        <button
-                            type="submit"
-                            class="action-delete"
-                            title="Hapus buku"
-                        >
-                            🗑
-                        </button>
-
-                    </form>
+                    <div class="book-actions">
 
 
-                </div>
-
-            </td>
-
-        </tr>
-
-
-    @empty
-
-        <tr>
-
-            <td
-                colspan="6"
-                class="empty-books"
-            >
-                Belum ada data buku.
-            </td>
-
-        </tr>
-
-    @endforelse
+                        {{-- Kelola Eksemplar --}}
+                        <a
+                            href="{{ route('books.copies.index', $book) }}"
+                            class="action-copy"
+                            title="Kelola eksemplar">
+                            📚
+                        </a>
 
 
-    {{-- Tidak ditemukan --}}
-    <tr
-        id="no-search-results"
-        style="display: none;"
-    >
-
-        <td
-            colspan="6"
-            class="empty-books"
-        >
-            Tidak ada buku yang sesuai dengan pencarian.
-        </td>
-
-    </tr>
+                        {{-- Edit --}}
+                        <a
+                            href="{{ route('books.edit', $book) }}"
+                            class="action-edit"
+                            title="Edit buku">
+                            ✎
+                        </a>
 
 
-</tbody>
+                        {{-- Hapus --}}
+                        <form
+                            action="{{ route('books.destroy', $book) }}"
+                            method="POST"
+                            onsubmit="return confirm('Yakin ingin menghapus buku ini?')">
+
+                            @csrf
+
+                            @method('DELETE')
+
+                            <button
+                                type="submit"
+                                class="action-delete"
+                                title="Hapus buku">
+                                🗑
+                            </button>
+
+                        </form>
+
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+
+            @empty
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="empty-books">
+                    Belum ada data buku.
+                </td>
+
+            </tr>
+
+            @endforelse
+
+
+            {{-- Tidak ditemukan --}}
+            <tr
+                id="no-search-results"
+                style="display: none;">
+
+                <td
+                    colspan="6"
+                    class="empty-books">
+                    Tidak ada buku yang sesuai dengan pencarian.
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
 
 {{-- =====================================================
      SEARCH & FILTER JAVASCRIPT
 ====================================================== --}}
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
 
-document.addEventListener('DOMContentLoaded', function () {
+        const searchInput =
+            document.getElementById('books-search');
 
-    const searchInput =
-        document.getElementById('books-search');
+        const filterCategory =
+            document.getElementById('books-filter-kategori');
 
-    const filterCategory =
-        document.getElementById('books-filter-kategori');
+        const rows =
+            document.querySelectorAll(
+                '.books-table tbody tr[data-category]'
+            );
 
-    const rows =
-        document.querySelectorAll(
-            '.books-table tbody tr[data-category]'
-        );
+        const totalCountEl =
+            document.querySelector('.book-total');
 
-    const totalCountEl =
-        document.querySelector('.book-total');
-
-    const noResultsRow =
-        document.getElementById('no-search-results');
-
-
-    /**
-     * ==================================================
-     * FILTER DATA BUKU
-     * ==================================================
-     */
-    function applyFilters() {
-
-        const keyword =
-            searchInput
-                ? searchInput.value.toLowerCase().trim()
-                : '';
-
-        const selectedCategory =
-            filterCategory
-                ? filterCategory.value
-                : '';
+        const noResultsRow =
+            document.getElementById('no-search-results');
 
 
-        let visibleCount = 0;
+        /**
+         * ==================================================
+         * FILTER DATA BUKU
+         * ==================================================
+         */
+        function applyFilters() {
+
+            const keyword =
+                searchInput ?
+                searchInput.value.toLowerCase().trim() :
+                '';
+
+            const selectedCategory =
+                filterCategory ?
+                filterCategory.value :
+                '';
 
 
-        rows.forEach(function (row) {
-
-            const category =
-                row.dataset.category || '';
+            let visibleCount = 0;
 
 
-            /*
-             * Ambil seluruh isi baris:
-             *
-             * Judul
-             * Penulis
-             * ISBN
-             * Kategori
-             * Stok
-             */
-            const rowText =
-                row.textContent
+            rows.forEach(function(row) {
+
+                const category =
+                    row.dataset.category || '';
+
+
+                /*
+                 * Ambil seluruh isi baris:
+                 *
+                 * Judul
+                 * Penulis
+                 * ISBN
+                 * Kategori
+                 * Stok
+                 */
+                const rowText =
+                    row.textContent
                     .toLowerCase()
                     .trim();
 
 
-            const matchSearch =
-                keyword === '' ||
-                rowText.includes(keyword);
+                const matchSearch =
+                    keyword === '' ||
+                    rowText.includes(keyword);
 
 
-            const matchCategory =
-                selectedCategory === '' ||
-                category === selectedCategory;
+                const matchCategory =
+                    selectedCategory === '' ||
+                    category === selectedCategory;
 
 
-            if (
-                matchSearch &&
-                matchCategory
-            ) {
+                if (
+                    matchSearch &&
+                    matchCategory
+                ) {
 
-                row.style.display = '';
+                    row.style.display = '';
 
-                visibleCount++;
+                    visibleCount++;
 
-            } else {
+                } else {
 
-                row.style.display = 'none';
+                    row.style.display = 'none';
+
+                }
+
+            });
+
+
+            /*
+             * Update jumlah buku
+             */
+            if (totalCountEl) {
+
+                totalCountEl.textContent =
+                    'Total: ' +
+                    visibleCount +
+                    ' Buku';
 
             }
 
-        });
 
+            /*
+             * Tampilkan pesan jika tidak ditemukan
+             */
+            if (noResultsRow) {
 
-        /*
-         * Update jumlah buku
-         */
-        if (totalCountEl) {
+                if (
+                    visibleCount === 0 &&
+                    rows.length > 0
+                ) {
 
-            totalCountEl.textContent =
-                'Total: ' +
-                visibleCount +
-                ' Buku';
+                    noResultsRow.style.display = '';
+
+                } else {
+
+                    noResultsRow.style.display = 'none';
+
+                }
+
+            }
 
         }
 
 
-        /*
-         * Tampilkan pesan jika tidak ditemukan
+        /**
+         * ==================================================
+         * SEARCH LANGSUNG SAAT MENGETIK
+         * ==================================================
          */
-        if (noResultsRow) {
+        if (searchInput) {
 
-            if (
-                visibleCount === 0 &&
-                rows.length > 0
-            ) {
-
-                noResultsRow.style.display = '';
-
-            } else {
-
-                noResultsRow.style.display = 'none';
-
-            }
+            searchInput.addEventListener(
+                'input',
+                applyFilters
+            );
 
         }
 
-    }
 
+        /**
+         * ==================================================
+         * FILTER KATEGORI
+         * ==================================================
+         */
+        if (filterCategory) {
 
-    /**
-     * ==================================================
-     * SEARCH LANGSUNG SAAT MENGETIK
-     * ==================================================
-     */
-    if (searchInput) {
+            filterCategory.addEventListener(
+                'change',
+                applyFilters
+            );
 
-        searchInput.addEventListener(
-            'input',
-            applyFilters
-        );
+        }
 
-    }
-
-
-    /**
-     * ==================================================
-     * FILTER KATEGORI
-     * ==================================================
-     */
-    if (filterCategory) {
-
-        filterCategory.addEventListener(
-            'change',
-            applyFilters
-        );
-
-    }
-
-});
-
+    });
 </script>
 
 @endsection

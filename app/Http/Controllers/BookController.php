@@ -29,6 +29,7 @@ class BookController extends Controller
         $request->validate([
             'category_id'      => 'required',
             'title'            => 'required',
+            'sku'              => 'required|string|max:100|unique:books,sku',
             'author'           => 'required',
             'publisher'        => 'required',
             'publication_year' => 'required',
@@ -47,6 +48,7 @@ class BookController extends Controller
         Book::create([
             'category_id'      => $request->category_id,
             'title'            => $request->title,
+            'sku'              => $request->sku,
             'author'           => $request->author,
             'publisher'        => $request->publisher,
             'publication_year' => $request->publication_year,

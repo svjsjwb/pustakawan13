@@ -23,6 +23,7 @@ class Book extends Model
         'kode_buku',
         'ddc',
         'rak',
+        'sku',
         'edition',
     ];
 

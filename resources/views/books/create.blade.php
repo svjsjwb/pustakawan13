@@ -29,14 +29,14 @@
 
         {{-- Alert Error Global --}}
         @if ($errors->any())
-            <div class="form-alert-error">
-                <strong>Terdapat beberapa kesalahan pengisian:</strong>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
+        <div class="form-alert-error">
+            <strong>Terdapat beberapa kesalahan pengisian:</strong>
+            <ul>
+                @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
         @endif
 
         <form
@@ -68,7 +68,30 @@
                         value="{{ old('title') }}"
                         required>
                     @error('title')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="book-form-group">
+                    <label for="sku">
+                        SKU <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="sku"
+                        name="sku"
+                        class="input @error('sku') is-invalid @enderror"
+                        placeholder="cth. BK-2026-00001"
+                        value="{{ old('sku') }}"
+                        required>
+
+                    <small class="form-help">
+                        Kode unik internal perpustakaan.
+                    </small>
+
+                    @error('sku')
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -85,8 +108,8 @@
                         placeholder="cth. 123456789"
                         value="{{ old('no_iventaris') }}"
                         required>
-                    @error('author')
-                        <span class="form-error">{{ $message }}</span>
+                    @error('no_iventaris')
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -103,8 +126,8 @@
                         placeholder="cth. 808.123456789"
                         value="{{ old('kode_buku') }}"
                         required>
-                    @error('author')
-                        <span class="form-error">{{ $message }}</span>
+                    @error('kode_buku')
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -122,7 +145,7 @@
                         value="{{ old('author') }}"
                         required>
                     @error('author')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -139,8 +162,8 @@
                         placeholder="cth. 808.123456789"
                         value="{{ old('ddc') }}"
                         required>
-                    @error('author')
-                        <span class="form-error">{{ $message }}</span>
+                    @error('ddc')
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -156,13 +179,13 @@
                         required>
                         <option value="" disabled {{ old('category_id') ? '' : 'selected' }}>-- Pilih Kategori --</option>
                         @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
+                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
                         @endforeach
                     </select>
                     @error('category_id')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -178,20 +201,20 @@
                         required>
                         <option value="" disabled {{ old('rak') ? '' : 'selected' }}>-- Pilih Rak --</option>
                         @foreach($racks as $rack)
-                            <option value="{{ $rack->code }}" {{ old('rak') == $rack->code ? 'selected' : '' }}>
-                                {{ $rack->code }} – {{ $rack->name }}
-                            </option>
+                        <option value="{{ $rack->code }}" {{ old('rak') == $rack->code ? 'selected' : '' }}>
+                            {{ $rack->code }} – {{ $rack->name }}
+                        </option>
                         @endforeach
                     </select>
                     @error('rak')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
                 {{-- Edisi --}}
                 <div class="book-form-group">
                     <label for="edition">
-                        Edisi    <span class="required">*</span>
+                        Edisi <span class="required">*</span>
                     </label>
                     <input
                         type="text"
@@ -202,7 +225,7 @@
                         value="{{ old('edition') }}"
                         required>
                     @error('edition')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -220,7 +243,7 @@
                         value="{{ old('isbn') }}"
                         required>
                     @error('isbn')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -238,7 +261,7 @@
                         value="{{ old('call_number') }}"
                         required>
                     @error('call_number')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -263,7 +286,7 @@
                         value="{{ old('publisher') }}"
                         required>
                     @error('publisher')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -283,7 +306,7 @@
                         value="{{ old('publication_year', date('Y')) }}"
                         required>
                     @error('publication_year')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -302,7 +325,7 @@
                         value="{{ old('stock', 1) }}"
                         required>
                     @error('stock')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -325,7 +348,7 @@
                         rows="4"
                         placeholder="Tuliskan ringkasan singkat atau poin penting mengenai isi buku ini...">{{ old('description') }}</textarea>
                     @error('description')
-                        <span class="form-error">{{ $message }}</span>
+                    <span class="form-error">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -339,9 +362,9 @@
                         <div class="cover-preview-box" id="coverPreviewContainer">
                             <div class="cover-placeholder-icon" id="coverPlaceholder">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-                                    <circle cx="9" cy="9" r="2"/>
-                                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                    <circle cx="9" cy="9" r="2" />
+                                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                                 </svg>
                                 <span>No Cover</span>
                             </div>
@@ -355,12 +378,12 @@
                                 name="cover"
                                 class="cover-file-input"
                                 accept="image/jpeg,image/png,image/jpg,image/webp">
-                            
+
                             <label for="cover" class="cover-upload-btn">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="17 8 12 3 7 8"/>
-                                    <line x1="12" x2="12" y1="3" y2="15"/>
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" x2="12" y1="3" y2="15" />
                                 </svg>
                                 <span>Pilih Berkas Gambar...</span>
                             </label>
@@ -369,7 +392,7 @@
                                 Format didukung: <strong>JPG, JPEG, PNG, WEBP</strong>. Ukuran maksimum: <strong>2 MB</strong>.
                             </p>
                             @error('cover')
-                                <span class="form-error">{{ $message }}</span>
+                            <span class="form-error">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
@@ -389,9 +412,9 @@
                     type="submit"
                     class="book-btn-save">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                        <polyline points="17 21 17 13 7 13 7 21"/>
-                        <polyline points="7 3 7 8 15 8"/>
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                        <polyline points="17 21 17 13 7 13 7 21" />
+                        <polyline points="7 3 7 8 15 8" />
                     </svg>
                     <span>Simpan Buku</span>
                 </button>
@@ -405,34 +428,34 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const coverInput = document.getElementById('cover');
-    const previewImage = document.getElementById('coverPreviewImage');
-    const placeholder = document.getElementById('coverPlaceholder');
+    document.addEventListener('DOMContentLoaded', function() {
+        const coverInput = document.getElementById('cover');
+        const previewImage = document.getElementById('coverPreviewImage');
+        const placeholder = document.getElementById('coverPlaceholder');
 
-    if (coverInput && previewImage) {
-        coverInput.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    previewImage.src = event.target.result;
-                    previewImage.style.display = 'block';
+        if (coverInput && previewImage) {
+            coverInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        previewImage.src = event.target.result;
+                        previewImage.style.display = 'block';
+                        if (placeholder) {
+                            placeholder.style.display = 'none';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewImage.src = '#';
+                    previewImage.style.display = 'none';
                     if (placeholder) {
-                        placeholder.style.display = 'none';
+                        placeholder.style.display = 'flex';
                     }
-                };
-                reader.readAsDataURL(file);
-            } else {
-                previewImage.src = '#';
-                previewImage.style.display = 'none';
-                if (placeholder) {
-                    placeholder.style.display = 'flex';
                 }
-            }
-        });
-    }
-});
+            });
+        }
+    });
 </script>
 @endpush
 

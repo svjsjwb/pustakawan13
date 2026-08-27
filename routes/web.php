@@ -14,6 +14,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BookCopyController;
+use App\Http\Controllers\UserHomeController;
 
 // LANDING
 Route::get('/', function () {
@@ -145,9 +146,6 @@ Route::get('/members', [MemberController::class, 'index'])
 Route::get('/calendar', [CalendarController::class, 'index'])
     ->name('calendar');
 
-
-
-
 // PENGATURAN
 Route::get('/settings', [SettingController::class, 'index'])
     ->name('settings');
@@ -182,3 +180,8 @@ Route::prefix('books/{book}/copies')
             'update'
         ])->name('update');
     });
+
+Route::get('/home', [
+    UserHomeController::class,
+    'index'
+])->name('user.home');
