@@ -15,6 +15,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BookCopyController;
 use App\Http\Controllers\UserHomeController;
+use App\Http\Controllers\BorrowingController;
 
 // LANDING
 Route::get('/', function () {
@@ -26,10 +27,16 @@ Route::get('/', function () {
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
+
 Route::post('/login', function () {
     return redirect()->route('dashboard');
 })->name('login.store');
 
+
+// LOGOUT
+Route::post('/logout', function () {
+    return redirect()->route('login');
+})->name('logout');
 
 // DASHBOARD
 Route::get('/dashboard', [

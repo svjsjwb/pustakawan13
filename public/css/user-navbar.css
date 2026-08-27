@@ -1,0 +1,527 @@
+/* =========================================================
+   USER NAVBAR
+========================================================= */
+
+.user-navbar {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 1000;
+
+    width: 100%;
+
+    background:
+        rgba(255, 255, 255, .92);
+
+    border-bottom:
+        1px solid #e7eeee;
+
+    backdrop-filter:
+        blur(14px);
+
+    -webkit-backdrop-filter:
+        blur(14px);
+
+}
+
+
+.user-navbar-inner {
+
+    width: min(1400px, calc(100% - 48px));
+
+    height: 70px;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    align-items: center;
+
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.user-navbar-logo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: #173e3e;
+
+    text-decoration: none;
+
+    flex-shrink: 0;
+
+}
+
+
+.user-navbar-logo-mark {
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background:
+        #287b7b;
+
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 800;
+
+}
+
+
+.user-navbar-logo-text {
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    letter-spacing: -.3px;
+
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+.user-navbar-menu {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-left: 55px;
+
+}
+
+
+.user-navbar-menu a {
+
+    position: relative;
+
+    padding: 9px 14px;
+
+    color: #718080;
+
+    font-size: 11px;
+
+    font-weight: 650;
+
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    transition:
+        color .25s ease,
+        background .25s ease;
+
+}
+
+
+.user-navbar-menu a:hover {
+
+    color: #287b7b;
+
+    background:
+        #f0f6f5;
+
+}
+
+
+.user-navbar-menu a.active {
+
+    color: #287b7b;
+
+    font-weight: 750;
+
+}
+
+
+.user-navbar-menu a.active::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 2px;
+
+    width: 18px;
+
+    height: 2px;
+
+    border-radius: 10px;
+
+    background: #287b7b;
+
+    transform:
+        translateX(-50%);
+
+}
+
+
+/* =========================================================
+   ACCOUNT
+========================================================= */
+
+.user-navbar-account {
+
+    position: relative;
+
+    margin-left: auto;
+
+}
+
+
+.user-navbar-profile {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 5px 8px 5px 5px;
+
+    border: none;
+
+    border-radius: 30px;
+
+    background: transparent;
+
+    color: #173e3e;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition:
+        background .25s ease;
+
+}
+
+
+.user-navbar-profile:hover {
+
+    background:
+        #f1f6f5;
+
+}
+
+
+.user-navbar-avatar {
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        #287b7b;
+
+    color: #ffffff;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+}
+
+
+.user-navbar-name {
+
+    max-width: 130px;
+
+    overflow: hidden;
+
+    color: #314848;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+}
+
+
+.user-navbar-arrow {
+
+    color: #7b8989;
+
+    font-size: 11px;
+
+    transition:
+        transform .25s ease;
+
+}
+
+
+.user-navbar-account.open
+.user-navbar-arrow {
+
+    transform:
+        rotate(180deg);
+
+}
+
+
+/* =========================================================
+   DROPDOWN
+========================================================= */
+
+.user-navbar-dropdown {
+
+    position: absolute;
+
+    top: calc(100% + 10px);
+
+    right: 0;
+
+    width: 210px;
+
+    padding: 8px;
+
+    box-sizing: border-box;
+
+    border:
+        1px solid #e4eceb;
+
+    border-radius: 13px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 15px 40px rgba(20, 60, 60, .13);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform:
+        translateY(-8px)
+        scale(.97);
+
+    transform-origin:
+        top right;
+
+    transition:
+        opacity .2s ease,
+        visibility .2s ease,
+        transform .2s ease;
+
+}
+
+
+.user-navbar-account.open
+.user-navbar-dropdown {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    transform:
+        translateY(0)
+        scale(1);
+
+}
+
+
+/* =========================================================
+   DROPDOWN HEADER
+========================================================= */
+
+.user-navbar-dropdown-header {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    padding: 10px;
+
+}
+
+
+.user-navbar-dropdown-header strong {
+
+    color: #173e3e;
+
+    font-size: 11px;
+
+}
+
+
+.user-navbar-dropdown-header span {
+
+    color: #8a9999;
+
+    font-size: 9px;
+
+}
+
+
+/* =========================================================
+   DIVIDER
+========================================================= */
+
+.user-navbar-dropdown-divider {
+
+    height: 1px;
+
+    margin: 3px 5px 6px;
+
+    background:
+        #edf1f1;
+
+}
+
+
+/* =========================================================
+   DROPDOWN LINK
+========================================================= */
+
+.user-navbar-dropdown a,
+.user-navbar-dropdown form button {
+
+    display: flex;
+
+    align-items: center;
+
+    width: 100%;
+
+    min-height: 36px;
+
+    padding: 0 10px;
+
+    box-sizing: border-box;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #4c5e5e;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    text-align: left;
+
+    cursor: pointer;
+
+}
+
+
+.user-navbar-dropdown a:hover,
+.user-navbar-dropdown form button:hover {
+
+    background:
+        #f1f6f5;
+
+    color:
+        #287b7b;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 750px) {
+
+    .user-navbar-inner {
+
+        width: calc(100% - 30px);
+
+        height: 64px;
+
+    }
+
+
+    .user-navbar-logo-text {
+
+        display: none;
+
+    }
+
+
+    .user-navbar-menu {
+
+        margin-left: 20px;
+
+        gap: 2px;
+
+    }
+
+
+    .user-navbar-menu a {
+
+        padding:
+            8px 9px;
+
+        font-size: 10px;
+
+    }
+
+
+    .user-navbar-name {
+
+        display: none;
+
+    }
+
+}
+
+
+@media (max-width: 520px) {
+
+    .user-navbar-menu a:nth-child(1) {
+
+        display: none;
+
+    }
+
+
+    .user-navbar-menu {
+
+        margin-left: 15px;
+
+    }
+
+}
