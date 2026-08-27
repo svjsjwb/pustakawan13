@@ -41,8 +41,10 @@
                 Pinjaman Buku
             </a>
 
-            <a href="{{ route('reservations.index') }}"
-                class="{{ request()->routeIs('reservations') ? 'active' : '' }}">
+            <a
+                href="{{ route('reservations.index') }}"
+                class="{{ request()->routeIs('reservations.*') ? 'active' : '' }}"
+            >
                 Reservasi Buku
             </a>
 
