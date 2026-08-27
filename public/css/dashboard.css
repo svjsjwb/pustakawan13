@@ -1,0 +1,1509 @@
+/* =========================================================
+   DASHBOARD - MODERN LIBRARY ADMIN
+   Topbar & Footer TIDAK DISENTUH
+========================================================= */
+
+.dashboard-page {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+}
+
+
+.content:has(.dashboard-page) {
+
+    background: #f5f7f7;
+
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.dashboard-header {
+
+    position: relative;
+
+    margin-bottom: 27px;
+
+}
+
+
+.dashboard-welcome {
+
+    margin-bottom: 4px;
+
+    color: #277b7b;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+}
+
+
+.dashboard-welcome span {
+
+    font-size: 15px;
+
+}
+
+
+.dashboard-header span {
+
+    display: block;
+
+    margin-bottom: 2px;
+
+}
+
+
+.dashboard-header h1 {
+
+    margin: 0;
+
+    color: #101820;
+
+    font-size: 31px;
+
+    line-height: 1.15;
+
+    font-weight: 750;
+
+    letter-spacing: -0.7px;
+
+}
+
+
+.dashboard-header p {
+
+    margin: 6px 0 0;
+
+    color: #697575;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.dashboard-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 22px;
+
+    margin-bottom: 27px;
+
+}
+
+
+/* =========================================================
+   STAT CARD
+========================================================= */
+
+.stat-card {
+
+    position: relative;
+
+    min-height: 126px;
+
+    overflow: hidden;
+
+    padding: 18px;
+
+    background: #ffffff;
+
+    border: 1px solid #e9eeee;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 4px 14px
+        rgba(22, 63, 63, 0.07);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+.stat-card:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 10px 25px
+        rgba(22, 63, 63, 0.12);
+
+}
+
+.stat-card-top {
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+
+/* =========================================================
+   STAT ICON
+========================================================= */
+
+.stat-icon {
+    flex: 0 0 58px;
+
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 15px;
+}
+
+.stat-icon svg {
+    width: 31px;
+    height: 31px;
+}
+
+
+/* BUKU */
+
+.stat-books .stat-icon {
+    color: #20a86b;
+
+    background: linear-gradient(145deg,
+            #dffaf0,
+            #bff0e1);
+}
+
+
+/* DIPINJAM */
+
+.stat-borrowed .stat-icon {
+    color: #3975ed;
+
+    background: linear-gradient(145deg,
+            #e1eaff,
+            #c9d8ff);
+}
+
+
+/* ANGGOTA */
+
+.stat-members .stat-icon {
+    color: #8c52e8;
+
+    background: linear-gradient(145deg,
+            #f0e5ff,
+            #e2d0ff);
+}
+
+
+/* TERLAMBAT */
+
+.stat-late .stat-icon {
+    color: #ee921c;
+
+    background: linear-gradient(145deg,
+            #fff0dc,
+            #ffdfbd);
+}
+
+
+/* =========================================================
+   STAT CONTENT
+========================================================= */
+
+.stat-content {
+    min-width: 0;
+}
+
+.stat-title {
+    margin-bottom: 5px;
+
+    color: #277575;
+
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 0.2px;
+}
+
+.stat-value {
+    margin-bottom: 4px;
+
+    color: #152323;
+
+    font-size: 29px;
+    line-height: 1;
+
+    font-weight: 750;
+}
+
+.stat-description {
+    color: #718080;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   STAT CARD DECORATION
+========================================================= */
+
+.stat-wave {
+    position: absolute;
+
+    right: -20px;
+    bottom: -28px;
+
+    width: 70%;
+    height: 62px;
+
+    border-radius: 50%;
+
+    opacity: 0.75;
+}
+
+.stat-books .stat-wave {
+    background: #d9f6ed;
+}
+
+.stat-borrowed .stat-wave {
+    background: #dce6ff;
+}
+
+.stat-members .stat-wave {
+    background: #ebddff;
+}
+
+.stat-late .stat-wave {
+    background: #ffe4cf;
+}
+
+
+/* =========================================================
+   MIDDLE CONTENT
+========================================================= */
+
+.dashboard-middle {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.65fr) minmax(230px, 0.75fr) minmax(230px, 0.75fr);
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   PANEL
+========================================================= */
+
+.dashboard-panel {
+    background: #ffffff;
+
+    border: 1px solid #e8eeee;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 3px 13px rgba(22, 63, 63, 0.055);
+
+    box-sizing: border-box;
+}
+/* =========================================================
+   STAT CARD DECORATION
+========================================================= */
+
+.stat-icon {
+
+    width: 56px;
+
+    height: 14px;
+
+    margin: -21px auto 9px;
+
+    background: #a7caca;
+
+    border-radius: 7px;
+
+}
+
+
+/* =========================================================
+   DASHBOARD PANELS
+========================================================= */
+
+.borrowing-panel {
+
+    min-height: 295px;
+
+}
+
+
+.popular-panel,
+.activity-panel {
+
+    min-height: 295px;
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+/* =========================================================
+   STAT TITLE
+========================================================= */
+
+.stat-title {
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    color: #287070;
+
+}
+
+
+/* =========================================================
+   PANEL HEADER
+========================================================= */
+
+.panel-header,
+.reservation-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 18px 18px 12px;
+
+}
+
+
+.panel-title-wrapper {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+}
+
+
+.panel-title-wrapper h2 {
+
+    margin: 0;
+
+    color: #182828;
+
+    font-size: 15px;
+
+    font-weight: 750;
+
+}
+
+
+.panel-title-wrapper span {
+
+    display: block;
+
+    margin-top: 2px;
+
+    color: #7a8787;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   STAT NUMBER
+========================================================= */
+
+.stat-number {
+
+    font-size: 21px;
+
+    line-height: 1;
+
+    color: #287070;
+
+}
+
+
+/* =========================================================
+   PANEL ICON
+========================================================= */
+
+.panel-icon {
+
+    width: 36px;
+
+    height: 36px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+}
+
+
+.panel-icon svg {
+
+    width: 20px;
+
+    height: 20px;
+
+}
+
+
+.chart-icon {
+
+    color: #217c7c;
+
+    background: #e0f3f1;
+
+}
+
+
+.book-icon {
+
+    color: #258989;
+
+    background: #e0f4f2;
+
+}
+
+
+.activity-icon {
+
+    color: #258989;
+
+    background: #e0f4f2;
+
+}
+
+
+.reservation-icon {
+
+    color: #217c7c;
+
+    background: #e0f3f1;
+
+}
+/* keterangan */
+
+/* =========================================================
+   BAR CHART
+========================================================= */
+
+.chart-area {
+    display: flex;
+
+    height: 190px;
+
+    padding: 8px 20px 0 12px;
+}
+
+.chart-y {
+    width: 25px;
+
+    display: flex;
+
+    flex-direction: column;
+    justify-content: space-between;
+
+    padding: 7px 0 27px;
+
+    color: #879393;
+
+    font-size: 9px;
+
+    text-align: right;
+}
+
+.chart-content {
+    position: relative;
+
+    flex: 1;
+
+    min-width: 0;
+}
+
+.chart-grid {
+    position: absolute;
+
+    inset: 7px 0 28px;
+
+    display: flex;
+
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.chart-grid span {
+    width: 100%;
+
+    border-top: 1px solid #edf1f1;
+}
+
+.chart-bars {
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: flex-end;
+    justify-content: space-around;
+
+    gap: 12px;
+
+    padding: 8px 3px 0;
+}
+
+.chart-bar-item {
+    position: relative;
+
+    height: 100%;
+
+    flex: 1;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    flex-direction: column;
+
+    z-index: 2;
+}
+
+.chart-bar {
+    width: 42px;
+
+    max-width: 80%;
+
+    min-height: 8px;
+
+    border-radius: 8px 8px 3px 3px;
+
+    background: linear-gradient(to top,
+            #237e7e,
+            #66b9b3);
+
+    box-shadow:
+        0 3px 7px rgba(35, 126, 126, 0.18);
+
+    transition:
+        height 0.3s ease,
+        transform 0.2s ease;
+}
+
+.chart-bar:hover {
+    transform: scaleY(1.04);
+}
+.chart-bar-item span {
+
+    margin-top: 7px;
+
+    padding: 3px 5px;
+
+    background: #dceaea;
+
+    color: #737f7f;
+
+    font-size: 8px;
+
+    white-space: nowrap;
+
+}
+
+
+.chart-bar-tooltip {
+
+    position: absolute;
+
+    bottom: calc(100% + 4px);
+
+    left: 50%;
+
+    transform:
+        translateX(-50%)
+        translateY(4px);
+
+    background: #182828;
+
+    color: #ffffff;
+
+    font-size: 9px;
+
+    font-weight: 500;
+
+    padding: 3px 7px;
+
+    border-radius: 4px;
+
+    white-space: nowrap;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition: all 0.15s ease;
+
+    z-index: 10;
+
+    box-shadow:
+        0 2px 8px
+        rgba(0, 0, 0, 0.18);
+
+}
+
+
+.chart-bar-item:hover .chart-bar-tooltip {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    transform:
+        translateX(-50%)
+        translateY(0);
+
+}
+
+
+.chart-caption {
+
+    padding: 0 18px 15px;
+
+    color: #748080;
+
+    font-size: 9px;
+
+}
+
+
+/* =========================================================
+   POPULAR BOOK
+========================================================= */
+
+.popular-list {
+
+    padding: 0 17px;
+
+    flex: 1;
+
+}
+
+
+.popular-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-height: 36px;
+
+    border-bottom:
+        1px solid #edf1f1;
+
+}
+
+.popular-number {
+    width: 23px;
+    height: 23px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 23px;
+
+    border-radius: 50%;
+
+    background: #f4f7f7;
+
+    color: #536262;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.popular-item:nth-child(1) .popular-number {
+    background: #fff0bc;
+    color: #bd8211;
+}
+
+.popular-item:nth-child(2) .popular-number {
+    background: #edf0f2;
+}
+
+.popular-item:nth-child(3) .popular-number {
+    background: #ffe2cf;
+    color: #c7682e;
+}
+
+.popular-name {
+    flex: 1;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    color: #334343;
+
+    font-size: 10px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.popular-total {
+    color: #5d6b6b;
+
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.empty-small {
+    padding: 25px 10px;
+
+    color: #879393;
+
+    font-size: 10px;
+
+    text-align: center;
+}
+.dashboard-section h2 {
+
+    margin: 0 0 9px;
+
+}
+
+
+/* =========================================================
+   PANEL LINK - COMPACT BUTTON
+========================================================= */
+
+.panel-link {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    width: fit-content;
+
+    padding: 7px 12px;
+
+    border: 1px solid #287b7b;
+
+    border-radius: 7px;
+
+    background: #287b7b;
+
+    color: #ffffff;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    box-shadow:
+        0 2px 7px
+        rgba(40, 123, 123, 0.16);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+.panel-link:hover {
+
+    background: #216969;
+
+    border-color: #216969;
+
+    color: #ffffff;
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 4px 10px
+        rgba(40, 123, 123, 0.22);
+
+}
+
+
+.panel-link span {
+
+    font-size: 12px;
+
+    transition:
+        transform 0.2s ease;
+
+}
+
+
+.panel-link:hover span {
+
+    transform:
+        translateX(2px);
+
+}
+
+
+/* =========================
+   TABLE
+========================= */
+
+
+/* Tombol di tengah panel */
+
+.popular-panel .panel-link {
+
+    align-self: center;
+
+    margin: 10px auto 15px;
+
+}
+
+
+/* =========================================================
+   ACTIVITY
+========================================================= */
+
+.activity-list {
+
+    padding: 0 15px 15px;
+
+    flex: 1;
+
+}
+
+
+.activity-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 9px 0;
+
+    border-bottom:
+        1px solid #edf1f1;
+
+}
+
+
+.activity-item:last-child {
+
+    border-bottom: none;
+
+}
+
+
+.activity-item-icon {
+
+    width: 27px;
+
+    height: 27px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 27px;
+
+    border-radius: 50%;
+
+    background: #e3f5ef;
+
+    color: #20a66d;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+}
+
+
+.activity-info {
+
+    min-width: 0;
+
+    flex: 1;
+
+}
+
+.activity-info strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #344444;
+
+    font-size: 10px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.activity-info span {
+    display: block;
+
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: #7a8787;
+
+    font-size: 9px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.activity-item time {
+    color: #277b7b;
+
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+
+/* =========================================================
+   RESERVATION
+========================================================= */
+
+.reservation-panel {
+    width: 100%;
+/* =========================================================
+   DASHBOARD TABLE
+========================================================= */
+
+.dashboard-table {
+
+    width: calc(100% - 24px);
+
+    margin:
+        0 12px 13px;
+
+    overflow: hidden;
+
+    background: #fff;
+
+    border: 1px solid #e6eded;
+
+    border-radius: 9px;
+
+}
+
+
+.reservation-header {
+
+    padding-bottom: 14px;
+
+}
+
+
+.reservation-see-all {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 8px 15px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #287b7b;
+
+    color: #ffffff;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    box-shadow:
+        0 3px 10px
+        rgba(40, 123, 123, 0.20);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+.reservation-see-all:hover {
+
+    background: #216969;
+
+    color: #ffffff;
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 5px 14px
+        rgba(40, 123, 123, 0.28);
+
+}
+
+
+.reservation-see-all span {
+
+    font-size: 13px;
+
+    transition:
+        transform 0.2s ease;
+
+}
+
+
+.reservation-see-all:hover span {
+
+    transform:
+        translateX(2px);
+
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.dashboard-table-head,
+.dashboard-table-row {
+
+    display: grid;
+
+    grid-template-columns:
+        0.7fr 1.1fr 1.6fr 1.5fr 0.9fr;
+
+    align-items: center;
+
+}
+
+
+.dashboard-table-head {
+
+    min-height: 37px;
+
+    padding: 0 12px;
+
+    background: #267e7e;
+
+    color: #ffffff;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+
+.dashboard-table-row {
+
+    min-height: 38px;
+
+    padding: 0 12px;
+
+    background: #ffffff;
+
+    border-bottom:
+        1px solid #edf1f1;
+
+    color: #485656;
+
+    font-size: 10px;
+
+    transition:
+        background 0.15s ease;
+
+}
+
+
+.dashboard-table-row:last-child {
+
+    border-bottom: none;
+
+}
+
+
+.dashboard-table-row:hover {
+
+    background: #f8fbfb;
+
+}
+
+
+.dashboard-table-row > div {
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   ACTIVITY LABEL
+========================================================= */
+
+.activity-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    color: #556363;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.dashboard-status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 58px;
+
+    padding: 4px 9px;
+
+    border: 1px solid transparent;
+
+    border-radius: 999px;
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+}
+
+
+.dashboard-status.waiting {
+
+    background: #fff3ce;
+
+    border-color: #ffe29a;
+
+    color: #bb8010;
+
+}
+
+
+.dashboard-status.approved {
+
+    background: #def5e5;
+
+    border-color: #bde8ca;
+
+    color: #29934d;
+
+}
+
+
+.dashboard-status.borrowed {
+
+    background: #e1ecff;
+
+    border-color: #c5d9ff;
+
+    color: #3d6fc2;
+
+}
+
+
+.dashboard-status.completed {
+
+    background: #e2f4ef;
+
+    border-color: #c1e7dc;
+
+    color: #287f70;
+
+}
+
+
+.dashboard-status.rejected {
+
+    background: #ffe2e2;
+
+    border-color: #f6c5c5;
+
+    color: #c35d5d;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| STATUS LAMA
+|--------------------------------------------------------------------------
+*/
+
+.dashboard-status.returned {
+
+    background: #d9e9d5;
+
+    color: #333;
+
+}
+
+
+.dashboard-status.late {
+
+    background: #e3caca;
+
+    color: #333;
+
+}
+
+
+/* =========================================================
+   LIHAT SEMUA
+========================================================= */
+
+.dashboard-see-all {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    margin-top: 7px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #111;
+
+    cursor: pointer;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    .dashboard-middle {
+
+        grid-template-columns:
+            minmax(0, 1.4fr)
+            minmax(220px, 0.8fr);
+
+    }
+
+
+    .activity-panel {
+
+        grid-column: 2;
+
+    }
+
+
+    .borrowing-panel {
+
+        grid-row: span 2;
+
+    }
+
+}
+
+
+@media (max-width: 1000px) {
+
+    .dashboard-stats {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+        gap: 20px;
+
+    }
+
+
+    .dashboard-middle {
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+
+    .borrowing-panel {
+
+        grid-column:
+            1 / -1;
+
+        grid-row: auto;
+
+    }
+
+
+    .activity-panel {
+
+        grid-column: auto;
+
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .dashboard-header h1 {
+
+        font-size: 27px;
+
+    }
+
+
+    .dashboard-stats {
+
+        grid-template-columns:
+            1fr;
+
+        gap: 14px;
+
+    }
+
+
+    .dashboard-middle {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .borrowing-panel,
+    .popular-panel,
+    .activity-panel {
+
+        grid-column: auto;
+
+    }
+
+
+    .chart-bars {
+
+        gap: 4px;
+
+    }
+
+
+    .chart-bar {
+
+        width: 24px;
+
+    }
+
+
+    .dashboard-table {
+
+        overflow-x: auto;
+
+    }
+
+
+    .dashboard-table-head,
+    .dashboard-table-row {
+
+        min-width: 650px;
+
+    }
+
+
+    .reservation-header {
+
+        align-items: flex-start;
+
+        gap: 12px;
+
+        flex-direction: column;
+
+    }
+
+}
+}

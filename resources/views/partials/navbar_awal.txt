@@ -1,0 +1,112 @@
+<header class="topnav">
+    <div class="topnav-top">
+        <div class="brand">
+            <div class="brand-mark">S</div>
+            <div>
+                <div class="brand-name">SmartLibrary <span style="color:#CB9C50;">Pro</span></div>
+                <div class="brand-sub">Katalog &amp; Sirkulasi</div>
+            </div>
+        </div>
+        <div class="topnav-user">
+            <div>
+                <div class="who" style="text-align:right;">Admin Perpustakaan</div>
+                <div class="role" style="text-align:right;">Administrator</div>
+            </div>
+            <div class="avatar-sm">AD</div>
+        </div>
+    </div>
+
+    <nav class="nav-scroll">
+        <a href="{{ route('dashboard') }}"
+            class="nav-pill {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                <rect x="3" y="16" width="7" height="5" rx="1.5" />
+            </svg>
+            <span>Dashboard</span>
+        </a>
+        <div class="nav-divider"></div>
+        <a href="{{ route('catalog') }}"
+            class="nav-pill {{ request()->routeIs('catalog') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+            <span>Katalog Publik</span>
+        </a>
+        <a href="{{ route('books.index') }}"
+            class="nav-pill {{ request()->routeIs('books.*') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+            <span>Manajemen Buku</span>
+        </a>
+        <div class="nav-divider"></div>
+        <a href="{{ route('circulation') }}"
+            class="nav-pill {{ request()->routeIs('circulation') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 2l4 4-4 4" />
+                <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                <path d="M7 22l-4-4 4-4" />
+                <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+            </svg>
+            <span>Peminjaman</span>
+            <span class="nav-badge" id="badge-overdue">0</span>
+        </a>
+        <a href="{{ route('reservations') }}"
+            class="nav-pill {{ request()->routeIs('reservations') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 8v4l3 3" />
+                <circle cx="12" cy="12" r="9" />
+            </svg>
+            <span>Reservasi</span>
+        </a>
+        <a href="{{ route('fines') }}"
+            class="nav-pill {{ request()->routeIs('fines') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1 3 2.2c0 2.8-6 1.3-6 4.2 0 1.3 1.3 2.3 3 2.3s3-1 3-2.3" />
+            </svg>
+            <span>Denda &amp; Bayar</span>
+        </a>
+        <div class="nav-divider"></div>
+        <a href="{{ route('members') }}"
+            class="nav-pill {{ request()->routeIs('members') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <span>Anggota</span>
+        </a>
+        <a href="{{ route('calendar') }}"
+            class="nav-pill {{ request()->routeIs('calendar') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+            </svg>
+            <span>Kegiatan</span>
+        </a>
+        <div class="nav-divider"></div>
+        <a href="{{ route('reports') }}"
+            class="nav-pill {{ request()->routeIs('reports') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3v18h18" />
+                <path d="M7 15l4-6 3 3 5-8" />
+            </svg>
+            <span>Laporan</span>
+        </a>
+        <a href="{{ route('settings') }}"
+            class="nav-pill {{ request()->routeIs('settings') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z" />
+            </svg>
+            <span>Pengaturan</span>
+        </a>
+    </nav>
+</header>
