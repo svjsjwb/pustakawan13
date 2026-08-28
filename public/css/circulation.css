@@ -401,21 +401,97 @@
 }
 
 #page-circulation .status-badge.aktif {
-    background: #e1f0f0;
+    background: #FFF7DB;
 
-    color: #287b7b;
+    color: #8A6A12;
+}
+
+#page-circulation .status-badge.diperpanjang {
+    background: #e6efff;
+    color: #3267a8;
 }
 
 #page-circulation .status-badge.terlambat {
-    background: #f8dddd;
+    background: #FDE8E8;
 
-    color: #9b3333;
+    color: #A33A3A;
 }
 
 #page-circulation .status-badge.kembali {
-    background: #e3efdf;
+    background: #E7F3E3;
 
-    color: #3d7035;
+    color: #3F7138;
+}
+
+
+/* =========================================================
+   BUTTON AKSI PEMINJAMAN
+========================================================= */
+
+#page-circulation .borrowing-action-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+
+/* =========================================================
+   BUTTON PERPANJANG
+========================================================= */
+
+#page-circulation .btn-extend {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-width: 100px;
+    height: 34px;
+
+    padding: 0 12px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: #f3f4f6;
+    color: #374151;
+
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+
+    cursor: pointer;
+    box-sizing: border-box;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        transform .15s ease;
+}
+
+
+/* ICON PERPANJANG */
+
+#page-circulation .btn-extend .extend-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 5px;
+
+    font-size: 13px;
+    line-height: 1;
+}
+
+
+/* HOVER PERPANJANG */
+
+#page-circulation .btn-extend:hover {
+    background: #e5e7eb;
+    color: #1f2937;
+
+    transform: translateY(-1px);
 }
 
 
@@ -424,39 +500,58 @@
 ========================================================= */
 
 #page-circulation .return-form {
+    width: 100%;
     margin: 0;
 }
 
+
 #page-circulation .btn-secondary {
-    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-width: 100px;
+    height: 34px;
+
+    padding: 0 12px;
 
     border: none;
-
     border-radius: 7px;
 
     background: #f3f4f6;
-
     color: #374151;
 
     font-family: inherit;
-
     font-size: 10px;
-
     font-weight: 600;
 
     cursor: pointer;
+    box-sizing: border-box;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        transform .15s ease;
 }
+
 
 #page-circulation .btn-secondary:hover {
     background: #e5e7eb;
+    color: #1f2937;
+
+    transform: translateY(-1px);
 }
+
+
+/* =========================================================
+   TEXT SELESAI
+========================================================= */
 
 #page-circulation .completed-text {
     color: #6b7280;
-
     font-size: 10px;
 }
-
 
 /* =========================================================
    EMPTY
@@ -470,6 +565,534 @@
     color: #9ca3af !important;
 }
 
+
+/* =========================================================
+   MODAL PERPANJANG PEMINJAMAN
+========================================================= */
+
+#extendLoanModal {
+    position: fixed !important;
+    inset: 0 !important;
+
+    width: 100vw !important;
+    height: 100vh !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 20px !important;
+    box-sizing: border-box !important;
+
+    z-index: 99999 !important;
+
+    visibility: hidden !important;
+    opacity: 0 !important;
+
+    pointer-events: none !important;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease !important;
+}
+
+
+/* =========================================================
+   MODAL OPEN
+========================================================= */
+
+#extendLoanModal.open {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+#extendLoanModal .extend-modal-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    background: rgba(16, 45, 45, 0.62) !important;
+
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+
+    opacity: 1 !important;
+}
+
+
+/* =========================================================
+   MODAL CARD
+========================================================= */
+
+#extendLoanModal .extend-modal-card {
+    position: relative !important;
+
+    z-index: 2 !important;
+
+    width: 460px !important;
+    max-width: calc(100vw - 40px) !important;
+
+    min-height: auto !important;
+
+    margin: 0 !important;
+    padding: 30px !important;
+
+    box-sizing: border-box !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #e2eeee !important;
+    border-radius: 20px !important;
+
+    box-shadow:
+        0 30px 80px rgba(0, 40, 40, 0.25) !important;
+
+    transform: translateY(25px) scale(0.96) !important;
+
+    opacity: 0 !important;
+
+    transition:
+        transform 0.4s cubic-bezier(.22, 1, .36, 1),
+        opacity 0.3s ease !important;
+}
+
+
+/* CARD SAAT OPEN */
+
+#extendLoanModal.open .extend-modal-card {
+    transform: translateY(0) scale(1) !important;
+    opacity: 1 !important;
+}
+
+
+/* =========================================================
+   CLOSE
+========================================================= */
+
+#extendLoanModal .extend-modal-close {
+    position: absolute !important;
+
+    top: 18px !important;
+    right: 18px !important;
+
+    width: 38px !important;
+    height: 38px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: none !important;
+    border-radius: 50% !important;
+
+    background: #edf5f5 !important;
+
+    color: #174a4c !important;
+
+    font-family: inherit !important;
+    font-size: 24px !important;
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease !important;
+}
+
+#extendLoanModal .extend-modal-close:hover {
+    background: #dceeee !important;
+
+    transform: rotate(90deg) !important;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+#extendLoanModal .extend-modal-header {
+    padding-right: 45px !important;
+
+    margin: 0 0 24px 0 !important;
+}
+
+
+#extendLoanModal .extend-modal-label {
+    display: block !important;
+
+    margin: 0 0 8px 0 !important;
+
+    color: #287b7b !important;
+
+    font-size: 10px !important;
+    font-weight: 800 !important;
+
+    letter-spacing: 1.5px !important;
+}
+
+
+#extendLoanModal .extend-modal-header h3 {
+    margin: 0 0 8px 0 !important;
+
+    color: #173f40 !important;
+
+    font-size: 25px !important;
+    font-weight: 800 !important;
+
+    line-height: 1.2 !important;
+}
+
+
+#extendLoanModal .extend-modal-header p {
+    margin: 0 !important;
+
+    color: #718080 !important;
+
+    font-size: 12px !important;
+
+    line-height: 1.5 !important;
+}
+
+
+/* =========================================================
+   BOOK INFO
+========================================================= */
+
+#extendLoanModal .extend-book-info {
+    display: flex !important;
+    flex-direction: column !important;
+
+    gap: 5px !important;
+
+    padding: 15px 16px !important;
+
+    margin: 0 0 10px 0 !important;
+
+    background: #f1f7f7 !important;
+
+    border: 1px solid #e1eeee !important;
+
+    border-radius: 12px !important;
+}
+
+
+#extendLoanModal .extend-book-info span {
+    color: #789090 !important;
+
+    font-size: 9px !important;
+    font-weight: 800 !important;
+
+    letter-spacing: 0.8px !important;
+}
+
+
+#extendLoanModal .extend-book-info strong {
+    color: #174a4c !important;
+
+    font-size: 14px !important;
+    font-weight: 700 !important;
+}
+
+
+/* =========================================================
+   CURRENT DUE DATE
+========================================================= */
+
+#extendLoanModal .extend-current-date {
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 15px !important;
+
+    padding: 13px 16px !important;
+
+    margin: 0 0 24px 0 !important;
+
+    background: #fafcfc !important;
+
+    border: 1px solid #edf2f2 !important;
+
+    border-radius: 10px !important;
+}
+
+
+#extendLoanModal .extend-current-date span {
+    color: #789090 !important;
+
+    font-size: 10px !important;
+    font-weight: 600 !important;
+}
+
+
+#extendLoanModal .extend-current-date strong {
+    color: #174a4c !important;
+
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+
+/* =========================================================
+   INPUT GROUP
+========================================================= */
+
+#extendLoanModal .extend-input-group {
+    margin: 0 0 24px 0 !important;
+}
+
+
+#extendLoanModal .extend-input-group label {
+    display: block !important;
+
+    margin: 0 0 8px 0 !important;
+
+    color: #1c3030 !important;
+
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+
+/* =========================================================
+   INPUT WRAPPER
+========================================================= */
+
+#extendLoanModal .extend-input-wrap {
+    display: flex !important;
+
+    align-items: center !important;
+
+    width: 100% !important;
+    height: 48px !important;
+
+    padding: 0 14px !important;
+
+    box-sizing: border-box !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #cbdada !important;
+
+    border-radius: 11px !important;
+}
+
+
+#extendLoanModal .extend-input-wrap:focus-within {
+    border-color: #287b7b !important;
+
+    box-shadow:
+        0 0 0 3px rgba(40, 123, 123, 0.10) !important;
+}
+
+
+#extendLoanModal .extend-input-wrap input {
+    flex: 1 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: none !important;
+    outline: none !important;
+
+    background: transparent !important;
+
+    color: #173f40 !important;
+
+    font-family: inherit !important;
+
+    font-size: 16px !important;
+    font-weight: 700 !important;
+}
+
+
+#extendLoanModal .extend-input-wrap span {
+    color: #718080 !important;
+
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+
+
+/* HILANGKAN SPINNER */
+
+#extendLoanModal
+.extend-input-wrap
+input::-webkit-inner-spin-button,
+
+#extendLoanModal
+.extend-input-wrap
+input::-webkit-outer-spin-button {
+
+    -webkit-appearance: none !important;
+
+    margin: 0 !important;
+}
+
+
+#extendLoanModal
+.extend-input-wrap
+input[type="number"] {
+
+    appearance: textfield !important;
+    -moz-appearance: textfield !important;
+}
+
+
+/* =========================================================
+   HELPER TEXT
+========================================================= */
+
+#extendLoanModal .extend-input-group small {
+    display: block !important;
+
+    margin: 7px 0 0 0 !important;
+
+    color: #8a9999 !important;
+
+    font-size: 10px !important;
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
+
+#extendLoanModal .extend-modal-actions {
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: flex-end !important;
+
+    gap: 10px !important;
+
+    margin: 0 !important;
+}
+
+
+#extendLoanModal .extend-cancel,
+#extendLoanModal .extend-confirm {
+
+    height: 42px !important;
+
+    padding: 0 20px !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 10px !important;
+
+    font-family: inherit !important;
+
+    font-size: 11px !important;
+    font-weight: 700 !important;
+
+    cursor: pointer !important;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+/* BATAL */
+
+#extendLoanModal .extend-cancel {
+
+    border: 1px solid #d7e0e0 !important;
+
+    background: #ffffff !important;
+
+    color: #526565 !important;
+}
+
+
+#extendLoanModal .extend-cancel:hover {
+
+    background: #f5f8f8 !important;
+
+    transform: translateY(-1px) !important;
+}
+
+
+/* PERPANJANG */
+
+#extendLoanModal .extend-confirm {
+
+    border: none !important;
+
+    background: #278486 !important;
+
+    color: #ffffff !important;
+
+    box-shadow:
+        0 6px 16px rgba(39, 132, 134, 0.20) !important;
+}
+
+
+#extendLoanModal .extend-confirm:hover {
+
+    background: #217174 !important;
+
+    transform: translateY(-1px) !important;
+
+    box-shadow:
+        0 9px 22px rgba(39, 132, 134, 0.28) !important;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 520px) {
+
+    #extendLoanModal {
+        padding: 16px !important;
+    }
+
+    #extendLoanModal .extend-modal-card {
+
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        padding: 24px !important;
+
+        border-radius: 17px !important;
+    }
+
+    #extendLoanModal .extend-modal-header h3 {
+        font-size: 21px !important;
+    }
+
+    #extendLoanModal .extend-modal-actions {
+
+        flex-direction: column-reverse !important;
+    }
+
+    #extendLoanModal .extend-cancel,
+    #extendLoanModal .extend-confirm {
+
+        width: 100% !important;
+    }
+}
 
 /* =========================================================
    RESPONSIVE

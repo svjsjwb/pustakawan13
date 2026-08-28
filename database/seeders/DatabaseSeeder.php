@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
 
             BookCopySeeder::class,
 
+            AdminSeeder::class,
+
         ]);
     }
 }

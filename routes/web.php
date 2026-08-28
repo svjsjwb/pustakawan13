@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CatalogController;
@@ -16,6 +17,9 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BookCopyController;
 use App\Http\Controllers\UserHomeController;
 use App\Http\Controllers\BorrowingController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\GoogleAuthController;
+
 
 // LANDING
 Route::get('/', function () {
@@ -28,21 +32,59 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-Route::post('/login', function () {
-    return redirect()->route('dashboard');
-})->name('login.store');
+Route::post('/login', [
+    LoginController::class,
+    'login'
+])->name('login.store');
+
+
+// =========================================================
+// REGISTER
+// =========================================================
+Route::get('/register', [
+    RegisterController::class,
+    'create'
+])->name('register');
+
+Route::post('/register', [
+    RegisterController::class,
+    'store'
+])->name('register.store');
+
+
+// =========================================================
+// GOOGLE AUTH
+// =========================================================
+Route::get('/auth/google', [
+    GoogleAuthController::class,
+    'redirect'
+])->name('google.redirect');
+
+Route::get('/auth/google/callback', [
+    GoogleAuthController::class,
+    'callback'
+])->name('google.callback');
 
 
 // LOGOUT
 Route::post('/logout', function () {
-    return redirect()->route('login');
+    Auth::logout();
+
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    return redirect('/login');
 })->name('logout');
+
 
 // DASHBOARD
 Route::get('/dashboard', [
     DashboardController::class,
     'index'
-])->name('dashboard');
+])
+    ->middleware(['admin', 'no.back'])
+    ->name('dashboard');
+
 
 // KATEGORI
 Route::resource('categories', CategoryController::class);
@@ -78,6 +120,11 @@ Route::delete('/borrowings/{borrowing}', [
     'destroy'
 ])->name('borrowings.destroy');
 
+// Tambah waktu baca
+Route::patch(
+    '/circulation/{borrowing}/extend',
+    [CirculationController::class, 'extendLoan']
+)->name('circulation.extend');
 
 // SIRKULASI
 Route::get('/circulation', [CirculationController::class, 'index'])
@@ -188,7 +235,10 @@ Route::prefix('books/{book}/copies')
         ])->name('update');
     });
 
+//Home user
 Route::get('/home', [
     UserHomeController::class,
     'index'
-])->name('user.home');
+])
+    ->middleware(['auth', 'no.back'])
+    ->name('user.home');

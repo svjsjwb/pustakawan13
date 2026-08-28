@@ -3,34 +3,422 @@
 @section('title', 'Reservasi Buku')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/reservations.css') }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ asset('css/reservations.css') }}"
+    >
+
+    {{-- Flatpickr CSS --}}
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css"
+    >
+
+
+    <style>
+
+        /* =====================================================
+           FILTER BAR
+        ====================================================== */
+
+        .reservation-filter-bar {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            margin-top: 14px;
+
+            margin-bottom: 14px;
+
+            padding: 0;
+
+            background: transparent;
+
+            border: none;
+
+        }
+
+
+        /* =====================================================
+           DATE RANGE FORM
+        ====================================================== */
+
+        .date-range-form {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            align-items: center;
+
+            gap: 8px;
+
+        }
+
+
+        .date-range-wrapper {
+
+            position: relative;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+
+        .date-range-icon {
+
+            position: absolute;
+
+            left: 15px;
+
+            color: #64748b;
+
+            font-size: 14px;
+
+            pointer-events: none;
+
+            z-index: 2;
+
+        }
+
+
+        .date-range-input {
+
+            margin-left: 0;
+
+            padding: 7px 12px 7px 38px;
+
+            font-size: 12px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 6px;
+
+            background-color: #fff;
+
+            color: #1e293b;
+
+            min-width: 230px;
+
+            cursor: pointer;
+
+            transition:
+                border-color .15s ease-in-out,
+                box-shadow .15s ease-in-out;
+
+        }
+
+
+        .date-range-input:focus {
+
+            border-color: #287b7b;
+
+            outline: 0;
+
+            box-shadow:
+                0 0 0 2px rgba(
+                    40,
+                    123,
+                    123,
+                    .15
+                );
+
+        }
+
+
+        /* =====================================================
+           FILTER BUTTON
+        ====================================================== */
+
+        .btn-filter-submit {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 4px;
+
+            padding: 7px 14px;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            color: #fff;
+
+            background-color: #287b7b;
+
+            border: 1px solid #287b7b;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            transition:
+                background-color .15s ease,
+                transform .15s ease;
+
+        }
+
+
+        .btn-filter-submit:hover {
+
+            background-color: #216969;
+
+            border-color: #216969;
+
+            transform:
+                translateY(-1px);
+
+        }
+
+
+        /* =====================================================
+           RESET BUTTON
+        ====================================================== */
+
+        .btn-filter-reset {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 4px;
+
+            padding: 7px 12px;
+
+            font-size: 12px;
+
+            font-weight: 500;
+
+            color: #64748b;
+
+            background-color: #fff;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 6px;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            transition:
+                all .15s ease;
+
+        }
+
+
+        .btn-filter-reset:hover {
+
+            background-color: #f1f5f9;
+
+            color: #334155;
+
+            border-color: #94a3b8;
+
+        }
+
+
+        /* =====================================================
+           ACTIVE FILTER BADGE
+        ====================================================== */
+
+        .filter-badge-active {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            font-size: 11px;
+
+            padding: 3px 8px;
+
+            background-color: #e0f2fe;
+
+            color: #0369a1;
+
+            border-radius: 4px;
+
+            margin-top: 4px;
+
+            font-weight: 500;
+
+        }
+
+
+        /* =====================================================
+           SEARCH
+        ====================================================== */
+
+        .reservation-search-wrapper {
+
+            flex-grow: 1;
+
+            max-width: 250px;
+
+            margin-right: 8px;
+
+        }
+
+
+        .reservation-search-wrapper input {
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            padding: 7px 12px;
+
+            font-size: 12px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 6px;
+
+            outline: none;
+
+            transition:
+                border-color .15s ease,
+                box-shadow .15s ease;
+
+        }
+
+
+        .reservation-search-wrapper input:focus {
+
+            border-color: #287b7b;
+
+            box-shadow:
+                0 0 0 2px rgba(
+                    40,
+                    123,
+                    123,
+                    .10
+                );
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ====================================================== */
+
+        @media (max-width: 700px) {
+
+            .reservation-filter-bar {
+
+                align-items: stretch;
+
+                flex-direction: column;
+
+            }
+
+
+            .date-range-form {
+
+                width: 100%;
+
+            }
+
+
+            .date-range-wrapper {
+
+                width: 100%;
+
+            }
+
+
+            .date-range-input {
+
+                width: 100%;
+
+                min-width: 0;
+
+                box-sizing: border-box;
+
+            }
+
+
+            .reservation-search-wrapper {
+
+                width: 100%;
+
+                max-width: none;
+
+                margin-right: 0;
+
+            }
+
+
+            .reservation-search-wrapper input {
+
+                width: 100%;
+
+            }
+
+        }
+
+    </style>
+
 @endpush
+
 
 @section('content')
 
 <section id="page-reservations">
 
+
     {{-- =====================================================
-         ALERT
+         ALERT SUCCESS
     ====================================================== --}}
 
     @if(session('success'))
 
         <div class="reservation-alert success">
+
             {{ session('success') }}
+
         </div>
 
     @endif
 
+
+    {{-- =====================================================
+         ALERT ERROR
+    ====================================================== --}}
 
     @if(session('error'))
 
         <div class="reservation-alert error">
+
             {{ session('error') }}
+
         </div>
 
     @endif
 
+
+    {{-- =====================================================
+         VALIDATION ERROR
+    ====================================================== --}}
 
     @if($errors->any())
 
@@ -54,7 +442,7 @@
 
 
     {{-- =====================================================
-         LAYOUT
+         MAIN LAYOUT
     ====================================================== --}}
 
     <div class="reservation-layout">
@@ -84,15 +472,16 @@
                 @csrf
 
 
-                {{-- =========================
+                {{-- =========================================
                      ANGGOTA
-                ========================= --}}
+                ========================================== --}}
 
                 <div class="reservation-field">
 
                     <label for="member_id">
                         Anggota
                     </label>
+
 
                     <select
                         name="member_id"
@@ -104,13 +493,18 @@
                             -- Pilih Anggota --
                         </option>
 
+
                         @foreach($members as $member)
 
                             <option
                                 value="{{ $member->id }}"
-                                {{ old('member_id') == $member->id ? 'selected' : '' }}
+                                @selected(
+                                    old('member_id') == $member->id
+                                )
                             >
+
                                 {{ $member->name }}
+
                             </option>
 
                         @endforeach
@@ -120,15 +514,16 @@
                 </div>
 
 
-                {{-- =========================
+                {{-- =========================================
                      BUKU
-                ========================= --}}
+                ========================================== --}}
 
                 <div class="reservation-field">
 
                     <label for="book_id">
                         Buku
                     </label>
+
 
                     <select
                         name="book_id"
@@ -140,12 +535,17 @@
                             -- Pilih Buku --
                         </option>
 
+
                         @foreach($books as $book)
 
                             <option
                                 value="{{ $book->id }}"
-                                {{ old('book_id') == $book->id ? 'selected' : '' }}
-                                {{ $book->available_stock < 1 ? 'disabled' : '' }}
+                                @selected(
+                                    old('book_id') == $book->id
+                                )
+                                @disabled(
+                                    $book->available_stock < 1
+                                )
                             >
 
                                 {{ $book->title }}
@@ -156,7 +556,8 @@
 
                                 @else
 
-                                    — Stok {{ $book->available_stock }}
+                                    — Stok
+                                    {{ $book->available_stock }}
 
                                 @endif
 
@@ -169,11 +570,12 @@
                 </div>
 
 
-                {{-- =========================
+                {{-- =========================================
                      TANGGAL
-                ========================= --}}
+                ========================================== --}}
 
                 <div class="reservation-date-row">
+
 
                     <div class="reservation-field">
 
@@ -181,11 +583,15 @@
                             Tanggal Reservasi
                         </label>
 
+
                         <input
                             type="date"
                             name="reserved_at"
                             id="reserved_at"
-                            value="{{ old('reserved_at', $selectedDate) }}"
+                            value="{{ old(
+                                'reserved_at',
+                                $selectedDate
+                            ) }}"
                             min="{{ now()->format('Y-m-d') }}"
                             required
                         >
@@ -199,12 +605,16 @@
                             Tanggal Berakhir
                         </label>
 
+
                         <input
                             type="date"
                             name="expires_at"
                             id="expires_at"
                             value="{{ old('expires_at') }}"
-                            min="{{ old('reserved_at', $selectedDate) }}"
+                            min="{{ old(
+                                'reserved_at',
+                                $selectedDate
+                            ) }}"
                         >
 
                     </div>
@@ -212,15 +622,17 @@
                 </div>
 
 
-                {{-- =========================
+                {{-- =========================================
                      SUBMIT
-                ========================= --}}
+                ========================================== --}}
 
                 <button
                     type="submit"
                     class="reservation-submit"
                 >
+
                     Simpan Reservasi
+
                 </button>
 
             </form>
@@ -235,9 +647,9 @@
         <div class="reservation-list-card">
 
 
-            {{-- =========================
+            {{-- =============================================
                  HEADER
-            ========================= --}}
+            ============================================== --}}
 
             <div class="reservation-list-top">
 
@@ -247,25 +659,154 @@
                         Daftar Reservasi
                     </h3>
 
+
                     <span class="reservation-list-subtitle">
                         Daftar buku yang telah direservasi.
                     </span>
 
+
+                    @if(
+                        request('start_date')
+                        &&
+                        request('end_date')
+                    )
+
+                        <div>
+
+                            <span class="filter-badge-active">
+
+                                📅 Filter:
+
+                                {{ \Carbon\Carbon::parse(
+                                    request('start_date')
+                                )->format('d/m/Y') }}
+
+                                -
+
+                                {{ \Carbon\Carbon::parse(
+                                    request('end_date')
+                                )->format('d/m/Y') }}
+
+                            </span>
+
+                        </div>
+
+                    @endif
+
                 </div>
-
-
-                <input
-                    type="text"
-                    id="reservationSearch"
-                    placeholder="Cari reservasi..."
-                >
 
             </div>
 
 
-            {{-- =========================
+            {{-- =============================================
+                 FILTER BAR
+            ============================================== --}}
+
+            <div class="reservation-filter-bar">
+
+
+                {{-- =============================================
+                     DATE RANGE
+                ============================================== --}}
+
+                <form
+                    action="{{ route('reservations.index') }}"
+                    method="GET"
+                    class="date-range-form"
+                    id="dateRangeFilterForm"
+                >
+
+
+                    <div class="date-range-wrapper">
+
+                        <span class="date-range-icon">
+                            📅
+                        </span>
+
+
+                        <input
+                            type="text"
+                            id="dateRangePicker"
+                            class="date-range-input"
+                            placeholder="Pilih rentang tanggal..."
+                            readonly
+                        >
+
+
+                        <input
+                            type="hidden"
+                            name="start_date"
+                            id="startDateInput"
+                            value="{{ request('start_date') }}"
+                        >
+
+
+                        <input
+                            type="hidden"
+                            name="end_date"
+                            id="endDateInput"
+                            value="{{ request('end_date') }}"
+                        >
+
+                    </div>
+
+
+                    {{-- APPLY --}}
+
+                    <button
+                        type="submit"
+                        class="btn-filter-submit"
+                    >
+
+                        Terapkan
+
+                    </button>
+
+
+                    {{-- RESET --}}
+
+                    @if(
+                        request('start_date')
+                        ||
+                        request('end_date')
+                    )
+
+                        <a
+                            href="{{ route('reservations.index') }}"
+                            class="btn-filter-reset"
+                            title="Reset Filter"
+                        >
+
+                            Reset
+
+                        </a>
+
+                    @endif
+
+                </form>
+
+
+                {{-- =============================================
+                     LIVE SEARCH
+                ============================================== --}}
+
+                <div class="reservation-search-wrapper">
+
+                    <input
+                        type="text"
+                        id="reservationSearch"
+                        placeholder="Cari di tabel..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+
+            {{-- =================================================
                  TABLE
-            ========================= --}}
+            ================================================== --}}
 
             <div class="reservation-table-wrap">
 
@@ -309,14 +850,18 @@
 
                     <tbody>
 
-                        @forelse($reservations as $reservation)
+
+                        @forelse(
+                            $reservations
+                            as $reservation
+                        )
 
                             <tr class="reservation-row">
 
 
                                 {{-- =========================
                                      ANGGOTA
-                                ========================= --}}
+                                ========================== --}}
 
                                 <td>
 
@@ -327,7 +872,7 @@
 
                                 {{-- =========================
                                      BUKU
-                                ========================= --}}
+                                ========================== --}}
 
                                 <td>
 
@@ -337,8 +882,8 @@
 
 
                                 {{-- =========================
-                                     TANGGAL RESERVASI
-                                ========================= --}}
+                                     RESERVASI
+                                ========================== --}}
 
                                 <td>
 
@@ -351,11 +896,13 @@
 
                                 {{-- =========================
                                      BERLAKU SAMPAI
-                                ========================= --}}
+                                ========================== --}}
 
                                 <td>
 
-                                    @if($reservation->expires_at)
+                                    @if(
+                                        $reservation->expires_at
+                                    )
 
                                         {{ \Carbon\Carbon::parse(
                                             $reservation->expires_at
@@ -372,44 +919,80 @@
 
                                 {{-- =========================
                                      STATUS
-                                ========================= --}}
+                                ========================== --}}
 
                                 <td>
 
-                                    @if($reservation->status === 'menunggu')
+                                    @if(
+                                        $reservation->status ===
+                                        'menunggu'
+                                    )
 
-                                        <span class="reservation-status waiting">
+                                        <span
+                                            class="reservation-status waiting"
+                                        >
                                             Menunggu
                                         </span>
 
-                                    @elseif($reservation->status === 'disetujui')
 
-                                        <span class="reservation-status approved">
+                                    @elseif(
+                                        $reservation->status ===
+                                        'disetujui'
+                                    )
+
+                                        <span
+                                            class="reservation-status approved"
+                                        >
                                             Disetujui
                                         </span>
 
-                                    @elseif($reservation->status === 'ditolak')
 
-                                        <span class="reservation-status rejected">
+                                    @elseif(
+                                        $reservation->status ===
+                                        'ditolak'
+                                    )
+
+                                        <span
+                                            class="reservation-status rejected"
+                                        >
                                             Ditolak
                                         </span>
 
-                                    @elseif($reservation->status === 'dibatalkan')
 
-                                        <span class="reservation-status cancelled">
+                                    @elseif(
+                                        $reservation->status ===
+                                        'dibatalkan'
+                                    )
+
+                                        <span
+                                            class="reservation-status cancelled"
+                                        >
                                             Dibatalkan
                                         </span>
 
-                                    @elseif($reservation->status === 'selesai')
 
-                                        <span class="reservation-status finished">
+                                    @elseif(
+                                        $reservation->status ===
+                                        'selesai'
+                                    )
+
+                                        <span
+                                            class="reservation-status finished"
+                                        >
                                             Selesai
                                         </span>
 
+
                                     @else
 
-                                        <span class="reservation-status">
-                                            {{ ucfirst($reservation->status) }}
+                                        <span
+                                            class="reservation-status"
+                                        >
+
+                                            {{ ucfirst(
+                                                $reservation->status
+                                            ) }}
+
                                         </span>
 
                                     @endif
@@ -419,18 +1002,21 @@
 
                                 {{-- =========================
                                      AKSI
-                                ========================= --}}
+                                ========================== --}}
 
                                 <td>
 
                                     <div class="reservation-actions">
 
 
-                                        {{-- =====================
+                                        {{-- =================================
                                              SETUJUI
-                                        ====================== --}}
+                                        ================================== --}}
 
-                                        @if($reservation->status === 'menunggu')
+                                        @if(
+                                            $reservation->status ===
+                                            'menunggu'
+                                        )
 
                                             <form
                                                 action="{{ route(
@@ -444,17 +1030,21 @@
 
                                                 @method('PATCH')
 
+
                                                 <input
                                                     type="hidden"
                                                     name="status"
                                                     value="disetujui"
                                                 >
 
+
                                                 <button
                                                     type="submit"
                                                     class="btn-approve"
                                                 >
+
                                                     Setujui
+
                                                 </button>
 
                                             </form>
@@ -462,13 +1052,15 @@
                                         @endif
 
 
-                                        {{-- =====================
-                                             BOOK LOCATOR
-                                        ====================== --}}
+                                        {{-- =================================
+                                             LOCATOR
+                                        ================================== --}}
 
                                         @if(
-                                            $reservation->book_copy_id &&
-                                            $reservation->bookCopy?->shelf_id &&
+                                            $reservation->book_copy_id
+                                            &&
+                                            $reservation->bookCopy?->shelf_id
+                                            &&
                                             in_array(
                                                 $reservation->status,
                                                 [
@@ -485,17 +1077,22 @@
                                                 ) }}"
                                                 class="btn btn-primary"
                                             >
+
                                                 📍 Temukan Buku
+
                                             </a>
 
                                         @endif
 
 
-                                        {{-- =====================
+                                        {{-- =================================
                                              TOLAK
-                                        ====================== --}}
+                                        ================================== --}}
 
-                                        @if($reservation->status === 'menunggu')
+                                        @if(
+                                            $reservation->status ===
+                                            'menunggu'
+                                        )
 
                                             <form
                                                 action="{{ route(
@@ -509,17 +1106,21 @@
 
                                                 @method('PATCH')
 
+
                                                 <input
                                                     type="hidden"
                                                     name="status"
                                                     value="ditolak"
                                                 >
 
+
                                                 <button
                                                     type="submit"
                                                     class="btn-reject"
                                                 >
+
                                                     Tolak
+
                                                 </button>
 
                                             </form>
@@ -527,15 +1128,19 @@
                                         @endif
 
 
-                                        {{-- =====================
-                                             TIDAK ADA AKSI
-                                        ====================== --}}
+                                        {{-- =================================
+                                             EMPTY ACTION
+                                        ================================== --}}
 
                                         @if(
-                                            $reservation->status !== 'menunggu' &&
+                                            $reservation->status !==
+                                            'menunggu'
+                                            &&
                                             !(
-                                                $reservation->book_copy_id &&
-                                                $reservation->bookCopy?->shelf_id &&
+                                                $reservation->book_copy_id
+                                                &&
+                                                $reservation->bookCopy?->shelf_id
+                                                &&
                                                 in_array(
                                                     $reservation->status,
                                                     [
@@ -567,7 +1172,36 @@
                                     colspan="6"
                                     class="reservation-empty"
                                 >
-                                    Belum ada reservasi.
+
+                                    @if(
+                                        request('start_date')
+                                        &&
+                                        request('end_date')
+                                    )
+
+                                        Tidak ada data reservasi pada
+                                        rentang tanggal
+
+                                        {{
+                                            \Carbon\Carbon::parse(
+                                                request('start_date')
+                                            )->format('d/m/Y')
+                                        }}
+
+                                        s/d
+
+                                        {{
+                                            \Carbon\Carbon::parse(
+                                                request('end_date')
+                                            )->format('d/m/Y')
+                                        }}.
+
+                                    @else
+
+                                        Belum ada reservasi.
+
+                                    @endif
+
                                 </td>
 
                             </tr>
@@ -586,75 +1220,215 @@
 
 </section>
 
-
-{{-- =========================================================
-     JAVASCRIPT
-========================================================= --}}
-
-<script>
-
-document.addEventListener(
-    'DOMContentLoaded',
-    function () {
-
-        const searchInput =
-            document.getElementById(
-                'reservationSearch'
-            );
-
-        const rows =
-            document.querySelectorAll(
-                '#reservationTable tbody tr.reservation-row'
-            );
+@endsection
 
 
-        if (searchInput) {
+@push('scripts')
 
-            searchInput.addEventListener(
-                'input',
-                function () {
+    {{-- =====================================================
+         FLATPICKR
+    ====================================================== --}}
 
-                    const keyword =
-                        this.value
-                            .toLowerCase()
-                            .trim();
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-
-                    rows.forEach(
-                        function (row) {
-
-                            const text =
-                                row.textContent
-                                    .toLowerCase();
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
 
 
-                            if (
-                                text.includes(
-                                    keyword
-                                )
-                            ) {
+    <script>
 
-                                row.style.display =
-                                    '';
+        document.addEventListener(
+            'DOMContentLoaded',
+            function () {
 
-                            } else {
 
-                                row.style.display =
-                                    'none';
+                /* =================================================
+                   FLATPICKR RANGE
+                ================================================= */
 
-                            }
+                const startDateVal =
+                    @json(request('start_date'));
+
+                const endDateVal =
+                    @json(request('end_date'));
+
+
+                let defaultDateRange = [];
+
+
+                if (
+                    startDateVal
+                    &&
+                    endDateVal
+                ) {
+
+                    defaultDateRange = [
+                        startDateVal,
+                        endDateVal
+                    ];
+
+                } else if (
+                    startDateVal
+                ) {
+
+                    defaultDateRange = [
+                        startDateVal
+                    ];
+
+                }
+
+
+                const datePicker =
+                    document.getElementById(
+                        'dateRangePicker'
+                    );
+
+
+                if (datePicker) {
+
+                    flatpickr(
+                        datePicker,
+                        {
+
+                            mode: 'range',
+
+                            dateFormat: 'Y-m-d',
+
+                            altInput: true,
+
+                            altFormat: 'j M Y',
+
+                            locale:
+                                typeof flatpickr.l10ns.id !==
+                                'undefined'
+                                    ? flatpickr.l10ns.id
+                                    : 'default',
+
+                            defaultDate:
+                                defaultDateRange,
+
+                            allowInput: false,
+
+
+                            onChange:
+                                function (
+                                    selectedDates,
+                                    dateStr,
+                                    instance
+                                ) {
+
+                                    const startInput =
+                                        document.getElementById(
+                                            'startDateInput'
+                                        );
+
+
+                                    const endInput =
+                                        document.getElementById(
+                                            'endDateInput'
+                                        );
+
+
+                                    if (
+                                        selectedDates.length === 2
+                                    ) {
+
+                                        startInput.value =
+                                            instance.formatDate(
+                                                selectedDates[0],
+                                                'Y-m-d'
+                                            );
+
+
+                                        endInput.value =
+                                            instance.formatDate(
+                                                selectedDates[1],
+                                                'Y-m-d'
+                                            );
+
+                                    } else if (
+                                        selectedDates.length === 1
+                                    ) {
+
+                                        startInput.value =
+                                            instance.formatDate(
+                                                selectedDates[0],
+                                                'Y-m-d'
+                                            );
+
+
+                                        endInput.value = '';
+
+                                    } else {
+
+                                        startInput.value = '';
+
+                                        endInput.value = '';
+
+                                    }
+
+                                }
 
                         }
                     );
 
                 }
-            );
 
-        }
 
-    }
-);
+                /* =================================================
+                   LIVE SEARCH
+                ================================================= */
 
-</script>
+                const searchInput =
+                    document.getElementById(
+                        'reservationSearch'
+                    );
 
-@endsection
+
+                const rows =
+                    document.querySelectorAll(
+                        '#reservationTable tbody tr.reservation-row'
+                    );
+
+
+                if (!searchInput) {
+
+                    return;
+
+                }
+
+
+                searchInput.addEventListener(
+                    'input',
+                    function () {
+
+                        const keyword =
+                            this.value
+                                .toLowerCase()
+                                .trim();
+
+
+                        rows.forEach(
+                            function (row) {
+
+                                const text =
+                                    row.textContent
+                                        .toLowerCase();
+
+
+                                row.style.display =
+                                    text.includes(keyword)
+                                        ? ''
+                                        : 'none';
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    </script>
+
+@endpush

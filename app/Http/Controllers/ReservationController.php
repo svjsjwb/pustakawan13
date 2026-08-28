@@ -6,10 +6,12 @@ use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Member;
 use App\Models\Reservation;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\Shelf;
 use App\Models\LibraryZone;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ReservationController extends Controller
 {
@@ -22,8 +24,11 @@ class ReservationController extends Controller
     public function index(Request $request)
     {
         /*
-         * Tanggal yang dipilih untuk denah kursi.
+         * =====================================================
+         * TANGGAL DENAH KURSI
+         * =====================================================
          */
+
         $selectedDate = $request->get(
             'reservation_date',
             now()->format('Y-m-d')
@@ -36,7 +41,10 @@ class ReservationController extends Controller
          * =====================================================
          */
 
-        $members = Member::where('status', 'aktif')
+        $members = Member::where(
+            'status',
+            'aktif'
+        )
             ->orderBy('name')
             ->get();
 
@@ -54,41 +62,165 @@ class ReservationController extends Controller
 
         /*
          * =====================================================
-         * DAFTAR RESERVASI
+         * QUERY RESERVASI
          * =====================================================
          *
-         * bookCopy ikut dimuat karena dibutuhkan
-         * untuk mengetahui lokasi fisik buku.
+         * BookCopy ikut dimuat karena diperlukan untuk
+         * mengetahui lokasi fisik buku.
          */
 
-        $reservations = Reservation::with([
+        $query = Reservation::with([
             'member',
             'book',
             'bookCopy.shelf.zone.floor',
-        ])
-            ->latest()
+        ]);
+
+
+        /*
+         * =====================================================
+         * TENTUKAN KOLOM BATAS WAKTU
+         * =====================================================
+         *
+         * Prioritas:
+         *
+         * 1. due_at
+         * 2. expires_at
+         * 3. reserved_at
+         */
+
+        $dueColumn = Schema::hasColumn(
+            'reservations',
+            'due_at'
+        )
+            ? 'due_at'
+            : (
+                Schema::hasColumn(
+                    'reservations',
+                    'expires_at'
+                )
+                    ? 'expires_at'
+                    : 'reserved_at'
+            );
+
+
+        /*
+         * =====================================================
+         * FILTER RENTANG TANGGAL
+         * =====================================================
+         */
+
+        if (
+            $request->filled('start_date')
+            &&
+            $request->filled('end_date')
+        ) {
+
+            $startDate = Carbon::parse(
+                $request->start_date
+            )->startOfDay();
+
+            $endDate = Carbon::parse(
+                $request->end_date
+            )->endOfDay();
+
+            $query->whereBetween(
+                'reserved_at',
+                [
+                    $startDate,
+                    $endDate,
+                ]
+            );
+
+        } elseif (
+            $request->filled('start_date')
+        ) {
+
+            $query->whereDate(
+                'reserved_at',
+                '>=',
+                $request->start_date
+            );
+
+        } elseif (
+            $request->filled('end_date')
+        ) {
+
+            $query->whereDate(
+                'reserved_at',
+                '<=',
+                $request->end_date
+            );
+
+        } elseif (
+            $request->filled('month')
+            &&
+            $request->filled('year')
+        ) {
+
+            /*
+             * Filter bulan berdasarkan due date
+             * / expires_at / reserved_at.
+             */
+
+            $query
+                ->whereYear(
+                    $dueColumn,
+                    $request->year
+                )
+                ->whereMonth(
+                    $dueColumn,
+                    $request->month
+                );
+
+        } else {
+
+            /*
+             * Default:
+             * tampilkan data dalam satu bulan terakhir.
+             */
+
+            $query->where(
+                $dueColumn,
+                '>=',
+                now()->subMonth()->startOfDay()
+            );
+        }
+
+
+        /*
+         * =====================================================
+         * AMBIL RESERVASI
+         * =====================================================
+         */
+
+        $reservations = $query
+            ->latest('reserved_at')
             ->get();
 
 
         /*
          * =====================================================
-         * KURSI YANG SUDAH BOOKING
+         * KURSI YANG SUDAH DIPESAN
          * =====================================================
-         *
-         * Status menunggu dan disetujui dianggap
-         * sudah melakukan booking.
          */
 
         $bookedSeats = Reservation::whereDate(
             'reserved_at',
             $selectedDate
         )
-            ->whereIn('status', [
-                'menunggu',
-                'disetujui'
-            ])
-            ->whereNotNull('seat_number')
-            ->pluck('seat_number')
+            ->whereIn(
+                'status',
+                [
+                    'menunggu',
+                    'disetujui',
+                ]
+            )
+            ->whereNotNull(
+                'seat_number'
+            )
+            ->pluck(
+                'seat_number'
+            )
             ->toArray();
 
 
@@ -126,58 +258,64 @@ class ReservationController extends Controller
          */
 
         $validated = $request->validate([
-
             'member_id' => [
                 'required',
-                'exists:members,id'
+                'exists:members,id',
             ],
 
             'book_id' => [
                 'required',
-                'exists:books,id'
+                'exists:books,id',
             ],
 
             'reserved_at' => [
                 'required',
-                'date'
+                'date',
             ],
 
             'expires_at' => [
                 'nullable',
                 'date',
-                'after_or_equal:reserved_at'
+                'after_or_equal:reserved_at',
             ],
 
             'seat_number' => [
                 'nullable',
                 'string',
-                'regex:/^[ABC][1-8]$/'
+                'regex:/^[ABC][1-8]$/',
             ],
-
         ]);
 
 
         /*
          * =====================================================
-         * CEK KURSI
+         * CEK KURSI SEBELUM TRANSACTION
          * =====================================================
          */
 
-        if (!empty($validated['seat_number'])) {
-
-            $seatAlreadyBooked = Reservation::whereDate(
-                'reserved_at',
-                $validated['reserved_at']
+        if (
+            !empty(
+                $validated['seat_number']
             )
-                ->where(
-                    'seat_number',
-                    $validated['seat_number']
+        ) {
+
+            $seatAlreadyBooked =
+                Reservation::whereDate(
+                    'reserved_at',
+                    $validated['reserved_at']
                 )
-                ->whereIn('status', [
-                    'menunggu',
-                    'disetujui'
-                ])
-                ->exists();
+                    ->where(
+                        'seat_number',
+                        $validated['seat_number']
+                    )
+                    ->whereIn(
+                        'status',
+                        [
+                            'menunggu',
+                            'disetujui',
+                        ]
+                    )
+                    ->exists();
 
 
             if ($seatAlreadyBooked) {
@@ -188,7 +326,7 @@ class ReservationController extends Controller
                         'error',
                         'Kursi ' .
                         $validated['seat_number'] .
-                        ' sudah dipesan pada tanggal tersebut.'
+                        ' sudah dipesan oleh pengguna lain pada tanggal tersebut.'
                     );
             }
         }
@@ -200,161 +338,202 @@ class ReservationController extends Controller
          * =====================================================
          */
 
-        DB::transaction(function () use ($validated) {
+        DB::transaction(
+            function () use (
+                $validated
+            ) {
 
-            /*
-             * Kunci buku terlebih dahulu.
-             */
+                /*
+                 * =================================================
+                 * KUNCI BUKU
+                 * =================================================
+                 */
 
-            $book = Book::lockForUpdate()
-                ->findOrFail(
-                    $validated['book_id']
-                );
-
-
-            /*
-             * =================================================
-             * CARI SATU EKSEMPLAR TERSEDIA
-             * =================================================
-             *
-             * BookCopy menjadi sumber lokasi fisik buku.
-             */
-
-            $bookCopy = BookCopy::where(
-                'book_id',
-                $book->id
-            )
-                ->where(
-                    'status',
-                    'available'
-                )
-                ->lockForUpdate()
-                ->first();
+                $book = Book::lockForUpdate()
+                    ->findOrFail(
+                        $validated['book_id']
+                    );
 
 
-            /*
-             * Tidak ada eksemplar tersedia.
-             */
+                /*
+                 * =================================================
+                 * CEK STOK
+                 * =================================================
+                 */
 
-            if (!$bookCopy) {
-
-                abort(
-                    422,
-                    'Tidak ada eksemplar buku yang tersedia.'
-                );
-            }
-
-
-            /*
-             * =================================================
-             * CEK STOK LAMA
-             * =================================================
-             *
-             * Tetap dipertahankan karena sistem lama
-             * masih menggunakan available_stock.
-             */
-
-            if ($book->available_stock < 1) {
-
-                abort(
-                    422,
-                    'Buku sedang tidak tersedia.'
-                );
-            }
-
-
-            /*
-             * =================================================
-             * KUNCI BOOK COPY
-             * =================================================
-             */
-
-            $bookCopy->update([
-                'status' => 'reserved',
-            ]);
-
-
-            /*
-             * =================================================
-             * CEK KURSI LAGI
-             * =================================================
-             *
-             * Dilakukan kembali di dalam transaction
-             * untuk mencegah dua request memesan kursi
-             * yang sama secara bersamaan.
-             */
-
-            if (!empty($validated['seat_number'])) {
-
-                $seatAlreadyBooked = Reservation::whereDate(
-                    'reserved_at',
-                    $validated['reserved_at']
-                )
-                    ->where(
-                        'seat_number',
-                        $validated['seat_number']
-                    )
-                    ->whereIn('status', [
-                        'menunggu',
-                        'disetujui'
-                    ])
-                    ->exists();
-
-
-                if ($seatAlreadyBooked) {
+                if (
+                    $book->available_stock < 1
+                ) {
 
                     abort(
                         422,
-                        'Kursi ' .
-                        $validated['seat_number'] .
-                        ' baru saja dipesan oleh pengguna lain.'
+                        'Buku sedang tidak tersedia.'
                     );
                 }
+
+
+                /*
+                 * =================================================
+                 * CARI BOOK COPY
+                 * =================================================
+                 *
+                 * Reservation harus memegang satu eksemplar
+                 * fisik yang tersedia.
+                 */
+
+                $bookCopy = BookCopy::where(
+                    'book_id',
+                    $book->id
+                )
+                    ->where(
+                        'status',
+                        'available'
+                    )
+                    ->lockForUpdate()
+                    ->first();
+
+
+                if (!$bookCopy) {
+
+                    abort(
+                        422,
+                        'Tidak ada eksemplar buku yang tersedia.'
+                    );
+                }
+
+
+                /*
+                 * =================================================
+                 * CEK KURSI LAGI DI DALAM TRANSACTION
+                 * =================================================
+                 *
+                 * Untuk mengurangi kemungkinan dua request
+                 * mengambil kursi yang sama.
+                 */
+
+                if (
+                    !empty(
+                        $validated['seat_number']
+                    )
+                ) {
+
+                    $seatAlreadyBooked =
+                        Reservation::whereDate(
+                            'reserved_at',
+                            $validated['reserved_at']
+                        )
+                            ->where(
+                                'seat_number',
+                                $validated['seat_number']
+                            )
+                            ->whereIn(
+                                'status',
+                                [
+                                    'menunggu',
+                                    'disetujui',
+                                ]
+                            )
+                            ->lockForUpdate()
+                            ->exists();
+
+
+                    if ($seatAlreadyBooked) {
+
+                        abort(
+                            422,
+                            'Kursi ' .
+                            $validated['seat_number'] .
+                            ' baru saja dipesan oleh pengguna lain.'
+                        );
+                    }
+                }
+
+
+                /*
+                 * =================================================
+                 * RESERVATION DATA
+                 * =================================================
+                 */
+
+                $reservationData = [
+                    'member_id' =>
+                        $validated['member_id'],
+
+                    'book_id' =>
+                        $validated['book_id'],
+
+                    'book_copy_id' =>
+                        $bookCopy->id,
+
+                    'reserved_at' =>
+                        $validated['reserved_at'],
+
+                    'expires_at' =>
+                        $validated['expires_at']
+                        ?? null,
+
+                    'seat_number' =>
+                        $validated['seat_number']
+                        ?? null,
+
+                    'status' =>
+                        'menunggu',
+                ];
+
+
+                /*
+                 * =================================================
+                 * KOMPATIBILITAS due_at
+                 * =================================================
+                 */
+
+                if (
+                    Schema::hasColumn(
+                        'reservations',
+                        'due_at'
+                    )
+                ) {
+
+                    $reservationData['due_at'] =
+                        $validated['expires_at']
+                        ??
+                        $validated['reserved_at'];
+                }
+
+
+                /*
+                 * =================================================
+                 * BUAT RESERVASI
+                 * =================================================
+                 */
+
+                Reservation::create(
+                    $reservationData
+                );
+
+
+                /*
+                 * =================================================
+                 * UBAH STATUS BOOK COPY
+                 * =================================================
+                 */
+
+                $bookCopy->update([
+                    'status' => 'reserved',
+                ]);
+
+
+                /*
+                 * =================================================
+                 * KURANGI STOK
+                 * =================================================
+                 */
+
+                $book->decrement(
+                    'available_stock'
+                );
             }
-
-
-            /*
-             * =================================================
-             * BUAT RESERVASI
-             * =================================================
-             */
-
-            Reservation::create([
-
-                'member_id' =>
-                    $validated['member_id'],
-
-                'book_id' =>
-                    $book->id,
-
-                'book_copy_id' =>
-                    $bookCopy->id,
-
-                'reserved_at' =>
-                    $validated['reserved_at'],
-
-                'expires_at' =>
-                    $validated['expires_at'] ?? null,
-
-                'seat_number' =>
-                    $validated['seat_number'] ?? null,
-
-                'status' =>
-                    'menunggu',
-
-            ]);
-
-
-            /*
-             * =================================================
-             * KURANGI STOK
-             * =================================================
-             */
-
-            $book->decrement(
-                'available_stock'
-            );
-        });
+        );
 
 
         /*
@@ -364,7 +543,9 @@ class ReservationController extends Controller
          */
 
         return redirect()
-            ->route('reservations.index')
+            ->route(
+                'reservations.index'
+            )
             ->with(
                 'success',
                 'Reservasi berhasil dibuat.'
@@ -385,17 +566,15 @@ class ReservationController extends Controller
 
         /*
          * =====================================================
-         * VALIDASI STATUS
+         * VALIDASI
          * =====================================================
          */
 
         $validated = $request->validate([
-
             'status' => [
                 'required',
-                'in:menunggu,disetujui,ditolak,dibatalkan,selesai'
+                'in:menunggu,disetujui,ditolak,dibatalkan,selesai',
             ],
-
         ]);
 
 
@@ -405,239 +584,257 @@ class ReservationController extends Controller
          * =====================================================
          */
 
-        DB::transaction(function () use (
-            $validated,
-            $reservation
-        ) {
-
-            /*
-             * Kunci reservation.
-             */
-
-            $reservation = Reservation::lockForUpdate()
-                ->findOrFail(
-                    $reservation->id
-                );
-
-
-            $oldStatus =
-                $reservation->status;
-
-
-            $newStatus =
-                $validated['status'];
-
-
-            /*
-             * =================================================
-             * TIDAK ADA PERUBAHAN
-             * =================================================
-             */
-
-            if (
-                $oldStatus ===
-                $newStatus
-            ) {
-
-                return;
-            }
-
-
-            /*
-             * =================================================
-             * RESERVASI DITOLAK / DIBATALKAN
-             * =================================================
-             *
-             * BookCopy yang sebelumnya reserved
-             * dikembalikan menjadi available.
-             */
-
-            if (
-                in_array(
-                    $newStatus,
-                    [
-                        'ditolak',
-                        'dibatalkan'
-                    ]
-                )
-                &&
-                !in_array(
-                    $oldStatus,
-                    [
-                        'ditolak',
-                        'dibatalkan'
-                    ]
-                )
+        DB::transaction(
+            function () use (
+                $validated,
+                $reservation
             ) {
 
                 /*
-                 * Release BookCopy.
+                 * Kunci reservation.
+                 */
+
+                $reservation =
+                    Reservation::lockForUpdate()
+                        ->findOrFail(
+                            $reservation->id
+                        );
+
+
+                $oldStatus =
+                    $reservation->status;
+
+
+                $newStatus =
+                    $validated['status'];
+
+
+                /*
+                 * =================================================
+                 * TIDAK ADA PERUBAHAN
+                 * =================================================
                  */
 
                 if (
-                    $reservation->book_copy_id
+                    $oldStatus ===
+                    $newStatus
                 ) {
 
-                    $bookCopy =
-                        BookCopy::lockForUpdate()
-                            ->find(
-                                $reservation->book_copy_id
+                    return;
+                }
+
+
+                /*
+                 * =================================================
+                 * DITOLAK / DIBATALKAN
+                 * =================================================
+                 */
+
+                if (
+                    in_array(
+                        $newStatus,
+                        [
+                            'ditolak',
+                            'dibatalkan',
+                        ]
+                    )
+                    &&
+                    !in_array(
+                        $oldStatus,
+                        [
+                            'ditolak',
+                            'dibatalkan',
+                        ]
+                    )
+                ) {
+
+                    /*
+                     * ---------------------------------------------
+                     * RELEASE BOOK COPY
+                     * ---------------------------------------------
+                     */
+
+                    if (
+                        $reservation->book_copy_id
+                    ) {
+
+                        $bookCopy =
+                            BookCopy::lockForUpdate()
+                                ->find(
+                                    $reservation
+                                        ->book_copy_id
+                                );
+
+
+                        if (
+                            $bookCopy
+                            &&
+                            $bookCopy->status ===
+                            'reserved'
+                        ) {
+
+                            $bookCopy->update([
+                                'status' =>
+                                    'available',
+                            ]);
+                        }
+                    }
+
+
+                    /*
+                     * ---------------------------------------------
+                     * KEMBALIKAN STOK
+                     * ---------------------------------------------
+                     */
+
+                    $book =
+                        Book::lockForUpdate()
+                            ->findOrFail(
+                                $reservation->book_id
                             );
 
 
-                    if (
-                        $bookCopy &&
-                        $bookCopy->status ===
-                        'reserved'
-                    ) {
-
-                        $bookCopy->update([
-                            'status' =>
-                                'available',
-                        ]);
-                    }
-                }
-
-
-                /*
-                 * Kembalikan stok.
-                 */
-
-                $book =
-                    Book::lockForUpdate()
-                        ->findOrFail(
-                            $reservation->book_id
-                        );
-
-
-                $book->increment(
-                    'available_stock'
-                );
-            }
-
-
-            /*
-             * =================================================
-             * RESERVASI DI-AKTIFKAN KEMBALI
-             * =================================================
-             *
-             * Contoh:
-             *
-             * dibatalkan
-             *      ↓
-             * menunggu
-             *
-             * Cari BookCopy available baru.
-             */
-
-            if (
-                in_array(
-                    $oldStatus,
-                    [
-                        'ditolak',
-                        'dibatalkan'
-                    ]
-                )
-                &&
-                !in_array(
-                    $newStatus,
-                    [
-                        'ditolak',
-                        'dibatalkan'
-                    ]
-                )
-            ) {
-
-                $book =
-                    Book::lockForUpdate()
-                        ->findOrFail(
-                            $reservation->book_id
-                        );
-
-
-                /*
-                 * Cari eksemplar tersedia.
-                 */
-
-                $bookCopy =
-                    BookCopy::where(
-                        'book_id',
-                        $book->id
-                    )
-                    ->where(
-                        'status',
-                        'available'
-                    )
-                    ->lockForUpdate()
-                    ->first();
-
-
-                if (!$bookCopy) {
-
-                    abort(
-                        422,
-                        'Tidak ada eksemplar buku yang tersedia untuk mengaktifkan kembali reservasi.'
+                    $book->increment(
+                        'available_stock'
                     );
                 }
 
 
                 /*
-                 * Kunci BookCopy.
-                 */
-
-                $bookCopy->update([
-                    'status' =>
-                        'reserved',
-                ]);
-
-
-                /*
-                 * Hubungkan reservation
-                 * dengan BookCopy baru.
-                 */
-
-                $reservation->update([
-                    'book_copy_id' =>
-                        $bookCopy->id,
-                ]);
-
-
-                /*
-                 * Pastikan stok tersedia.
+                 * =================================================
+                 * AKTIFKAN KEMBALI
+                 * =================================================
+                 *
+                 * Contoh:
+                 *
+                 * dibatalkan → menunggu
+                 * ditolak    → menunggu
                  */
 
                 if (
-                    $book->available_stock < 1
+                    in_array(
+                        $oldStatus,
+                        [
+                            'ditolak',
+                            'dibatalkan',
+                        ]
+                    )
+                    &&
+                    !in_array(
+                        $newStatus,
+                        [
+                            'ditolak',
+                            'dibatalkan',
+                        ]
+                    )
                 ) {
 
-                    abort(
-                        422,
-                        'Stok buku tidak tersedia untuk mengaktifkan kembali reservasi.'
+                    /*
+                     * ---------------------------------------------
+                     * KUNCI BUKU
+                     * ---------------------------------------------
+                     */
+
+                    $book =
+                        Book::lockForUpdate()
+                            ->findOrFail(
+                                $reservation->book_id
+                            );
+
+
+                    /*
+                     * ---------------------------------------------
+                     * CEK STOK
+                     * ---------------------------------------------
+                     */
+
+                    if (
+                        $book->available_stock < 1
+                    ) {
+
+                        abort(
+                            422,
+                            'Stok buku tidak tersedia untuk mengaktifkan kembali reservasi.'
+                        );
+                    }
+
+
+                    /*
+                     * ---------------------------------------------
+                     * CARI BOOK COPY BARU
+                     * ---------------------------------------------
+                     */
+
+                    $bookCopy =
+                        BookCopy::where(
+                            'book_id',
+                            $book->id
+                        )
+                            ->where(
+                                'status',
+                                'available'
+                            )
+                            ->lockForUpdate()
+                            ->first();
+
+
+                    if (!$bookCopy) {
+
+                        abort(
+                            422,
+                            'Tidak ada eksemplar buku yang tersedia untuk mengaktifkan kembali reservasi.'
+                        );
+                    }
+
+
+                    /*
+                     * ---------------------------------------------
+                     * RESERVE COPY
+                     * ---------------------------------------------
+                     */
+
+                    $bookCopy->update([
+                        'status' =>
+                            'reserved',
+                    ]);
+
+
+                    /*
+                     * ---------------------------------------------
+                     * HUBUNGKAN RESERVATION
+                     * ---------------------------------------------
+                     */
+
+                    $reservation->update([
+                        'book_copy_id' =>
+                            $bookCopy->id,
+                    ]);
+
+
+                    /*
+                     * ---------------------------------------------
+                     * KURANGI STOK
+                     * ---------------------------------------------
+                     */
+
+                    $book->decrement(
+                        'available_stock'
                     );
                 }
 
 
                 /*
-                 * Kurangi stok.
+                 * =================================================
+                 * UPDATE STATUS
+                 * =================================================
                  */
 
-                $book->decrement(
-                    'available_stock'
-                );
+                $reservation->update([
+                    'status' =>
+                        $newStatus,
+                ]);
             }
-
-
-            /*
-             * =================================================
-             * UPDATE STATUS
-             * =================================================
-             */
-
-            $reservation->update([
-                'status' =>
-                    $newStatus
-            ]);
-        });
+        );
 
 
         /*
@@ -647,7 +844,9 @@ class ReservationController extends Controller
          */
 
         return redirect()
-            ->route('reservations.index')
+            ->route(
+                'reservations.index'
+            )
             ->with(
                 'success',
                 'Status reservasi berhasil diperbarui.'
@@ -666,9 +865,9 @@ class ReservationController extends Controller
     ) {
 
         /*
-         * =========================================================
-         * LOAD DATA RESERVASI
-         * =========================================================
+         * =====================================================
+         * LOAD DATA
+         * =====================================================
          */
 
         $reservation->load([
@@ -679,9 +878,9 @@ class ReservationController extends Controller
 
 
         /*
-         * =========================================================
+         * =====================================================
          * CEK BOOK COPY
-         * =========================================================
+         * =====================================================
          */
 
         if (
@@ -696,13 +895,15 @@ class ReservationController extends Controller
 
 
         /*
-         * =========================================================
+         * =====================================================
          * RAK TARGET
-         * =========================================================
+         * =====================================================
          */
 
         $targetShelf =
-            $reservation->bookCopy->shelf;
+            $reservation
+                ->bookCopy
+                ->shelf;
 
 
         if (
@@ -717,9 +918,9 @@ class ReservationController extends Controller
 
 
         /*
-         * =========================================================
+         * =====================================================
          * ZONA TARGET
-         * =========================================================
+         * =====================================================
          */
 
         $targetZone =
@@ -738,9 +939,9 @@ class ReservationController extends Controller
 
 
         /*
-         * =========================================================
+         * =====================================================
          * LANTAI TARGET
-         * =========================================================
+         * =====================================================
          */
 
         $targetFloor =
@@ -759,9 +960,9 @@ class ReservationController extends Controller
 
 
         /*
-         * =========================================================
-         * SEMUA ZONA DI LANTAI YANG SAMA
-         * =========================================================
+         * =====================================================
+         * SEMUA ZONA DI LANTAI
+         * =====================================================
          */
 
         $zoneIds =
@@ -769,13 +970,13 @@ class ReservationController extends Controller
                 'library_floor_id',
                 $targetFloor->id
             )
-            ->pluck('id');
+                ->pluck('id');
 
 
         /*
-         * =========================================================
-         * SEMUA RAK DI LANTAI YANG SAMA
-         * =========================================================
+         * =====================================================
+         * SEMUA RAK DI LANTAI
+         * =====================================================
          */
 
         $shelves =
@@ -783,18 +984,18 @@ class ReservationController extends Controller
                 'library_zone_id',
                 $zoneIds
             )
-            ->with([
-                'copies.book',
-                'zone.floor',
-            ])
-            ->orderBy('code')
-            ->get();
+                ->with([
+                    'copies.book',
+                    'zone.floor',
+                ])
+                ->orderBy('code')
+                ->get();
 
 
         /*
-         * =========================================================
-         * DATA BOOK COPY UNTUK 3D
-         * =========================================================
+         * =====================================================
+         * DATA BOOK COPY UNTUK 3D LOCATOR
+         * =====================================================
          */
 
         $bookCopies =
@@ -821,7 +1022,8 @@ class ReservationController extends Controller
 
                                         'title' =>
                                             $copy->book?->title
-                                            ?? 'Buku',
+                                            ??
+                                            'Buku',
 
                                         'barcode' =>
                                             $copy->barcode,
@@ -851,7 +1053,6 @@ class ReservationController extends Controller
                                             $copy->id ===
                                             $reservation
                                                 ->book_copy_id,
-
                                     ];
                                 }
                             );
@@ -862,15 +1063,14 @@ class ReservationController extends Controller
 
 
         /*
-         * =========================================================
-         * KIRIM KE VIEW
-         * =========================================================
+         * =====================================================
+         * KIRIM KE VIEW LOCATOR
+         * =====================================================
          */
 
         return view(
             'book-locator.show',
             [
-
                 'reservation' =>
                     $reservation,
 
@@ -882,7 +1082,6 @@ class ReservationController extends Controller
 
                 'bookCopies' =>
                     $bookCopies,
-
             ]
         );
     }
@@ -903,6 +1102,12 @@ class ReservationController extends Controller
                 $reservation
             ) {
 
+                /*
+                 * =================================================
+                 * KUNCI RESERVATION
+                 * =================================================
+                 */
+
                 $reservation =
                     Reservation::lockForUpdate()
                         ->findOrFail(
@@ -912,7 +1117,7 @@ class ReservationController extends Controller
 
                 /*
                  * =================================================
-                 * KEMBALIKAN BOOK COPY DAN STOK
+                 * RELEASE COPY + STOK
                  * =================================================
                  *
                  * Reservation aktif masih memegang
@@ -925,13 +1130,15 @@ class ReservationController extends Controller
                         [
                             'ditolak',
                             'dibatalkan',
-                            'selesai'
+                            'selesai',
                         ]
                     )
                 ) {
 
                     /*
-                     * Release BookCopy.
+                     * ---------------------------------------------
+                     * RELEASE BOOK COPY
+                     * ---------------------------------------------
                      */
 
                     if (
@@ -947,7 +1154,8 @@ class ReservationController extends Controller
 
 
                         if (
-                            $bookCopy &&
+                            $bookCopy
+                            &&
                             $bookCopy->status ===
                             'reserved'
                         ) {
@@ -961,7 +1169,9 @@ class ReservationController extends Controller
 
 
                     /*
-                     * Kembalikan stok.
+                     * ---------------------------------------------
+                     * KEMBALIKAN STOK
+                     * ---------------------------------------------
                      */
 
                     $book =
@@ -995,7 +1205,9 @@ class ReservationController extends Controller
          */
 
         return redirect()
-            ->route('reservations.index')
+            ->route(
+                'reservations.index'
+            )
             ->with(
                 'success',
                 'Reservasi berhasil dihapus.'
