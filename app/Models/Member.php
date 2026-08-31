@@ -2,21 +2,27 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Member extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
+        'member_number',
         'name',
-        'email',
-        'phone',
+        'nis_nip',
+        'gender',
+        'class',
         'address',
+        'phone',
+        'email',
+        'registered_at',
         'status',
     ];
 
-    public function borrowings(): HasMany
-    {
-        return $this->hasMany(Borrowing::class);
-    }
+    protected $casts = [
+        'registered_at' => 'date',
+    ];
 }
