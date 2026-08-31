@@ -4,42 +4,34 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('category_id')
-                ->constrained()
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
+            $table->string('judul_buku');
+            $table->string('penulis');
 
-            $table->string('title');
-            $table->string('author');
-            $table->string('publisher');
-            $table->year('publication_year');
+            $table
+                ->foreignId('category_id')
+                ->constrained('categories')
+                ->cascadeOnDelete();
 
-            $table->string('isbn')->unique();
-            $table->string('call_number')->unique();
+            $table->unsignedInteger('stok')->default(0);
 
-            $table->integer('stock')->default(0);
-            $table->integer('available_stock')->default(0);
-
-            $table->text('description')->nullable();
-            $table->string('cover')->nullable();
+            $table->enum('status', [
+                'Tersedia',
+                'Dipinjam'
+            ])->default('Tersedia');
 
             $table->timestamps();
+
+            $table->index('judul_buku');
+            $table->index('status');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('books');

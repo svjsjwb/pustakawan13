@@ -2,42 +2,23 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Book extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
+        'judul_buku',
+        'penulis',
         'category_id',
-        'title',
-        'author',
-        'publisher',
-        'publication_year',
-        'isbn',
-        'call_number',
-        'stock',
-        'available_stock',
-        'description',
-        'cover',
-        'no_iventaris',
-        'kode_buku',
-        'ddc',
-        'rak',
-        'edition',
+        'stok',
+        'status',
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
-    }
-
-    public function rack()
-    {
-        return $this->belongsTo(Rack::class, 'rak', 'code');
-    }
-
-    public function borrowingDetails(): HasMany
-    {
-        return $this->hasMany(BorrowingDetail::class);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Book;
+use Illuminate\Database\Seeder;
 
 class BookSeeder extends Seeder
 {
@@ -12,7 +12,6 @@ class BookSeeder extends Seeder
         $books = [];
 
         for ($i = 1; $i <= 50; $i++) {
-
             $categoryId = $i % 2 === 0 ? 2 : 1;
 
             $books[] = [

@@ -7,27 +7,21 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-
-            $table->string('name');
-
+        Schema::table('categories', function (Blueprint $table) {
             $table
                 ->foreignId('parent_id')
                 ->nullable()
+                ->after('name')
                 ->constrained('categories')
-                ->cascadeOnDelete();
-
-            $table->unsignedTinyInteger('level');
-
-            $table->timestamps();
-
-            $table->index(['parent_id', 'level']);
+                ->nullOnDelete();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::table('categories', function (Blueprint $table) {
+            $table->dropForeign(['parent_id']);
+            $table->dropColumn('parent_id');
+        });
     }
 };

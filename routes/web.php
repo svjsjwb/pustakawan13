@@ -1,25 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CirculationController;
-use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FineController;
 use App\Http\Controllers\MemberController;
-use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SettingController;
-
+use Illuminate\Support\Facades\Route;
 
 // LANDING
 Route::get('/', function () {
     return view('landing');
 })->name('landing');
-
 
 // LOGIN
 Route::get('/login', function () {
@@ -28,7 +25,6 @@ Route::get('/login', function () {
 Route::post('/login', function () {
     return redirect()->route('dashboard');
 })->name('login.store');
-
 
 // DASHBOARD
 Route::get('/dashboard', [
@@ -39,17 +35,14 @@ Route::get('/dashboard', [
 // KATEGORI
 Route::resource('categories', CategoryController::class);
 
-
 // KATALOG
 Route::get('/catalog', [CatalogController::class, 'index'])
     ->name('catalog');
 
-
 // BUKU
 Route::resource('books', BookController::class);
 
-
-//Borrowing
+// Borrowing
 Route::get('/borrowings', [
     BorrowingController::class,
     'index'
@@ -70,7 +63,6 @@ Route::delete('/borrowings/{borrowing}', [
     'destroy'
 ])->name('borrowings.destroy');
 
-
 // SIRKULASI
 Route::get('/circulation', [CirculationController::class, 'index'])
     ->name('circulation');
@@ -80,7 +72,6 @@ Route::post('/circulation', [CirculationController::class, 'store'])
 
 Route::patch('/circulation/{borrowing}/return', [CirculationController::class, 'returnBook'])
     ->name('circulation.return');
-
 
 // RESERVASI
 Route::get('/reservations', [
@@ -102,7 +93,6 @@ Route::delete('/reservations/{reservation}', [
     ReservationController::class,
     'destroy'
 ])->name('reservations.destroy');
-
 
 // LAPORAN
 Route::get('/laporan', [ReportController::class, 'index'])
@@ -127,18 +117,13 @@ Route::delete('/laporan/{id}', [ReportController::class, 'destroy'])
 Route::get('/fines', [FineController::class, 'index'])
     ->name('fines');
 
-
 // ANGGOTA
 Route::get('/members', [MemberController::class, 'index'])
     ->name('members');
 
-
 // KALENDER
 Route::get('/calendar', [CalendarController::class, 'index'])
     ->name('calendar');
-
-
-
 
 // PENGATURAN
 Route::get('/settings', [SettingController::class, 'index'])
