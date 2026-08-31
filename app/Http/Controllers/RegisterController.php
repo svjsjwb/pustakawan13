@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class RegisterController extends Controller
@@ -39,7 +38,7 @@ class RegisterController extends Controller
             ],
         ]);
 
-        $user = User::create([
+        User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make(
@@ -48,15 +47,11 @@ class RegisterController extends Controller
             'role' => 'user',
         ]);
 
-        Auth::login($user);
-
-        $request->session()->regenerate();
-
         return redirect()
-            ->route('user.home')
+            ->route('login')
             ->with(
                 'success',
-                'Akun berhasil dibuat. Selamat datang!'
+                'Akun berhasil dibuat. Silakan login.'
             );
     }
 }

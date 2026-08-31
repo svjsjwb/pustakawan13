@@ -108,6 +108,277 @@
     color: #287c7c;
 }
 
+
+/* =========================================================
+   CATEGORY DROPDOWN
+========================================================= */
+
+.catalog-category-dropdown {
+    position: relative;
+
+    width: 180px;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================
+   TRIGGER
+========================= */
+
+.catalog-category-trigger {
+
+    width: 100%;
+    height: 38px;
+
+    padding: 0 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+
+    background: #fff;
+    color: #64748b;
+
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.catalog-category-trigger:hover {
+
+    border-color: #287c7c;
+
+    color: #287c7c;
+}
+
+
+.catalog-category-arrow {
+
+    font-size: 16px;
+
+    line-height: 1;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   CATEGORY MENU
+========================================================= */
+
+.catalog-category-menu {
+    position: absolute;
+
+    top: 100%;
+    left: 0;
+
+    width: 210px;
+
+    background: #fff;
+
+    border: 1px solid #dbe3e8;
+
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.12);
+
+    z-index: 9999;
+
+    display: none;
+
+    padding: 0;
+    margin: 0;
+}
+
+
+/*
+   BUKA MENU SAAT TRIGGER DI-HOVER
+   ATAU MENU SEDANG DI-HOVER
+*/
+
+.catalog-category-dropdown:hover .catalog-category-menu {
+
+    display: block;
+}
+
+
+/* =========================================================
+   CATEGORY ITEM
+========================================================= */
+
+.catalog-category-item {
+
+    position: relative;
+
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* =========================================================
+   CATEGORY OPTION
+========================================================= */
+
+.catalog-category-option {
+    min-height: 34px;
+    height: 34px;
+
+    padding: 0 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    box-sizing: border-box;
+
+    color: #287c7c;
+    background: #fff;
+
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    margin: 0;
+    border: 0;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.catalog-category-option:hover {
+    background: #f1f5f5;
+    color: #12403e;
+}
+
+
+.catalog-category-option.active {
+    background: #808080;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* =========================================================
+   SUBCATEGORY MENU
+========================================================= */
+
+.catalog-subcategory-menu {
+
+    position: absolute;
+
+    top: 0px;
+
+    left: calc(100% - 1px);
+
+    width: 210px;
+
+    padding: 4px 0;
+
+    background: #fff;
+
+    border: 1px solid #dbe3e8;
+
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.12);
+
+    z-index: 10000;
+
+    display: none;
+}
+
+.catalog-subcategory-menu::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -8px;
+
+    width: 8px;
+    height: 100%;
+
+    background: transparent;
+}
+
+/*
+   INI BAGIAN PALING PENTING
+
+   Subkategori HANYA muncul
+   ketika kategori tersebut di-hover.
+*/
+
+.catalog-category-item:hover>.catalog-subcategory-menu {
+
+    display: block;
+}
+
+
+/* =========================================================
+   SUBCATEGORY OPTION
+========================================================= */
+
+.catalog-subcategory-option {
+
+    min-height: 34px;
+
+    padding: 0 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    box-sizing: border-box;
+
+    color: #287c7c;
+
+    background: #fff;
+
+    text-decoration: none;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.catalog-subcategory-option:hover {
+
+    background: #f1f5f5;
+
+    color: #12403e;
+}
+
+
+/* SUBKATEGORI AKTIF */
+
+.catalog-subcategory-option.active {
+
+    background: #808080;
+
+    color: #fff;
+
+    font-weight: 600;
+}
+
+
 /* =========================
    GRID
 ========================= */
@@ -427,6 +698,7 @@
     background: #fee2e2;
     color: #b91c1c;
 }
+
 /* =========================
    PAGINATION
 ========================= */
@@ -446,8 +718,7 @@
     border-radius: 14px;
 
     box-shadow:
-        0 2px 8px
-        rgba(0, 0, 0, 0.04);
+        0 2px 8px rgba(0, 0, 0, 0.04);
 
     box-sizing: border-box;
 
@@ -489,149 +760,149 @@
 
 }
 
-    /* KIRI: Select Tampilkan per halaman */
-    .catalog-pagination-per-page {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #64748b;
-        font-size: 12px;
-        font-weight: 500;
-    }
+/* KIRI: Select Tampilkan per halaman */
+.catalog-pagination-per-page {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+}
 
-    .catalog-pagination-per-page label {
-        color: #64748b;
-        font-size: 12px;
-        font-weight: 500;
-        white-space: nowrap;
-    }
+.catalog-pagination-per-page label {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
 
-    .catalog-pagination-per-page select {
-        height: 32px;
-        padding: 0 10px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        background: #fff;
-        color: #12403e;
-        font-family: inherit;
-        font-size: 12px;
-        font-weight: 700;
-        outline: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
+.catalog-pagination-per-page select {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #12403e;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
 
-    .catalog-pagination-per-page select:hover,
-    .catalog-pagination-per-page select:focus {
-        border-color: #287c7c;
-        box-shadow: 0 0 0 3px rgba(40, 124, 124, 0.08);
-    }
+.catalog-pagination-per-page select:hover,
+.catalog-pagination-per-page select:focus {
+    border-color: #287c7c;
+    box-shadow: 0 0 0 3px rgba(40, 124, 124, 0.08);
+}
 
-    /* TENGAH: Teks Info Menampilkan X - Y dari Z hasil */
-    .catalog-pagination-info {
-        margin: 0;
-        font-size: 12px;
-        color: #64748b;
+/* TENGAH: Teks Info Menampilkan X - Y dari Z hasil */
+.catalog-pagination-info {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.catalog-pagination-info strong,
+.catalog-pagination-info span {
+    color: #12403e;
+    font-weight: 700;
+}
+
+/* KANAN: Navigasi Tombol Halaman */
+.catalog-pagination-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.catalog-pagination a,
+.catalog-pagination nav span[aria-current="page"],
+.catalog-pagination nav span[aria-disabled="true"],
+.catalog-pagination .page-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    margin: 0 2px !important;
+    padding: 0 10px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #1e293b !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    box-sizing: border-box !important;
+}
+
+.catalog-pagination a:hover {
+    border-color: #287c7c !important;
+    color: #287c7c !important;
+    background: #e6f0ef !important;
+}
+
+/* Tombol Aktif (Teal Gelap sesuai screenshot) */
+.catalog-pagination nav span[aria-current="page"],
+.catalog-pagination nav span[aria-current="page"] span,
+.catalog-pagination .page-link.active {
+    background: #1a5c5a !important;
+    border-color: #1a5c5a !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(26, 92, 90, 0.2) !important;
+}
+
+/* Tombol Disabled (pucat / grayed out sesuai screenshot) */
+.catalog-pagination nav span[aria-disabled="true"],
+.catalog-pagination .page-link.disabled {
+    background: #fff !important;
+    border-color: #e2e8f0 !important;
+    color: #cbd5e1 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 850px) {
+    .catalog-pagination-wrapper {
+        flex-direction: column;
+        justify-content: center;
         text-align: center;
-        font-weight: 500;
-        white-space: nowrap;
+        gap: 12px;
     }
+}
 
-    .catalog-pagination-info strong,
-    .catalog-pagination-info span {
-        color: #12403e;
-        font-weight: 700;
-    }
-
-    /* KANAN: Navigasi Tombol Halaman */
-    .catalog-pagination-nav {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .catalog-pagination a,
-    .catalog-pagination nav span[aria-current="page"],
-    .catalog-pagination nav span[aria-disabled="true"],
-    .catalog-pagination .page-link {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        min-width: 32px !important;
-        height: 32px !important;
-        margin: 0 2px !important;
-        padding: 0 10px !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 8px !important;
-        background: #fff !important;
-        color: #1e293b !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        text-decoration: none !important;
-        transition: all 0.2s ease !important;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
-        box-sizing: border-box !important;
-    }
-
-    .catalog-pagination a:hover {
-        border-color: #287c7c !important;
-        color: #287c7c !important;
-        background: #e6f0ef !important;
-    }
-
-    /* Tombol Aktif (Teal Gelap sesuai screenshot) */
-    .catalog-pagination nav span[aria-current="page"],
-    .catalog-pagination nav span[aria-current="page"] span,
-    .catalog-pagination .page-link.active {
-        background: #1a5c5a !important;
-        border-color: #1a5c5a !important;
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        box-shadow: 0 2px 6px rgba(26, 92, 90, 0.2) !important;
-    }
-
-    /* Tombol Disabled (pucat / grayed out sesuai screenshot) */
-    .catalog-pagination nav span[aria-disabled="true"],
-    .catalog-pagination .page-link.disabled {
-        background: #fff !important;
-        border-color: #e2e8f0 !important;
-        color: #cbd5e1 !important;
-        cursor: not-allowed !important;
-        box-shadow: none !important;
-    }
-
-    @media (max-width: 850px) {
-        .catalog-pagination-wrapper {
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-            gap: 12px;
-        }
-    }
-
-    /* =========================
+/* =========================
    EMPTY
 ========================= */
 
-    .catalog-empty {
-        grid-column: 1 / -1;
+.catalog-empty {
+    grid-column: 1 / -1;
 
-        padding: 60px 20px;
+    padding: 60px 20px;
 
-        text-align: center;
+    text-align: center;
 
-        color: #64748b;
+    color: #64748b;
 
-        background: #fff;
+    background: #fff;
 
-        border: 1px solid #e2e8f0;
+    border: 1px solid #e2e8f0;
 
-        border-radius: 14px;
+    border-radius: 14px;
 
-        font-size: 13px;
-    }
+    font-size: 13px;
+}
 
-    /* =========================================================
+/* =========================================================
    BOOK DETAIL MODAL
 ========================================================= */
 
@@ -769,11 +1040,9 @@
     justify-content: space-between;
 
     background:
-        linear-gradient(
-            135deg,
+        linear-gradient(135deg,
             #1a5c5a,
-            #2b7a78
-        );
+            #2b7a78);
 
     border-radius: 10px;
 
@@ -1040,90 +1309,90 @@
     }
 }
 
-    @media (max-width: 700px) {
+@media (max-width: 700px) {
 
-        .catalog-modal-body {
-            grid-template-columns: 1fr;
+    .catalog-modal-body {
+        grid-template-columns: 1fr;
 
-            padding: 24px;
-        }
-
-        .catalog-modal-cover {
-            align-items: center;
-        }
-
-        .catalog-modal-book {
-            width: 150px;
-            height: 210px;
-        }
-
+        padding: 24px;
     }
 
-    @media (max-width: 450px) {
-
-        .catalog-modal {
-            padding: 10px;
-        }
-
-        .catalog-modal-body {
-            padding: 20px;
-        }
-
-        .catalog-modal-meta {
-            grid-template-columns: 1fr;
-        }
-
+    .catalog-modal-cover {
+        align-items: center;
     }
 
-    /* =========================
+    .catalog-modal-book {
+        width: 150px;
+        height: 210px;
+    }
+
+}
+
+@media (max-width: 450px) {
+
+    .catalog-modal {
+        padding: 10px;
+    }
+
+    .catalog-modal-body {
+        padding: 20px;
+    }
+
+    .catalog-modal-meta {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* =========================
    RESPONSIVE
 ========================= */
 
-    @media (max-width: 1200px) {
+@media (max-width: 1200px) {
 
-        .book-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-
+    .book-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    @media (max-width: 950px) {
+}
 
-        .book-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
+@media (max-width: 950px) {
 
+    .book-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    @media (max-width: 700px) {
+}
 
-        #page-catalog .filters {
-            flex-direction: column;
+@media (max-width: 700px) {
 
-            align-items: stretch;
-        }
+    #page-catalog .filters {
+        flex-direction: column;
 
-        #page-catalog .filters input,
-        #page-catalog .filters select {
-            width: 100%;
-        }
-
-        .book-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-
-            gap: 12px;
-        }
-
-        .book-cover {
-            height: 150px;
-        }
-
+        align-items: stretch;
     }
 
-    @media (max-width: 450px) {
-
-        .book-grid {
-            grid-template-columns: 1fr;
-        }
-
+    #page-catalog .filters input,
+    #page-catalog .filters select {
+        width: 100%;
     }
+
+    .book-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        gap: 12px;
+    }
+
+    .book-cover {
+        height: 150px;
+    }
+
+}
+
+@media (max-width: 450px) {
+
+    .book-grid {
+        grid-template-columns: 1fr;
+    }
+
+}

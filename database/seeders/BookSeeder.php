@@ -10,47 +10,124 @@ class BookSeeder extends Seeder
 {
     public function run(): void
     {
-        $novel = Category::where(
-            'name',
-            'Novel'
-        )->firstOrFail();
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIL KATEGORI + SUBKATEGORI
+        |--------------------------------------------------------------------------
+        */
 
-        $teknologi = Category::where(
-            'name',
-            'Teknologi'
-        )->firstOrFail();
+        $categories = Category::with('subcategories')
+            ->whereIn('name', [
+                'Anak',
+                'Remaja',
+                'Dewasa',
+                'Buku Pendidikan',
+            ])
+            ->get()
+            ->keyBy('name');
 
-        $sejarah = Category::where(
-            'name',
-            'Sejarah'
-        )->firstOrFail();
 
-        $pendidikan = Category::where(
-            'name',
-            'Pendidikan'
-        )->firstOrFail();
+        /*
+        |--------------------------------------------------------------------------
+        | PASTIKAN SEMUA KATEGORI ADA
+        |--------------------------------------------------------------------------
+        */
 
+        $categoryNames = [
+            'Anak',
+            'Remaja',
+            'Dewasa',
+            'Buku Pendidikan',
+        ];
+
+        foreach ($categoryNames as $categoryName) {
+
+            if (! $categories->has($categoryName)) {
+                throw new \Exception(
+                    "Kategori '{$categoryName}' tidak ditemukan."
+                );
+            }
+
+            $category = $categories->get($categoryName);
+
+            if ($category->subcategories->isEmpty()) {
+                throw new \Exception(
+                    "Kategori '{$categoryName}' belum memiliki subkategori."
+                );
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BUAT 50 BUKU DUMMY
+        |--------------------------------------------------------------------------
+        |
+        | Pembagian:
+        |
+        | 1  → Anak
+        | 2  → Remaja
+        | 3  → Dewasa
+        | 0  → Buku Pendidikan
+        |
+        */
 
         for ($i = 1; $i <= 50; $i++) {
 
             $category = match ($i % 4) {
 
-                1 => $novel,
+                1 => $categories->get('Anak'),
 
-                2 => $teknologi,
+                2 => $categories->get('Remaja'),
 
-                3 => $sejarah,
+                3 => $categories->get('Dewasa'),
 
-                0 => $pendidikan,
+                0 => $categories->get('Buku Pendidikan'),
             };
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | PILIH SUBKATEGORI
+            |--------------------------------------------------------------------------
+            |
+            | Subkategori dipilih bergantian berdasarkan subkategori
+            | yang memang dimiliki oleh kategori tersebut.
+            |
+            */
+
+            $subcategories = $category
+                ->subcategories
+                ->values();
+
+            $subcategory = $subcategories[($i - 1) % $subcategories->count()];
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SIMPAN BUKU
+            |--------------------------------------------------------------------------
+            */
+
             Book::create([
 
-                'category_id' => $category->id,
+                'category_id' =>
+                $category->id,
+
+                'subcategory_id' =>
+                $subcategory->id,
 
                 'title' =>
                 'Buku Dummy ' . $i,
+
+                'sku' =>
+                'BK-2026-' .
+                    str_pad(
+                        $i,
+                        5,
+                        '0',
+                        STR_PAD_LEFT
+                    ),
 
                 'author' =>
                 'Penulis Dummy ' . $i,
