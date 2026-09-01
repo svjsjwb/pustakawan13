@@ -1,22 +1,24 @@
+```blade
 @extends('layouts.app')
 
 @section('title', 'Katalog Buku')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/catalog.js') }}"></script>
+    <script src="{{ asset('js/catalog.js') }}"></script>
 @endpush
 
 @section('content')
 
 <section class="page" id="page-catalog">
 
-    {{-- =========================
+    {{-- =========================================================
          HEADER
-    ========================= --}}
+    ========================================================= --}}
+
     <div class="catalog-header">
 
         <div>
@@ -37,19 +39,19 @@
     </div>
 
 
-    {{-- =========================
+    {{-- =========================================================
          FILTER FORM
-         HIERARKI KATEGORI 3 LAYER
-    ========================= --}}
+    ========================================================= --}}
+
     <form
         method="GET"
         action="{{ route('catalog') }}"
         class="filters"
+        id="catalog-filter-form"
     >
 
-        {{-- =========================
-             SEARCH
-        ========================= --}}
+        {{-- SEARCH --}}
+
         <input
             type="text"
             name="search"
@@ -58,130 +60,191 @@
         >
 
 
-        {{-- =========================
-             DROPDOWN KATEGORI
-        ========================= --}}
-        <select
-            name="category"
-            onchange="this.form.submit()"
-        >
+        {{-- =====================================================
+             CATEGORY DROPDOWN
+        ====================================================== --}}
 
-            <option value="">
-                Semua Kategori
-            </option>
+        @php
 
+            $selectedCategoryId = request('category');
 
-            @php
+            $selectedSubcategoryId = request('subcategory');
 
-                /*
-                |--------------------------------------------------------------------------
-                | Ambil kategori Layer 1
-                |--------------------------------------------------------------------------
-                | Struktur:
-                |
-                | Layer 1
-                | └── Layer 2
-                |     └── Layer 3
-                |
-                */
+            $selectedCategory = $categories->firstWhere(
+                'id',
+                $selectedCategoryId
+            );
 
-                $categoriesL1 = isset($categories)
-                    ? $categories->whereNull('parent_id')
-                    : collect();
+            $selectedSubcategory = null;
 
-            @endphp
+            if ($selectedCategory && $selectedSubcategoryId) {
+
+                $selectedSubcategory =
+                    $selectedCategory->subcategories
+                        ->firstWhere(
+                            'id',
+                            $selectedSubcategoryId
+                        );
+
+            }
+
+        @endphp
 
 
-            @if($categoriesL1->isNotEmpty())
+        <div class="catalog-category-dropdown">
 
-                @foreach($categoriesL1 as $l1)
+            {{-- TOMBOL UTAMA --}}
 
-                    {{-- =====================================
-                         LAYER 1
-                    ====================================== --}}
-                    <optgroup label="📂 {{ $l1->name }}">
+            <button
+                type="button"
+                class="catalog-category-trigger"
+            >
 
-                        {{-- Semua buku dalam Layer 1 --}}
-                        <option
-                            value="{{ $l1->name }}"
-                            {{ request('category') == $l1->name ? 'selected' : '' }}
+                <span>
+
+                    @if($selectedSubcategory)
+
+                        {{ $selectedSubcategory->name }}
+
+                    @elseif($selectedCategory)
+
+                        {{ $selectedCategory->name }}
+
+                    @else
+
+                        Semua Kategori
+
+                    @endif
+
+                </span>
+
+                <span class="catalog-category-arrow">
+                    ⌄
+                </span>
+
+            </button>
+
+
+            {{-- MENU KATEGORI --}}
+
+            <div class="catalog-category-menu">
+
+                {{-- SEMUA KATEGORI --}}
+
+                <a
+                    href="{{ route('catalog', array_filter([
+                        'search' => request('search'),
+                        'status' => request('status'),
+                        'per_page' => request('per_page'),
+                    ])) }}"
+                    class="catalog-category-option
+                    {{ !$selectedCategoryId && !$selectedSubcategoryId ? 'active' : '' }}"
+                >
+
+                    Semua Kategori
+
+                </a>
+
+
+                {{-- KATEGORI UTAMA --}}
+
+                @foreach($categories as $category)
+
+                    <div class="catalog-category-item">
+
+                        {{-- KATEGORI --}}
+
+                        <a
+                            href="{{ route('catalog', array_filter([
+                                'search' => request('search'),
+                                'category' => $category->id,
+                                'status' => request('status'),
+                                'per_page' => request('per_page'),
+                            ])) }}"
+                            class="catalog-category-option
+                            {{ (string) $selectedCategoryId === (string) $category->id && !$selectedSubcategoryId ? 'active' : '' }}"
                         >
-                            Semua {{ $l1->name }}
-                        </option>
 
+                            <span>
+                                {{ $category->name }}
+                            </span>
 
-                        {{-- =================================
-                             LAYER 2
-                        ================================== --}}
-                        @foreach($l1->children ?? [] as $l2)
+                            @if($category->subcategories->count())
 
-
-                            {{-- Jika Layer 2 mempunyai anak --}}
-                            @if(isset($l2->children) && $l2->children->isNotEmpty())
-
-
-                                {{-- =========================
-                                     LAYER 3
-                                ========================== --}}
-                                @foreach($l2->children as $l3)
-
-                                    <option
-                                        value="{{ $l3->name }}"
-                                        {{ request('category') == $l3->name ? 'selected' : '' }}
-                                    >
-                                        &nbsp;&nbsp;↳ {{ $l2->name }}
-                                        → {{ $l3->name }}
-                                    </option>
-
-                                @endforeach
-
-
-                            @else
-
-                                {{-- =========================
-                                     LAYER 2 TANPA LAYER 3
-                                ========================== --}}
-                                <option
-                                    value="{{ $l2->name }}"
-                                    {{ request('category') == $l2->name ? 'selected' : '' }}
-                                >
-                                    &nbsp;&nbsp;↳ {{ $l2->name }}
-                                </option>
+                                <span class="catalog-category-arrow">
+                                    ›
+                                </span>
 
                             @endif
 
-                        @endforeach
+                        </a>
 
-                    </optgroup>
+
+                        {{-- =================================================
+                             SUBKATEGORI
+                        ================================================== --}}
+
+                        @if($category->subcategories->count())
+
+                            <div class="catalog-subcategory-menu">
+
+                                {{-- SEMUA DALAM KATEGORI --}}
+
+                                <a
+                                    href="{{ route('catalog', array_filter([
+                                        'search' => request('search'),
+                                        'category' => $category->id,
+                                        'status' => request('status'),
+                                        'per_page' => request('per_page'),
+                                    ])) }}"
+                                    class="catalog-subcategory-option
+                                    {{ (string) $selectedCategoryId === (string) $category->id && !$selectedSubcategoryId ? 'active' : '' }}"
+                                >
+
+                                    Semua {{ $category->name }}
+
+                                </a>
+
+
+                                {{-- SUBKATEGORI --}}
+
+                                @foreach($category->subcategories as $subcategory)
+
+                                    <a
+                                        href="{{ route('catalog', array_filter([
+                                            'search' => request('search'),
+                                            'category' => $category->id,
+                                            'subcategory' => $subcategory->id,
+                                            'status' => request('status'),
+                                            'per_page' => request('per_page'),
+                                        ])) }}"
+                                        class="catalog-subcategory-option
+                                        {{ (string) $selectedSubcategoryId === (string) $subcategory->id ? 'active' : '' }}"
+                                    >
+
+                                        └─ {{ $subcategory->name }}
+
+                                    </a>
+
+                                @endforeach
+
+                            </div>
+
+                        @endif
+
+                    </div>
 
                 @endforeach
 
+            </div>
 
-            @else
-
-                {{-- =====================================
-                     FALLBACK
-                     Jika $categories bukan hierarki
-                ====================================== --}}
-                @foreach($categories ?? [] as $category)
-
-                    <option
-                        value="{{ $category->name }}"
-                        {{ request('category') == $category->name ? 'selected' : '' }}
-                    >
-                        {{ $category->name }}
-                    </option>
-
-                @endforeach
-
-            @endif
-
-        </select>
+        </div>
 
 
-        {{-- =========================
-             FILTER STATUS
-        ========================= --}}
+        {{-- =====================================================
+             STATUS
+        ====================================================== --}}
+
         <select
             name="status"
             onchange="this.form.submit()"
@@ -193,14 +256,14 @@
 
             <option
                 value="Tersedia"
-                {{ request('status') == 'Tersedia' ? 'selected' : '' }}
+                {{ request('status') === 'Tersedia' ? 'selected' : '' }}
             >
                 Tersedia
             </option>
 
             <option
                 value="Dipinjam"
-                {{ request('status') == 'Dipinjam' ? 'selected' : '' }}
+                {{ request('status') === 'Dipinjam' ? 'selected' : '' }}
             >
                 Sedang Dipinjam
             </option>
@@ -210,9 +273,10 @@
     </form>
 
 
-    {{-- =========================
+    {{-- =========================================================
          BOOK GRID
-    ========================= --}}
+    ========================================================= --}}
+
     <div class="book-grid">
 
         @forelse($books as $book)
@@ -221,87 +285,49 @@
 
                 /*
                 |--------------------------------------------------------------------------
-                | HIERARKI KATEGORI
+                | CATEGORY INFORMATION
                 |--------------------------------------------------------------------------
-                |
-                | category
-                |    ↓
-                | Layer 3
-                |    ↓
-                | parent
-                |    ↓
-                | Layer 2
-                |    ↓
-                | parent
-                |    ↓
-                | Layer 1
-                |
                 */
 
-                $catL1 = $book->category?->parent?->parent?->name;
+                $categoryName =
+                    $book->category?->name ?? '-';
 
-                $catL2 = $book->category?->parent?->name;
-
-                $catL3 = $book->category?->name;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | BADGE KATEGORI
-                |--------------------------------------------------------------------------
-                |
-                | Tetap dibuat singkat agar desain card
-                | tidak berubah.
-                |
-                */
-
-                $badgeCategory = $catL2 ?? $catL3 ?? '-';
+                $subcategoryName =
+                    $book->subcategory?->name ?? null;
 
 
                 /*
                 |--------------------------------------------------------------------------
                 | FULL CATEGORY
                 |--------------------------------------------------------------------------
-                |
-                | Contoh:
-                |
-                | Anak > Novel > Petualangan Anak
-                |
                 */
 
                 $fullCategory = collect([
-                    $catL1,
-                    $catL2,
-                    $catL3
+                    $categoryName,
+                    $subcategoryName,
                 ])
                 ->filter()
                 ->implode(' > ');
 
-
-                if (empty($fullCategory)) {
-
-                    $fullCategory = $catL3 ?? '-';
-
-                }
-
             @endphp
 
 
-            {{-- =========================
+            {{-- =================================================
                  BOOK CARD
-            ========================= --}}
+            ================================================== --}}
+
             <div
                 class="book-card"
 
-                data-title="{{ $book->title }}"
+                data-title="{{ $book->title ?? $book->judul_buku ?? '-' }}"
 
-                data-author="{{ $book->author }}"
+                data-author="{{ $book->author ?? $book->penulis ?? '-' }}"
 
                 data-category="{{ $fullCategory }}"
 
-                data-stock="{{ $book->available_stock }}"
+                data-stock="{{ $book->available_stock ?? $book->stok ?? 0 }}"
 
-                data-status="{{ $book->available_stock > 0 ? 'Tersedia' : 'Dipinjam' }}"
+                data-status="{{ ($book->available_stock ?? $book->stok ?? 0) > 0 ? 'Tersedia' : 'Dipinjam' }}"
 
                 data-description="{{ $book->description ?? 'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.' }}"
 
@@ -317,9 +343,10 @@
             >
 
 
-                {{-- =========================
+                {{-- =================================================
                      COVER
-                ========================= --}}
+                ================================================== --}}
+
                 <div
                     class="book-cover {{ $book->cover ? 'has-image' : '' }}"
                 >
@@ -328,7 +355,7 @@
 
                         <img
                             src="{{ asset('storage/' . $book->cover) }}"
-                            alt="{{ $book->title }}"
+                            alt="{{ $book->title ?? $book->judul_buku ?? 'Cover Buku' }}"
                             class="book-cover-img"
                         >
 
@@ -343,51 +370,49 @@
                 </div>
 
 
-                {{-- =========================
+                {{-- =================================================
                      INFORMATION
-                ========================= --}}
+                ================================================== --}}
+
                 <div class="book-info">
 
                     {{-- TITLE --}}
+
                     <strong>
-                        {{ $book->title }}
+                        {{ $book->title ?? $book->judul_buku ?? '-' }}
                     </strong>
 
 
                     {{-- AUTHOR --}}
+
                     <span>
-                        {{ $book->author }}
+                        {{ $book->author ?? $book->penulis ?? '-' }}
                     </span>
 
 
-                    {{-- =========================
-                         BOOK META
-                    ========================= --}}
+                    {{-- BOOK META --}}
+
                     <div class="book-meta">
 
                         {{-- CATEGORY --}}
-                        <span
-                            title="{{ $fullCategory }}"
-                        >
-                            {{ $badgeCategory }}
+
+                        <span title="{{ $fullCategory }}">
+                            {{ $subcategoryName ?? $categoryName }}
                         </span>
 
 
                         {{-- STATUS --}}
-                        @if($book->available_stock > 0)
 
-                            <span
-                                class="book-status available"
-                            >
+                        @if(($book->available_stock ?? $book->stok ?? 0) > 0)
+
+                            <span class="book-status available">
                                 Tersedia
-                                ({{ $book->available_stock }})
+                                ({{ $book->available_stock ?? $book->stok ?? 0 }})
                             </span>
 
                         @else
 
-                            <span
-                                class="book-status borrowed"
-                            >
+                            <span class="book-status borrowed">
                                 Dipinjam
                             </span>
 
@@ -402,9 +427,10 @@
 
         @empty
 
-            {{-- =========================
+            {{-- =================================================
                  EMPTY DATA
-            ========================= --}}
+            ================================================== --}}
+
             <div class="catalog-empty">
 
                 Belum ada koleksi buku yang sesuai
@@ -417,9 +443,10 @@
     </div>
 
 
-    {{-- =========================
+    {{-- =========================================================
          PAGINATION
-    ========================= --}}
+    ========================================================= --}}
+
     @if($books->total() > 0)
 
         <div class="catalog-pagination">
@@ -433,10 +460,10 @@
 </section>
 
 
-
 {{-- =========================================================
      BOOK DETAIL MODAL
 ========================================================= --}}
+
 <div
     class="catalog-modal"
     id="book-modal"
@@ -445,9 +472,8 @@
     <div class="catalog-modal-container">
 
 
-        {{-- =========================
-             CLOSE BUTTON
-        ========================= --}}
+        {{-- CLOSE BUTTON --}}
+
         <button
             type="button"
             class="catalog-modal-close"
@@ -461,12 +487,15 @@
         <div class="catalog-modal-body">
 
 
-            {{-- =========================
+            {{-- =================================================
                  MODAL COVER
-            ========================= --}}
+            ================================================== --}}
+
             <div class="catalog-modal-cover">
 
+
                 {{-- DEFAULT BOOK COVER --}}
+
                 <div
                     class="catalog-modal-book"
                     id="modal-book-box"
@@ -492,44 +521,43 @@
 
 
                 {{-- REAL COVER IMAGE --}}
+
                 <img
                     id="modal-cover-image"
                     src="#"
                     alt="Cover Buku"
                     style="
-                        display:none;
-                        width:170px;
-                        height:235px;
-                        object-fit:cover;
-                        border-radius:10px;
-                        box-shadow:-6px 12px 25px rgba(0,0,0,0.20);
+                        display: none;
+                        width: 170px;
+                        height: 235px;
+                        object-fit: cover;
+                        border-radius: 10px;
+                        box-shadow:
+                            -6px 12px 25px
+                            rgba(0,0,0,0.20);
                     "
                 >
 
             </div>
 
 
-
-            {{-- =========================
+            {{-- =================================================
                  MODAL INFORMATION
-            ========================= --}}
+            ================================================== --}}
+
             <div class="catalog-modal-info">
 
 
-                {{-- =========================
-                     BADGES
-                ========================= --}}
+                {{-- BADGES --}}
+
                 <div class="catalog-modal-badges">
 
-                    {{-- CATEGORY --}}
                     <span
                         class="catalog-modal-category"
                         id="modal-category"
                     >
                     </span>
 
-
-                    {{-- STATUS --}}
                     <span
                         class="catalog-modal-status"
                         id="modal-status"
@@ -539,15 +567,14 @@
                 </div>
 
 
-                {{-- =========================
-                     TITLE
-                ========================= --}}
-                <h2 id="modal-title"></h2>
+                {{-- TITLE --}}
+
+                <h2 id="modal-title">
+                </h2>
 
 
-                {{-- =========================
-                     AUTHOR
-                ========================= --}}
+                {{-- AUTHOR --}}
+
                 <div
                     class="catalog-modal-author"
                     id="modal-author"
@@ -555,9 +582,8 @@
                 </div>
 
 
-                {{-- =========================
-                     DESCRIPTION
-                ========================= --}}
+                {{-- DESCRIPTION --}}
+
                 <div class="catalog-modal-description-title">
 
                     Sinopsis / Deskripsi
@@ -573,13 +599,15 @@
                 </div>
 
 
-                {{-- =========================
+                {{-- =================================================
                      BOOK META
-                ========================= --}}
+                ================================================== --}}
+
                 <div class="catalog-modal-meta">
 
 
                     {{-- STOK --}}
+
                     <div>
 
                         <span>
@@ -594,6 +622,7 @@
 
 
                     {{-- PENERBIT --}}
+
                     <div>
 
                         <span>
@@ -608,6 +637,7 @@
 
 
                     {{-- TAHUN --}}
+
                     <div>
 
                         <span>
@@ -622,6 +652,7 @@
 
 
                     {{-- NO PANGGIL --}}
+
                     <div>
 
                         <span>
@@ -636,6 +667,7 @@
 
 
                     {{-- ISBN --}}
+
                     <div>
 
                         <span>
@@ -648,13 +680,13 @@
 
                     </div>
 
-
                 </div>
 
 
-                {{-- =========================
+                {{-- =================================================
                      ACTION BUTTON
-                ========================= --}}
+                ================================================== --}}
+
                 <div class="catalog-modal-actions">
 
                     <button
@@ -676,4 +708,6 @@
 
 </div>
 
+
 @endsection
+

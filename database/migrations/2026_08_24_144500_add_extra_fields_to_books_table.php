@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('books', function (Blueprint $table) {
-            $table->string('no_iventaris', 50)->nullable()->after('cover');
+            $table->string('no_iventaris', 50)->nullable()->after('status');
             $table->string('kode_buku', 50)->nullable()->after('no_iventaris');
             $table->string('ddc', 30)->nullable()->after('kode_buku');
             $table->string('rak', 20)->nullable()->after('ddc');

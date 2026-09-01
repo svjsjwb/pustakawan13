@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\BookCopy;
+use App\Models\Reservation;
 use App\Models\Borrowing;
 use App\Models\BorrowingDetail;
 use App\Models\Member;
@@ -20,82 +22,188 @@ class CirculationController extends Controller
 
     public function index(Request $request)
     {
+        /*
+         * =====================================================
+         * DATA ANGGOTA
+         * =====================================================
+         */
+
         $members = Member::where('status', 'aktif')
             ->orderBy('name')
             ->get();
 
-        // Semua buku tetap ditampilkan, termasuk yang stok tersedia = 0
-        $books = Book::orderByRaw(
-            "CAST(SUBSTRING_INDEX(title, ' ', -1) AS UNSIGNED)"
-        )->get();
 
         /*
          * =====================================================
-         * 1. NAVIGASI BULAN OTOMATIS (DEFAULT: BULAN INI)
+         * DATA BUKU
          * =====================================================
-         * Saat halaman pertama kali dibuka, otomatis mengambil bulan & tahun
-         * dari tanggal sistem saat ini (now()->month & now()->year).
          */
 
-        $month = (int) $request->get('month', now()->month);
-        $year  = (int) $request->get('year', now()->year);
+        $books = Book::orderBy('judul_buku')->get();
 
-        // Pengaman input bulan dan tahun
+
+        /*
+         * =====================================================
+         * DATA RESERVASI
+         * =====================================================
+         */
+
+        $reservations = Reservation::with([
+            'member',
+            'book',
+            'bookCopy',
+        ])
+            ->whereNotIn('status', [
+                'ditolak',
+                'dibatalkan',
+                'selesai',
+            ])
+            ->latest()
+            ->get();
+
+
+        /*
+         * =====================================================
+         * NAVIGASI BULAN
+         * =====================================================
+         */
+
+        $month = (int) $request->get(
+            'month',
+            now()->month
+        );
+
+        $year = (int) $request->get(
+            'year',
+            now()->year
+        );
+
+
+        /*
+         * =====================================================
+         * VALIDASI BULAN
+         * =====================================================
+         */
+
         if ($month < 1 || $month > 12) {
             $month = now()->month;
         }
+
         if ($year < 2000 || $year > 2100) {
             $year = now()->year;
         }
 
-        // Buat objek Carbon untuk periode aktif (Bahasa Indonesia)
-        $currentPeriod = Carbon::createFromDate($year, $month, 1)->locale('id');
-        $monthLabel    = $currentPeriod->translatedFormat('F Y'); // Contoh: "Agustus 2026"
-
-        // Hitung parameter bulan sebelumnya (Previous Month <)
-        $prevPeriod = $currentPeriod->copy()->subMonth();
-        $prevMonth  = $prevPeriod->month;
-        $prevYear   = $prevPeriod->year;
-
-        // Hitung parameter bulan berikutnya (Next Month >)
-        $nextPeriod = $currentPeriod->copy()->addMonth();
-        $nextMonth  = $nextPeriod->month;
-        $nextYear   = $nextPeriod->year;
-
-        $isCurrentMonth = ($month === now()->month && $year === now()->year);
 
         /*
          * =====================================================
-         * 2. QUERY & PENGARSIPAN BULANAN (whereMonth & whereYear)
+         * PERIODE AKTIF
          * =====================================================
-         * - Menampilkan data peminjaman khusus untuk bulan & tahun yang dipilih.
-         * - Data peminjaman dari bulan-bulan lain TIDAK dihapus dari database,
-         *   melainkan terarsip rapi dan dapat dibuka kembali kapan saja.
+         */
+
+        $currentPeriod = Carbon::createFromDate(
+            $year,
+            $month,
+            1
+        )->locale('id');
+
+        $monthLabel =
+            $currentPeriod->translatedFormat('F Y');
+
+
+        /*
+         * =====================================================
+         * BULAN SEBELUMNYA
+         * =====================================================
+         */
+
+        $prevPeriod =
+            $currentPeriod->copy()->subMonth();
+
+        $prevMonth =
+            $prevPeriod->month;
+
+        $prevYear =
+            $prevPeriod->year;
+
+
+        /*
+         * =====================================================
+         * BULAN BERIKUTNYA
+         * =====================================================
+         */
+
+        $nextPeriod =
+            $currentPeriod->copy()->addMonth();
+
+        $nextMonth =
+            $nextPeriod->month;
+
+        $nextYear =
+            $nextPeriod->year;
+
+
+        /*
+         * =====================================================
+         * CEK BULAN SAAT INI
+         * =====================================================
+         */
+
+        $isCurrentMonth =
+            (
+                $month === now()->month
+                &&
+                $year === now()->year
+            );
+
+
+        /*
+         * =====================================================
+         * DATA PEMINJAMAN
+         * =====================================================
          */
 
         $borrowings = Borrowing::with([
             'member',
-            'details.book'
+            'details.book',
+            'details.bookCopy.shelf.zone.floor',
         ])
-            ->whereYear('borrowed_at', $year)
-            ->whereMonth('borrowed_at', $month)
+            ->whereYear(
+                'borrowed_at',
+                $year
+            )
+            ->whereMonth(
+                'borrowed_at',
+                $month
+            )
             ->latest('borrowed_at')
             ->get();
 
-        return view('circulation.index', compact(
-            'members',
-            'books',
-            'borrowings',
-            'month',
-            'year',
-            'monthLabel',
-            'prevMonth',
-            'prevYear',
-            'nextMonth',
-            'nextYear',
-            'isCurrentMonth'
-        ));
+
+        /*
+         * =====================================================
+         * KIRIM KE VIEW
+         * =====================================================
+         */
+
+        return view(
+            'circulation.index',
+            compact(
+                'members',
+                'books',
+                'reservations',
+                'borrowings',
+                'month',
+                'year',
+                'monthLabel',
+                'prevMonth',
+                'prevYear',
+                'nextMonth',
+                'nextYear',
+                'isCurrentMonth'
+            )
+        );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -105,47 +213,183 @@ class CirculationController extends Controller
 
     public function store(Request $request)
     {
+        /*
+         * =====================================================
+         * VALIDASI
+         * =====================================================
+         */
+
         $validated = $request->validate([
-            'member_id'   => ['required', 'exists:members,id'],
-            'book_id'     => ['required', 'exists:books,id'],
-            'borrowed_at' => ['required', 'date'],
-            'due_at'      => ['required', 'date', 'after_or_equal:borrowed_at'],
+            'member_id' => [
+                'required',
+                'exists:members,id',
+            ],
+
+            'book_id' => [
+                'required',
+                'exists:books,id',
+            ],
+
+            'borrowed_at' => [
+                'required',
+                'date',
+            ],
+
+            'due_at' => [
+                'required',
+                'date',
+                'after_or_equal:borrowed_at',
+            ],
         ]);
 
-        DB::transaction(function () use ($validated) {
-            $book = Book::lockForUpdate()
-                ->findOrFail($validated['book_id']);
 
-            if ($book->available_stock < 1) {
-                abort(422, 'Buku sedang tidak tersedia.');
+        /*
+         * =====================================================
+         * TRANSAKSI DATABASE
+         * =====================================================
+         */
+
+        DB::transaction(function () use ($validated) {
+
+            /*
+             * KUNCI DATA BUKU
+             */
+
+            $book = Book::lockForUpdate()
+                ->findOrFail(
+                    $validated['book_id']
+                );
+
+
+            /*
+             * =================================================
+             * CARI BOOK COPY
+             * =================================================
+             */
+
+            $bookCopy = BookCopy::where(
+                'book_id',
+                $book->id
+            )
+                ->where(
+                    'status',
+                    'available'
+                )
+                ->lockForUpdate()
+                ->first();
+
+
+            /*
+             * =================================================
+             * CEK STOK
+             * =================================================
+             */
+
+            if (
+                !$bookCopy
+                ||
+                $book->available_stock < 1
+            ) {
+                abort(
+                    422,
+                    'Buku sedang tidak tersedia.'
+                );
             }
 
+
+            /*
+             * =================================================
+             * BUAT PEMINJAMAN
+             * =================================================
+             */
+
             $borrowing = Borrowing::create([
-                'member_id'   => $validated['member_id'],
-                'borrowed_at' => $validated['borrowed_at'],
-                'due_at'      => $validated['due_at'],
-                'status'      => 'dipinjam',
+                'member_id' =>
+                    $validated['member_id'],
+
+                'borrowed_at' =>
+                    $validated['borrowed_at'],
+
+                'due_at' =>
+                    $validated['due_at'],
+
+                'status' =>
+                    'dipinjam',
             ]);
+
+
+            /*
+             * =================================================
+             * DETAIL PEMINJAMAN
+             * =================================================
+             */
 
             BorrowingDetail::create([
-                'borrowing_id' => $borrowing->id,
-                'book_id'      => $book->id,
-                'quantity'     => 1,
+                'borrowing_id' =>
+                    $borrowing->id,
+
+                'book_id' =>
+                    $book->id,
+
+                'book_copy_id' =>
+                    $bookCopy->id,
+
+                'quantity' =>
+                    1,
             ]);
 
-            $book->decrement('available_stock');
+
+            /*
+             * =================================================
+             * UPDATE BOOK COPY
+             * =================================================
+             */
+
+            $bookCopy->update([
+                'status' =>
+                    'borrowed',
+            ]);
+
+
+            /*
+             * =================================================
+             * KURANGI STOK
+             * =================================================
+             */
+
+            $book->decrement('stok');
         });
 
-        // Redirect ke sirkulasi bulan peminjaman yang bersangkutan
-        $borrowDate = Carbon::parse($validated['borrowed_at']);
+
+        /*
+         * =====================================================
+         * REDIRECT
+         * =====================================================
+         */
+
+        $borrowDate =
+            Carbon::parse(
+                $validated['borrowed_at']
+            );
+
 
         return redirect()
-            ->route('circulation', [
-                'month' => $borrowDate->month,
-                'year'  => $borrowDate->year
-            ])
-            ->with('success', 'Peminjaman berhasil diproses.');
+            ->route(
+                'circulation',
+                [
+                    'month' =>
+                        $borrowDate->month,
+
+                    'year' =>
+                        $borrowDate->year,
+                ]
+            )
+            ->with(
+                'success',
+                'Peminjaman berhasil diproses.'
+            );
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -153,36 +397,292 @@ class CirculationController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function returnBook(Borrowing $borrowing)
-    {
-        if ($borrowing->status === 'dikembalikan') {
-            return back()->with(
-                'error',
-                'Peminjaman ini sudah dikembalikan.'
-            );
+    public function returnBook(
+        Borrowing $borrowing
+    ) {
+
+        /*
+         * =====================================================
+         * CEK STATUS
+         * =====================================================
+         */
+
+        if (
+            $borrowing->status ===
+            'dikembalikan'
+        ) {
+
+            return back()
+                ->with(
+                    'error',
+                    'Peminjaman ini sudah dikembalikan.'
+                );
         }
 
-        DB::transaction(function () use ($borrowing) {
-            $borrowing->load('details');
 
-            foreach ($borrowing->details as $detail) {
-                $book = Book::lockForUpdate()
-                    ->findOrFail($detail->book_id);
+        /*
+         * =====================================================
+         * TRANSAKSI PENGEMBALIAN
+         * =====================================================
+         */
 
-                $book->increment(
-                    'available_stock',
-                    $detail->quantity
-                );
+        DB::transaction(function () use (
+            $borrowing
+        ) {
+
+            /*
+             * LOAD DETAIL
+             */
+
+            $borrowing->load(
+                'details'
+            );
+
+
+            foreach (
+                $borrowing->details
+                as $detail
+            ) {
+
+                /*
+                 * =================================================
+                 * JIKA PUNYA BOOK COPY
+                 * =================================================
+                 */
+
+                if (
+                    $detail->book_copy_id
+                ) {
+
+                    $bookCopy =
+                        BookCopy::lockForUpdate()
+                            ->find(
+                                $detail->book_copy_id
+                            );
+
+
+                    /*
+                     * KEMBALIKAN BOOK COPY
+                     */
+
+                    if ($bookCopy) {
+
+                        $bookCopy->update([
+                            'status' =>
+                                'available',
+                        ]);
+                    }
+
+
+                    /*
+                     * TAMBAH STOK
+                     */
+
+                    $book =
+                        Book::lockForUpdate()
+                            ->findOrFail(
+                                $detail->book_id
+                            );
+
+
+                    $book->increment(
+                        'stok',
+                        $detail->quantity
+                    );
+
+                } else {
+
+                    /*
+                     * =================================================
+                     * DATA LAMA TANPA BOOK COPY
+                     * =================================================
+                     */
+
+                    $book =
+                        Book::lockForUpdate()
+                            ->findOrFail(
+                                $detail->book_id
+                            );
+
+
+                    $book->increment(
+                        'stok',
+                        $detail->quantity
+                    );
+                }
             }
 
+
+            /*
+             * =================================================
+             * UPDATE STATUS
+             * =================================================
+             */
+
             $borrowing->update([
-                'returned_at' => now()->toDateString(),
-                'status'      => 'dikembalikan',
+                'returned_at' =>
+                    now()->toDateString(),
+
+                'status' =>
+                    'dikembalikan',
             ]);
         });
 
+
+        /*
+         * =====================================================
+         * REDIRECT
+         * =====================================================
+         */
+
+        return back()
+            ->with(
+                'success',
+                'Buku berhasil dikembalikan.'
+            );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PERPANJANG PEMINJAMAN
+    |--------------------------------------------------------------------------
+    */
+
+    public function extendLoan(
+        Request $request,
+        Borrowing $borrowing
+    ) {
+
+        /*
+         * =====================================================
+         * VALIDASI
+         * =====================================================
+         *
+         * User dapat memilih 1 sampai 30 hari.
+         */
+
+        $validated = $request->validate([
+            'extension_days' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:30',
+            ],
+        ], [
+
+            'extension_days.required' =>
+                'Jumlah hari perpanjangan wajib diisi.',
+
+            'extension_days.integer' =>
+                'Jumlah hari harus berupa angka.',
+
+            'extension_days.min' =>
+                'Minimal perpanjangan adalah 1 hari.',
+
+            'extension_days.max' =>
+                'Maksimal perpanjangan adalah 30 hari.',
+        ]);
+
+
+        /*
+         * =====================================================
+         * CEK STATUS
+         * =====================================================
+         *
+         * Yang boleh diperpanjang:
+         *
+         * 1. dipinjam
+         * 2. diperpanjang
+         *
+         * Dengan begitu buku yang sudah pernah
+         * diperpanjang masih dapat diperpanjang lagi.
+         */
+
+        if (
+            !in_array(
+                $borrowing->status,
+                [
+                    'dipinjam',
+                    'diperpanjang',
+                ],
+                true
+            )
+        ) {
+
+            return back()
+                ->with(
+                    'error',
+                    'Peminjaman yang sudah selesai tidak dapat diperpanjang.'
+                );
+        }
+
+
+        /*
+         * =====================================================
+         * HITUNG TAMBAHAN HARI
+         * =====================================================
+         */
+
+        $extensionDays =
+            (int) $validated['extension_days'];
+
+
+        /*
+         * =====================================================
+         * TANGGAL JATUH TEMPO BARU
+         * =====================================================
+         */
+
+        $newDueDate =
+            Carbon::parse(
+                $borrowing->due_at
+            )->addDays(
+                $extensionDays
+            );
+
+
+        /*
+         * =====================================================
+         * UPDATE PEMINJAMAN
+         * =====================================================
+         */
+
+        $borrowing->update([
+            'due_at' =>
+                $newDueDate->toDateString(),
+
+            'status' =>
+                'diperpanjang',
+        ]);
+
+
+        /*
+         * =====================================================
+         * REDIRECT
+         * =====================================================
+         */
+
         return redirect()
-            ->back()
-            ->with('success', 'Buku berhasil dikembalikan.');
+            ->route(
+                'circulation',
+                [
+                    'month' =>
+                        Carbon::parse(
+                            $borrowing->borrowed_at
+                        )->month,
+
+                    'year' =>
+                        Carbon::parse(
+                            $borrowing->borrowed_at
+                        )->year,
+                ]
+            )
+            ->with(
+                'success',
+                'Masa peminjaman berhasil diperpanjang ' .
+                $extensionDays .
+                ' hari.'
+            );
     }
 }

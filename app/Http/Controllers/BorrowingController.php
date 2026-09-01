@@ -51,9 +51,7 @@ class BorrowingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $books = Book::orderByRaw(
-            "CAST(SUBSTRING_INDEX(title, ' ', -1) AS UNSIGNED)"
-        )->get();
+        $books = Book::orderBy('judul_buku')->get();
 
 
         /*

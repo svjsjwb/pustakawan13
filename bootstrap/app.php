@@ -12,7 +12,24 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'no.back' => \App\Http\Middleware\PreventBackHistory::class,
+        ]);
+
+        // User sudah login → jangan bisa akses /login atau /register
+        $middleware->redirectUsersTo(function (\Illuminate\Http\Request $request) {
+            $user = $request->user();
+
+            if ($user && $user->role === 'admin') {
+                return route('dashboard');
+            }
+
+            return route('user.home');
+        });
+
+        // User belum login → redirect ke halaman login
+        $middleware->redirectGuestsTo(fn () => route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
