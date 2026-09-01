@@ -253,3 +253,11 @@ Route::get('/settings', [
     SettingController::class,
     'index'
 ])->name('settings');
+
+//Home user
+Route::get('/home', [
+    UserHomeController::class,
+    'index'
+])
+->middleware(['auth', 'no.back'])
+->name('user.home');
