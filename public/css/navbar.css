@@ -208,6 +208,54 @@
     color: rgba(255, 255, 255, 0.8);
 }
 
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.logout-form {
+    margin: 0;
+    padding: 0;
+}
+
+.logout-button {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    height: 32px;
+
+    padding: 0 13px;
+
+    border: 1px solid #d8e1e1;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #287879;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.logout-button:hover {
+    background: #f4f8f8;
+
+    border-color: #287879;
+
+    color: #205d5e;
+}
 
 /* =========================================================
    RESPONSIVE

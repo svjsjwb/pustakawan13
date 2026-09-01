@@ -2,8 +2,13 @@
 
     <div class="header-inner">
 
-        {{-- BRAND --}}
-        <a href="{{ route('dashboard') }}" class="brand">
+        {{-- =====================================================
+             BRAND
+        ====================================================== --}}
+
+        <a
+            href="{{ route('dashboard') }}"
+            class="brand">
 
             <img
                 src="{{ asset('images/logo-tiga-serangkai.png') }}"
@@ -11,27 +16,48 @@
                 class="brand-logo">
 
             <div class="brand-text">
-                <span>PERPUSTAKAAN</span>
-                <strong>TIGA SERANGKAI</strong>
+
+                <span>
+                    PERPUSTAKAAN
+                </span>
+
+                <strong>
+                    TIGA SERANGKAI
+                </strong>
+
             </div>
 
         </a>
 
 
-        {{-- NAVIGATION --}}
+        {{-- =====================================================
+             NAVIGATION
+        ====================================================== --}}
+
         <nav class="main-nav">
 
-            <a href="{{ route('dashboard') }}"
+            {{-- DASHBOARD --}}
+
+            <a
+                href="{{ route('dashboard') }}"
                 class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 Dashboard
             </a>
 
-            <a href="{{ route('catalog') }}"
+
+            {{-- KATALOG --}}
+
+            <a
+                href="{{ route('catalog') }}"
                 class="{{ request()->routeIs('catalog') ? 'active' : '' }}">
                 Katalog Buku
             </a>
 
-            <a href="{{ route('books.index') }}"
+
+            {{-- MANAJEMEN BUKU --}}
+
+            <a
+                href="{{ route('books.index') }}"
                 class="{{ request()->routeIs('books.*') ? 'active' : '' }}">
                 Manajemen Buku
             </a>
@@ -53,7 +79,11 @@
                 Reservasi Buku
             </a>
 
-            <a href="{{ route('reports.index') }}"
+
+            {{-- LAPORAN --}}
+
+            <a
+                href="{{ route('reports.index') }}"
                 class="{{ request()->routeIs('reports.*') ? 'active' : '' }}">
                 Laporan
             </a>
@@ -61,20 +91,45 @@
         </nav>
 
 
-        {{-- USER --}}
+        {{-- =====================================================
+             USER
+        ====================================================== --}}
         <div class="nav-user">
 
             <div class="nav-user-avatar">
-                D
+                {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
             </div>
 
             <div class="nav-user-info">
-                <span>Ibu Desi</span>
-                <small>Admin Perpustakaan</small>
+
+                <span>
+                    {{ auth()->user()->name ?? 'User' }}
+                </span>
+
+                <small>
+                    {{ auth()->user()->role === 'admin'
+                ? 'Admin Perpustakaan'
+                : 'Pengguna Perpustakaan' }}
+                </small>
+
             </div>
 
-        </div>
+            <form
+                method="POST"
+                action="{{ route('logout') }}"
+                class="logout-form">
 
+                @csrf
+
+                <button
+                    type="submit"
+                    class="logout-button">
+                    Logout
+                </button>
+
+            </form>
+
+        </div>
     </div>
 
 </header>

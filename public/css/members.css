@@ -337,3 +337,187 @@
     }
 
 }
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 42px;
+    color: #111827;
+}
+
+.page-header p {
+    margin: 8px 0 0;
+    font-size: 19px;
+    color: #64748b;
+}
+
+.btn-back {
+    background: #e8f4f4;
+    color: #277f81;
+    text-decoration: none;
+    padding: 13px 22px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.member-form-card {
+    max-width: 850px;
+    margin: 0 auto;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 35px;
+}
+
+.form-header {
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #1e293b;
+}
+
+.form-header p {
+    margin-top: 7px;
+    color: #64748b;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 16px;
+    border: 1px solid #d8e0e5;
+    border-radius: 10px;
+    font-size: 16px;
+    background: white;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #27888a;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #edf0f1;
+}
+
+.btn-cancel,
+.btn-save {
+    padding: 13px 22px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-save {
+    background: #27888a;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #207375;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+}
+
+.alert-error ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+/* =====================================================
+   TOMBOL FORM EDIT KARYAWAN
+   ===================================================== */
+
+.form-footer {
+    width: 100%;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+}
+
+.form-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.form-actions .btn-cancel,
+.form-actions .btn-submit {
+    height: 44px !important;
+    padding: 0 20px !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+}
+
+.form-actions .btn-cancel {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    text-decoration: none !important;
+    border: none !important;
+}
+
+.form-actions .btn-submit {
+    background: #258b8d !important;
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+.form-actions .btn-cancel:hover {
+    background: #e2e8f0 !important;
+}
+
+.form-actions .btn-submit:hover {
+    background: #217d7f !important;
+}

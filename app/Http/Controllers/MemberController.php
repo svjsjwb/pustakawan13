@@ -7,73 +7,116 @@ use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
+    /**
+     * Menampilkan daftar karyawan
+     */
     public function index()
     {
-        $members = Member::latest()->get();
+        $members = Member::orderBy('id', 'asc')->get();
 
         return view('members.index', compact('members'));
     }
 
+
+    /**
+     * Form tambah karyawan
+     */
     public function create()
     {
         return view('members.create');
     }
 
-    public function store(Request $request)
+
+    /**
+     * Menyimpan karyawan baru
+     */
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name' => [
+            'required',
+            'string',
+            'max:255',
+        ],
+
+        'division' => [
+            'required',
+            'string',
+            'max:100',
+        ],
+
+        'phone' => [
+            'required',
+            'string',
+            'max:20',
+        ],
+
+        'status' => [
+            'required',
+            'in:Aktif,Nonaktif',
+        ],
+    ], [
+        'name.required' => 'Nama karyawan wajib diisi.',
+        'division.required' => 'Divisi wajib dipilih.',
+        'phone.required' => 'Nomor telepon wajib diisi.',
+        'status.required' => 'Status wajib dipilih.',
+    ]);
+
+    Member::create($validated);
+
+    return redirect()
+        ->route('members.index')
+        ->with('success', 'Karyawan berhasil ditambahkan.');
+}
+
+
+    /**
+     * Menampilkan detail karyawan
+     */
+    public function show(Member $member)
     {
-        $validated = $request->validate([
-            'member_number' => 'required|string|max:50|unique:members,member_number',
-            'name' => 'required|string|max:255',
-            'nis_nip' => 'nullable|string|max:50',
-            'gender' => 'nullable|in:Laki-laki,Perempuan',
-            'class' => 'nullable|string|max:100',
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string|max:30',
-            'email' => 'nullable|email|max:255',
-            'registered_at' => 'required|date',
-            'status' => 'required|in:Aktif,Tidak Aktif',
-        ]);
-
-        Member::create($validated);
-
-        return redirect()
-            ->route('members.index')
-            ->with('success', 'Anggota berhasil ditambahkan.');
+        return view('members.show', compact('member'));
     }
 
+
+    /**
+     * Form edit karyawan
+     */
     public function edit(Member $member)
     {
         return view('members.edit', compact('member'));
     }
 
+
+    /**
+     * Update data karyawan
+     */
     public function update(Request $request, Member $member)
-    {
-        $validated = $request->validate([
-            'member_number' => 'required|string|max:50|unique:members,member_number,' . $member->id,
-            'name' => 'required|string|max:255',
-            'nis_nip' => 'nullable|string|max:50',
-            'gender' => 'nullable|in:Laki-laki,Perempuan',
-            'class' => 'nullable|string|max:100',
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string|max:30',
-            'email' => 'nullable|email|max:255',
-            'registered_at' => 'required|date',
-            'status' => 'required|in:Aktif,Tidak Aktif',
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'division' => 'required|string|max:100',
+        'phone' => 'required|string|max:20',
+        'status' => 'required|in:Aktif,Nonaktif',
+    ]);
 
-        $member->update($validated);
+    $member->update($validated);
 
-        return redirect()
-            ->route('members.index')
-            ->with('success', 'Data anggota berhasil diperbarui.');
-    }
+    return redirect()
+        ->route('members.index')
+        ->with('success', 'Data karyawan berhasil diperbarui.');
+}
 
+
+    /**
+     * Hapus karyawan
+     */
     public function destroy(Member $member)
     {
         $member->delete();
 
         return redirect()
             ->route('members.index')
-            ->with('success', 'Anggota berhasil dihapus.');
+            ->with('success', 'Karyawan berhasil dihapus.');
     }
 }

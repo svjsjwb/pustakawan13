@@ -11,6 +11,7 @@ class BorrowingDetail extends Model
         'borrowing_id',
         'book_id',
         'quantity',
+        'book_copy_id',
     ];
 
     public function borrowing(): BelongsTo
@@ -22,4 +23,9 @@ class BorrowingDetail extends Model
     {
         return $this->belongsTo(Book::class);
     }
+
+    public function bookCopy(): BelongsTo
+    {
+        return $this->belongsTo(BookCopy::class);
+    }   
 }

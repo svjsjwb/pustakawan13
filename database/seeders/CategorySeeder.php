@@ -4,28 +4,67 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Category;
+use App\Models\Subcategory;
 
 class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        Category::insert([
-            [
-                'name' => 'Novel',
-                'description' => 'Koleksi Novel'
+        $categories = [
+
+            'Anak' => [
+                'Novel',
+                'Cerpen',
+                'Komik',
+                'Dongeng',
             ],
-            [
-                'name' => 'Teknologi',
-                'description' => 'Buku Teknologi'
+
+            'Remaja' => [
+                'Novel',
+                'Cerpen',
+                'Komik',
+                'Agama',
             ],
-            [
-                'name' => 'Sejarah',
-                'description' => 'Buku Sejarah'
+
+            'Dewasa' => [
+                'Novel',
+                'Cerpen',
+                'Agama',
+                'Sejarah',
+                'Teknologi',
             ],
-            [
-                'name' => 'Pendidikan',
-                'description' => 'Buku Pendidikan'
-            ]
-        ]);
+
+            'Buku Pendidikan' => [
+                'SD/MI',
+                'SMP/MTs',
+                'SMA/MA/SMK',
+            ],
+
+        ];
+
+
+        foreach ($categories as $categoryName => $subcategories) {
+
+            $category = Category::updateOrCreate(
+                [
+                    'name' => $categoryName,
+                ],
+                [
+                    'description' => 'Kategori buku ' . $categoryName,
+                ]
+            );
+
+
+            foreach ($subcategories as $subcategoryName) {
+
+                Subcategory::updateOrCreate(
+                    [
+                        'category_id' => $category->id,
+                        'name' => $subcategoryName,
+                    ]
+                );
+
+            }
+        }
     }
 }

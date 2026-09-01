@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Book extends Model
 {
     protected $fillable = [
         'category_id',
+        'subcategory_id',
         'title',
         'author',
         'publisher',
@@ -23,6 +25,7 @@ class Book extends Model
         'kode_buku',
         'ddc',
         'rak',
+        'sku',
         'edition',
     ];
 
@@ -39,5 +42,15 @@ class Book extends Model
     public function borrowingDetails(): HasMany
     {
         return $this->hasMany(BorrowingDetail::class);
+    }
+
+    public function copies(): HasMany
+    {
+        return $this->hasMany(BookCopy::class);
+    }
+
+    public function subcategory(): BelongsTo
+    {
+        return $this->belongsTo(Subcategory::class);
     }
 }
