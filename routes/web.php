@@ -17,6 +17,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\BookCopyController;
+use App\Http\Controllers\UserHomeController;
 
 
 // =========================================================
