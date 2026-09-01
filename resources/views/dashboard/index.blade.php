@@ -3,7 +3,7 @@
 @section('title', 'Dashboard')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 @endpush
 
 @section('content')
@@ -41,11 +41,11 @@
                 <div class="stat-icon">
                     <svg viewBox="0 0 24 24" fill="none">
                         <path d="M4 5.5C4 4.672 4.672 4 5.5 4H19v15H5.5A1.5 1.5 0 0 1 4 17.5v-12Z"
-                              stroke="currentColor"
-                              stroke-width="1.8"/>
+                            stroke="currentColor"
+                            stroke-width="1.8" />
                         <path d="M8 4v15M8 17.5c0 .828-.672 1.5-1.5 1.5H19"
-                              stroke="currentColor"
-                              stroke-width="1.8"/>
+                            stroke="currentColor"
+                            stroke-width="1.8" />
                     </svg>
                 </div>
 
@@ -80,12 +80,12 @@
                 <div class="stat-icon">
                     <svg viewBox="0 0 24 24" fill="none">
                         <path d="M6 4.5A2.5 2.5 0 0 1 8.5 2H19v17H8.5A2.5 2.5 0 0 0 6 21.5v-17Z"
-                              stroke="currentColor"
-                              stroke-width="1.8"/>
+                            stroke="currentColor"
+                            stroke-width="1.8" />
                         <path d="M6 4.5v14M10 6h5M10 9h5"
-                              stroke="currentColor"
-                              stroke-width="1.8"
-                              stroke-linecap="round"/>
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round" />
                     </svg>
                 </div>
 
@@ -121,16 +121,16 @@
 
                     <svg viewBox="0 0 24 24" fill="none">
                         <path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20"
-                              stroke="currentColor"
-                              stroke-width="1.8"
-                              stroke-linecap="round"/>
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round" />
                         <circle cx="10" cy="7.5" r="3.5"
-                                stroke="currentColor"
-                                stroke-width="1.8"/>
+                            stroke="currentColor"
+                            stroke-width="1.8" />
                         <path d="M16 11a3 3 0 1 0 0-6M17 14a4 4 0 0 1 3 4v2"
-                              stroke="currentColor"
-                              stroke-width="1.8"
-                              stroke-linecap="round"/>
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round" />
                     </svg>
 
                 </div>
@@ -167,12 +167,12 @@
 
                     <svg viewBox="0 0 24 24" fill="none">
                         <circle cx="12" cy="12" r="8.5"
-                                stroke="currentColor"
-                                stroke-width="1.8"/>
+                            stroke="currentColor"
+                            stroke-width="1.8" />
                         <path d="M12 7v5l3 2"
-                              stroke="currentColor"
-                              stroke-width="1.8"
-                              stroke-linecap="round"/>
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round" />
                     </svg>
 
                 </div>
@@ -221,18 +221,18 @@
                     <div class="panel-icon chart-icon">
                         <svg viewBox="0 0 24 24" fill="none">
                             <path d="M4 19V5"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"
-                                  stroke-linecap="round"/>
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round" />
                             <path d="M4 19h16"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"
-                                  stroke-linecap="round"/>
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round" />
                             <path d="M7 15l3-4 3 2 5-7"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"/>
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                     </div>
 
@@ -271,17 +271,17 @@
                     <div class="chart-bars">
 
                         @forelse($chart7Days as $item)
-                            <div class="chart-bar-item">
-                                <div class="chart-bar-tooltip">
-                                    {{ $item['label'] }}: {{ $item['count'] }} dipinjam
-                                </div>
-                                <div class="chart-bar" style="height: {{ $item['height'] }}%;"></div>
-                                <span>{{ $item['label'] }}</span>
+                        <div class="chart-bar-item">
+                            <div class="chart-bar-tooltip">
+                                {{ $item['label'] }}: {{ $item['count'] }} dipinjam
                             </div>
+                            <div class="chart-bar" style="height: {{ $item['height'] }}%;"></div>
+                            <span>{{ $item['label'] }}</span>
+                        </div>
                         @empty
-                            <div class="empty-small">
-                                Belum ada data peminjaman bulan ini.
-                            </div>
+                        <div class="empty-small">
+                            Belum ada data peminjaman bulan ini.
+                        </div>
                         @endforelse
 
                     </div>
@@ -310,11 +310,11 @@
                     <div class="panel-icon book-icon">
                         <svg viewBox="0 0 24 24" fill="none">
                             <path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17H7.5A2.5 2.5 0 0 0 5 21.5v-17Z"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"/>
+                                stroke="currentColor"
+                                stroke-width="1.8" />
                             <path d="M5 4.5v14"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"/>
+                                stroke="currentColor"
+                                stroke-width="1.8" />
                         </svg>
                     </div>
 
@@ -331,44 +331,44 @@
             <div class="popular-list">
 
                 @php
-                    $popularBooks = $reservations
-                        ->filter(fn($reservation) => $reservation->book)
-                        ->groupBy('book_id')
-                        ->map(function ($items) {
-                            return [
-                                'title' => $items->first()->book->title ?? '-',
-                                'total' => $items->count()
-                            ];
-                        })
-                        ->sortByDesc('total')
-                        ->take(5)
-                        ->values();
+                $popularBooks = $reservations
+                ->filter(fn($reservation) => $reservation->book)
+                ->groupBy('book_id')
+                ->map(function ($items) {
+                return [
+                'title' => $items->first()->book->title ?? '-',
+                'total' => $items->count()
+                ];
+                })
+                ->sortByDesc('total')
+                ->take(5)
+                ->values();
                 @endphp
 
 
                 @forelse($popularBooks as $index => $book)
 
-                    <div class="popular-item">
+                <div class="popular-item">
 
-                        <div class="popular-number">
-                            {{ $index + 1 }}
-                        </div>
-
-                        <div class="popular-name">
-                            {{ $book['title'] }}
-                        </div>
-
-                        <div class="popular-total">
-                            {{ $book['total'] }} kali
-                        </div>
-
+                    <div class="popular-number">
+                        {{ $index + 1 }}
                     </div>
+
+                    <div class="popular-name">
+                        {{ $book['title'] }}
+                    </div>
+
+                    <div class="popular-total">
+                        {{ $book['total'] }} kali
+                    </div>
+
+                </div>
 
                 @empty
 
-                    <div class="empty-small">
-                        Belum ada data buku.
-                    </div>
+                <div class="empty-small">
+                    Belum ada data buku.
+                </div>
 
                 @endforelse
 
@@ -377,15 +377,15 @@
 
             <a href="{{ route('reservations.index') }}" class="panel-link">
                 Lihat semua buku
-            
+
             </a>
 
         </div>
 
 
         {{-- =================================================
-             AKTIVITAS TERBARU
-        ================================================== --}}
+     AKTIVITAS TERBARU
+================================================== --}}
 
         <div class="dashboard-panel activity-panel">
 
@@ -394,21 +394,35 @@
                 <div class="panel-title-wrapper">
 
                     <div class="panel-icon activity-icon">
+
                         <svg viewBox="0 0 24 24" fill="none">
-                            <path d="M4 12a8 8 0 1 0 16 0"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"
-                                  stroke-linecap="round"/>
-                            <path d="M12 7v5l3 2"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"
-                                  stroke-linecap="round"/>
+
+                            <path
+                                d="M4 12a8 8 0 1 0 16 0"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round" />
+
+                            <path
+                                d="M12 7v5l3 2"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round" />
+
                         </svg>
+
                     </div>
 
                     <div>
-                        <h2>Aktivitas Terbaru</h2>
-                        <span>Update aktivitas perpustakaan</span>
+
+                        <h2>
+                            Aktivitas Terbaru
+                        </h2>
+
+                        <span>
+                            Update aktivitas perpustakaan
+                        </span>
+
                     </div>
 
                 </div>
@@ -418,50 +432,53 @@
 
             <div class="activity-list">
 
-                @forelse($reservations->take(4) as $reservation)
+                @forelse($activities as $activity)
 
-                    <div class="activity-item">
+                <div class="activity-item">
 
-                        <div class="activity-item-icon">
-                            @if($reservation->display_status === 'disetujui')
-                                ✓
-                            @elseif($reservation->display_status === 'ditolak')
-                                !
-                            @else
-                                +
-                            @endif
-                        </div>
+                    {{-- ICON --}}
+                    <div class="activity-item-icon">
 
-                        <div class="activity-info">
-
-                            <strong>
-                                @if($reservation->display_status === 'disetujui')
-                                    Reservasi disetujui
-                                @elseif($reservation->display_status === 'ditolak')
-                                    Reservasi ditolak
-                                @else
-                                    Reservasi baru
-                                @endif
-                            </strong>
-
-                            <span>
-                                {{ $reservation->member->name ?? '-' }}
-                            </span>
-
-                        </div>
-
-                        <time>
-                            {{ ($reservation->reserved_at ?? $reservation->created_at)?->locale('id')->translatedFormat('l')
-                                ?? '-' }}
-                        </time>
+                        {{ $activity['icon'] }}
 
                     </div>
+
+
+                    {{-- INFORMASI --}}
+                    <div class="activity-info">
+
+                        <strong>
+                            {{ $activity['title'] }}
+                        </strong>
+
+                        <span>
+                            {{ $activity['description'] }}
+                        </span>
+
+                    </div>
+
+
+                    {{-- WAKTU --}}
+                    <time>
+
+                        {{ $activity['created_at']
+                        ? $activity['created_at']
+                            ->locale('id')
+                            ->diffForHumans()
+                        : '-'
+                    }}
+
+                    </time>
+
+                </div>
 
                 @empty
 
-                    <div class="empty-small">
-                        Belum ada aktivitas.
-                    </div>
+                <div class="empty-small">
+
+                    Belum ada aktivitas.
+
+                </div>
 
                 @endforelse
 
@@ -485,12 +502,12 @@
                 <div class="panel-icon reservation-icon">
                     <svg viewBox="0 0 24 24" fill="none">
                         <rect x="4" y="5" width="16" height="15" rx="2"
-                              stroke="currentColor"
-                              stroke-width="1.8"/>
+                            stroke="currentColor"
+                            stroke-width="1.8" />
                         <path d="M8 3v4M16 3v4M4 10h16"
-                              stroke="currentColor"
-                              stroke-width="1.8"
-                              stroke-linecap="round"/>
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round" />
                     </svg>
                 </div>
 
@@ -503,10 +520,10 @@
 
 
             <a href="{{ route('reservations.index') }}"
-               class="reservation-see-all">
+                class="reservation-see-all">
 
                 Lihat semua reservasi
-                
+
 
             </a>
 
@@ -528,95 +545,95 @@
 
             @forelse($reservations as $reservation)
 
-                <div class="dashboard-table-row">
+            <div class="dashboard-table-row">
 
-                    <div>
-                        {{ $reservation->created_at
+                <div>
+                    {{ $reservation->created_at
                             ? $reservation->created_at->format('H.i')
                             : '-' }}
-                    </div>
+                </div>
 
-                    <div>
-                        {{ $reservation->member->name ?? '-' }}
-                    </div>
+                <div>
+                    {{ $reservation->member->name ?? '-' }}
+                </div>
 
-                    <div>
-                        {{ $reservation->book->title ?? '-' }}
-                    </div>
+                <div>
+                    {{ $reservation->book->title ?? '-' }}
+                </div>
 
-                    <div>
-                        <span class="activity-label">
-                            Reservasi
-                        </span>
-                    </div>
+                <div>
+                    <span class="activity-label">
+                        Reservasi
+                    </span>
+                </div>
 
-                    <div>
+                <div>
 
-                        @if($reservation->display_status === 'menunggu')
+                    @if($reservation->display_status === 'menunggu')
 
-                            <span class="dashboard-status waiting">
-                                Menunggu
-                            </span>
+                    <span class="dashboard-status waiting">
+                        Menunggu
+                    </span>
 
-                        @elseif($reservation->display_status === 'disetujui')
+                    @elseif($reservation->display_status === 'disetujui')
 
-                            <span class="dashboard-status approved">
-                                Disetujui
-                            </span>
+                    <span class="dashboard-status approved">
+                        Disetujui
+                    </span>
 
-                        @elseif($reservation->display_status === 'dipinjam')
+                    @elseif($reservation->display_status === 'dipinjam')
 
-                            <span class="dashboard-status borrowed">
-                                Dipinjam
-                            </span>
+                    <span class="dashboard-status borrowed">
+                        Dipinjam
+                    </span>
 
-                        @elseif($reservation->display_status === 'selesai')
+                    @elseif($reservation->display_status === 'selesai')
 
-                            <span class="dashboard-status completed">
-                                Selesai
-                            </span>
+                    <span class="dashboard-status completed">
+                        Selesai
+                    </span>
 
-                        @elseif(
-                            $reservation->display_status === 'ditolak' ||
-                            $reservation->display_status === 'dibatalkan'
-                        )
+                    @elseif(
+                    $reservation->display_status === 'ditolak' ||
+                    $reservation->display_status === 'dibatalkan'
+                    )
 
-                            <span class="dashboard-status rejected">
-                                {{ ucfirst($reservation->display_status) }}
-                            </span>
+                    <span class="dashboard-status rejected">
+                        {{ ucfirst($reservation->display_status) }}
+                    </span>
 
-                        @elseif(
-                            str_starts_with(
-                                $reservation->display_status ?? '',
-                                'terlambat'
-                            )
-                        )
+                    @elseif(
+                    str_starts_with(
+                    $reservation->display_status ?? '',
+                    'terlambat'
+                    )
+                    )
 
-                            <span class="dashboard-status rejected">
-                                {{ ucfirst($reservation->display_status) }}
-                            </span>
+                    <span class="dashboard-status rejected">
+                        {{ ucfirst($reservation->display_status) }}
+                    </span>
 
-                        @else
+                    @else
 
-                            <span class="dashboard-status">
-                                {{ ucfirst($reservation->display_status ?? '-') }}
-                            </span>
+                    <span class="dashboard-status">
+                        {{ ucfirst($reservation->display_status ?? '-') }}
+                    </span>
 
-                        @endif
-
-                    </div>
+                    @endif
 
                 </div>
+
+            </div>
 
             @empty
 
-                <div class="dashboard-table-row">
+            <div class="dashboard-table-row">
 
-                    <div style="grid-column:1/-1;text-align:center;">
-                        Belum ada reservasi.
-                    </div>
-
+                <div style="grid-column:1/-1;text-align:center;">
+                    Belum ada reservasi.
                 </div>
+
+            </div>
 
             @endforelse
 

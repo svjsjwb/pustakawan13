@@ -15,21 +15,12 @@ class DashboardController extends Controller
      * ============================================================
      * HALAMAN DASHBOARD
      * ============================================================
-     *
-     * Grafik "Statistik Peminjaman" pada dashboard ini sekarang
-     * MENGIKUTI PERIODE OTOMATIS yang sama dengan periode default
-     * halaman Laporan (ReportController::getPeriod), yaitu:
-     *
-     *      bulan berjalan (tanggal 1 - akhir bulan)
-     *
-     * Tidak ada lagi pilihan manual "7 Hari Terakhir" / "1 Bulan
-     * Terakhir" seperti sebelumnya.
      */
     public function index(Request $request)
     {
         /*
          * ========================================================
-         * STATISTIK CARD (TOTAL, REALTIME - TIDAK DIBATASI PERIODE)
+         * STATISTIK CARD
          * ========================================================
          */
 
@@ -63,24 +54,27 @@ class DashboardController extends Controller
 
         /*
          * ========================================================
-         * PERIODE OTOMATIS (SAMA DENGAN DEFAULT HALAMAN LAPORAN)
+         * PERIODE OTOMATIS
          * ========================================================
          *
-         * ReportController::getPeriod() default-nya adalah
-         * rangeType = 'month' dengan selectedDate = hari ini,
-         * sehingga rentangnya selalu bulan berjalan.
+         * Mengikuti periode default halaman laporan:
+         * bulan berjalan.
          */
 
         $startDate =
-            now()->startOfMonth()->startOfDay();
+            now()
+                ->startOfMonth()
+                ->startOfDay();
 
         $endDate =
-            now()->endOfMonth()->endOfDay();
+            now()
+                ->endOfMonth()
+                ->endOfDay();
 
 
         /*
          * ========================================================
-         * GRAFIK STATISTIK PEMINJAMAN (BULAN BERJALAN)
+         * GRAFIK STATISTIK PEMINJAMAN
          * ========================================================
          */
 
@@ -92,7 +86,12 @@ class DashboardController extends Controller
 
         $max7 =
             !empty($chart7Days)
-                ? max(array_column($chart7Days, 'count'))
+                ? max(
+                    array_column(
+                        $chart7Days,
+                        'count'
+                    )
+                )
                 : 0;
 
         $max7 =
@@ -103,16 +102,193 @@ class DashboardController extends Controller
 
         /*
          * ========================================================
-         * RESERVASI (UNTUK PANEL BUKU TERPOPULER, AKTIVITAS
-         * TERBARU, DAN TABEL RESERVASI TERBARU)
+         * RESERVASI
          * ========================================================
+         *
+         * Tetap digunakan untuk:
+         * - Buku Terpopuler
+         * - Reservasi Terbaru
          */
 
         $reservations =
-            Reservation::with(['member', 'book'])
-                ->latest()
+            Reservation::with([
+                'member',
+                'book'
+            ])
+            ->latest()
+            ->take(20)
+            ->get();
+
+
+        /*
+         * ========================================================
+         * AKTIVITAS TERBARU
+         * ========================================================
+         *
+         * Sumber aktivitas:
+         *
+         * 1. Anggota baru
+         * 2. Koleksi buku baru
+         * 3. Peminjaman baru
+         * 4. Reservasi baru
+         *
+         * Semua digabung.
+         *
+         * Kemudian diurutkan berdasarkan created_at
+         * dari yang paling baru ke paling lama.
+         *
+         * Hanya 4 aktivitas terbaru yang ditampilkan.
+         */
+
+        $activities = collect();
+
+
+        /*
+         * ========================================================
+         * 1. ANGGOTA BARU
+         * ========================================================
+         */
+
+        $members =
+            Member::latest()
                 ->take(20)
                 ->get();
+
+        foreach ($members as $member) {
+
+            $activities->push([
+
+                'type' =>
+                    'member',
+
+                'title' =>
+                    'Anggota baru',
+
+                'description' =>
+                    $member->name ?? '-',
+
+                'created_at' =>
+                    $member->created_at,
+
+                'icon' =>
+                    '+',
+            ]);
+        }
+
+
+        /*
+         * ========================================================
+         * 2. BUKU BARU
+         * ========================================================
+         */
+
+        $books =
+            Book::latest()
+                ->take(20)
+                ->get();
+
+        foreach ($books as $book) {
+
+            $activities->push([
+
+                'type' =>
+                    'book',
+
+                'title' =>
+                    'Koleksi buku baru',
+
+                'description' =>
+                    $book->title ?? '-',
+
+                'created_at' =>
+                    $book->created_at,
+
+                'icon' =>
+                    '+',
+            ]);
+        }
+
+
+        /*
+         * ========================================================
+         * 3. RESERVASI BARU
+         * ========================================================
+         */
+
+        foreach ($reservations as $reservation) {
+
+            $activities->push([
+
+                'type' =>
+                    'reservation',
+
+                'title' =>
+                    'Reservasi baru',
+
+                'description' =>
+                    $reservation->member?->name ?? '-',
+
+                'created_at' =>
+                    $reservation->created_at,
+
+                'icon' =>
+                    '+',
+            ]);
+        }
+
+
+        /*
+         * ========================================================
+         * 4. PEMINJAMAN BARU
+         * ========================================================
+         */
+
+        $borrowings =
+            Borrowing::with([
+                'member',
+                'details.book'
+            ])
+            ->latest()
+            ->take(20)
+            ->get();
+
+        foreach ($borrowings as $borrowing) {
+
+            $activities->push([
+
+                'type' =>
+                    'borrowing',
+
+                'title' =>
+                    'Peminjaman baru',
+
+                'description' =>
+                    $borrowing->member?->name ?? '-',
+
+                'created_at' =>
+                    $borrowing->created_at,
+
+                'icon' =>
+                    '+',
+            ]);
+        }
+
+
+        /*
+         * ========================================================
+         * URUTKAN AKTIVITAS
+         * ========================================================
+         *
+         * Yang paling baru selalu di atas.
+         */
+
+        $activities =
+            $activities
+                ->sortByDesc(
+                    'created_at'
+                )
+                ->take(4)
+                ->values();
 
 
         /*
@@ -132,7 +308,8 @@ class DashboardController extends Controller
                 'chart7Days',
                 'max7',
 
-                'reservations'
+                'reservations',
+                'activities'
             )
         );
     }
@@ -140,14 +317,8 @@ class DashboardController extends Controller
 
     /**
      * ============================================================
-     * GENERATE GRAFIK PEMINJAMAN PER MINGGU (BULAN BERJALAN)
+     * GENERATE GRAFIK PEMINJAMAN PER MINGGU
      * ============================================================
-     *
-     * Logika pembagian minggu ini SAMA dengan
-     * ReportController::generateDateChart() untuk periode 'month',
-     * supaya angka pada dashboard selalu konsisten dengan Laporan.
-     *
-     * Return: array of ['label' => .., 'count' => .., 'height' => ..]
      */
     private function generateBorrowChart(
         Carbon $startDate,
@@ -168,11 +339,13 @@ class DashboardController extends Controller
         ) {
 
             $weekStart =
-                $cursor->copy()
+                $cursor
+                    ->copy()
                     ->startOfDay();
 
             $weekEnd =
-                $cursor->copy()
+                $cursor
+                    ->copy()
                     ->addDays(6)
                     ->endOfDay();
 
@@ -180,6 +353,7 @@ class DashboardController extends Controller
             if (
                 $weekEnd->gt($endDate)
             ) {
+
                 $weekEnd =
                     $endDate->copy();
             }
@@ -187,6 +361,7 @@ class DashboardController extends Controller
 
             $labels[] =
                 'M' . $weekNumber;
+
 
             $counts[] =
                 Borrowing::whereBetween(
@@ -199,7 +374,8 @@ class DashboardController extends Controller
 
 
             $cursor =
-                $weekEnd->copy()
+                $weekEnd
+                    ->copy()
                     ->addSecond();
 
             $weekNumber++;
@@ -214,20 +390,35 @@ class DashboardController extends Controller
 
         $chart = [];
 
-        foreach ($labels as $index => $label) {
+        foreach (
+            $labels as $index => $label
+        ) {
 
             $count =
                 $counts[$index] ?? 0;
 
+
             $height =
                 $max > 0
-                    ? max(8, round(($count / $max) * 100))
+                    ? max(
+                        8,
+                        round(
+                            ($count / $max) * 100
+                        )
+                    )
                     : 8;
 
+
             $chart[] = [
-                'label' => $label,
-                'count' => $count,
-                'height' => $height,
+
+                'label' =>
+                    $label,
+
+                'count' =>
+                    $count,
+
+                'height' =>
+                    $height,
             ];
         }
 
