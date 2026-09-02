@@ -68,12 +68,14 @@ Route::get('/auth/google/callback', [
 
 // LOGOUT
 Route::post('/logout', function () {
+
     Auth::logout();
 
     request()->session()->invalidate();
     request()->session()->regenerateToken();
 
-    return redirect('/login');
+    return redirect()->route('login');
+
 })->name('logout');
 
 
@@ -188,12 +190,12 @@ Route::get(
 
 
 // DENDA
-
 Route::get('/fines', [FineController::class, 'index'])
     ->name('fines');
+
+
 // ANGGOTA
-Route::get('/members', [MemberController::class, 'index'])
-    ->name('members');
+Route::resource('members', MemberController::class);
 
 
 // KALENDER

@@ -11,13 +11,26 @@ return new class extends Migration
         Schema::create('members', function (Blueprint $table) {
             $table->id();
 
+            $table->string('member_number')->unique();
             $table->string('name');
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('address')->nullable();
 
-            $table->enum('status', ['aktif', 'nonaktif'])
-                ->default('aktif');
+            $table->string('nis_nip')->nullable();
+
+            $table->enum('gender', ['Laki-laki', 'Perempuan'])
+                ->nullable();
+
+            $table->string('class')->nullable();
+
+            $table->text('address')->nullable();
+
+            $table->string('phone')->nullable();
+
+            $table->string('email')->nullable();
+
+            $table->date('registered_at')->nullable();
+
+            $table->enum('status', ['Aktif', 'Tidak Aktif'])
+                ->default('Aktif');
 
             $table->timestamps();
         });

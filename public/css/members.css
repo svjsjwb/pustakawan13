@@ -1,0 +1,523 @@
+.member-page {
+    padding: 38px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: 32px;
+    color: #111827;
+}
+
+.page-header p {
+    margin: 7px 0 0;
+    color: #718096;
+    font-size: 15px;
+}
+
+.btn-add-top {
+    background: #287f80;
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 9px;
+    font-weight: 600;
+}
+
+.btn-add-top:hover {
+    opacity: .9;
+}
+
+.btn-secondary {
+    display: inline-block;
+    padding: 11px 18px;
+    border-radius: 9px;
+    border: 1px solid #d7e1e1;
+    background: white;
+    color: #287f80;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.member-card,
+.member-form-card {
+    background: white;
+    border: 1px solid #e4ebeb;
+    border-radius: 18px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .04);
+    overflow: hidden;
+}
+
+.member-toolbar {
+    padding: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.member-toolbar h3 {
+    margin: 0;
+    font-size: 21px;
+}
+
+.member-toolbar p {
+    margin: 6px 0 0;
+    color: #718096;
+}
+
+.member-search input {
+    width: 260px;
+    padding: 11px 15px;
+    border: 1px solid #d9e2e2;
+    border-radius: 9px;
+    outline: none;
+}
+
+.member-search input:focus {
+    border-color: #287f80;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+#memberTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#memberTable th {
+    padding: 15px 18px;
+    background: #f6f9f9;
+    color: #527070;
+    font-size: 12px;
+    text-align: left;
+}
+
+#memberTable td {
+    padding: 17px 18px;
+    border-top: 1px solid #edf1f1;
+    color: #374151;
+    font-size: 14px;
+}
+
+#memberTable tbody tr:hover {
+    background: #fafcfc;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-badge.inactive {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 7px;
+}
+
+.btn-edit,
+.btn-delete {
+    border: none;
+    text-decoration: none;
+    padding: 7px 11px;
+    border-radius: 7px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background: #e0f2f2;
+    color: #287f80;
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 45px !important;
+    color: #8a9999 !important;
+}
+
+
+/* =========================
+   FORM TAMBAH ANGGOTA
+========================= */
+
+.member-form-card {
+    padding: 30px;
+}
+
+.form-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 25px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #edf1f1;
+}
+
+.form-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: #dff4f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 23px;
+}
+
+.form-title h3 {
+    margin: 0;
+    font-size: 21px;
+}
+
+.form-title p {
+    margin: 5px 0 0;
+    color: #718096;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-group label span {
+    color: #dc2626;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #d9e2e2;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #287f80;
+    box-shadow: 0 0 0 3px rgba(40, 127, 128, .08);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #edf1f1;
+}
+
+.btn-cancel {
+    padding: 12px 20px;
+    border: 1px solid #d7e1e1;
+    border-radius: 9px;
+    background: white;
+    color: #526565;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-save {
+    border: none;
+    padding: 12px 22px;
+    border-radius: 9px;
+    background: #287f80;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-save:hover {
+    opacity: .9;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #166534;
+    padding: 13px 17px;
+    border-radius: 9px;
+    margin-bottom: 20px;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 13px 17px;
+    border-radius: 9px;
+    margin-bottom: 20px;
+}
+
+.alert-error ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+@media (max-width: 800px) {
+
+    .member-page {
+        padding: 20px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        gap: 15px;
+        flex-direction: column;
+    }
+
+    .member-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .member-search,
+    .member-search input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 42px;
+    color: #111827;
+}
+
+.page-header p {
+    margin: 8px 0 0;
+    font-size: 19px;
+    color: #64748b;
+}
+
+.btn-back {
+    background: #e8f4f4;
+    color: #277f81;
+    text-decoration: none;
+    padding: 13px 22px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.member-form-card {
+    max-width: 850px;
+    margin: 0 auto;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 35px;
+}
+
+.form-header {
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #1e293b;
+}
+
+.form-header p {
+    margin-top: 7px;
+    color: #64748b;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 16px;
+    border: 1px solid #d8e0e5;
+    border-radius: 10px;
+    font-size: 16px;
+    background: white;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #27888a;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #edf0f1;
+}
+
+.btn-cancel,
+.btn-save {
+    padding: 13px 22px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-save {
+    background: #27888a;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #207375;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+}
+
+.alert-error ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+/* =====================================================
+   TOMBOL FORM EDIT KARYAWAN
+   ===================================================== */
+
+.form-footer {
+    width: 100%;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+}
+
+.form-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.form-actions .btn-cancel,
+.form-actions .btn-submit {
+    height: 44px !important;
+    padding: 0 20px !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+}
+
+.form-actions .btn-cancel {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    text-decoration: none !important;
+    border: none !important;
+}
+
+.form-actions .btn-submit {
+    background: #258b8d !important;
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+.form-actions .btn-cancel:hover {
+    background: #e2e8f0 !important;
+}
+
+.form-actions .btn-submit:hover {
+    background: #217d7f !important;
+}

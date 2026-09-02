@@ -64,9 +64,6 @@ class ReservationController extends Controller
          * =====================================================
          * QUERY RESERVASI
          * =====================================================
-         *
-         * BookCopy ikut dimuat karena diperlukan untuk
-         * mengetahui lokasi fisik buku.
          */
 
         $query = Reservation::with([
@@ -98,8 +95,8 @@ class ReservationController extends Controller
                     'reservations',
                     'expires_at'
                 )
-                ? 'expires_at'
-                : 'reserved_at'
+                    ? 'expires_at'
+                    : 'reserved_at'
             );
 
 
@@ -130,6 +127,7 @@ class ReservationController extends Controller
                     $endDate,
                 ]
             );
+
         } elseif (
             $request->filled('start_date')
         ) {
@@ -139,6 +137,7 @@ class ReservationController extends Controller
                 '>=',
                 $request->start_date
             );
+
         } elseif (
             $request->filled('end_date')
         ) {
@@ -148,15 +147,16 @@ class ReservationController extends Controller
                 '<=',
                 $request->end_date
             );
+
         } elseif (
-            $request->filled('month')
-            &&
             $request->filled('year')
+            &&
+            $request->filled('month')
         ) {
 
             /*
-             * Filter bulan berdasarkan due date
-             * / expires_at / reserved_at.
+             * Filter bulan berdasarkan
+             * due_at / expires_at / reserved_at.
              */
 
             $query
@@ -168,14 +168,14 @@ class ReservationController extends Controller
                     $dueColumn,
                     $request->month
                 );
+
         } else {
 
             /*
-     * Default:
-     * tampilkan semua reservasi
-     * dalam satu bulan terakhir berdasarkan
-     * tanggal reservasi.
-     */
+             * Default:
+             * tampilkan semua reservasi
+             * dalam satu bulan terakhir.
+             */
 
             $query->where(
                 'reserved_at',
@@ -256,6 +256,7 @@ class ReservationController extends Controller
          */
 
         $validated = $request->validate([
+
             'member_id' => [
                 'required',
                 'exists:members,id',
@@ -292,7 +293,9 @@ class ReservationController extends Controller
          */
 
         if (
-            !empty($validated['seat_number'])
+            !empty(
+                $validated['seat_number']
+            )
         ) {
 
             $seatAlreadyBooked =
@@ -300,18 +303,18 @@ class ReservationController extends Controller
                     'reserved_at',
                     $validated['reserved_at']
                 )
-                ->where(
-                    'seat_number',
-                    $validated['seat_number']
-                )
-                ->whereIn(
-                    'status',
-                    [
-                        'menunggu',
-                        'disetujui',
-                    ]
-                )
-                ->exists();
+                    ->where(
+                        'seat_number',
+                        $validated['seat_number']
+                    )
+                    ->whereIn(
+                        'status',
+                        [
+                            'menunggu',
+                            'disetujui',
+                        ]
+                    )
+                    ->exists();
 
 
             if ($seatAlreadyBooked) {
@@ -372,9 +375,6 @@ class ReservationController extends Controller
                  * =================================================
                  * CARI BOOK COPY
                  * =================================================
-                 *
-                 * Reservation harus memegang satu eksemplar
-                 * fisik yang tersedia.
                  */
 
                 $bookCopy = BookCopy::where(
@@ -402,13 +402,12 @@ class ReservationController extends Controller
                  * =================================================
                  * CEK KURSI LAGI DI DALAM TRANSACTION
                  * =================================================
-                 *
-                 * Untuk mengurangi kemungkinan dua request
-                 * mengambil kursi yang sama.
                  */
 
                 if (
-                    !empty($validated['seat_number'])
+                    !empty(
+                        $validated['seat_number']
+                    )
                 ) {
 
                     $seatAlreadyBooked =
@@ -416,19 +415,19 @@ class ReservationController extends Controller
                             'reserved_at',
                             $validated['reserved_at']
                         )
-                        ->where(
-                            'seat_number',
-                            $validated['seat_number']
-                        )
-                        ->whereIn(
-                            'status',
-                            [
-                                'menunggu',
-                                'disetujui',
-                            ]
-                        )
-                        ->lockForUpdate()
-                        ->exists();
+                            ->where(
+                                'seat_number',
+                                $validated['seat_number']
+                            )
+                            ->whereIn(
+                                'status',
+                                [
+                                    'menunggu',
+                                    'disetujui',
+                                ]
+                            )
+                            ->lockForUpdate()
+                            ->exists();
 
 
                     if ($seatAlreadyBooked) {
@@ -450,28 +449,28 @@ class ReservationController extends Controller
                  */
 
                 $reservationData = [
+
                     'member_id' =>
-                    $validated['member_id'],
+                        $validated['member_id'],
 
                     'book_id' =>
-                    $validated['book_id'],
+                        $validated['book_id'],
 
                     'book_copy_id' =>
-                    $bookCopy->id,
+                        $bookCopy->id,
 
                     'reserved_at' =>
-                    $validated['reserved_at'],
+                        $validated['reserved_at'],
 
                     'expires_at' =>
-                    $validated['expires_at']
-                        ?? null,
+                        $validated['expires_at'],
 
                     'seat_number' =>
-                    $validated['seat_number']
+                        $validated['seat_number']
                         ?? null,
 
                     'status' =>
-                    'menunggu',
+                        'menunggu',
                 ];
 
 
@@ -513,7 +512,8 @@ class ReservationController extends Controller
                  */
 
                 $bookCopy->update([
-                    'status' => 'reserved',
+                    'status' =>
+                        'reserved',
                 ]);
 
 
@@ -565,10 +565,12 @@ class ReservationController extends Controller
          */
 
         $validated = $request->validate([
+
             'status' => [
                 'required',
                 'in:menunggu,disetujui,ditolak,dibatalkan,selesai',
             ],
+
         ]);
 
 
@@ -590,9 +592,9 @@ class ReservationController extends Controller
 
                 $reservation =
                     Reservation::lockForUpdate()
-                    ->findOrFail(
-                        $reservation->id
-                    );
+                        ->findOrFail(
+                            $reservation->id
+                        );
 
 
                 $oldStatus =
@@ -654,10 +656,9 @@ class ReservationController extends Controller
 
                         $bookCopy =
                             BookCopy::lockForUpdate()
-                            ->find(
-                                $reservation
-                                    ->book_copy_id
-                            );
+                                ->find(
+                                    $reservation->book_copy_id
+                                );
 
 
                         if (
@@ -669,7 +670,7 @@ class ReservationController extends Controller
 
                             $bookCopy->update([
                                 'status' =>
-                                'available',
+                                    'available',
                             ]);
                         }
                     }
@@ -683,10 +684,9 @@ class ReservationController extends Controller
 
                     $book =
                         Book::lockForUpdate()
-                        ->findOrFail(
-                            $reservation->book_id
-                        );
-
+                            ->findOrFail(
+                                $reservation->book_id
+                            );
 
                     $book->increment(
                         'available_stock'
@@ -698,11 +698,6 @@ class ReservationController extends Controller
                  * =================================================
                  * AKTIFKAN KEMBALI
                  * =================================================
-                 *
-                 * Contoh:
-                 *
-                 * dibatalkan → menunggu
-                 * ditolak    → menunggu
                  */
 
                 if (
@@ -731,9 +726,9 @@ class ReservationController extends Controller
 
                     $book =
                         Book::lockForUpdate()
-                        ->findOrFail(
-                            $reservation->book_id
-                        );
+                            ->findOrFail(
+                                $reservation->book_id
+                            );
 
 
                     /*
@@ -764,12 +759,12 @@ class ReservationController extends Controller
                             'book_id',
                             $book->id
                         )
-                        ->where(
-                            'status',
-                            'available'
-                        )
-                        ->lockForUpdate()
-                        ->first();
+                            ->where(
+                                'status',
+                                'available'
+                            )
+                            ->lockForUpdate()
+                            ->first();
 
 
                     if (!$bookCopy) {
@@ -789,7 +784,7 @@ class ReservationController extends Controller
 
                     $bookCopy->update([
                         'status' =>
-                        'reserved',
+                            'reserved',
                     ]);
 
 
@@ -801,7 +796,7 @@ class ReservationController extends Controller
 
                     $reservation->update([
                         'book_copy_id' =>
-                        $bookCopy->id,
+                            $bookCopy->id,
                     ]);
 
 
@@ -825,7 +820,7 @@ class ReservationController extends Controller
 
                 $reservation->update([
                     'status' =>
-                    $newStatus,
+                        $newStatus,
                 ]);
             }
         );
@@ -896,8 +891,8 @@ class ReservationController extends Controller
 
         $targetShelf =
             $reservation
-            ->bookCopy
-            ->shelf;
+                ->bookCopy
+                ->shelf;
 
 
         if (
@@ -964,7 +959,7 @@ class ReservationController extends Controller
                 'library_floor_id',
                 $targetFloor->id
             )
-            ->pluck('id');
+                ->pluck('id');
 
 
         /*
@@ -978,12 +973,12 @@ class ReservationController extends Controller
                 'library_zone_id',
                 $zoneIds
             )
-            ->with([
-                'copies.book',
-                'zone.floor',
-            ])
-            ->orderBy('code')
-            ->get();
+                ->with([
+                    'copies.book',
+                    'zone.floor',
+                ])
+                ->orderBy('code')
+                ->get();
 
 
         /*
@@ -994,66 +989,66 @@ class ReservationController extends Controller
 
         $bookCopies =
             $shelves
-            ->flatMap(
-                function ($shelf)
-                use ($reservation) {
+                ->flatMap(
+                    function ($shelf)
+                    use ($reservation) {
 
-                    return $shelf->copies
-                        ->map(
-                            function ($copy)
-                            use (
-                                $shelf,
-                                $reservation
-                            ) {
+                        return $shelf->copies
+                            ->map(
+                                function ($copy)
+                                use (
+                                    $shelf,
+                                    $reservation
+                                ) {
 
-                                return [
+                                    return [
 
-                                    'id' =>
-                                    $copy->id,
+                                        'id' =>
+                                            $copy->id,
 
-                                    'book_id' =>
-                                    $copy->book_id,
+                                        'book_id' =>
+                                            $copy->book_id,
 
-                                    'title' =>
-                                    $copy->book?->title
-                                        ??
-                                        'Buku',
+                                        'title' =>
+                                            $copy->book?->title
+                                            ??
+                                            'Buku',
 
-                                    'barcode' =>
-                                    $copy->barcode,
+                                        'barcode' =>
+                                            $copy->barcode,
 
-                                    'status' =>
-                                    $copy->status,
+                                        'status' =>
+                                            $copy->status,
 
-                                    'shelf_id' =>
-                                    $shelf->id,
+                                        'shelf_id' =>
+                                            $shelf->id,
 
-                                    'shelf' =>
-                                    $shelf->code,
+                                        'shelf' =>
+                                            $shelf->code,
 
-                                    'section' =>
-                                    (int)
-                                    $copy->section,
+                                        'section' =>
+                                            (int)
+                                            $copy->section,
 
-                                    'row' =>
-                                    (int)
-                                    $copy->row,
+                                        'row' =>
+                                            (int)
+                                            $copy->row,
 
-                                    'column' =>
-                                    (int)
-                                    $copy->column,
+                                        'column' =>
+                                            (int)
+                                            $copy->column,
 
-                                    'is_target' =>
-                                    $copy->id ===
-                                        $reservation
-                                        ->book_copy_id,
-                                ];
-                            }
-                        );
-                }
-            )
-            ->values()
-            ->toArray();
+                                        'is_target' =>
+                                            $copy->id ===
+                                            $reservation
+                                                ->book_copy_id,
+                                    ];
+                                }
+                            );
+                    }
+                )
+                ->values()
+                ->toArray();
 
 
         /*
@@ -1065,17 +1060,19 @@ class ReservationController extends Controller
         return view(
             'book-locator.show',
             [
+
                 'reservation' =>
-                $reservation,
+                    $reservation,
 
                 'targetShelf' =>
-                $targetShelf,
+                    $targetShelf,
 
                 'shelves' =>
-                $shelves,
+                    $shelves,
 
                 'bookCopies' =>
-                $bookCopies,
+                    $bookCopies,
+
             ]
         );
     }
@@ -1104,18 +1101,15 @@ class ReservationController extends Controller
 
                 $reservation =
                     Reservation::lockForUpdate()
-                    ->findOrFail(
-                        $reservation->id
-                    );
+                        ->findOrFail(
+                            $reservation->id
+                        );
 
 
                 /*
                  * =================================================
                  * RELEASE COPY + STOK
                  * =================================================
-                 *
-                 * Reservation aktif masih memegang
-                 * satu BookCopy.
                  */
 
                 if (
@@ -1141,10 +1135,9 @@ class ReservationController extends Controller
 
                         $bookCopy =
                             BookCopy::lockForUpdate()
-                            ->find(
-                                $reservation
-                                    ->book_copy_id
-                            );
+                                ->find(
+                                    $reservation->book_copy_id
+                                );
 
 
                         if (
@@ -1156,7 +1149,7 @@ class ReservationController extends Controller
 
                             $bookCopy->update([
                                 'status' =>
-                                'available',
+                                    'available',
                             ]);
                         }
                     }
@@ -1170,10 +1163,9 @@ class ReservationController extends Controller
 
                     $book =
                         Book::lockForUpdate()
-                        ->findOrFail(
-                            $reservation->book_id
-                        );
-
+                            ->findOrFail(
+                                $reservation->book_id
+                            );
 
                     $book->increment(
                         'available_stock'

@@ -1,16 +1,13 @@
 /* =========================================================
    NAVBAR
-   ========================================================= */
+========================================================= */
 
 .site-header {
     width: 100%;
     height: 70px;
-
     background: #287b7b;
-
     box-sizing: border-box;
 }
-
 
 .header-inner {
     width: 100%;
@@ -27,7 +24,7 @@
 
 /* =========================================================
    BRAND
-   ========================================================= */
+========================================================= */
 
 .brand {
     display: flex;
@@ -43,14 +40,12 @@
     color: #fff;
 }
 
-
 .brand-logo {
     width: 42px;
     height: 42px;
 
     object-fit: contain;
 }
-
 
 .brand-text {
     display: flex;
@@ -59,18 +54,19 @@
     line-height: 1.05;
 }
 
-
 .brand-text span {
     font-size: 15px;
     font-weight: 600;
+
     margin-left: 10px;
+
     color: #fff;
 }
-
 
 .brand-text strong {
     margin-top: 2px;
     margin-left: 8px;
+
     font-size: 15px;
     font-weight: 700;
 
@@ -80,12 +76,11 @@
 
 /* =========================================================
    MAIN NAVIGATION
-   ========================================================= */
+========================================================= */
 
 .main-nav {
     display: flex;
     align-items: center;
-
     justify-content: center;
 
     gap: 22px;
@@ -94,7 +89,6 @@
 
     height: 100%;
 }
-
 
 .main-nav a {
     position: relative;
@@ -116,20 +110,15 @@
     white-space: nowrap;
 }
 
-
 .main-nav a:hover {
     color: #fff;
 }
-
 
 .main-nav a.active {
     color: #fff;
 
     font-weight: 700;
 }
-
-
-/* underline menu aktif */
 
 .main-nav a.active::after {
     content: "";
@@ -149,117 +138,337 @@
 
 
 /* =========================================================
-   USER
-   ========================================================= */
+   PROFILE WRAPPER
+========================================================= */
 
-.nav-user {
+.nav-user-wrapper {
+    position: relative;
+
     display: flex;
     align-items: center;
 
-    gap: 7px;
-
-    width: 160px;
-    min-width: 160px;
+    width: 300px;
+    min-width: 300px;
 
     justify-content: flex-end;
 }
 
 
+/* =========================================================
+   PROFILE BUTTON
+========================================================= */
+
+.nav-user {
+    width: auto;
+    min-width: 0;
+
+    border: none;
+
+    background: transparent;
+
+    padding: 6px 10px;
+
+    margin: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    cursor: pointer;
+
+    color: inherit;
+
+    font-family: inherit;
+
+    border-radius: 10px;
+
+    transition:
+        background-color 0.2s ease;
+}
+
+.nav-user:hover {
+    background: rgba(255, 255, 255, 0.10);
+}
+
+
+/* =========================================================
+   PROFILE AVATAR
+========================================================= */
+
 .nav-user-avatar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
     display: flex;
     align-items: center;
     justify-content: center;
 
-    width: 32px;
-    height: 32px;
+    flex-shrink: 0;
 
-    border-radius: 50%;
+    background: #e8f4f4;
 
-    background: #d7e5e5;
+    color: #278486;
 
-    color: #287b7b;
-
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
 }
 
+
+/* =========================================================
+   PROFILE INFO
+========================================================= */
 
 .nav-user-info {
     display: flex;
     flex-direction: column;
 
+    text-align: left;
+
     line-height: 1.15;
-
-    color: #fff;
 }
-
 
 .nav-user-info span {
-    font-size: 10px;
-    font-weight: 600;
-}
+    font-size: 14px;
+    font-weight: 700;
 
+    color: #fff;
+
+    white-space: nowrap;
+}
 
 .nav-user-info small {
-    margin-top: 2px;
+    margin-top: 4px;
 
-    font-size: 9px;
+    font-size: 11px;
 
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.82);
+
+    white-space: nowrap;
 }
+
 
 /* =========================================================
-   LOGOUT
+   PROFILE ARROW
 ========================================================= */
 
-.logout-form {
-    margin: 0;
-    padding: 0;
+.profile-arrow {
+    margin-left: 3px;
+
+    font-size: 12px;
+
+    color: rgba(255, 255, 255, 0.85);
+
+    transition:
+        transform 0.2s ease;
 }
 
-.logout-button {
-    display: inline-flex;
+.profile-arrow.rotate {
+    transform: rotate(180deg);
+}
 
+
+/* =========================================================
+   PROFILE DROPDOWN
+========================================================= */
+
+.profile-dropdown {
+    position: absolute;
+
+    top: calc(100% + 8px);
+    right: 0;
+
+    width: 270px;
+
+    background: #fff;
+
+    border: 1px solid #e1e7e7;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.12);
+
+    overflow: hidden;
+
+    z-index: 9999;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(-6px);
+
+    transition:
+        opacity 0.18s ease,
+        visibility 0.18s ease,
+        transform 0.18s ease;
+}
+
+.profile-dropdown.show {
+    opacity: 1;
+
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   DROPDOWN HEADER
+========================================================= */
+
+.profile-dropdown-header {
+    padding: 16px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+/* =========================================================
+   DROPDOWN AVATAR
+========================================================= */
+
+.profile-dropdown-avatar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    display: flex;
     align-items: center;
     justify-content: center;
 
-    height: 32px;
+    flex-shrink: 0;
 
-    padding: 0 13px;
+    background: #e8f4f4;
 
-    border: 1px solid #d8e1e1;
+    color: #278486;
 
-    border-radius: 7px;
+    font-size: 17px;
+    font-weight: 700;
+}
 
-    background: #ffffff;
 
-    color: #287879;
+/* =========================================================
+   DROPDOWN USER INFO
+========================================================= */
 
-    font-family: inherit;
+.profile-dropdown-user {
+    min-width: 0;
 
-    font-size: 10px;
+    display: flex;
+    flex-direction: column;
 
-    font-weight: 600;
+    gap: 4px;
+}
+
+.profile-dropdown-user strong {
+    font-size: 14px;
+
+    color: #173b4f;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.profile-dropdown-user span {
+    font-size: 12px;
+
+    color: #71808a;
+}
+
+
+/* =========================================================
+   DROPDOWN DIVIDER
+========================================================= */
+
+.profile-dropdown-divider {
+    height: 1px;
+
+    background: #edf0f0;
+
+    margin: 0;
+}
+
+
+/* =========================================================
+   LOGOUT FORM
+========================================================= */
+
+.profile-logout-form {
+    margin: 0;
+    padding: 7px;
+}
+
+
+/* =========================================================
+   LOGOUT BUTTON
+========================================================= */
+
+.profile-logout-button {
+    width: 100%;
+
+    border: none;
+
+    background: transparent;
+
+    padding: 11px 12px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    border-radius: 8px;
 
     cursor: pointer;
 
+    font-family: inherit;
+
+    font-size: 14px;
+
+    color: #d9534f;
+
+    text-align: left;
+
     transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease;
+        background-color 0.18s ease,
+        color 0.18s ease;
 }
 
-.logout-button:hover {
-    background: #f4f8f8;
+.profile-logout-button:hover {
+    background: #fff2f2;
 
-    border-color: #287879;
-
-    color: #205d5e;
+    color: #c43d39;
 }
+
+
+/* =========================================================
+   LOGOUT ICON
+========================================================= */
+
+.logout-icon {
+    width: 22px;
+
+    display: inline-flex;
+
+    justify-content: center;
+
+    font-size: 18px;
+}
+
 
 /* =========================================================
    RESPONSIVE
-   ========================================================= */
+========================================================= */
 
 @media (max-width: 1100px) {
 
@@ -280,9 +489,9 @@
         font-size: 11px;
     }
 
-    .nav-user {
-        width: 145px;
-        min-width: 145px;
+    .nav-user-wrapper {
+        width: 220px;
+        min-width: 220px;
     }
 
 }
@@ -303,13 +512,17 @@
         gap: 14px;
     }
 
+    .nav-user-wrapper {
+        width: 55px;
+        min-width: 55px;
+    }
+
     .nav-user-info {
         display: none;
     }
 
     .nav-user {
-        width: 35px;
-        min-width: 35px;
+        padding: 6px;
     }
 
 }
@@ -345,4 +558,8 @@
         height: 40px;
     }
 
+    .nav-user-wrapper {
+        width: auto;
+        min-width: auto;
+    }
 }
