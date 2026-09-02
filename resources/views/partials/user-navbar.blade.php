@@ -28,8 +28,8 @@
             </a>
 
             <a
-                href="{{ route('catalog') }}"
-                class="{{ request()->routeIs('catalog*') ? 'active' : '' }}"
+                href="{{ route('user.catalog') }}"
+                class="{{ request()->routeIs('user.catalog*') ? 'active' : '' }}"
             >
                 Katalog
             </a>

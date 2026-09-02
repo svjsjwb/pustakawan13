@@ -32,36 +32,36 @@
                 yang cocok untukmu.
             </p>
 
-            <div class="user-search">
+            <form method="GET" action="{{ route('user.catalog') }}" class="user-search-form">
+                <div class="user-search">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
 
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2">
+                        <circle
+                            cx="11"
+                            cy="11"
+                            r="8">
+                        </circle>
 
-                    <circle
-                        cx="11"
-                        cy="11"
-                        r="8">
-                    </circle>
+                        <line
+                            x1="21"
+                            y1="21"
+                            x2="16.65"
+                            y2="16.65">
+                        </line>
+                    </svg>
 
-                    <line
-                        x1="21"
-                        y1="21"
-                        x2="16.65"
-                        y2="16.65">
-                    </line>
-
-                </svg>
-
-                <input
-                    type="text"
-                    id="user-book-search"
-                    placeholder="Cari judul, penulis, atau kategori..."
-                    autocomplete="off">
-
-            </div>
+                    <input
+                        type="text"
+                        name="search"
+                        id="user-book-search"
+                        placeholder="Cari judul, penulis, atau kategori..."
+                        autocomplete="off">
+                </div>
+            </form>
 
         </div>
 
@@ -124,7 +124,7 @@
 
             </div>
 
-            <a href="{{ route('catalog') }}">
+            <a href="{{ route('user.catalog', ['sort' => 'populer']) }}">
                 Lihat semua →
             </a>
 
@@ -220,7 +220,7 @@
 
             </div>
 
-            <a href="{{ route('catalog') }}">
+            <a href="{{ route('user.catalog', ['sort' => 'terbaru']) }}">
                 Lihat semua →
             </a>
 
@@ -324,7 +324,7 @@
             @foreach($categories as $category)
 
             <a
-                href="{{ route('catalog') }}"
+                href="{{ route('user.catalog', ['category' => $category->name]) }}"
                 class="user-category-card">
 
                 <span>
@@ -580,7 +580,7 @@
             <div class="user-book-actions">
 
                 <a
-                    href="{{ route('catalog') }}"
+                    href="{{ route('user.catalog') }}"
                     class="user-book-catalog-btn">
 
                     Lihat di Katalog →

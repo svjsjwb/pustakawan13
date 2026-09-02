@@ -16,6 +16,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BookCopyController;
 use App\Http\Controllers\UserHomeController;
+use App\Http\Controllers\User\CatalogController as UserCatalogController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GoogleAuthController;
@@ -90,8 +91,9 @@ Route::get('/dashboard', [
 Route::resource('categories', CategoryController::class);
 
 
-// KATALOG
+// KATALOG ADMIN
 Route::get('/catalog', [CatalogController::class, 'index'])
+    ->middleware(['admin', 'no.back'])
     ->name('catalog');
 
 
@@ -235,10 +237,19 @@ Route::prefix('books/{book}/copies')
         ])->name('update');
     });
 
-//Home user
-Route::get('/home', [
-    UserHomeController::class,
-    'index'
-])
-    ->middleware(['auth', 'no.back'])
-    ->name('user.home');
+// =========================================================
+// ROLE USER (PORTAL PENGGUNA)
+// =========================================================
+Route::middleware(['auth', 'no.back'])->group(function () {
+    // Home / Beranda User
+    Route::get('/home', [
+        UserHomeController::class,
+        'index'
+    ])->name('user.home');
+
+    // Katalog Mandiri Khusus Role User
+    Route::get('/katalog', [
+        UserCatalogController::class,
+        'index'
+    ])->name('user.catalog');
+});
