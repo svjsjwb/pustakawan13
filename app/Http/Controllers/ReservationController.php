@@ -64,9 +64,6 @@ class ReservationController extends Controller
          * =====================================================
          * QUERY RESERVASI
          * =====================================================
-         *
-         * BookCopy ikut dimuat karena diperlukan untuk
-         * mengetahui lokasi fisik buku.
          */
 
         $query = Reservation::with([
@@ -152,14 +149,14 @@ class ReservationController extends Controller
             );
 
         } elseif (
-            $request->filled('month')
-            &&
             $request->filled('year')
+            &&
+            $request->filled('month')
         ) {
 
             /*
-             * Filter bulan berdasarkan due date
-             * / expires_at / reserved_at.
+             * Filter bulan berdasarkan
+             * due_at / expires_at / reserved_at.
              */
 
             $query
@@ -176,11 +173,12 @@ class ReservationController extends Controller
 
             /*
              * Default:
-             * tampilkan data dalam satu bulan terakhir.
+             * tampilkan semua reservasi
+             * dalam satu bulan terakhir.
              */
 
             $query->where(
-                $dueColumn,
+                'reserved_at',
                 '>=',
                 now()->subMonth()->startOfDay()
             );
@@ -258,6 +256,7 @@ class ReservationController extends Controller
          */
 
         $validated = $request->validate([
+
             'member_id' => [
                 'required',
                 'exists:members,id',
@@ -274,7 +273,7 @@ class ReservationController extends Controller
             ],
 
             'expires_at' => [
-                'nullable',
+                'required',
                 'date',
                 'after_or_equal:reserved_at',
             ],
@@ -325,8 +324,8 @@ class ReservationController extends Controller
                     ->with(
                         'error',
                         'Kursi ' .
-                        $validated['seat_number'] .
-                        ' sudah dipesan oleh pengguna lain pada tanggal tersebut.'
+                            $validated['seat_number'] .
+                            ' sudah dipesan oleh pengguna lain pada tanggal tersebut.'
                     );
             }
         }
@@ -376,9 +375,6 @@ class ReservationController extends Controller
                  * =================================================
                  * CARI BOOK COPY
                  * =================================================
-                 *
-                 * Reservation harus memegang satu eksemplar
-                 * fisik yang tersedia.
                  */
 
                 $bookCopy = BookCopy::where(
@@ -406,9 +402,6 @@ class ReservationController extends Controller
                  * =================================================
                  * CEK KURSI LAGI DI DALAM TRANSACTION
                  * =================================================
-                 *
-                 * Untuk mengurangi kemungkinan dua request
-                 * mengambil kursi yang sama.
                  */
 
                 if (
@@ -442,8 +435,8 @@ class ReservationController extends Controller
                         abort(
                             422,
                             'Kursi ' .
-                            $validated['seat_number'] .
-                            ' baru saja dipesan oleh pengguna lain.'
+                                $validated['seat_number'] .
+                                ' baru saja dipesan oleh pengguna lain.'
                         );
                     }
                 }
@@ -456,6 +449,7 @@ class ReservationController extends Controller
                  */
 
                 $reservationData = [
+
                     'member_id' =>
                         $validated['member_id'],
 
@@ -469,8 +463,7 @@ class ReservationController extends Controller
                         $validated['reserved_at'],
 
                     'expires_at' =>
-                        $validated['expires_at']
-                        ?? null,
+                        $validated['expires_at'],
 
                     'seat_number' =>
                         $validated['seat_number']
@@ -519,7 +512,8 @@ class ReservationController extends Controller
                  */
 
                 $bookCopy->update([
-                    'status' => 'reserved',
+                    'status' =>
+                        'reserved',
                 ]);
 
 
@@ -571,10 +565,12 @@ class ReservationController extends Controller
          */
 
         $validated = $request->validate([
+
             'status' => [
                 'required',
                 'in:menunggu,disetujui,ditolak,dibatalkan,selesai',
             ],
+
         ]);
 
 
@@ -661,8 +657,7 @@ class ReservationController extends Controller
                         $bookCopy =
                             BookCopy::lockForUpdate()
                                 ->find(
-                                    $reservation
-                                        ->book_copy_id
+                                    $reservation->book_copy_id
                                 );
 
 
@@ -693,7 +688,6 @@ class ReservationController extends Controller
                                 $reservation->book_id
                             );
 
-
                     $book->increment(
                         'available_stock'
                     );
@@ -704,11 +698,6 @@ class ReservationController extends Controller
                  * =================================================
                  * AKTIFKAN KEMBALI
                  * =================================================
-                 *
-                 * Contoh:
-                 *
-                 * dibatalkan → menunggu
-                 * ditolak    → menunggu
                  */
 
                 if (
@@ -1071,6 +1060,7 @@ class ReservationController extends Controller
         return view(
             'book-locator.show',
             [
+
                 'reservation' =>
                     $reservation,
 
@@ -1082,6 +1072,7 @@ class ReservationController extends Controller
 
                 'bookCopies' =>
                     $bookCopies,
+
             ]
         );
     }
@@ -1119,9 +1110,6 @@ class ReservationController extends Controller
                  * =================================================
                  * RELEASE COPY + STOK
                  * =================================================
-                 *
-                 * Reservation aktif masih memegang
-                 * satu BookCopy.
                  */
 
                 if (
@@ -1148,8 +1136,7 @@ class ReservationController extends Controller
                         $bookCopy =
                             BookCopy::lockForUpdate()
                                 ->find(
-                                    $reservation
-                                        ->book_copy_id
+                                    $reservation->book_copy_id
                                 );
 
 
@@ -1179,7 +1166,6 @@ class ReservationController extends Controller
                             ->findOrFail(
                                 $reservation->book_id
                             );
-
 
                     $book->increment(
                         'available_stock'

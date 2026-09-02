@@ -63,7 +63,16 @@
             </a>
 
 
-            {{-- PINJAMAN BUKU --}}
+            {{-- ANGGOTA --}}
+
+            <a
+                href="{{ route('members.index') }}"
+                class="{{ request()->routeIs('members.*') ? 'active' : '' }}">
+                Anggota
+            </a>
+
+
+            {{-- PEMINJAMAN BUKU --}}
 
             <a
                 href="{{ route('circulation') }}"
@@ -93,44 +102,217 @@
 
 
         {{-- =====================================================
-             USER
+             USER PROFILE
         ====================================================== --}}
-        <div class="nav-user">
 
-            <div class="nav-user-avatar">
-                {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-            </div>
+        <div class="nav-user-wrapper">
 
-            <div class="nav-user-info">
+            {{-- PROFILE BUTTON --}}
 
-                <span>
-                    {{ auth()->user()->name ?? 'User' }}
+            <button
+                type="button"
+                class="nav-user"
+                id="profileDropdownButton"
+                aria-expanded="false">
+
+                <div class="nav-user-avatar">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                </div>
+
+                <div class="nav-user-info">
+
+                    <span>
+                        {{ auth()->user()->name ?? 'User' }}
+                    </span>
+
+                    <small>
+                        {{ auth()->user()->role === 'admin'
+                            ? 'Admin Perpustakaan'
+                            : 'Pengguna Perpustakaan' }}
+                    </small>
+
+                </div>
+
+                {{-- ICON PANAH --}}
+
+                <span class="profile-arrow" id="profileArrow">
+                    ▾
                 </span>
 
-                <small>
-                    {{ auth()->user()->role === 'admin'
-                ? 'Admin Perpustakaan'
-                : 'Pengguna Perpustakaan' }}
-                </small>
+            </button>
+
+
+            {{-- =================================================
+                 DROPDOWN
+            ================================================== --}}
+
+            <div
+                class="profile-dropdown"
+                id="profileDropdown">
+
+                {{-- INFO USER --}}
+
+                <div class="profile-dropdown-header">
+
+                    <div class="profile-dropdown-avatar">
+                        {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                    </div>
+
+                    <div class="profile-dropdown-user">
+
+                        <strong>
+                            {{ auth()->user()->name ?? 'User' }}
+                        </strong>
+
+                        <span>
+                            {{ auth()->user()->role === 'admin'
+                                ? 'Admin Perpustakaan'
+                                : 'Pengguna Perpustakaan' }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                {{-- GARIS PEMISAH --}}
+
+                <div class="profile-dropdown-divider"></div>
+
+
+                {{-- LOGOUT --}}
+
+                <form
+                    method="POST"
+                    action="{{ route('logout') }}"
+                    class="profile-logout-form">
+
+                    @csrf
+
+                    <button
+                        type="submit"
+                        class="profile-logout-button">
+
+                        <span class="logout-icon">
+                            ⇥
+                        </span>
+
+                        <span>
+                            Logout
+                        </span>
+
+                    </button>
+
+                </form>
 
             </div>
 
-            <form
-                method="POST"
-                action="{{ route('logout') }}"
-                class="logout-form">
-
-                @csrf
-
-                <button
-                    type="submit"
-                    class="logout-button">
-                    Logout
-                </button>
-
-            </form>
-
         </div>
+
     </div>
 
 </header>
+
+
+{{-- =========================================================
+     PROFILE DROPDOWN SCRIPT
+========================================================= --}}
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const profileButton =
+        document.getElementById('profileDropdownButton');
+
+    const profileDropdown =
+        document.getElementById('profileDropdown');
+
+    const profileArrow =
+        document.getElementById('profileArrow');
+
+
+    if (
+        !profileButton ||
+        !profileDropdown
+    ) {
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUKA / TUTUP DROPDOWN
+    |--------------------------------------------------------------------------
+    */
+
+    profileButton.addEventListener('click', function (event) {
+
+        event.stopPropagation();
+
+        const isOpen =
+            profileDropdown.classList.contains('show');
+
+
+        if (isOpen) {
+
+            profileDropdown.classList.remove('show');
+
+            profileButton.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+
+            if (profileArrow) {
+                profileArrow.classList.remove('rotate');
+            }
+
+        } else {
+
+            profileDropdown.classList.add('show');
+
+            profileButton.setAttribute(
+                'aria-expanded',
+                'true'
+            );
+
+            if (profileArrow) {
+                profileArrow.classList.add('rotate');
+            }
+
+        }
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | KLIK DI LUAR DROPDOWN
+    |--------------------------------------------------------------------------
+    */
+
+    document.addEventListener('click', function (event) {
+
+        if (
+            !profileDropdown.contains(event.target) &&
+            !profileButton.contains(event.target)
+        ) {
+
+            profileDropdown.classList.remove('show');
+
+            profileButton.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+
+            if (profileArrow) {
+                profileArrow.classList.remove('rotate');
+            }
+
+        }
+
+    });
+
+});
+
+</script>

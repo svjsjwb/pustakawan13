@@ -6,7 +6,9 @@ use App\Models\Book;
 use App\Models\Category;
 use App\Models\Rack;
 use App\Models\Subcategory;
+use App\Models\BookCopy;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BookController extends Controller
 {
@@ -25,7 +27,10 @@ class BookController extends Controller
             ->latest()
             ->get();
 
-        return view('books.index', compact('books'));
+        return view(
+            'books.index',
+            compact('books')
+        );
     }
 
 
@@ -43,21 +48,28 @@ class BookController extends Controller
 
         $subcategoryData = $categories
             ->mapWithKeys(function ($category) {
+
                 return [
-                    $category->id => $category->subcategories
-                        ->map(function ($subcategory) {
-                            return [
-                                'id' => $subcategory->id,
-                                'name' => $subcategory->name,
-                            ];
-                        })
-                        ->values()
-                        ->toArray(),
+                    $category->id =>
+                        $category->subcategories
+                            ->map(function ($subcategory) {
+
+                                return [
+                                    'id' =>
+                                        $subcategory->id,
+
+                                    'name' =>
+                                        $subcategory->name,
+                                ];
+                            })
+                            ->values()
+                            ->toArray(),
                 ];
             })
             ->toArray();
 
-        $racks = Rack::orderBy('code')->get();
+        $racks = Rack::orderBy('code')
+            ->get();
 
         return view(
             'books.create',
@@ -183,17 +195,15 @@ class BookController extends Controller
         |--------------------------------------------------------------------------
         | VALIDASI SUBKATEGORI
         |--------------------------------------------------------------------------
-        |
-        | Subkategori harus benar-benar milik kategori yang dipilih.
-        |
         */
 
         if ($request->filled('subcategory_id')) {
 
-            $validSubcategory = Subcategory::where(
-                'id',
-                $request->subcategory_id
-            )
+            $validSubcategory =
+                Subcategory::where(
+                    'id',
+                    $request->subcategory_id
+                )
                 ->where(
                     'category_id',
                     $request->category_id
@@ -206,7 +216,7 @@ class BookController extends Controller
                     ->withInput()
                     ->withErrors([
                         'subcategory_id' =>
-                        'Subkategori tidak sesuai dengan kategori yang dipilih.',
+                            'Subkategori tidak sesuai dengan kategori yang dipilih.',
                     ]);
             }
         }
@@ -222,57 +232,156 @@ class BookController extends Controller
 
         if ($request->hasFile('cover')) {
 
-            $cover = $request
-                ->file('cover')
-                ->store('covers', 'public');
+            $cover =
+                $request
+                    ->file('cover')
+                    ->store(
+                        'covers',
+                        'public'
+                    );
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | SIMPAN BUKU
+        | SIMPAN BUKU + BOOK COPY
         |--------------------------------------------------------------------------
+        |
+        | Semua proses dibuat dalam satu transaction.
+        |
+        | Contoh:
+        |
+        | stock = 3
+        |
+        | maka:
+        |
+        | books
+        |   stock = 3
+        |   available_stock = 3
+        |
+        | book_copies
+        |   copy 1 = available
+        |   copy 2 = available
+        |   copy 3 = available
+        |
         */
 
-        Book::create([
+        DB::transaction(function () use (
+            $request,
+            $cover
+        ) {
 
-            'category_id' => $request->category_id,
+            $book = Book::create([
 
-            'subcategory_id' => $request->subcategory_id,
+                'category_id' =>
+                    $request->category_id,
 
-            'title' => $request->title,
+                'subcategory_id' =>
+                    $request->subcategory_id,
 
-            'sku' => $request->sku,
+                'title' =>
+                    $request->title,
 
-            'author' => $request->author,
+                'sku' =>
+                    $request->sku,
 
-            'publisher' => $request->publisher,
+                'author' =>
+                    $request->author,
 
-            'publication_year' => $request->publication_year,
+                'publisher' =>
+                    $request->publisher,
 
-            'isbn' => $request->isbn,
+                'publication_year' =>
+                    $request->publication_year,
 
-            'call_number' => $request->call_number,
+                'isbn' =>
+                    $request->isbn,
 
-            'stock' => $request->stock,
+                'call_number' =>
+                    $request->call_number,
 
-            'available_stock' => $request->stock,
+                'stock' =>
+                    $request->stock,
 
-            'description' => $request->description,
+                'available_stock' =>
+                    $request->stock,
 
-            'cover' => $cover,
+                'description' =>
+                    $request->description,
 
-            'no_iventaris' => $request->no_iventaris,
+                'cover' =>
+                    $cover,
 
-            'kode_buku' => $request->kode_buku,
+                'no_iventaris' =>
+                    $request->no_iventaris,
 
-            'ddc' => $request->ddc,
+                'kode_buku' =>
+                    $request->kode_buku,
 
-            'rak' => $request->rak,
+                'ddc' =>
+                    $request->ddc,
 
-            'edition' => $request->edition,
-        ]);
+                'rak' =>
+                    $request->rak,
 
+                'edition' =>
+                    $request->edition,
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | BUAT BOOK COPY OTOMATIS
+            |--------------------------------------------------------------------------
+            |
+            | Satu stock = satu eksemplar fisik.
+            |
+            | Lokasi belum diisi karena lokasi fisik
+            | harus ditentukan melalui menu Kelola Eksemplar.
+            |
+            */
+
+            for (
+                $i = 0;
+                $i < $request->stock;
+                $i++
+            ) {
+
+                BookCopy::create([
+
+                    'book_id' =>
+                        $book->id,
+
+                    'barcode' =>
+                        null,
+
+                    'status' =>
+                        'available',
+
+                    'shelf_id' =>
+                        null,
+
+                    'section' =>
+                        1,
+
+                    'side' =>
+                        'front',
+
+                    'row' =>
+                        null,
+
+                    'column' =>
+                        null,
+                ]);
+            }
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route('books.index')
@@ -295,7 +404,8 @@ class BookController extends Controller
             ->orderBy('name')
             ->get();
 
-        $racks = Rack::orderBy('code')->get();
+        $racks = Rack::orderBy('code')
+            ->get();
 
         return view(
             'books.edit',
@@ -421,10 +531,11 @@ class BookController extends Controller
 
         if ($request->filled('subcategory_id')) {
 
-            $validSubcategory = Subcategory::where(
-                'id',
-                $request->subcategory_id
-            )
+            $validSubcategory =
+                Subcategory::where(
+                    'id',
+                    $request->subcategory_id
+                )
                 ->where(
                     'category_id',
                     $request->category_id
@@ -437,7 +548,7 @@ class BookController extends Controller
                     ->withInput()
                     ->withErrors([
                         'subcategory_id' =>
-                        'Subkategori tidak sesuai dengan kategori yang dipilih.',
+                            'Subkategori tidak sesuai dengan kategori yang dipilih.',
                     ]);
             }
         }
@@ -466,7 +577,7 @@ class BookController extends Controller
                 ->withInput()
                 ->withErrors([
                     'stock' =>
-                    'Stok tidak boleh lebih kecil dari jumlah buku yang sedang dipinjam.',
+                        'Stok tidak boleh lebih kecil dari jumlah buku yang sedang dipinjam.',
                 ]);
         }
 
@@ -492,55 +603,222 @@ class BookController extends Controller
 
         if ($request->hasFile('cover')) {
 
-            $cover = $request
-                ->file('cover')
-                ->store('covers', 'public');
+            $cover =
+                $request
+                    ->file('cover')
+                    ->store(
+                        'covers',
+                        'public'
+                    );
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | UPDATE
+        | UPDATE BUKU + SINKRONISASI BOOK COPY
         |--------------------------------------------------------------------------
         */
 
-        $book->update([
+        DB::transaction(function () use (
+            $request,
+            $book,
+            $availableStock
+        ) {
 
-            'category_id' => $request->category_id,
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE DATA BUKU
+            |--------------------------------------------------------------------------
+            */
 
-            'subcategory_id' => $request->subcategory_id,
+            $book->update([
 
-            'title' => $request->title,
+                'category_id' =>
+                    $request->category_id,
 
-            'author' => $request->author,
+                'subcategory_id' =>
+                    $request->subcategory_id,
 
-            'publisher' => $request->publisher,
+                'title' =>
+                    $request->title,
 
-            'publication_year' => $request->publication_year,
+                'author' =>
+                    $request->author,
 
-            'isbn' => $request->isbn,
+                'publisher' =>
+                    $request->publisher,
 
-            'call_number' => $request->call_number,
+                'publication_year' =>
+                    $request->publication_year,
 
-            'stock' => $request->stock,
+                'isbn' =>
+                    $request->isbn,
 
-            'available_stock' => $availableStock,
+                'call_number' =>
+                    $request->call_number,
 
-            'description' => $request->description,
+                'stock' =>
+                    $request->stock,
 
-            'cover' => $cover,
+                'available_stock' =>
+                    $availableStock,
 
-            'no_iventaris' => $request->no_iventaris,
+                'description' =>
+                    $request->description,
 
-            'kode_buku' => $request->kode_buku,
+                'cover' =>
+                    $request->hasFile('cover')
+                        ? $request
+                            ->file('cover')
+                            ->store(
+                                'covers',
+                                'public'
+                            )
+                        : $book->cover,
 
-            'ddc' => $request->ddc,
+                'no_iventaris' =>
+                    $request->no_iventaris,
 
-            'rak' => $request->rak,
+                'kode_buku' =>
+                    $request->kode_buku,
 
-            'edition' => $request->edition,
-        ]);
+                'ddc' =>
+                    $request->ddc,
 
+                'rak' =>
+                    $request->rak,
+
+                'edition' =>
+                    $request->edition,
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | JUMLAH BOOK COPY SAAT INI
+            |--------------------------------------------------------------------------
+            */
+
+            $copyCount =
+                BookCopy::where(
+                    'book_id',
+                    $book->id
+                )->count();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | JIKA STOCK BERTAMBAH
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $request->stock >
+                $copyCount
+            ) {
+
+                $difference =
+                    $request->stock -
+                    $copyCount;
+
+
+                for (
+                    $i = 0;
+                    $i < $difference;
+                    $i++
+                ) {
+
+                    BookCopy::create([
+
+                        'book_id' =>
+                            $book->id,
+
+                        'barcode' =>
+                            null,
+
+                        'status' =>
+                            'available',
+
+                        'shelf_id' =>
+                            null,
+
+                        'section' =>
+                            1,
+
+                        'side' =>
+                            'front',
+
+                        'row' =>
+                            null,
+
+                        'column' =>
+                            null,
+                    ]);
+                }
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | JIKA STOCK BERKURANG
+            |--------------------------------------------------------------------------
+            |
+            | Jangan hapus copy yang sedang:
+            |
+            | borrowed
+            | reserved
+            | lost
+            | damaged
+            | maintenance
+            |
+            | Hanya hapus copy AVAILABLE tanpa lokasi
+            | jika memang jumlah copy melebihi stock.
+            |
+            */
+
+            elseif (
+                $request->stock <
+                $copyCount
+            ) {
+
+                $difference =
+                    $copyCount -
+                    $request->stock;
+
+
+                $copiesToDelete =
+                    BookCopy::where(
+                        'book_id',
+                        $book->id
+                    )
+                    ->where(
+                        'status',
+                        'available'
+                    )
+                    ->whereNull(
+                        'shelf_id'
+                    )
+                    ->latest('id')
+                    ->take($difference)
+                    ->get();
+
+
+                foreach (
+                    $copiesToDelete
+                    as $copy
+                ) {
+
+                    $copy->delete();
+                }
+            }
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route('books.index')
