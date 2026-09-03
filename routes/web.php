@@ -60,15 +60,15 @@ Route::post('/register', [
 
 // =========================================================
 // LOGOUT
-// =========================================================
-
 Route::post('/logout', function () {
-    auth()->logout();
+
+    Auth::logout();
 
     request()->session()->invalidate();
     request()->session()->regenerateToken();
 
-    return redirect('/login');
+    return redirect()->route('login');
+
 })->name('logout');
 
 
@@ -153,6 +153,9 @@ Route::patch('/circulation/{borrowing}/return', [
     'returnBook'
 ])->name('circulation.return');
 
+    Route::post('/circulation/{borrowing}/extend', 
+    [CirculationController::class, 'extendLoan']
+)->name('circulation.extend');
 
 // =========================================================
 // RESERVASI

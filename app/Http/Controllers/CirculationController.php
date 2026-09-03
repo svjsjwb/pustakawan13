@@ -548,145 +548,143 @@ class CirculationController extends Controller
 
 
     /*
-    |--------------------------------------------------------------------------
-    | PERPANJANG PEMINJAMAN
-    |--------------------------------------------------------------------------
-    */
+    |/*
+|/*
+|--------------------------------------------------------------------------
+| PERPANJANG PEMINJAMAN
+|--------------------------------------------------------------------------
+*/
 
-    public function extendLoan(
-        Request $request,
-        Borrowing $borrowing
+public function extendLoan(
+    Request $request,
+    Borrowing $borrowing
+) {
+
+    /*
+     * =====================================================
+     * VALIDASI JUMLAH HARI
+     * =====================================================
+     */
+
+    $validated = $request->validate([
+        'extension_days' => [
+            'required',
+            'integer',
+            'min:1',
+            'max:30',
+        ],
+    ], [
+
+        'extension_days.required' =>
+            'Jumlah hari perpanjangan wajib diisi.',
+
+        'extension_days.integer' =>
+            'Jumlah hari harus berupa angka.',
+
+        'extension_days.min' =>
+            'Minimal perpanjangan adalah 1 hari.',
+
+        'extension_days.max' =>
+            'Maksimal perpanjangan adalah 30 hari.',
+    ]);
+
+
+    /*
+     * =====================================================
+     * CEK STATUS PEMINJAMAN
+     * =====================================================
+     *
+     * Peminjaman yang boleh diperpanjang:
+     *
+     * - dipinjam
+     * - diperpanjang
+     *
+     * Jika sudah dikembalikan/selesai,
+     * tidak dapat diperpanjang lagi.
+     */
+
+    if (
+        !in_array(
+            $borrowing->status,
+            [
+                'dipinjam',
+                'diperpanjang',
+            ],
+            true
+        )
     ) {
 
-        /*
-         * =====================================================
-         * VALIDASI
-         * =====================================================
-         *
-         * User dapat memilih 1 sampai 30 hari.
-         */
-
-        $validated = $request->validate([
-            'extension_days' => [
-                'required',
-                'integer',
-                'min:1',
-                'max:30',
-            ],
-        ], [
-
-            'extension_days.required' =>
-                'Jumlah hari perpanjangan wajib diisi.',
-
-            'extension_days.integer' =>
-                'Jumlah hari harus berupa angka.',
-
-            'extension_days.min' =>
-                'Minimal perpanjangan adalah 1 hari.',
-
-            'extension_days.max' =>
-                'Maksimal perpanjangan adalah 30 hari.',
-        ]);
-
-
-        /*
-         * =====================================================
-         * CEK STATUS
-         * =====================================================
-         *
-         * Yang boleh diperpanjang:
-         *
-         * 1. dipinjam
-         * 2. diperpanjang
-         *
-         * Dengan begitu buku yang sudah pernah
-         * diperpanjang masih dapat diperpanjang lagi.
-         */
-
-        if (
-            !in_array(
-                $borrowing->status,
-                [
-                    'dipinjam',
-                    'diperpanjang',
-                ],
-                true
-            )
-        ) {
-
-            return back()
-                ->with(
-                    'error',
-                    'Peminjaman yang sudah selesai tidak dapat diperpanjang.'
-                );
-        }
-
-
-        /*
-         * =====================================================
-         * HITUNG TAMBAHAN HARI
-         * =====================================================
-         */
-
-        $extensionDays =
-            (int) $validated['extension_days'];
-
-
-        /*
-         * =====================================================
-         * TANGGAL JATUH TEMPO BARU
-         * =====================================================
-         */
-
-        $newDueDate =
-            Carbon::parse(
-                $borrowing->due_at
-            )->addDays(
-                $extensionDays
-            );
-
-
-        /*
-         * =====================================================
-         * UPDATE PEMINJAMAN
-         * =====================================================
-         */
-
-        $borrowing->update([
-            'due_at' =>
-                $newDueDate->toDateString(),
-
-            'status' =>
-                'diperpanjang',
-        ]);
-
-
-        /*
-         * =====================================================
-         * REDIRECT
-         * =====================================================
-         */
-
-        return redirect()
-            ->route(
-                'circulation',
-                [
-                    'month' =>
-                        Carbon::parse(
-                            $borrowing->borrowed_at
-                        )->month,
-
-                    'year' =>
-                        Carbon::parse(
-                            $borrowing->borrowed_at
-                        )->year,
-                ]
-            )
+        return back()
             ->with(
-                'success',
-                'Masa peminjaman berhasil diperpanjang ' .
-                $extensionDays .
-                ' hari.'
+                'error',
+                'Peminjaman yang sudah selesai tidak dapat diperpanjang.'
             );
     }
+
+
+    /*
+     * =====================================================
+     * HITUNG TAMBAHAN HARI
+     * =====================================================
+     */
+
+    $extensionDays = (int) $validated['extension_days'];
+
+
+    /*
+     * =====================================================
+     * HITUNG TANGGAL JATUH TEMPO BARU
+     * =====================================================
+     */
+
+    $newDueDate = \Carbon\Carbon::parse(
+        $borrowing->due_at
+    )->addDays(
+        $extensionDays
+    );
+
+
+    /*
+     * =====================================================
+     * UPDATE PEMINJAMAN
+     * =====================================================
+     */
+
+    $borrowing->update([
+        'due_at' =>
+            $newDueDate->toDateString(),
+
+        'status' =>
+            'diperpanjang',
+    ]);
+
+
+    /*
+     * =====================================================
+     * KEMBALI KE HALAMAN SIRKULASI
+     * =====================================================
+     */
+
+    return redirect()
+        ->route(
+            'circulation',
+            [
+                'month' =>
+                    \Carbon\Carbon::parse(
+                        $borrowing->borrowed_at
+                    )->month,
+
+                'year' =>
+                    \Carbon\Carbon::parse(
+                        $borrowing->borrowed_at
+                    )->year,
+            ]
+        )
+        ->with(
+            'success',
+            'Masa peminjaman berhasil diperpanjang ' .
+            $extensionDays .
+            ' hari.'
+        );
+}
 }

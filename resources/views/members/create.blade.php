@@ -10,8 +10,8 @@
 
 <div class="page-header">
     <div>
-        <h1>Tambah Karyawan</h1>
-        <p>Tambahkan data karyawan perpustakaan.</p>
+        <h1>Tambah Anggota</h1>
+        <p>Tambahkan data anggota perpustakaan.</p>
     </div>
 
     <a href="{{ route('members.index') }}" class="btn-back">
@@ -32,8 +32,8 @@
 <div class="member-form-card">
 
     <div class="form-header">
-        <h2>Data Karyawan</h2>
-        <p>Isi informasi karyawan dengan lengkap.</p>
+        <h2>Data Anggota</h2>
+        <p>Isi informasi anggota dengan lengkap.</p>
     </div>
 
     <form action="{{ route('members.store') }}" method="POST">
@@ -49,7 +49,7 @@
                 id="name"
                 name="name"
                 value="{{ old('name') }}"
-                placeholder="Masukkan nama karyawan"
+                placeholder="Masukkan nama anggota"
                 required
             >
         </div>
@@ -152,7 +152,7 @@
                 type="submit"
                 class="btn-save"
             >
-                Simpan Karyawan
+                Simpan Anggota
             </button>
 
         </div>

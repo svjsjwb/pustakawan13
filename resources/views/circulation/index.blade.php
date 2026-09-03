@@ -542,7 +542,7 @@
                                 </th>
 
                                 <th>
-                                    TANGGAL PENGEMBALIAN
+                                    PENGEMBALIAN
                                 </th>
 
                                 <th>
@@ -972,82 +972,65 @@
         </div>
 
 
-        {{-- FORM PERPANJANG --}}
+       {{-- FORM PERPANJANG --}}
 
-        <form
-            id="extendLoanForm"
-            method="POST">
+<form
+    id="extendLoanForm"
+    method="POST">
 
-            @csrf
+    @csrf
 
-            @method('PATCH')
+    {{-- INPUT HARI --}}
+    <div class="extend-input-group">
 
+        <label for="extension_days">
+            Tambah waktu baca
+        </label>
 
-            {{-- INPUT HARI --}}
+        <div class="extend-input-wrap">
 
-            <div class="extend-input-group">
+            <input
+                type="number"
+                name="extension_days"
+                id="extension_days"
+                min="1"
+                max="30"
+                value="7"
+                required>
 
-                <label for="extension_days">
+            <span>
+                hari
+            </span>
 
-                    Tambah waktu baca
+        </div>
 
-                </label>
-
-
-                <div class="extend-input-wrap">
-
-                    <input
-                        type="number"
-                        name="extension_days"
-                        id="extension_days"
-                        min="1"
-                        max="30"
-                        value="7"
-                        required>
-
-                    <span>
-                        hari
-                    </span>
-
-                </div>
-
-
-                <small>
-
-                    Masukkan antara 1–30 hari.
-
-                </small>
-
-            </div>
-
-
-            {{-- BUTTON --}}
-
-            <div class="extend-modal-actions">
-
-                <button
-                    type="button"
-                    class="extend-cancel"
-                    onclick="closeExtendModal()">
-
-                    Batal
-
-                </button>
-
-
-                <button
-                    type="submit"
-                    class="extend-confirm">
-
-                    Perpanjang
-
-                </button>
-
-            </div>
-
-        </form>
+        <small>
+            Masukkan antara 1–30 hari.
+        </small>
 
     </div>
+
+    {{-- BUTTON --}}
+    <div class="extend-modal-actions">
+
+        <button
+            type="button"
+            class="extend-cancel"
+            onclick="closeExtendModal()">
+            Batal
+        </button>
+
+        <button
+            type="submit"
+            class="extend-confirm">
+            Perpanjang
+        </button>
+
+    </div>
+
+</form>
+
+</div>
 
 </div>
 
@@ -1206,8 +1189,8 @@ function openExtendModal(
        ACTION FORM
     ====================================================== */
 
-    form.action =
-        `/circulation/${borrowingId}/extend`;
+    form.action = `/circulation/${borrowingId}/extend`;
+form.method = 'POST';
 
 
     /* =====================================================
