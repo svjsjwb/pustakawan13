@@ -60,11 +60,14 @@ Route::post('/register', [
 
 // =========================================================
 // LOGOUT
+// =========================================================
+
 Route::post('/logout', function () {
 
-    Auth::logout();
+    auth()->logout();
 
     request()->session()->invalidate();
+
     request()->session()->regenerateToken();
 
     return redirect()->route('login');
@@ -88,44 +91,74 @@ Route::get('/auth/google/callback', [
 
 
 // =========================================================
-// DASHBOARD
+// USER HOME
 // =========================================================
 
-Route::middleware('auth')->group(function () {
+Route::get('/home', [
+    UserHomeController::class,
+    'index'
+])
+->middleware(['auth', 'no.back'])
+->name('user.home');
+
+
+// =========================================================
+// ADMIN
+// SEMUA HALAMAN ADMIN WAJIB LOGIN
+// DAN TIDAK BOLEH KEMBALI KE HALAMAN SETELAH LOGOUT
+// =========================================================
+
+Route::middleware(['auth', 'no.back'])->group(function () {
+
+
+    // =====================================================
+    // DASHBOARD
+    // =====================================================
 
     Route::get('/dashboard', [
         DashboardController::class,
         'index'
     ])->name('dashboard');
 
-});
+
+    // =====================================================
+    // KATEGORI
+    // =====================================================
+
+    Route::resource(
+        'categories',
+        CategoryController::class
+    );
 
 
-// =========================================================
-// KATEGORI
-// =========================================================
+    // =====================================================
+    // KATALOG
+    // =====================================================
 
-Route::resource('categories', CategoryController::class);
-
-
-// =========================================================
-// KATALOG
-// =========================================================
-
-Route::get('/catalog', [
-    CatalogController::class,
-    'index'
-])->name('catalog');
+    Route::get('/catalog', [
+        CatalogController::class,
+        'index'
+    ])->name('catalog');
 
 
-// =========================================================
-// BUKU
-// =========================================================
+    // =====================================================
+    // BUKU
+    // =====================================================
 
-Route::resource('books', BookController::class);
+    Route::resource(
+        'books',
+        BookController::class
+    );
 
-Route::resource('books.copies', BookCopyController::class)
-    ->only([
+
+    // =====================================================
+    // COPY BUKU
+    // =====================================================
+
+    Route::resource(
+        'books.copies',
+        BookCopyController::class
+    )->only([
         'index',
         'create',
         'store',
@@ -134,134 +167,133 @@ Route::resource('books.copies', BookCopyController::class)
     ]);
 
 
-// =========================================================
-// SIRKULASI / PEMINJAMAN
-// =========================================================
+    // =====================================================
+    // SIRKULASI / PEMINJAMAN
+    // =====================================================
 
-Route::get('/circulation', [
-    CirculationController::class,
-    'index'
-])->name('circulation');
+    Route::get('/circulation', [
+        CirculationController::class,
+        'index'
+    ])->name('circulation');
 
-Route::post('/circulation', [
-    CirculationController::class,
-    'store'
-])->name('circulation.store');
+    Route::post('/circulation', [
+        CirculationController::class,
+        'store'
+    ])->name('circulation.store');
 
-Route::patch('/circulation/{borrowing}/return', [
-    CirculationController::class,
-    'returnBook'
-])->name('circulation.return');
+    Route::patch('/circulation/{borrowing}/return', [
+        CirculationController::class,
+        'returnBook'
+    ])->name('circulation.return');
 
-    Route::post('/circulation/{borrowing}/extend', 
-    [CirculationController::class, 'extendLoan']
-)->name('circulation.extend');
-
-// =========================================================
-// RESERVASI
-// =========================================================
-
-Route::get('/reservations', [
-    ReservationController::class,
-    'index'
-])->name('reservations.index');
-
-Route::post('/reservations', [
-    ReservationController::class,
-    'store'
-])->name('reservations.store');
-
-Route::patch('/reservations/{reservation}/status', [
-    ReservationController::class,
-    'updateStatus'
-])->name('reservations.updateStatus');
-
-Route::delete('/reservations/{reservation}', [
-    ReservationController::class,
-    'destroy'
-])->name('reservations.destroy');
-
-Route::get('/reservations/{reservation}/locator', [
-    ReservationController::class,
-    'locator'
-])->name('reservations.locator');
+    Route::post('/circulation/{borrowing}/extend', [
+        CirculationController::class,
+        'extendLoan'
+    ])->name('circulation.extend');
 
 
-// =========================================================
-// LAPORAN
-// =========================================================
+    // =====================================================
+    // RESERVASI
+    // =====================================================
 
-Route::get('/laporan', [
-    ReportController::class,
-    'index'
-])->name('reports.index');
+    Route::get('/reservations', [
+        ReservationController::class,
+        'index'
+    ])->name('reservations.index');
 
-Route::get('/laporan/create', [
-    ReportController::class,
-    'create'
-])->name('reports.create');
+    Route::post('/reservations', [
+        ReservationController::class,
+        'store'
+    ])->name('reservations.store');
 
-Route::post('/laporan', [
-    ReportController::class,
-    'store'
-])->name('reports.store');
+    Route::patch('/reservations/{reservation}/status', [
+        ReservationController::class,
+        'updateStatus'
+    ])->name('reservations.updateStatus');
 
-Route::get('/laporan/{id}/edit', [
-    ReportController::class,
-    'edit'
-])->name('reports.edit');
+    Route::delete('/reservations/{reservation}', [
+        ReservationController::class,
+        'destroy'
+    ])->name('reservations.destroy');
 
-Route::put('/laporan/{id}', [
-    ReportController::class,
-    'update'
-])->name('reports.update');
-
-Route::delete('/laporan/{id}', [
-    ReportController::class,
-    'destroy'
-])->name('reports.destroy');
+    Route::get('/reservations/{reservation}/locator', [
+        ReservationController::class,
+        'locator'
+    ])->name('reservations.locator');
 
 
-// =========================================================
-// DENDA
-// =========================================================
+    // =====================================================
+    // LAPORAN
+    // =====================================================
 
-Route::get('/fines', [
-    FineController::class,
-    'index'
-])->name('fines');
+    Route::get('/laporan', [
+        ReportController::class,
+        'index'
+    ])->name('reports.index');
+
+    Route::get('/laporan/create', [
+        ReportController::class,
+        'create'
+    ])->name('reports.create');
+
+    Route::post('/laporan', [
+        ReportController::class,
+        'store'
+    ])->name('reports.store');
+
+    Route::get('/laporan/{id}/edit', [
+        ReportController::class,
+        'edit'
+    ])->name('reports.edit');
+
+    Route::put('/laporan/{id}', [
+        ReportController::class,
+        'update'
+    ])->name('reports.update');
+
+    Route::delete('/laporan/{id}', [
+        ReportController::class,
+        'destroy'
+    ])->name('reports.destroy');
 
 
-// =========================================================
-// ANGGOTA / KEANGGOTAAN
-// =========================================================
+    // =====================================================
+    // DENDA
+    // =====================================================
 
-Route::resource('members', MemberController::class);
-
-
-// =========================================================
-// KALENDER
-// =========================================================
-
-Route::get('/calendar', [
-    CalendarController::class,
-    'index'
-])->name('calendar');
+    Route::get('/fines', [
+        FineController::class,
+        'index'
+    ])->name('fines');
 
 
-// =========================================================
-// PENGATURAN
-// =========================================================
+    // =====================================================
+    // ANGGOTA / KEANGGOTAAN
+    // =====================================================
 
-Route::get('/settings', [
-    SettingController::class,
-    'index'
-])->name('settings');
+    Route::resource(
+        'members',
+        MemberController::class
+    );
 
-//Home user
-Route::get('/home', [
-    UserHomeController::class,
-    'index'
-])
-->middleware(['auth', 'no.back'])
-->name('user.home');
+
+    // =====================================================
+    // KALENDER
+    // =====================================================
+
+    Route::get('/calendar', [
+        CalendarController::class,
+        'index'
+    ])->name('calendar');
+
+
+    // =====================================================
+    // PENGATURAN
+    // =====================================================
+
+    Route::get('/settings', [
+        SettingController::class,
+        'index'
+    ])->name('settings');
+
+});

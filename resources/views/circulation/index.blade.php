@@ -806,31 +806,21 @@
                                         {{-- KEMBALIKAN --}}
 
                                         <form
-                                            action="{{ route(
-                                                'circulation.return',
-                                                $borrowing
-                                            ) }}"
-                                            method="POST"
-                                            class="return-form"
-                                            onsubmit="
-                                                return confirm(
-                                                    'Yakin buku ini sudah dikembalikan?'
-                                                );
-                                            ">
+    action="{{ route('circulation.return', $borrowing) }}"
+    method="POST"
+    class="return-form"
+    onsubmit="return openReturnConfirmModal(this);">
 
-                                            @csrf
+    @csrf
+    @method('PATCH')
 
-                                            @method('PATCH')
+    <button
+        type="submit"
+        class="btn-secondary">
+        Kembalikan
+    </button>
 
-                                            <button
-                                                type="submit"
-                                                class="btn-secondary">
-
-                                                Kembalikan
-
-                                            </button>
-
-                                        </form>
+</form>
 
                                     </div>
 
@@ -892,7 +882,6 @@
     aria-hidden="true">
 
     {{-- OVERLAY --}}
-
     <div
         class="extend-modal-overlay"
         onclick="closeExtendModal()">
@@ -900,50 +889,37 @@
 
 
     {{-- CARD MODAL --}}
-
     <div class="extend-modal-card">
 
-
         {{-- CLOSE --}}
-
         <button
             type="button"
             class="extend-modal-close"
             onclick="closeExtendModal()"
             aria-label="Tutup">
-
             ×
-
         </button>
 
 
         {{-- HEADER --}}
-
         <div class="extend-modal-header">
 
             <span class="extend-modal-label">
-
                 PERPANJANG PEMINJAMAN
-
             </span>
 
             <h3>
-
                 Perpanjang Waktu Baca
-
             </h3>
 
             <p>
-
                 Tentukan tambahan waktu peminjaman buku.
-
             </p>
 
         </div>
 
 
         {{-- INFO BUKU --}}
-
         <div class="extend-book-info">
 
             <span>
@@ -958,7 +934,6 @@
 
 
         {{-- JATUH TEMPO --}}
-
         <div class="extend-current-date">
 
             <span>
@@ -972,65 +947,199 @@
         </div>
 
 
-       {{-- FORM PERPANJANG --}}
+        {{-- FORM PERPANJANG --}}
+        <form
+            id="extendLoanForm"
+            method="POST">
 
-<form
-    id="extendLoanForm"
-    method="POST">
+            @csrf
 
-    @csrf
+            {{-- INPUT HARI --}}
+            <div class="extend-input-group">
 
-    {{-- INPUT HARI --}}
-    <div class="extend-input-group">
+                <label for="extension_days">
+                    Tambah waktu baca
+                </label>
 
-        <label for="extension_days">
-            Tambah waktu baca
-        </label>
+                <div class="extend-input-wrap">
 
-        <div class="extend-input-wrap">
+                    <input
+                        type="number"
+                        name="extension_days"
+                        id="extension_days"
+                        min="1"
+                        max="30"
+                        value="7"
+                        required>
 
-            <input
-                type="number"
-                name="extension_days"
-                id="extension_days"
-                min="1"
-                max="30"
-                value="7"
-                required>
+                    <span>
+                        hari
+                    </span>
 
-            <span>
-                hari
+                </div>
+
+                <small>
+                    Masukkan antara 1–30 hari.
+                </small>
+
+            </div>
+
+
+            {{-- BUTTON --}}
+            <div class="extend-modal-actions">
+
+                <button
+                    type="button"
+                    class="extend-cancel"
+                    onclick="closeExtendModal()">
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="extend-confirm">
+                    Perpanjang
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+{{-- =========================================================
+     MODAL KONFIRMASI PERPANJANGAN
+========================================================= --}}
+
+<div
+    id="extendConfirmModal"
+    class="extend-confirm-modal"
+    aria-hidden="true">
+
+    {{-- OVERLAY --}}
+    <div class="extend-confirm-overlay"></div>
+
+
+    {{-- CARD KONFIRMASI --}}
+    <div class="extend-confirm-card">
+
+        {{-- ICON --}}
+        <div class="extend-confirm-icon">
+            ↻
+        </div>
+
+
+        {{-- CONTENT --}}
+        <div class="extend-confirm-content">
+
+            <span class="extend-confirm-label">
+                KONFIRMASI
             </span>
+
+            <h3>
+                Konfirmasi Perpanjangan
+            </h3>
+
+            <p>
+                Yakin ingin memperpanjang masa peminjaman
+                selama
+                <strong id="confirmExtensionDays">
+                    7 hari
+                </strong>?
+            </p>
 
         </div>
 
-        <small>
-            Masukkan antara 1–30 hari.
-        </small>
+
+        {{-- BUTTON --}}
+        <div class="extend-confirm-actions">
+
+            <button
+                type="button"
+                id="cancelExtendConfirm"
+                class="extend-confirm-cancel">
+                Batal
+            </button>
+
+            <button
+                type="button"
+                id="yesExtendConfirm"
+                class="extend-confirm-yes">
+                Ya, Perpanjang
+            </button>
+
+        </div>
 
     </div>
-
-    {{-- BUTTON --}}
-    <div class="extend-modal-actions">
-
-        <button
-            type="button"
-            class="extend-cancel"
-            onclick="closeExtendModal()">
-            Batal
-        </button>
-
-        <button
-            type="submit"
-            class="extend-confirm">
-            Perpanjang
-        </button>
-
-    </div>
-
-</form>
 
 </div>
+
+{{-- =========================================================
+     MODAL KONFIRMASI PENGEMBALIAN
+========================================================= --}}
+
+<div
+    id="returnConfirmModal"
+    class="return-confirm-modal"
+    aria-hidden="true">
+
+    {{-- OVERLAY --}}
+    <div
+        class="return-confirm-overlay"
+        onclick="closeReturnConfirmModal()">
+    </div>
+
+
+    {{-- CARD --}}
+    <div class="return-confirm-card">
+
+        {{-- ICON --}}
+        <div class="return-confirm-icon">
+            ✓
+        </div>
+
+
+        {{-- CONTENT --}}
+        <div class="return-confirm-content">
+
+            <span class="return-confirm-label">
+                KONFIRMASI
+            </span>
+
+            <h3>
+                Konfirmasi Pengembalian
+            </h3>
+
+            <p>
+                Yakin buku ini sudah dikembalikan?
+            </p>
+
+        </div>
+
+
+        {{-- BUTTON --}}
+        <div class="return-confirm-actions">
+
+            <button
+                type="button"
+                class="return-confirm-cancel"
+                onclick="closeReturnConfirmModal()">
+                Batal
+            </button>
+
+            <button
+                type="button"
+                id="yesReturnConfirm"
+                class="return-confirm-yes">
+                Ya, Kembalikan
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -1311,88 +1420,238 @@ document.addEventListener(
    VALIDASI 1–30 HARI
 ========================================================= */
 
-document.addEventListener(
-    'DOMContentLoaded',
-    function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-        const form =
-            document.getElementById(
-                'extendLoanForm'
-            );
+    const form = document.getElementById('extendLoanForm');
+    const input = document.getElementById('extension_days');
+
+    const confirmModal =
+        document.getElementById('extendConfirmModal');
+
+    const confirmDays =
+        document.getElementById('confirmExtensionDays');
+
+    const cancelConfirm =
+        document.getElementById('cancelExtendConfirm');
+
+    const yesConfirm =
+        document.getElementById('yesExtendConfirm');
 
 
-        const input =
-            document.getElementById(
-                'extension_days'
-            );
+    if (!form || !input || !confirmModal) {
+        return;
+    }
 
 
+    /* =========================
+       KLIK PERPANJANG DI MODAL
+       ========================= */
+
+    form.addEventListener('submit', function (event) {
+
+        event.preventDefault();
+
+        const days = Number(input.value);
+
+        /* Validasi jumlah hari */
         if (
-            !form ||
-            !input
+            !Number.isInteger(days) ||
+            days < 1 ||
+            days > 30
         ) {
 
-            return;
+            alert(
+                'Jumlah perpanjangan harus antara 1 sampai 30 hari.'
+            );
 
+            input.focus();
+
+            return;
         }
 
 
-        form.addEventListener(
-            'submit',
-            function(event) {
-
-                const days =
-                    Number(
-                        input.value
-                    );
+        /* Tampilkan jumlah hari di modal konfirmasi */
+        confirmDays.textContent = days + ' hari';
 
 
-                /* =========================================
-                   VALIDASI
-                ========================================== */
+        /* Tampilkan modal konfirmasi */
+        confirmModal.classList.add('open');
 
-                if (
-                    !Number.isInteger(days) ||
-                    days < 1 ||
-                    days > 30
-                ) {
+        confirmModal.setAttribute(
+            'aria-hidden',
+            'false'
+        );
 
-                    event.preventDefault();
+    });
 
 
-                    alert(
-                        'Jumlah perpanjangan harus antara 1 sampai 30 hari.'
-                    );
+    /* =========================
+       BATAL KONFIRMASI
+       ========================= */
+
+    cancelConfirm.addEventListener('click', function () {
+
+        confirmModal.classList.remove('open');
+
+        confirmModal.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+    });
 
 
-                    input.focus();
+    /* =========================
+       YA, PERPANJANG
+       ========================= */
 
+    yesConfirm.addEventListener('click', function () {
+
+        /*
+         * Tutup modal konfirmasi
+         */
+        confirmModal.classList.remove('open');
+
+        confirmModal.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+
+        /*
+         * Kirim form ke Laravel
+         *
+         * form.submit() tidak memanggil
+         * listener submit lagi.
+         */
+        form.submit();
+
+    });
+
+});
+
+/* =========================================
+   KONFIRMASI PENGEMBALIAN
+========================================= */
+
+let returnFormToSubmit = null;
+
+
+function openReturnConfirmModal(form) {
+
+    /*
+     * Jangan langsung submit.
+     */
+    event.preventDefault();
+
+    returnFormToSubmit = form;
+
+    const modal =
+        document.getElementById('returnConfirmModal');
+
+    if (!modal) {
+        console.error(
+            'Modal konfirmasi pengembalian tidak ditemukan.'
+        );
+
+        return false;
+    }
+
+    modal.classList.add('open');
+
+    modal.setAttribute(
+        'aria-hidden',
+        'false'
+    );
+
+    document.body.style.overflow = 'hidden';
+
+    return false;
+}
+
+
+function closeReturnConfirmModal() {
+
+    const modal =
+        document.getElementById('returnConfirmModal');
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove('open');
+
+    modal.setAttribute(
+        'aria-hidden',
+        'true'
+    );
+
+    document.body.style.overflow = '';
+
+    returnFormToSubmit = null;
+}
+
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        const yesButton =
+            document.getElementById(
+                'yesReturnConfirm'
+            );
+
+        if (!yesButton) {
+            return;
+        }
+
+
+        yesButton.addEventListener(
+            'click',
+            function () {
+
+                if (!returnFormToSubmit) {
                     return;
-
                 }
 
+                const form =
+                    returnFormToSubmit;
 
-                /* =========================================
-                   KONFIRMASI
-                ========================================== */
-
-                const confirmed =
-                    confirm(
-                        `Perpanjang masa peminjaman ${days} hari?`
+                const modal =
+                    document.getElementById(
+                        'returnConfirmModal'
                     );
 
 
-                if (!confirmed) {
+                /*
+                 * Tutup modal
+                 */
+                if (modal) {
 
-                    event.preventDefault();
+                    modal.classList.remove('open');
 
+                    modal.setAttribute(
+                        'aria-hidden',
+                        'true'
+                    );
                 }
+
+                document.body.style.overflow = '';
+
+
+                /*
+                 * Submit ke Laravel
+                 */
+                form.submit();
 
             }
         );
 
     }
 );
+
+
+
 
 </script>
 

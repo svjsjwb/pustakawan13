@@ -1094,6 +1094,554 @@ input[type="number"] {
     }
 }
 
+/* =========================================
+   MODAL KONFIRMASI PERPANJANGAN
+   ========================================= */
+
+#extendConfirmModal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 20px !important;
+    box-sizing: border-box !important;
+
+    z-index: 100000 !important;
+
+    visibility: hidden !important;
+    opacity: 0 !important;
+
+    pointer-events: none !important;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease !important;
+}
+
+
+/* MODAL TERBUKA */
+
+#extendConfirmModal.open {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+
+/* OVERLAY */
+
+#extendConfirmModal .extend-confirm-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    background: rgba(16, 45, 45, 0.68) !important;
+
+    backdrop-filter: blur(7px) !important;
+    -webkit-backdrop-filter: blur(7px) !important;
+}
+
+
+/* CARD */
+
+#extendConfirmModal .extend-confirm-card {
+
+    position: relative !important;
+    z-index: 2 !important;
+
+    width: 430px !important;
+    max-width: calc(100vw - 40px) !important;
+
+    padding: 32px !important;
+
+    box-sizing: border-box !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #e2eeee !important;
+
+    border-radius: 20px !important;
+
+    box-shadow:
+        0 30px 80px rgba(0, 40, 40, 0.28) !important;
+
+    text-align: center !important;
+
+    transform:
+        translateY(25px)
+        scale(0.96) !important;
+
+    opacity: 0 !important;
+
+    transition:
+        transform 0.35s cubic-bezier(.22, 1, .36, 1),
+        opacity 0.25s ease !important;
+}
+
+
+/* CARD SAAT TERBUKA */
+
+#extendConfirmModal.open
+.extend-confirm-card {
+
+    transform:
+        translateY(0)
+        scale(1) !important;
+
+    opacity: 1 !important;
+}
+
+
+/* ICON */
+
+#extendConfirmModal .extend-confirm-icon {
+
+    width: 58px !important;
+    height: 58px !important;
+
+    margin: 0 auto 18px auto !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    border-radius: 50% !important;
+
+    background: #edf7f7 !important;
+
+    color: #278486 !important;
+
+    font-size: 30px !important;
+    font-weight: 700 !important;
+}
+
+
+/* LABEL */
+
+#extendConfirmModal .extend-confirm-label {
+
+    display: block !important;
+
+    margin-bottom: 8px !important;
+
+    color: #287b7b !important;
+
+    font-size: 10px !important;
+
+    font-weight: 800 !important;
+
+    letter-spacing: 1.5px !important;
+}
+
+
+/* JUDUL */
+
+#extendConfirmModal .extend-confirm-content h3 {
+
+    margin: 0 0 10px 0 !important;
+
+    color: #173f40 !important;
+
+    font-size: 23px !important;
+
+    font-weight: 800 !important;
+
+    line-height: 1.2 !important;
+}
+
+
+/* DESKRIPSI */
+
+#extendConfirmModal .extend-confirm-content p {
+
+    margin: 0 !important;
+
+    color: #718080 !important;
+
+    font-size: 13px !important;
+
+    line-height: 1.6 !important;
+}
+
+
+/* JUMLAH HARI */
+
+#extendConfirmModal
+.extend-confirm-content
+strong {
+
+    color: #278486 !important;
+
+    font-weight: 800 !important;
+}
+
+
+/* BUTTON AREA */
+
+#extendConfirmModal .extend-confirm-actions {
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    gap: 10px !important;
+
+    margin-top: 28px !important;
+}
+
+
+/* BUTTON UMUM */
+
+#extendConfirmModal
+.extend-confirm-cancel,
+
+#extendConfirmModal
+.extend-confirm-yes {
+
+    height: 44px !important;
+
+    padding: 0 20px !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 10px !important;
+
+    font-family: inherit !important;
+
+    font-size: 11px !important;
+
+    font-weight: 700 !important;
+
+    cursor: pointer !important;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+/* BATAL */
+
+#extendConfirmModal .extend-confirm-cancel {
+
+    border: 1px solid #d7e0e0 !important;
+
+    background: #ffffff !important;
+
+    color: #526565 !important;
+}
+
+
+#extendConfirmModal
+.extend-confirm-cancel:hover {
+
+    background: #f5f8f8 !important;
+
+    transform: translateY(-1px) !important;
+}
+
+
+/* YA PERPANJANG */
+
+#extendConfirmModal .extend-confirm-yes {
+
+    border: none !important;
+
+    background: #278486 !important;
+
+    color: #ffffff !important;
+
+    box-shadow:
+        0 6px 16px rgba(39, 132, 134, 0.20) !important;
+}
+
+
+#extendConfirmModal
+.extend-confirm-yes:hover {
+
+    background: #217174 !important;
+
+    transform: translateY(-1px) !important;
+
+    box-shadow:
+        0 9px 22px rgba(39, 132, 134, 0.28) !important;
+}
+
+/* =========================================
+   MODAL KONFIRMASI PENGEMBALIAN
+========================================= */
+
+#returnConfirmModal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100vw !important;
+    height: 100vh !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 20px !important;
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+
+    z-index: 999999 !important;
+
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease !important;
+}
+
+
+/* MODAL TERBUKA */
+
+#returnConfirmModal.open {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+
+/* OVERLAY */
+
+#returnConfirmModal .return-confirm-overlay {
+    position: absolute !important;
+
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+
+    background: rgba(16, 45, 45, 0.68) !important;
+
+    backdrop-filter: blur(7px) !important;
+    -webkit-backdrop-filter: blur(7px) !important;
+}
+
+
+/* CARD */
+
+#returnConfirmModal .return-confirm-card {
+    position: relative !important;
+
+    z-index: 2 !important;
+
+    width: 430px !important;
+    max-width: calc(100vw - 40px) !important;
+
+    margin: 0 auto !important;
+    padding: 32px !important;
+
+    box-sizing: border-box !important;
+
+    background: #ffffff !important;
+
+    border: none !important;
+
+    border-radius: 20px !important;
+
+    box-shadow:
+        0 30px 80px rgba(0, 40, 40, 0.28) !important;
+
+    text-align: center !important;
+
+    transform:
+        translateY(25px)
+        scale(0.96) !important;
+
+    opacity: 0 !important;
+
+    transition:
+        transform 0.35s cubic-bezier(.22, 1, .36, 1),
+        opacity 0.25s ease !important;
+}
+
+
+/* CARD TERBUKA */
+
+#returnConfirmModal.open .return-confirm-card {
+    transform:
+        translateY(0)
+        scale(1) !important;
+
+    opacity: 1 !important;
+}
+
+
+/* ICON */
+
+#returnConfirmModal .return-confirm-icon {
+    width: 58px !important;
+    height: 58px !important;
+
+    margin: 0 auto 18px auto !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    border-radius: 50% !important;
+
+    background: #edf7f7 !important;
+
+    color: #278486 !important;
+
+    font-size: 28px !important;
+    font-weight: 800 !important;
+}
+
+
+/* LABEL */
+
+#returnConfirmModal .return-confirm-label {
+    display: block !important;
+
+    margin-bottom: 8px !important;
+
+    color: #287b7b !important;
+
+    font-size: 10px !important;
+
+    font-weight: 800 !important;
+
+    letter-spacing: 1.5px !important;
+}
+
+
+/* JUDUL */
+
+#returnConfirmModal .return-confirm-content h3 {
+    margin: 0 0 10px 0 !important;
+
+    color: #173f40 !important;
+
+    font-size: 23px !important;
+
+    font-weight: 800 !important;
+
+    line-height: 1.2 !important;
+}
+
+
+/* TEKS */
+
+#returnConfirmModal .return-confirm-content p {
+    margin: 0 !important;
+
+    color: #718080 !important;
+
+    font-size: 13px !important;
+
+    line-height: 1.6 !important;
+}
+
+
+/* BUTTON AREA */
+
+#returnConfirmModal .return-confirm-actions {
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 10px !important;
+
+    margin-top: 28px !important;
+}
+
+
+/* BUTTON */
+
+#returnConfirmModal .return-confirm-cancel,
+#returnConfirmModal .return-confirm-yes {
+    height: 44px !important;
+
+    padding: 0 20px !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 10px !important;
+
+    font-family: inherit !important;
+
+    font-size: 11px !important;
+
+    font-weight: 700 !important;
+
+    cursor: pointer !important;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+/* BATAL */
+
+#returnConfirmModal .return-confirm-cancel {
+    border: 1px solid #d7e0e0 !important;
+
+    background: #ffffff !important;
+
+    color: #526565 !important;
+}
+
+
+#returnConfirmModal .return-confirm-cancel:hover {
+    background: #f5f8f8 !important;
+
+    transform: translateY(-1px) !important;
+}
+
+
+/* YA KEMBALIKAN */
+
+#returnConfirmModal .return-confirm-yes {
+    border: none !important;
+
+    background: #278486 !important;
+
+    color: #ffffff !important;
+
+    box-shadow:
+        0 6px 16px rgba(39, 132, 134, 0.20) !important;
+}
+
+
+#returnConfirmModal .return-confirm-yes:hover {
+    background: #217174 !important;
+
+    transform: translateY(-1px) !important;
+
+    box-shadow:
+        0 9px 22px rgba(39, 132, 134, 0.28) !important;
+}
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */

@@ -426,12 +426,6 @@ function returnLoan(id){
   populateLoanForm();
   renderAll();
 }
-function extendLoan(id){
-  const l = loans.find(x=>x.id===id);
-  l.dueDate = daysFromNow(diffDays(TODAY,l.dueDate) + 7 > 0 ? diffDays(TODAY,l.dueDate)+7 : 7);
-  toast('Masa pinjam diperpanjang 7 hari.');
-  renderAll();
-}
 function setLoanFilter(status, el){
   loanFilter = status;
   document.querySelectorAll('#page-circulation .seg button').forEach(b=>b.classList.remove('active'));
