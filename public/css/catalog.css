@@ -198,16 +198,6 @@
 }
 
 
-/*
-   BUKA MENU SAAT TRIGGER DI-HOVER
-   ATAU MENU SEDANG DI-HOVER
-*/
-
-.catalog-category-dropdown:hover .catalog-category-menu {
-
-    display: block;
-}
-
 
 /* =========================================================
    CATEGORY ITEM
@@ -312,15 +302,19 @@
     background: transparent;
 }
 
-/*
-   INI BAGIAN PALING PENTING
+/* =========================================================
+   CATEGORY DROPDOWN - CLICK
+========================================================= */
 
-   Subkategori HANYA muncul
-   ketika kategori tersebut di-hover.
-*/
+.catalog-category-menu {
+    display: none;
+}
 
-.catalog-category-item:hover>.catalog-subcategory-menu {
+.catalog-category-dropdown.open > .catalog-category-menu {
+    display: block;
+}
 
+.catalog-category-item.open > .catalog-subcategory-menu {
     display: block;
 }
 

@@ -288,29 +288,42 @@
                     </label>
 
                     <select
-                        id="category_id"
-                        name="category_id"
-                        class="input @error('category_id') is-invalid @enderror"
-                        required>
+    id="category_id"
+    name="category_id"
+    class="input @error('category_id') is-invalid @enderror"
+    required>
 
-                        <option
-                            value=""
-                            disabled
-                            {{ old('category_id') ? '' : 'selected' }}>
-                            -- Pilih Kategori --
-                        </option>
+    <option
+        value=""
+        disabled
+        {{ old('category_id') ? '' : 'selected' }}>
+        -- Pilih Kategori --
+    </option>
 
-                        @foreach ($categories as $category)
+    @foreach (
+        $categories->sortBy(function ($category) {
+            return match ($category->name) {
+                'Buku Pendidikan' => 1,
+                'Anak' => 2,
+                'Remaja' => 3,
+                'Dewasa' => 4,
+                default => 99,
+            };
+        })
+        as $category
+    )
 
-                        <option
-                            value="{{ $category->id }}"
-                            {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
+        <option
+            value="{{ $category->id }}"
+            {{ old('category_id') == $category->id ? 'selected' : '' }}>
 
-                        @endforeach
+            {{ $category->name }}
 
-                    </select>
+        </option>
+
+    @endforeach
+
+</select>
 
                     @error('category_id')
                     <span class="form-error">

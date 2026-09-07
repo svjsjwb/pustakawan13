@@ -13,25 +13,18 @@ class CategorySeeder extends Seeder
         $categories = [
 
             'Anak' => [
-                'Novel',
-                'Cerpen',
-                'Komik',
-                'Dongeng',
+                'Fiksi',
+                'Non-Fiksi',
             ],
 
             'Remaja' => [
-                'Novel',
-                'Cerpen',
-                'Komik',
-                'Agama',
+                'Fiksi',
+                'Non-Fiksi',
             ],
 
             'Dewasa' => [
-                'Novel',
-                'Cerpen',
-                'Agama',
-                'Sejarah',
-                'Teknologi',
+                'Fiksi',
+                'Non-Fiksi',
             ],
 
             'Buku Pendidikan' => [

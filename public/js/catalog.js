@@ -1,7 +1,204 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    /*
+    |--------------------------------------------------------------------------
+    | CATEGORY DROPDOWN - CLICK
+    |--------------------------------------------------------------------------
+    */
+
+    const categoryDropdown =
+        document.querySelector('.catalog-category-dropdown');
+
+    const categoryTrigger =
+        document.querySelector('.catalog-category-trigger');
+
+    const categoryMenu =
+        document.querySelector('.catalog-category-menu');
+
+
+    if (
+        categoryDropdown &&
+        categoryTrigger &&
+        categoryMenu
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | BUKA / TUTUP MENU KATEGORI
+        |--------------------------------------------------------------------------
+        */
+
+        categoryTrigger.addEventListener(
+            'click',
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                categoryDropdown.classList.toggle('open');
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | KLIK KATEGORI YANG MEMILIKI SUBKATEGORI
+        |--------------------------------------------------------------------------
+        */
+
+        categoryMenu
+            .querySelectorAll('.catalog-category-item')
+            .forEach(function (item) {
+
+                const categoryLink =
+                    item.querySelector(
+                        ':scope > .catalog-category-option'
+                    );
+
+                const subcategoryMenu =
+                    item.querySelector(
+                        ':scope > .catalog-subcategory-menu'
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | KATEGORI PUNYA SUBKATEGORI
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    categoryLink &&
+                    subcategoryMenu
+                ) {
+
+                    categoryLink.addEventListener(
+                        'click',
+                        function (event) {
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | JANGAN PINDAH HALAMAN
+                            | KLIK KATEGORI = BUKA SUBMENU
+                            |--------------------------------------------------------------------------
+                            */
+
+                            event.preventDefault();
+                            event.stopPropagation();
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | TUTUP SUBMENU LAIN
+                            |--------------------------------------------------------------------------
+                            */
+
+                            categoryMenu
+                                .querySelectorAll(
+                                    '.catalog-category-item.open'
+                                )
+                                .forEach(function (otherItem) {
+
+                                    if (
+                                        otherItem !== item
+                                    ) {
+
+                                        otherItem.classList.remove(
+                                            'open'
+                                        );
+
+                                    }
+
+                                });
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | BUKA / TUTUP SUBMENU
+                            |--------------------------------------------------------------------------
+                            */
+
+                            item.classList.toggle(
+                                'open'
+                            );
+
+                        }
+                    );
+
+                }
+
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | KLIK DI LUAR DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        document.addEventListener(
+            'click',
+            function (event) {
+
+                if (
+                    !categoryDropdown.contains(
+                        event.target
+                    )
+                ) {
+
+                    /*
+                    | Tutup menu utama
+                    */
+
+                    categoryDropdown.classList.remove(
+                        'open'
+                    );
+
+
+                    /*
+                    | Tutup semua submenu
+                    */
+
+                    categoryMenu
+                        .querySelectorAll(
+                            '.catalog-category-item.open'
+                        )
+                        .forEach(function (item) {
+
+                            item.classList.remove(
+                                'open'
+                            );
+
+                        });
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BOOK MODAL
+    |--------------------------------------------------------------------------
+    */
+
     const modal =
         document.getElementById('book-modal');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | JIKA MODAL TIDAK ADA
+    |--------------------------------------------------------------------------
+    |
+    | Jangan hentikan dropdown kategori karena dropdown
+    | sudah diproses di atas.
+    |--------------------------------------------------------------------------
+    */
 
     if (!modal) {
         return;
