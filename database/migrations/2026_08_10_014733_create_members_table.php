@@ -12,12 +12,17 @@ return new class extends Migration
             $table->id();
 
             $table->string('member_number')->unique();
+
             $table->string('name');
+
+            $table->string('division')->nullable();
 
             $table->string('nis_nip')->nullable();
 
-            $table->enum('gender', ['Laki-laki', 'Perempuan'])
-                ->nullable();
+            $table->enum('gender', [
+                'Laki-laki',
+                'Perempuan'
+            ])->nullable();
 
             $table->string('class')->nullable();
 
@@ -29,8 +34,10 @@ return new class extends Migration
 
             $table->date('registered_at')->nullable();
 
-            $table->enum('status', ['Aktif', 'Tidak Aktif'])
-                ->default('Aktif');
+            $table->enum('status', [
+                'Aktif',
+                'Tidak Aktif'
+            ])->default('Tidak Aktif');
 
             $table->timestamps();
         });

@@ -21,12 +21,10 @@
         </a>
     </div>
 
-
     <div class="member-form-card">
 
         <h2>Data Anggota</h2>
         <p>Perbarui informasi Anggota dengan lengkap.</p>
-
 
         @if($errors->any())
             <div class="alert-error">
@@ -38,14 +36,12 @@
             </div>
         @endif
 
-
         <form
             action="{{ route('members.update', $member->id) }}"
             method="POST"
         >
             @csrf
             @method('PUT')
-
 
             {{-- NAMA --}}
             <div class="form-group">
@@ -63,6 +59,20 @@
                 >
             </div>
 
+            {{-- EMAIL --}}
+            <div class="form-group">
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    value="{{ old('email', $member->email) }}"
+                    placeholder="Contoh: nama@email.com"
+                >
+            </div>
 
             {{-- DIVISI --}}
             <div class="form-group">
@@ -123,7 +133,6 @@
                 </select>
             </div>
 
-
             {{-- NO TELEPON --}}
             <div class="form-group">
                 <label for="phone">
@@ -140,47 +149,30 @@
                 >
             </div>
 
-
             {{-- STATUS --}}
-            <div class="form-group">
-                <label for="status">
-                    Status
-                </label>
-
-                <select
-                    name="status"
-                    id="status"
-                    required
-                >
-                    <option
-                        value="Aktif"
-                        {{ old('status', $member->status) == 'Aktif' ? 'selected' : '' }}
-                    >
-                        Aktif
-                    </option>
-
-                    <option
-                        value="Tidak Aktif"
-                        {{ old('status', $member->status) == 'Tidak Aktif' ? 'selected' : '' }}
-                    >
-                        Tidak Aktif
-                    </option>
-                </select>
-            </div>
-
+            {{-- Status tidak dapat diedit secara manual.
+                 Status dikelola otomatis berdasarkan aktivitas peminjaman. --}}
 
             {{-- TOMBOL --}}
-<div class="form-footer">
-    <div class="form-actions">
-        <a href="{{ route('members.index') }}" class="btn-cancel">
-            Batal
-        </a>
+            <div class="form-footer">
+                <div class="form-actions">
 
-        <button type="submit" class="btn-submit">
-            Simpan Perubahan
-        </button>
-    </div>
-</div>
+                    <a
+                        href="{{ route('members.index') }}"
+                        class="btn-cancel"
+                    >
+                        Batal
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn-submit"
+                    >
+                        Simpan Perubahan
+                    </button>
+
+                </div>
+            </div>
 
         </form>
 

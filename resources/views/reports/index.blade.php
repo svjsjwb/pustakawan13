@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
     <link rel="stylesheet" href="{{ asset('css/report.css') }}">
-    
+
     <style>
         /* Modern Filter Bar Styles */
         .report-filter-box {
@@ -62,7 +62,8 @@
             transition: all 0.2s ease;
         }
 
-        .date-range-flatpickr:focus, .date-range-flatpickr:hover {
+        .date-range-flatpickr:focus,
+        .date-range-flatpickr:hover {
             border-color: #287b7b;
             background: #ffffff !important;
             box-shadow: 0 0 0 3px rgba(40, 123, 123, 0.12);
@@ -139,11 +140,15 @@
             border: 1px solid #d5e6e6 !important;
             font-family: inherit !important;
         }
-        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+
+        .flatpickr-day.selected,
+        .flatpickr-day.startRange,
+        .flatpickr-day.endRange {
             background: #287b7b !important;
             border-color: #287b7b !important;
             color: #fff !important;
         }
+
         .flatpickr-day.inRange {
             background: #d8eded !important;
             border-color: #d8eded !important;
@@ -154,267 +159,276 @@
 
 @section('content')
 
-<section class="report-page">
+    <section class="report-page">
 
-    {{-- =========================================================
+        {{-- =========================================================
          HERO SECTION
     ========================================================== --}}
-    <div class="report-hero">
-        <div class="report-hero-content">
-            <div class="report-label">
-                <span class="label-dot"></span>
-                Pusat Laporan
+        <div class="report-hero">
+            <div class="report-hero-content">
+                <div class="report-label">
+                    <span class="label-dot"></span>
+                    Pusat Laporan
+                </div>
+                <h1>Laporan Perpustakaan</h1>
+                <p>
+                    Pantau seluruh aktivitas perpustakaan melalui ringkasan sirkulasi peminjaman, keterlambatan, koleksi
+                    buku, dan keanggotaan aktif dalam rentang tanggal fleksibel.
+                </p>
             </div>
-            <h1>Laporan Perpustakaan</h1>
-            <p>
-                Pantau seluruh aktivitas perpustakaan melalui ringkasan sirkulasi peminjaman, keterlambatan, koleksi buku, dan keanggotaan aktif dalam rentang tanggal fleksibel.
-            </p>
+
+            <div class="report-hero-action">
+                <a href="{{ route('reports.create') }}" class="report-add-btn">
+                    <span class="add-icon">+</span>
+                    <span>Tambah Laporan</span>
+                </a>
+            </div>
         </div>
 
-        <div class="report-hero-action">
-            <a href="{{ route('reports.create') }}" class="report-add-btn">
-                <span class="add-icon">+</span>
-                <span>Tambah Laporan</span>
-            </a>
-        </div>
-    </div>
+        @if (session('success'))
+            <div class="report-success">
+                {{ session('success') }}
+            </div>
+        @endif
 
-    @if(session('success'))
-        <div class="report-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    {{-- =========================================================
+        {{-- =========================================================
          FILTER KALENDER RENTANG TANGGAL (DATE RANGE PICKER)
     ========================================================== --}}
-    <div class="report-filter-box">
-        <form method="GET" action="{{ route('reports.index') }}" id="dateRangeFilterForm" class="filter-form-group">
-            <div class="date-picker-input-wrapper">
-                <span class="calendar-icon">📅</span>
-                <input type="text" 
-                       id="date_range_picker" 
-                       class="date-range-flatpickr" 
-                       placeholder="Pilih rentang tanggal (klik 2 tanggal)..." 
-                       readonly>
+        <div class="report-filter-box">
+            <form method="GET" action="{{ route('reports.index') }}" id="dateRangeFilterForm" class="filter-form-group">
+                <div class="date-picker-input-wrapper">
+                    <span class="calendar-icon">📅</span>
+                    <input type="text" id="date_range_picker" class="date-range-flatpickr"
+                        placeholder="Pilih rentang tanggal (klik 2 tanggal)..." readonly>
+                </div>
+
+                {{-- Hidden input parameters untuk dikirimkan via GET ke Controller --}}
+                <input type="hidden" name="start_date" id="start_date"
+                    value="{{ $startDateInput ?? $startDate->format('Y-m-d') }}">
+                <input type="hidden" name="end_date" id="end_date"
+                    value="{{ $endDateInput ?? $endDate->format('Y-m-d') }}">
+
+                <button type="submit" class="btn-filter-apply">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+                        stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    Terapkan Filter
+                </button>
+
+                <a href="{{ route('reports.index') }}" class="btn-filter-reset" title="Kembalikan ke periode default">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                        stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                    Reset Filter
+                </a>
+            </form>
+
+            <div class="filter-period-badge">
+                <span>
+                    🗓️ Periode:
+                    <strong>
+                        {{ now()->locale('id')->startOfMonth()->translatedFormat('j M Y') }}
+                        -
+                        {{ now()->locale('id')->endOfMonth()->translatedFormat('j M Y') }}
+                    </strong>
+                </span>
             </div>
-
-            {{-- Hidden input parameters untuk dikirimkan via GET ke Controller --}}
-            <input type="hidden" name="start_date" id="start_date" value="{{ $startDateInput ?? $startDate->format('Y-m-d') }}">
-            <input type="hidden" name="end_date" id="end_date" value="{{ $endDateInput ?? $endDate->format('Y-m-d') }}">
-
-            <button type="submit" class="btn-filter-apply">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>
-                Terapkan Filter
-            </button>
-
-            <a href="{{ route('reports.index') }}" class="btn-filter-reset" title="Kembalikan ke periode default">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <polyline points="1 4 1 10 7 10"></polyline>
-                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                </svg>
-                Reset Filter
-            </a>
-        </form>
-
-        <div class="filter-period-badge">
-            <span>🗓️ Periode: <strong>{{ $periodLabel }}</strong></span>
         </div>
-    </div>
 
-    {{-- =========================================================
+        {{-- =========================================================
          SECTION TITLE & KARTU GRAFIK KATEGORI LAPORAN
     ========================================================== --}}
-    <div class="report-section-title">
-        <div>
-            <span>Ringkasan Aktivitas</span>
-            <h2>Laporan Terbaru</h2>
-        </div>
-    </div>
-
-    <div class="report-grid">
-        @forelse($reports as $report)
-            @php
-                $jenis = $report['jenis'];
-
-                if (str_contains($jenis, 'Peminjaman')) {
-                    $type = 'borrow';
-                    $category = 'Sirkulasi';
-                    $icon = '📖';
-                    $valNum = $borrowedBooks ?? 0;
-                    $badge = number_format($valNum, 0, ',', '.') . ' Dipinjam';
-                    $badgeClass = 'positive';
-                    $value = number_format($valNum, 0, ',', '.');
-                    $valueLabel = 'peminjaman';
-                    $description = 'Rekap transaksi peminjaman dan sirkulasi buku selama periode yang dipilih.';
-                    $bars = $borrowChartBars ?? [];
-                    $labels = $borrowChartLabels ?? [];
-                } elseif (str_contains($jenis, 'Keterlambatan')) {
-                    $type = 'late';
-                    $category = 'Monitoring';
-                    $icon = '⏰';
-                    $valNum = $lateBorrowings ?? 0;
-                    $badge = number_format($valNum, 0, ',', '.') . ' Kasus';
-                    $badgeClass = $valNum > 0 ? 'warning' : 'neutral';
-                    $value = number_format($valNum, 0, ',', '.');
-                    $valueLabel = 'kasus aktif';
-                    $description = 'Daftar aktivitas buku yang terlambat dikembalikan pada periode yang dipilih.';
-                    $bars = $lateChartBars ?? [];
-                    $labels = $lateChartLabels ?? [];
-                } elseif (str_contains($jenis, 'Koleksi')) {
-                    $type = 'collection';
-                    $category = 'Koleksi';
-                    $icon = '📚';
-                    $valNum = $totalBooks ?? 0;
-                    $badge = number_format($valNum, 0, ',', '.') . ' Buku';
-                    $badgeClass = 'neutral';
-                    $value = number_format($valNum, 0, ',', '.');
-                    $valueLabel = 'total koleksi';
-                    $description = 'Rekap buku yang tercatat dalam periode laporan yang dipilih.';
-                    $bars = $collectionChartBars ?? [];
-                    $labels = $collectionChartLabels ?? [];
-                } else {
-                    $type = 'member';
-                    $category = 'Keanggotaan';
-                    $icon = '👥';
-                    $valNum = $activeMembers ?? 0;
-                    $badge = number_format($valNum, 0, ',', '.') . ' Aktif';
-                    $badgeClass = 'positive';
-                    $value = number_format($valNum, 0, ',', '.');
-                    $valueLabel = 'anggota aktif';
-                    $description = 'Rekap anggota aktif yang tercatat dalam periode laporan yang dipilih.';
-                    $bars = $memberChartBars ?? [];
-                    $labels = $memberChartLabels ?? [];
-                }
-            @endphp
-
-            <article class="report-card"
-                     onclick="openReportDetail(this)"
-                     data-report="{{ $report['jenis'] }}"
-                     data-value="{{ $value }}"
-                     data-value-label="{{ $valueLabel }}"
-                     data-period="{{ $periodLabel }}"
-                     data-labels="{{ implode('|', $labels) }}"
-                     data-bars="{{ implode('|', $bars) }}">
-
-                <div class="report-card-top">
-                    <div class="report-card-icon {{ $type }}">
-                        {{ $icon }}
-                    </div>
-
-                    <div class="report-card-info">
-                        <span class="report-card-category">{{ $category }}</span>
-                        <h3>{{ $report['jenis'] }}</h3>
-                    </div>
-
-                    <span class="report-badge {{ $badgeClass }}">
-                        {{ $badge }}
-                    </span>
-                </div>
-
-                <p class="report-description">
-                    {{ $description }}
-                </p>
-
-                <div class="report-chart-wrapper">
-                    <div class="chart-value">
-                        <strong>{{ $value }}</strong>
-                        <span>{{ $valueLabel }}</span>
-                    </div>
-
-                    <div class="report-chart">
-                        <div class="chart-line"></div>
-                        <div class="chart-line"></div>
-                        <div class="chart-line"></div>
-
-                        <div class="chart-bars">
-                            @foreach($bars as $index => $bar)
-                                <div class="chart-column {{ $index === count($bars) - 1 ? 'active' : '' }}">
-                                    <div class="chart-bar" style="height: {{ $bar }}%;"></div>
-                                    <span>{{ $labels[$index] ?? '' }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-
-                <div class="report-card-footer" onclick="event.stopPropagation()">
-                    <span class="report-updated">
-                        ● Periode: {{ $periodLabel }}
-                    </span>
-
-                    <div class="report-actions" onclick="event.stopPropagation()">
-                        <a href="{{ route('reports.edit', $report['id']) }}" class="report-detail-btn">
-                            Edit
-                        </a>
-
-                        <select class="report-format-select" aria-label="Pilih format laporan" onclick="event.stopPropagation()">
-                            <option value="pdf">PDF</option>
-                            <option value="excel">Excel</option>
-                        </select>
-
-                        <div class="report-download" onclick="event.stopPropagation()">
-                            <button type="button" class="report-download-btn" onclick="downloadReport(this)">
-                                Unduh
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-        @empty
-            <div class="report-empty">
-                <strong>Belum ada laporan</strong>
-                <span>Klik "Tambah Laporan" untuk membuat laporan baru.</span>
+        <div class="report-section-title">
+            <div>
+                <span>Ringkasan Aktivitas</span>
+                <h2>Laporan Terbaru</h2>
             </div>
-        @endforelse
-    </div>
+        </div>
 
-</section>
+        <div class="report-grid">
+            @forelse($reports as $report)
+                @php
+                    $jenis = $report['jenis'];
 
-{{-- =========================================================
+                    if (str_contains($jenis, 'Peminjaman')) {
+                        $type = 'borrow';
+                        $category = 'Sirkulasi';
+                        $icon = '📖';
+                        $valNum = $borrowedBooks ?? 0;
+                        $badge = number_format($valNum, 0, ',', '.') . ' Dipinjam';
+                        $badgeClass = 'positive';
+                        $value = number_format($valNum, 0, ',', '.');
+                        $valueLabel = 'peminjaman';
+                        $description = 'Rekap transaksi peminjaman dan sirkulasi buku selama periode yang dipilih.';
+                        $bars = $borrowChartBars ?? [];
+                        $labels = $borrowChartLabels ?? [];
+                    } elseif (str_contains($jenis, 'Keterlambatan')) {
+                        $type = 'late';
+                        $category = 'Monitoring';
+                        $icon = '⏰';
+                        $valNum = $lateBorrowings ?? 0;
+                        $badge = number_format($valNum, 0, ',', '.') . ' Kasus';
+                        $badgeClass = $valNum > 0 ? 'warning' : 'neutral';
+                        $value = number_format($valNum, 0, ',', '.');
+                        $valueLabel = 'kasus aktif';
+                        $description = 'Daftar aktivitas buku yang terlambat dikembalikan pada periode yang dipilih.';
+                        $bars = $lateChartBars ?? [];
+                        $labels = $lateChartLabels ?? [];
+                    } elseif (str_contains($jenis, 'Koleksi')) {
+                        $type = 'collection';
+                        $category = 'Koleksi';
+                        $icon = '📚';
+                        $valNum = $totalBooks ?? 0;
+                        $badge = number_format($valNum, 0, ',', '.') . ' Buku';
+                        $badgeClass = 'neutral';
+                        $value = number_format($valNum, 0, ',', '.');
+                        $valueLabel = 'total koleksi';
+                        $description = 'Rekap buku yang tercatat dalam periode laporan yang dipilih.';
+                        $bars = $collectionChartBars ?? [];
+                        $labels = $collectionChartLabels ?? [];
+                    } else {
+                        $type = 'member';
+                        $category = 'Keanggotaan';
+                        $icon = '👥';
+                        $valNum = $activeMembers ?? 0;
+                        $badge = number_format($valNum, 0, ',', '.') . ' Aktif';
+                        $badgeClass = 'positive';
+                        $value = number_format($valNum, 0, ',', '.');
+                        $valueLabel = 'anggota aktif';
+                        $description = 'Rekap anggota aktif yang tercatat dalam periode laporan yang dipilih.';
+                        $bars = $memberChartBars ?? [];
+                        $labels = $memberChartLabels ?? [];
+                    }
+                @endphp
+
+                <article class="report-card" onclick="openReportDetail(this)" data-report="{{ $report['jenis'] }}"
+                    data-value="{{ $value }}" data-value-label="{{ $valueLabel }}"
+                    data-period="{{ $periodLabel }}" data-labels="{{ implode('|', $labels) }}"
+                    data-bars="{{ implode('|', $bars) }}">
+
+                    <div class="report-card-top">
+                        <div class="report-card-icon {{ $type }}">
+                            {{ $icon }}
+                        </div>
+
+                        <div class="report-card-info">
+                            <span class="report-card-category">{{ $category }}</span>
+                            <h3>{{ $report['jenis'] }}</h3>
+                        </div>
+
+                        <span class="report-badge {{ $badgeClass }}">
+                            {{ $badge }}
+                        </span>
+                    </div>
+
+                    <p class="report-description">
+                        {{ $description }}
+                    </p>
+
+                    <div class="report-chart-wrapper">
+                        <div class="chart-value">
+                            <strong>{{ $value }}</strong>
+                            <span>{{ $valueLabel }}</span>
+                        </div>
+
+                        <div class="report-chart">
+                            <div class="chart-line"></div>
+                            <div class="chart-line"></div>
+                            <div class="chart-line"></div>
+
+                            <div class="chart-bars">
+                                @foreach ($bars as $index => $bar)
+                                    <div class="chart-column {{ $index === count($bars) - 1 ? 'active' : '' }}">
+                                        <div class="chart-bar" style="height: {{ $bar }}%;"></div>
+                                        <span>{{ $labels[$index] ?? '' }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-card-footer" onclick="event.stopPropagation()">
+                        <span class="report-updated">
+                            ● Periode: {{ $periodLabel }}
+                        </span>
+
+                        <div class="report-actions" onclick="event.stopPropagation()">
+                            <a href="{{ route('reports.edit', $report['id']) }}" class="report-detail-btn">
+                                Edit
+                            </a>
+
+                            <select class="report-format-select" aria-label="Pilih format laporan"
+                                onclick="event.stopPropagation()">
+                                <option value="pdf">PDF</option>
+                                <option value="excel">Excel</option>
+                            </select>
+
+                            <div class="report-download" onclick="event.stopPropagation()">
+                                <button type="button" class="report-download-btn" onclick="downloadReport(this)">
+                                    Unduh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+            @empty
+                <div class="report-empty">
+                    <strong>Belum ada laporan</strong>
+                    <span>Klik "Tambah Laporan" untuk membuat laporan baru.</span>
+                </div>
+            @endforelse
+        </div>
+
+    </section>
+
+    {{-- =========================================================
      MODAL DETAIL LAPORAN
 ========================================================== --}}
-<div id="reportDetailModal" class="report-modal" onclick="closeReportDetail(event)">
-    <div class="report-modal-content" onclick="event.stopPropagation()">
-        <div class="report-modal-header">
-            <div>
-                <span class="report-modal-label">DETAIL LAPORAN</span>
-                <h2 id="modalReportTitle">Laporan</h2>
-            </div>
-            <button type="button" class="report-modal-close" onclick="closeReportDetail()">×</button>
-        </div>
-
-        <div class="report-modal-summary">
-            <div class="report-modal-value">
-                <strong id="modalReportValue">0</strong>
-                <span id="modalReportValueLabel">data</span>
+    <div id="reportDetailModal" class="report-modal" onclick="closeReportDetail(event)">
+        <div class="report-modal-content" onclick="event.stopPropagation()">
+            <div class="report-modal-header">
+                <div>
+                    <span class="report-modal-label">DETAIL LAPORAN</span>
+                    <h2 id="modalReportTitle">Laporan</h2>
+                </div>
+                <button type="button" class="report-modal-close" onclick="closeReportDetail()">×</button>
             </div>
 
-            <div class="report-modal-period" id="modalReportPeriod">
-                Periode: {{ $periodLabel }}
-            </div>
-        </div>
+            <div class="report-modal-summary">
+                <div class="report-modal-value">
+                    <strong id="modalReportValue">0</strong>
+                    <span id="modalReportValueLabel">data</span>
+                </div>
 
-        <div class="report-detail-chart">
-            <div class="detail-chart-lines">
-                <span></span><span></span><span></span><span></span>
+                <div class="report-modal-period" id="modalReportPeriod">
+                    Periode: {{ $periodLabel }}
+                </div>
             </div>
-            <div id="modalChartBars" class="detail-chart-bars"></div>
-        </div>
 
-        <div class="report-modal-footer">
-            <span>Data laporan berdasarkan periode <strong>{{ $periodLabel }}</strong>.</span>
-            <button type="button" onclick="closeReportDetail()">Tutup</button>
+            <div class="report-detail-chart">
+                <div class="detail-chart-lines">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <div id="modalChartBars" class="detail-chart-bars"></div>
+            </div>
+
+            <div class="report-modal-footer">
+                <span>Data laporan berdasarkan periode <strong>{{ $periodLabel }}</strong>.</span>
+                <button type="button" onclick="closeReportDetail()">Tutup</button>
+            </div>
         </div>
     </div>
-</div>
 
-{{-- Data JSON Transaksi Peminjaman untuk Ekspor PDF/Excel --}}
-<script id="borrowingsReportData" type="application/json">
+    {{-- Data JSON Transaksi Peminjaman untuk Ekspor PDF/Excel --}}
+    <script id="borrowingsReportData" type="application/json">
     {!! json_encode($borrowingsExportData ?? []) !!}
+</script>
+    <script id="activeMembersReportData" type="application/json">
+    {!! json_encode($activeMembersExportData ?? []) !!}
 </script>
 
 @endsection
@@ -433,7 +447,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const startDateInput = document.getElementById('start_date');
             const endDateInput = document.getElementById('end_date');
             const rangePicker = document.getElementById('date_range_picker');
@@ -479,12 +493,22 @@
 
             // Ambil data tabel JSON
             let tableData = [];
-            const dataScript = document.getElementById('borrowingsReportData');
+
+            const isMemberReport =
+                reportName.toLowerCase().includes('anggota aktif');
+
+            const dataScript = isMemberReport ?
+                document.getElementById('activeMembersReportData') :
+                document.getElementById('borrowingsReportData');
+
             if (dataScript) {
                 try {
                     tableData = JSON.parse(dataScript.textContent);
-                } catch(e) {
-                    console.error("Gagal parse data laporan", e);
+                } catch (e) {
+                    console.error(
+                        "Gagal parse data laporan",
+                        e
+                    );
                 }
             }
 
@@ -503,7 +527,9 @@
 
             // EKSPOR PDF MENGGUNAKAN JSPDF & AUTOTABLE
             try {
-                const { jsPDF } = window.jspdf;
+                const {
+                    jsPDF
+                } = window.jspdf;
                 const doc = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
@@ -533,7 +559,9 @@
                 doc.setFontSize(10);
                 doc.setTextColor(80, 99, 99);
                 doc.text(`Periode: ${period}`, 14, 42);
-                doc.text(`Tanggal Unduh: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`, 14, 47);
+                doc.text(
+                    `Tanggal Unduh: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`,
+                    14, 47);
 
                 // Kotak Ringkasan Statistik
                 doc.setFillColor(243, 248, 248);
@@ -547,22 +575,75 @@
                 doc.text(`TOTAL REKAPITULASI: ${statValue} ${statLabel.toUpperCase()}`, 19, 61);
 
                 // Tabel Data Transaksi
-                const headers = [['No', 'Nama Anggota', 'Kode', 'Buku yang Dipinjam', 'Tgl Pinjam', 'Jatuh Tempo', 'Status']];
-                const rows = tableData.map(item => [
-                    item.no,
-                    item.member_name,
-                    item.member_code,
-                    item.books,
-                    item.borrowed_at,
-                    item.due_at,
-                    item.status
-                ]);
+                let headers;
+                let rows;
+
+                if (isMemberReport) {
+
+                    headers = [
+                        [
+                            'No',
+                            'Nama Anggota',
+                            'Kode',
+                            'Aktivitas',
+                            'Tanggal',
+                            'Status'
+                        ]
+                    ];
+
+                    rows = tableData.map(item => [
+                        item.no,
+                        item.member_name,
+                        item.member_code,
+                        item.aktivitas,
+                        item.tanggal,
+                        item.status
+                    ]);
+
+                } else {
+
+                    headers = [
+                        [
+                            'No',
+                            'Nama Anggota',
+                            'Kode',
+                            'Buku yang Dipinjam',
+                            'Tgl Pinjam',
+                            'Jatuh Tempo',
+                            'Status'
+                        ]
+                    ];
+
+                    rows = tableData.map(item => [
+                        item.no,
+                        item.member_name,
+                        item.member_code,
+                        item.books,
+                        item.borrowed_at,
+                        item.due_at,
+                        item.status
+                    ]);
+                }
 
                 doc.autoTable({
                     head: headers,
-                    body: rows.length > 0 ? rows : [['-', 'Tidak ada data transaksi pada periode ini', '-', '-', '-', '-', '-']],
+
+                    body: rows.length > 0 ?
+                        rows : [
+                            [
+                                '-',
+                                'Tidak ada data aktivitas pada periode ini',
+                                '-',
+                                '-',
+                                '-',
+                                '-'
+                            ]
+                        ],
+
                     startY: 71,
+
                     theme: 'striped',
+
                     headStyles: {
                         fillColor: [40, 123, 123],
                         textColor: [255, 255, 255],
@@ -570,33 +651,88 @@
                         fontSize: 9,
                         halign: 'left'
                     },
+
                     bodyStyles: {
                         fontSize: 8.5,
                         textColor: [40, 50, 50]
                     },
-                    columnStyles: {
-                        0: { cellWidth: 10, halign: 'center' },
-                        1: { cellWidth: 36 },
-                        2: { cellWidth: 20 },
-                        3: { cellWidth: 54 },
-                        4: { cellWidth: 22 },
-                        5: { cellWidth: 22 },
-                        6: { cellWidth: 18, halign: 'center' }
+
+                    columnStyles: isMemberReport ? {
+                        0: {
+                            cellWidth: 12,
+                            halign: 'center'
+                        },
+                        1: {
+                            cellWidth: 45
+                        },
+                        2: {
+                            cellWidth: 25
+                        },
+                        3: {
+                            cellWidth: 35
+                        },
+                        4: {
+                            cellWidth: 30
+                        },
+                        5: {
+                            cellWidth: 30,
+                            halign: 'center'
+                        }
+                    } : {
+                        0: {
+                            cellWidth: 10,
+                            halign: 'center'
+                        },
+                        1: {
+                            cellWidth: 36
+                        },
+                        2: {
+                            cellWidth: 20
+                        },
+                        3: {
+                            cellWidth: 54
+                        },
+                        4: {
+                            cellWidth: 22
+                        },
+                        5: {
+                            cellWidth: 22
+                        },
+                        6: {
+                            cellWidth: 18,
+                            halign: 'center'
+                        }
                     },
+
                     styles: {
                         cellPadding: 3,
                         valign: 'middle'
                     },
+
                     alternateRowStyles: {
                         fillColor: [247, 251, 251]
                     },
-                    didDrawPage: function (data) {
-                        // Footer Dokumen
-                        const pageCount = doc.internal.getNumberOfPages();
+
+                    didDrawPage: function(data) {
+                        const pageCount =
+                            doc.internal.getNumberOfPages();
+
                         doc.setFontSize(8);
                         doc.setTextColor(150);
-                        doc.text('Dokumen ini dicetak otomatis oleh Sistem Perpustakaan Tiga Serangkai.', 14, 290);
-                        doc.text(`Halaman ${data.pageNumber} dari ${pageCount}`, 196, 290, { align: 'right' });
+
+                        doc.text(
+                            'Dokumen ini dicetak otomatis oleh Sistem Perpustakaan Tiga Serangkai.',
+                            14,
+                            290
+                        );
+
+                        doc.text(
+                            `Halaman ${data.pageNumber} dari ${pageCount}`,
+                            196,
+                            290, {
+                                align: 'right'
+                            }
+                        );
                     }
                 });
 
@@ -620,10 +756,20 @@
         // Fungsi Download Format CSV / Excel
         function exportToCSV(data, fileName) {
             if (!data || data.length === 0) {
-                data = [{ No: '-', Anggota: 'Tidak ada data', Kode: '-', Buku: '-', 'Tgl Pinjam': '-', 'Jatuh Tempo': '-', Status: '-' }];
+                data = [{
+                    No: '-',
+                    Anggota: 'Tidak ada data',
+                    Kode: '-',
+                    Buku: '-',
+                    'Tgl Pinjam': '-',
+                    'Jatuh Tempo': '-',
+                    Status: '-'
+                }];
             }
 
-            const header = ['No', 'Nama Anggota', 'Kode Anggota', 'Buku Dipinjam', 'Tanggal Pinjam', 'Jatuh Tempo', 'Tanggal Kembali', 'Status'];
+            const header = ['No', 'Nama Anggota', 'Kode Anggota', 'Buku Dipinjam', 'Tanggal Pinjam', 'Jatuh Tempo',
+                'Tanggal Kembali', 'Status'
+            ];
             const csvRows = [
                 header.join(','),
                 ...data.map(item => [
@@ -638,7 +784,9 @@
                 ].join(','))
             ];
 
-            const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob(["\uFEFF" + csvRows.join("\n")], {
+                type: 'text/csv;charset=utf-8;'
+            });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);

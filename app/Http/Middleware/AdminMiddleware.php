@@ -16,28 +16,54 @@ class AdminMiddleware
         Closure $next
     ): Response {
 
-        // Pastikan user sudah login
+        /*
+        |--------------------------------------------------------------------------
+        | WAJIB LOGIN
+        |--------------------------------------------------------------------------
+        */
+
         if (!auth()->check()) {
-            return redirect()->route('login')
+
+            return redirect()
+                ->route('login')
                 ->withHeaders([
-                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                    'Cache-Control' => 'private, no-store, no-cache, must-revalidate, max-age=0',
                     'Pragma' => 'no-cache',
                     'Expires' => '0',
                 ]);
         }
 
-        // Pastikan user adalah admin
+        /*
+        |--------------------------------------------------------------------------
+        | WAJIB ADMIN
+        |--------------------------------------------------------------------------
+        */
+
         if (auth()->user()->role !== 'admin') {
-            abort(403, 'Akses hanya untuk admin.');
+
+            abort(
+                403,
+                'Akses hanya untuk admin.'
+            );
         }
 
-        // Jalankan request
+        /*
+        |--------------------------------------------------------------------------
+        | LANJUTKAN REQUEST
+        |--------------------------------------------------------------------------
+        */
+
         $response = $next($request);
 
-        // Jangan izinkan browser menyimpan halaman admin
+        /*
+        |--------------------------------------------------------------------------
+        | JANGAN CACHE HALAMAN ADMIN
+        |--------------------------------------------------------------------------
+        */
+
         $response->headers->set(
             'Cache-Control',
-            'no-store, no-cache, must-revalidate, max-age=0'
+            'private, no-store, no-cache, must-revalidate, max-age=0'
         );
 
         $response->headers->set(

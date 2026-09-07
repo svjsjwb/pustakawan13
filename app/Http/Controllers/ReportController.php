@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Member;
 use App\Models\Borrowing;
+use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -312,19 +313,15 @@ class ReportController extends Controller
          * ANGGOTA AKTIF
          * ========================================================
          */
-        $activeMembers =
-            Member::where(
-                'status',
-                'aktif'
-            )
-            ->whereBetween(
-                'created_at',
-                [
-                    $startDate,
-                    $endDate
-                ]
-            )
-            ->count();
+        $activeMembers = $this->countActiveMembersInPeriod(
+            $startDate,
+            $endDate
+        );
+
+        $activeMembersExportData = $this->getActiveMembersExportData(
+            $startDate,
+            $endDate
+        );
 
 
         [
@@ -381,6 +378,7 @@ class ReportController extends Controller
                 'totalBooks',
                 'borrowedBooks',
                 'activeMembers',
+                'activeMembersExportData',
                 'lateBorrowings',
 
                 'periodLabel',
@@ -487,6 +485,131 @@ class ReportController extends Controller
 
     /**
      * ============================================================
+     * DATA EKSPOR LAPORAN ANGGOTA AKTIF
+     * ============================================================
+     *
+     * Menggabungkan aktivitas:
+     * - Peminjaman
+     * - Reservasi
+     *
+     * Data bersifat historis berdasarkan periode laporan,
+     * bukan berdasarkan status member saat ini.
+     */
+    private function getActiveMembersExportData(
+        $periodStart,
+        $periodEnd
+    ): array {
+        $rows = collect();
+
+        /*
+     * ========================================================
+     * PEMINJAMAN
+     * ========================================================
+     */
+
+        $borrowings = Borrowing::with('member')
+            ->where('borrowed_at', '<=', $periodEnd)
+            ->where(function ($query) use ($periodStart) {
+                $query
+                    ->whereNull('returned_at')
+                    ->orWhere('returned_at', '>=', $periodStart);
+            })
+            ->orderBy('borrowed_at')
+            ->get();
+
+        foreach ($borrowings as $borrowing) {
+            $rows->push([
+                'member_id' => $borrowing->member_id,
+                'member_name' => $borrowing->member->name
+                    ?? ('Anggota #' . $borrowing->member_id),
+
+                'member_code' => $borrowing->member->member_number
+                    ?? '-',
+
+                'aktivitas' => 'Peminjaman',
+
+                'tanggal' => Carbon::parse(
+                    $borrowing->borrowed_at
+                )->translatedFormat('d M Y'),
+
+                'status' => $borrowing->status === 'dikembalikan'
+                    ? 'Dikembalikan'
+                    : (
+                        $borrowing->status === 'terlambat'
+                        ? 'Terlambat'
+                        : 'Dipinjam'
+                    ),
+            ]);
+        }
+
+
+        /*
+     * ========================================================
+     * RESERVASI
+     * ========================================================
+     */
+
+        $reservations = Reservation::with('member')
+            ->where('reserved_at', '<=', $periodEnd)
+            ->where(function ($query) use ($periodStart) {
+                $query
+                    ->whereNull('expires_at')
+                    ->orWhere('expires_at', '>=', $periodStart);
+            })
+            ->orderBy('reserved_at')
+            ->get();
+
+        foreach ($reservations as $reservation) {
+            $rows->push([
+                'member_id' => $reservation->member_id,
+
+                'member_name' => $reservation->member->name
+                    ?? ('Anggota #' . $reservation->member_id),
+
+                'member_code' => $reservation->member->member_number
+                    ?? '-',
+
+                'aktivitas' => 'Reservasi',
+
+                'tanggal' => Carbon::parse(
+                    $reservation->reserved_at
+                )->translatedFormat('d M Y'),
+
+                'status' => match ($reservation->status) {
+                    'menunggu' => 'Menunggu',
+                    'disetujui' => 'Disetujui',
+                    'ditolak' => 'Ditolak',
+                    'dibatalkan' => 'Dibatalkan',
+                    'selesai' => 'Selesai',
+                    default => ucfirst($reservation->status),
+                },
+            ]);
+        }
+
+
+        /*
+     * ========================================================
+     * URUTKAN BERDASARKAN TANGGAL
+     * ========================================================
+     */
+
+        return $rows
+            ->sortBy(function ($row) {
+                return Carbon::createFromFormat(
+                    'd M Y',
+                    $row['tanggal']
+                )->timestamp;
+            })
+            ->values()
+            ->map(function ($row, $index) {
+                $row['no'] = $index + 1;
+                return $row;
+            })
+            ->toArray();
+    }
+
+    /**
+     * ============================================================
      * GRAFIK MEMBER
      * ============================================================
      */
@@ -495,22 +618,226 @@ class ReportController extends Controller
         $endDate,
         $type
     ) {
-        return $this->generateDateChart(
-            Member::query()
-                ->where(
-                    'status',
-                    'aktif'
-                ),
-            'created_at',
-            $startDate,
-            $endDate,
-            $type,
-            function ($query) {
-                return $query;
+        $labels = [];
+        $bars = [];
+
+        /*
+     * ========================================================
+     * HARIAN
+     * ========================================================
+     */
+
+        if ($type === 'day') {
+
+            $periods = [
+                ['00', 0, 3],
+                ['04', 4, 7],
+                ['08', 8, 11],
+                ['12', 12, 15],
+                ['16', 16, 19],
+                ['20', 20, 23],
+            ];
+
+            foreach ($periods as [$label, $startHour, $endHour]) {
+
+                $periodStart = $startDate
+                    ->copy()
+                    ->setHour($startHour)
+                    ->startOfHour();
+
+                $periodEnd = $startDate
+                    ->copy()
+                    ->setHour($endHour)
+                    ->endOfHour();
+
+                $labels[] = $label;
+
+                $bars[] = $this->countActiveMembersInPeriod(
+                    $periodStart,
+                    $periodEnd
+                );
             }
-        );
+
+            return [
+                $labels,
+                $this->normalizeBars($bars)
+            ];
+        }
+
+
+        /*
+     * ========================================================
+     * MINGGUAN
+     * ========================================================
+     *
+     * Satu bar = satu hari.
+     */
+
+        if ($type === 'week') {
+
+            $cursor = $startDate->copy();
+
+            while ($cursor->lte($endDate)) {
+
+                $periodStart = $cursor
+                    ->copy()
+                    ->startOfDay();
+
+                $periodEnd = $cursor
+                    ->copy()
+                    ->endOfDay();
+
+                $labels[] = $cursor->translatedFormat('D');
+
+                $bars[] = $this->countActiveMembersInPeriod(
+                    $periodStart,
+                    $periodEnd
+                );
+
+                $cursor->addDay();
+            }
+
+            return [
+                $labels,
+                $this->normalizeBars($bars)
+            ];
+        }
+
+
+        /*
+     * ========================================================
+     * BULANAN
+     * ========================================================
+     *
+     * Dibagi menjadi M1, M2, M3, M4, M5.
+     */
+
+        $cursor = $startDate->copy();
+
+        $weekNumber = 1;
+
+        while ($cursor->lte($endDate)) {
+
+            $periodStart = $cursor
+                ->copy()
+                ->startOfDay();
+
+            $periodEnd = $cursor
+                ->copy()
+                ->addDays(6)
+                ->endOfDay();
+
+            if ($periodEnd->gt($endDate)) {
+                $periodEnd = $endDate->copy();
+            }
+
+            $labels[] = 'M' . $weekNumber;
+
+            $bars[] = $this->countActiveMembersInPeriod(
+                $periodStart,
+                $periodEnd
+            );
+
+            $cursor = $periodEnd
+                ->copy()
+                ->addSecond();
+
+            $weekNumber++;
+        }
+
+        return [
+            $labels,
+            $this->normalizeBars($bars)
+        ];
     }
 
+
+    /**
+     * ============================================================
+     * HITUNG ANGGOTA AKTIF BERDASARKAN AKTIVITAS HISTORIS
+     * ============================================================
+     *
+     * Member dianggap aktif dalam suatu periode jika memiliki:
+     *
+     * 1. Peminjaman yang bersinggungan dengan periode tersebut
+     *    ATAU
+     *
+     * 2. Reservasi yang bersinggungan dengan periode tersebut.
+     *
+     * Status member saat ini TIDAK digunakan.
+     */
+    private function countActiveMembersInPeriod(
+        $periodStart,
+        $periodEnd
+    ): int {
+        /*
+     * ========================================================
+     * PEMINJAMAN
+     * ========================================================
+     *
+     * borrowed_at <= akhir periode
+     *
+     * DAN
+     *
+     * returned_at masih NULL
+     * ATAU
+     * returned_at >= awal periode
+     */
+
+        $borrowingMemberIds = Borrowing::query()
+            ->where('borrowed_at', '<=', $periodEnd)
+            ->where(function ($query) use ($periodStart) {
+
+                $query
+                    ->whereNull('returned_at')
+                    ->orWhere('returned_at', '>=', $periodStart);
+            })
+            ->pluck('member_id');
+
+
+        /*
+     * ========================================================
+     * RESERVASI
+     * ========================================================
+     *
+     * reserved_at <= akhir periode
+     *
+     * DAN
+     *
+     * expires_at masih NULL
+     * ATAU
+     * expires_at >= awal periode
+     *
+     * Reservasi tetap dihitung sebagai aktivitas historis
+     * walaupun sekarang statusnya sudah selesai/ditolak/
+     * dibatalkan.
+     */
+
+        $reservationMemberIds = Reservation::query()
+            ->where('reserved_at', '<=', $periodEnd)
+            ->where(function ($query) use ($periodStart) {
+
+                $query
+                    ->whereNull('expires_at')
+                    ->orWhere('expires_at', '>=', $periodStart);
+            })
+            ->pluck('member_id');
+
+
+        /*
+     * ========================================================
+     * GABUNGKAN MEMBER
+     * ========================================================
+     *
+     * Satu member hanya dihitung satu kali meskipun memiliki
+     * peminjaman dan reservasi pada periode yang sama.
+     */
+
+        return $borrowingMemberIds
+            ->merge($reservationMemberIds)
+            ->unique()
+            ->count();
+    }
 
     /**
      * ============================================================
@@ -553,29 +880,29 @@ class ReportController extends Controller
 
                 $start =
                     $startDate
-                        ->copy()
-                        ->setHour(
-                            (int) $hour
-                        )
-                        ->startOfHour();
+                    ->copy()
+                    ->setHour(
+                        (int) $hour
+                    )
+                    ->startOfHour();
 
                 $end =
                     $start
-                        ->copy()
-                        ->addHours(3)
-                        ->endOfHour();
+                    ->copy()
+                    ->addHours(3)
+                    ->endOfHour();
 
 
                 $count =
                     (clone $query)
-                        ->whereBetween(
-                            $column,
-                            [
-                                $start,
-                                $end
-                            ]
-                        )
-                        ->count();
+                    ->whereBetween(
+                        $column,
+                        [
+                            $start,
+                            $end
+                        ]
+                    )
+                    ->count();
 
 
                 $bars[] = $count;
@@ -616,11 +943,11 @@ class ReportController extends Controller
 
                 $dayStart =
                     $cursor->copy()
-                        ->startOfDay();
+                    ->startOfDay();
 
                 $dayEnd =
                     $cursor->copy()
-                        ->endOfDay();
+                    ->endOfDay();
 
 
                 $labels[] =
@@ -631,14 +958,14 @@ class ReportController extends Controller
 
                 $bars[] =
                     (clone $query)
-                        ->whereBetween(
-                            $column,
-                            [
-                                $dayStart,
-                                $dayEnd
-                            ]
-                        )
-                        ->count();
+                    ->whereBetween(
+                        $column,
+                        [
+                            $dayStart,
+                            $dayEnd
+                        ]
+                    )
+                    ->count();
 
 
                 $cursor->addDay();
@@ -680,12 +1007,12 @@ class ReportController extends Controller
 
             $weekStart =
                 $cursor->copy()
-                    ->startOfDay();
+                ->startOfDay();
 
             $weekEnd =
                 $cursor->copy()
-                    ->addDays(6)
-                    ->endOfDay();
+                ->addDays(6)
+                ->endOfDay();
 
 
             if (
@@ -705,20 +1032,20 @@ class ReportController extends Controller
 
             $bars[] =
                 (clone $query)
-                    ->whereBetween(
-                        $column,
-                        [
-                            $weekStart,
-                            $weekEnd
-                        ]
-                    )
-                    ->count();
+                ->whereBetween(
+                    $column,
+                    [
+                        $weekStart,
+                        $weekEnd
+                    ]
+                )
+                ->count();
 
 
             $cursor =
                 $weekEnd
-                    ->copy()
-                    ->addSecond();
+                ->copy()
+                ->addSecond();
 
             $weekNumber++;
         }
@@ -770,10 +1097,9 @@ class ReportController extends Controller
                     8,
                     round(
                         ($value / $max)
-                        * 100
+                            * 100
                     )
                 );
-
             },
             $values
         );
@@ -847,28 +1173,28 @@ class ReportController extends Controller
                 ],
                 [
                     'jenis.required' =>
-                        'Jenis laporan wajib dipilih.',
+                    'Jenis laporan wajib dipilih.',
 
                     'kategori.required' =>
-                        'Kategori buku wajib dipilih.',
+                    'Kategori buku wajib dipilih.',
 
                     'status.required' =>
-                        'Status wajib dipilih.',
+                    'Status wajib dipilih.',
 
                     'anggota.required' =>
-                        'Anggota wajib dipilih.',
+                    'Anggota wajib dipilih.',
 
                     'urutan.required' =>
-                        'Urutan wajib dipilih.',
+                    'Urutan wajib dipilih.',
 
                     'tanggal_mulai.required' =>
-                        'Tanggal mulai wajib diisi.',
+                    'Tanggal mulai wajib diisi.',
 
                     'tanggal_selesai.required' =>
-                        'Tanggal selesai wajib diisi.',
+                    'Tanggal selesai wajib diisi.',
 
                     'tanggal_selesai.after_or_equal' =>
-                        'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+                    'Tanggal selesai tidak boleh sebelum tanggal mulai.',
                 ]
             );
 
@@ -881,10 +1207,10 @@ class ReportController extends Controller
 
         $newId =
             empty($reports)
-                ? 1
-                : max(
-                    array_keys($reports)
-                ) + 1;
+            ? 1
+            : max(
+                array_keys($reports)
+            ) + 1;
 
 
         $validated['id'] =

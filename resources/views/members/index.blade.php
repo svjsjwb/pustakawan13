@@ -55,6 +55,7 @@
                     <tr>
                         <th>NO</th>
                         <th>NAMA</th>
+                        <th>EMAIL</th>
                         <th>DIVISI</th>
                         <th>NO. TELEPON</th>
                         <th>STATUS</th>
@@ -63,75 +64,100 @@
                 </thead>
 
                 <tbody>
-    @forelse($members as $member)
 
-        <tr>
-            <td>{{ $loop->iteration }}</td>
+                    @forelse($members as $member)
 
-            <td>
-                <strong>{{ $member->name }}</strong>
-            </td>
+                        <tr>
 
-            <td>
-                {{ $member->division }}
-            </td>
+                            {{-- NO --}}
+                            <td>
+                                {{ $loop->iteration }}
+                            </td>
 
-            <td>
-                {{ $member->phone }}
-            </td>
+                            {{-- NAMA --}}
+                            <td>
+                                <strong>{{ $member->name }}</strong>
+                            </td>
 
-            <td>
-                @if($member->status === 'Aktif')
-                    <span class="status-active">
-                        Aktif
-                    </span>
-                @else
-                    <span class="status-inactive">
-                        Nonaktif
-                    </span>
-                @endif
-            </td>
+                            {{-- EMAIL --}}
+                            <td>
+                                {{ $member->email ?? '-' }}
+                            </td>
 
-            <td>
-                <div class="action-buttons">
+                            {{-- DIVISI --}}
+                            <td>
+                                {{ $member->division }}
+                            </td>
 
-                    <a
-                        href="{{ route('members.edit', $member->id) }}"
-                        class="btn-edit"
-                    >
-                        Edit
-                    </a>
+                            {{-- NO TELEPON --}}
+                            <td>
+                                {{ $member->phone }}
+                            </td>
 
-                    <form
-                        action="{{ route('members.destroy', $member->id) }}"
-                        method="POST"
-                        onsubmit="return confirm('Yakin ingin menghapus karyawan ini?')"
-                    >
-                        @csrf
-                        @method('DELETE')
+                            {{-- STATUS --}}
+                            <td>
+                                @if($member->status === 'aktif')
 
-                        <button
-                            type="submit"
-                            class="btn-delete"
-                        >
-                            Hapus
-                        </button>
-                    </form>
+                                    <span class="status-active">
+                                        Aktif
+                                    </span>
 
-                </div>
-            </td>
-        </tr>
+                                @else
 
-    @empty
+                                    <span class="status-inactive">
+                                        Tidak Aktif
+                                    </span>
 
-        <tr>
-            <td colspan="6" class="empty-data">
-                Belum ada data karyawan.
-            </td>
-        </tr>
+                                @endif
+                            </td>
 
-    @endforelse
-</tbody>
+                            {{-- AKSI --}}
+                            <td>
+
+                                <div class="action-buttons">
+
+                                    <a
+                                        href="{{ route('members.edit', $member->id) }}"
+                                        class="btn-edit"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <form
+                                        action="{{ route('members.destroy', $member->id) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Yakin ingin menghapus karyawan ini?')"
+                                    >
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button
+                                            type="submit"
+                                            class="btn-delete"
+                                        >
+                                            Hapus
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+                            <td colspan="7" class="empty-data">
+                                Belum ada data karyawan.
+                            </td>
+                        </tr>
+
+                    @endforelse
+
+                </tbody>
 
             </table>
 
