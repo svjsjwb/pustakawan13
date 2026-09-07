@@ -144,6 +144,15 @@
             width: 100%;
         }
     }
+
+    @keyframes highlightPulse {
+        0% { background-color: #ecfdf5; transform: scale(1.005); }
+        50% { background-color: #d1fae5; }
+        100% { background-color: transparent; transform: scale(1); }
+    }
+    .row-pulse {
+        animation: highlightPulse 2.5s ease;
+    }
 </style>
 
 @endpush
@@ -604,7 +613,7 @@
                             @endphp
 
 
-                            <tr class="borrowing-row">
+                            <tr class="borrowing-row" data-borrowing-id="{{ $borrowing->id }}">
 
 
                                 {{-- ANGGOTA --}}
@@ -1411,6 +1420,86 @@ document.addEventListener(
     }
 );
 
+/* =================================================
+   REAL-TIME SYNCHRONIZATION (AC-1 & AC-3)
+================================================= */
+if (window.PustakawanRealtime) {
+    const currentMonth = {{ (int) $month }};
+    const currentYear = {{ (int) $year }};
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+    const tbody = document.querySelector('#borrowingTable tbody');
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    PustakawanRealtime.on('borrowing.created', function (data) {
+        // Notifikasi toast live untuk admin
+        PustakawanRealtime.toast(
+            `Peminjaman baru dibuat: "${escapeHtml(data.book_title)}" untuk ${escapeHtml(data.member_name)} (Tenggat 14 Hari)`,
+            'success',
+            '📚 Peminjaman Otomatis Aktif'
+        );
+
+        if (!tbody) return;
+
+        // Cek apakah data yang masuk sesuai dengan periode filter bulan & tahun yang sedang dibuka
+        if (data.year && data.month && (data.year !== currentYear || data.month !== currentMonth)) {
+            return;
+        }
+
+        // Cegah duplikasi baris
+        if (tbody.querySelector(`tr[data-borrowing-id="${data.id}"]`)) return;
+
+        // Hilangkan pesan kosong jika ada
+        const emptyRow = tbody.querySelector('.borrowing-empty');
+        if (emptyRow) emptyRow.remove();
+
+        const tr = document.createElement('tr');
+        tr.className = 'borrowing-row row-pulse';
+        tr.setAttribute('data-borrowing-id', data.id);
+
+        tr.innerHTML = `
+            <td class="member-cell">
+                ${escapeHtml(data.member_name)}
+            </td>
+            <td class="book-cell">
+                <span>${escapeHtml(data.book_title)}</span>
+            </td>
+            <td>
+                ${escapeHtml(data.borrowed_at_formatted || data.borrowed_at)}
+            </td>
+            <td>
+                ${escapeHtml(data.due_at_formatted || data.due_at)}
+            </td>
+            <td>
+                <span class="status-badge aktif">
+                    <span class="status-dot"></span>
+                    Sedang Dipinjam
+                </span>
+            </td>
+            <td>
+                <div class="borrowing-action-buttons">
+                    <button type="button" class="btn-extend" onclick="openExtendModal(${data.id}, ${JSON.stringify(data.book_title)}, ${JSON.stringify(data.due_at_formatted || data.due_at)})">
+                        <span class="extend-icon">↻</span>
+                        Perpanjang
+                    </button>
+                    <form action="/circulation/${data.id}/return" method="POST" class="return-form" onsubmit="return confirm('Yakin buku ini sudah dikembalikan?');">
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <input type="hidden" name="_method" value="PATCH">
+                        <button type="submit" class="btn-return">
+                            <span class="return-icon">✓</span>
+                            Kembalikan
+                        </button>
+                    </form>
+                </div>
+            </td>
+        `;
+
+        tbody.prepend(tr);
+    });
+}
 </script>
 
 @endsection

@@ -22,6 +22,14 @@
 
 
     <style>
+        @keyframes highlightPulse {
+            0% { background-color: #ecfdf5; transform: scale(1.005); }
+            50% { background-color: #d1fae5; }
+            100% { background-color: transparent; transform: scale(1); }
+        }
+        .row-pulse {
+            animation: highlightPulse 2.5s ease;
+        }
 
         /* =====================================================
            FILTER BAR
@@ -856,7 +864,7 @@
                             as $reservation
                         )
 
-                            <tr class="reservation-row">
+                            <tr class="reservation-row" data-reservation-id="{{ $reservation->id }}">
 
 
                                 {{-- =========================
@@ -865,7 +873,13 @@
 
                                 <td>
 
-                                    {{ $reservation->member->name ?? '-' }}
+                                    <strong>{{ $reservation->member->name ?? $reservation->user->name ?? '-' }}</strong>
+                                    @if($reservation->user_id && !$reservation->member_id)
+                                        <div style="font-size: 11px; color: #0f766e; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px; background: #f0fdfa; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccfbf1;">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                                            Online (User)
+                                        </div>
+                                    @endif
 
                                 </td>
 
@@ -876,7 +890,7 @@
 
                                 <td>
 
-                                    {{ $reservation->book->title ?? '-' }}
+                                    {{ $reservation->book->title ?? $reservation->book->judul_buku ?? '-' }}
 
                                 </td>
 
@@ -910,7 +924,7 @@
 
                                     @else
 
-                                        -
+                                        <span style="color: #64748b; font-size: 12px;">Menunggu Approval</span>
 
                                     @endif
 
@@ -1426,9 +1440,113 @@
                     }
                 );
 
+                /* =================================================
+                   REAL-TIME SYNCHRONIZATION (AC-1)
+                ================================================= */
+                if (window.PustakawanRealtime) {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+                    const tbody = document.querySelector('#reservationTable tbody');
+
+                    function escapeHtml(str) {
+                        if (!str) return '';
+                        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    }
+
+                    // 1. Reservasi Baru Masuk Live
+                    PustakawanRealtime.on('reservation.created', function (data) {
+                        if (!tbody) return;
+
+                        // Cegah duplikasi baris
+                        if (tbody.querySelector(`tr[data-reservation-id="${data.id}"]`)) return;
+
+                        // Hilangkan pesan kosong jika ada
+                        const emptyRow = tbody.querySelector('.reservation-empty');
+                        if (emptyRow) emptyRow.remove();
+
+                        const tr = document.createElement('tr');
+                        tr.className = 'reservation-row row-pulse';
+                        tr.setAttribute('data-reservation-id', data.id);
+
+                        const onlineBadge = data.is_online_user
+                            ? `<div style="font-size: 11px; color: #0f766e; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px; background: #f0fdfa; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccfbf1;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>Online (User)</div>`
+                            : '';
+
+                        const expiresText = data.expires_at ? escapeHtml(data.expires_at) : '<span style="color: #64748b; font-size: 12px;">Menunggu Approval</span>';
+
+                        tr.innerHTML = `
+                            <td>
+                                <strong>${escapeHtml(data.member_name)}</strong>
+                                ${onlineBadge}
+                            </td>
+                            <td>${escapeHtml(data.book_title)}</td>
+                            <td>${escapeHtml(data.reserved_at_formatted || data.reserved_at)}</td>
+                            <td>${expiresText}</td>
+                            <td>
+                                <span class="reservation-status waiting">Menunggu</span>
+                            </td>
+                            <td>
+                                <div class="reservation-actions">
+                                    <form action="/reservations/${data.id}/status" method="POST">
+                                        <input type="hidden" name="_token" value="${csrfToken}">
+                                        <input type="hidden" name="_method" value="PATCH">
+                                        <input type="hidden" name="status" value="disetujui">
+                                        <button type="submit" class="btn-approve">Setujui</button>
+                                    </form>
+                                    <form action="/reservations/${data.id}/status" method="POST">
+                                        <input type="hidden" name="_token" value="${csrfToken}">
+                                        <input type="hidden" name="_method" value="PATCH">
+                                        <input type="hidden" name="status" value="ditolak">
+                                        <button type="submit" class="btn-reject" onclick="return confirm('Tolak reservasi ini?')">Tolak</button>
+                                    </form>
+                                </div>
+                            </td>
+                        `;
+
+                        tbody.prepend(tr);
+
+                        // Notifikasi toast live
+                        PustakawanRealtime.toast(
+                            `Buku "${escapeHtml(data.book_title)}" oleh ${escapeHtml(data.member_name)}`,
+                            'info',
+                            '🔔 Reservasi Baru Masuk'
+                        );
+                    });
+
+                    // 2. Status Reservasi Disetujui / Diperbarui Live
+                    PustakawanRealtime.on('reservation.approved', function (data) {
+                        const row = tbody ? tbody.querySelector(`tr[data-reservation-id="${data.id}"]`) : null;
+                        if (row) {
+                            const statusTd = row.children[4];
+                            if (statusTd) {
+                                statusTd.innerHTML = '<span class="reservation-status approved">Disetujui</span>';
+                            }
+                            const actionsDiv = row.querySelector('.reservation-actions');
+                            if (actionsDiv) {
+                                const approveForm = actionsDiv.querySelector('button.btn-approve')?.closest('form');
+                                if (approveForm) approveForm.remove();
+                            }
+                            row.classList.add('row-pulse');
+                        }
+                    });
+
+                    PustakawanRealtime.on('reservation.updated', function (data) {
+                        const row = tbody ? tbody.querySelector(`tr[data-reservation-id="${data.id}"]`) : null;
+                        if (row) {
+                            const statusTd = row.children[4];
+                            if (statusTd) {
+                                let badgeClass = 'waiting';
+                                if (data.status === 'ditolak') badgeClass = 'rejected';
+                                else if (data.status === 'dibatalkan') badgeClass = 'cancelled';
+                                else if (data.status === 'selesai') badgeClass = 'finished';
+                                statusTd.innerHTML = `<span class="reservation-status ${badgeClass}">${escapeHtml(data.status_label || data.status)}</span>`;
+                            }
+                            row.classList.add('row-pulse');
+                        }
+                    });
+                }
+
             }
         );
 
     </script>
-
 @endpush

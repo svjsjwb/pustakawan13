@@ -32,4 +32,9 @@ class Borrowing extends Model
     {
         return $this->hasMany(BorrowingDetail::class);
     }
+
+    public function reservation()
+    {
+        return $this->hasOne(Reservation::class);
+    }
 }

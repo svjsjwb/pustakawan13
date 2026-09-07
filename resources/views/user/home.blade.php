@@ -146,7 +146,7 @@
                 <button
                     type="button"
                     class="user-book-cover user-book-open"
-
+                    data-id="{{ $book->id }}"
                     data-title="{{ $book->title }}"
                     data-author="{{ $book->author ?? '-' }}"
                     data-category="{{ $book->category->name ?? '-' }}"
@@ -242,7 +242,7 @@
                 <button
                     type="button"
                     class="user-book-cover user-book-open"
-
+                    data-id="{{ $book->id }}"
                     data-title="{{ $book->title }}"
                     data-author="{{ $book->author ?? '-' }}"
                     data-category="{{ $book->category->name ?? '-' }}"
@@ -577,7 +577,7 @@
             </div>
 
 
-            <div class="user-book-actions">
+            <div class="user-book-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
 
                 <a
                     href="{{ route('catalog') }}"
@@ -587,7 +587,42 @@
 
                 </a>
 
+                {{-- Form Buat Reservasi --}}
+                <form action="{{ route('user.reservations.store') }}" method="POST" id="modalReservationForm" style="margin: 0;">
+                    @csrf
+                    <input type="hidden" name="book_id" id="modalReservationBookId" value="">
+                    <button
+                        type="submit"
+                        id="btn-reservasi-modal"
+                        style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: 10px; background: #0f4c4c; color: #ffffff; border: none; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                        onmouseover="this.style.background='#0a3737'"
+                        onmouseout="this.style.background='#0f4c4c'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        Buat Reservasi
+                    </button>
+                </form>
+
+                {{-- Form Tambahkan ke Favorit Saya --}}
+                <form action="{{ route('favorites.store') }}" method="POST" id="modalFavoriteForm" style="margin: 0;">
+                    @csrf
+                    <input type="hidden" name="book_id" id="modalBookId" value="">
+                    <button
+                        type="submit"
+                        id="btn-favorit-modal"
+                        style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: 10px; background: #ffffff; color: #0f4c4c; border: 1.5px solid #0f4c4c; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                        onmouseover="this.style.background='#f0fdf4'"
+                        onmouseout="this.style.background='#ffffff'">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#0f4c4c" stroke="#0f4c4c" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        Tambahkan ke Favorit Saya
+                    </button>
+                </form>
+
             </div>
+
 
         </div>
 

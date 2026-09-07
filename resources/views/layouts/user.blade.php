@@ -10,6 +10,8 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>
         @yield('title', 'Pustakawan')
     </title>
@@ -65,6 +67,11 @@
     </div>
 
 
+    {{-- USER PROFILE MODAL (FRAME 1000006646) --}}
+
+    @include('partials.user-profile-modal')
+
+
     {{-- GLOBAL JS --}}
 
     <script
@@ -76,6 +83,11 @@
 
     <script
         src="{{ asset('js/user-navbar.js') }}"
+    ></script>
+
+    {{-- REALTIME SYNC JS --}}
+    <script
+        src="{{ asset('js/realtime.js') }}"
     ></script>
 
 

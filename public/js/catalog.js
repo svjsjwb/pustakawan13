@@ -338,6 +338,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     /*
                     |--------------------------------------------------------------------------
+                    | RESERVASI BOOK ID
+                    |--------------------------------------------------------------------------
+                    */
+
+                    const catalogReservationBookId = document.getElementById('catalogModalReservationBookId');
+                    if (catalogReservationBookId) {
+                        catalogReservationBookId.value = card.dataset.id || '';
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
                     | BUKA MODAL
                     |--------------------------------------------------------------------------
                     */

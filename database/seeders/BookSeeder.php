@@ -17,7 +17,7 @@ class BookSeeder extends Seeder
             ->get();
 
         if ($categories->isEmpty()) {
-            throw new \Exception("Data Category belum tersedia. Jalankan CategorySeeder & SubcategorySeeder terlebih dahulu.");
+            throw new \Exception("Data Category belum tersedia. Jalankan CategorySeeder terlebih dahulu.");
         }
 
         $racks = Rack::pluck('code')->toArray();
@@ -55,4 +55,3 @@ class BookSeeder extends Seeder
         }
     }
 }
-

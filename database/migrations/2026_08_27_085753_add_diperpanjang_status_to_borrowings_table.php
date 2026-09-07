@@ -12,18 +12,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("
-            ALTER TABLE borrowings
-            MODIFY status
-            ENUM(
-                'dipinjam',
-                'diperpanjang',
-                'dikembalikan',
-                'terlambat'
-            )
-            NOT NULL
-            DEFAULT 'dipinjam'
-        ");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("
+                ALTER TABLE borrowings
+                MODIFY status
+                ENUM(
+                    'dipinjam',
+                    'diperpanjang',
+                    'dikembalikan',
+                    'terlambat'
+                )
+                NOT NULL
+                DEFAULT 'dipinjam'
+            ");
+        }
     }
 
     /**
@@ -31,16 +33,18 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("
-            ALTER TABLE borrowings
-            MODIFY status
-            ENUM(
-                'dipinjam',
-                'dikembalikan',
-                'terlambat'
-            )
-            NOT NULL
-            DEFAULT 'dipinjam'
-        ");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("
+                ALTER TABLE borrowings
+                MODIFY status
+                ENUM(
+                    'dipinjam',
+                    'dikembalikan',
+                    'terlambat'
+                )
+                NOT NULL
+                DEFAULT 'dipinjam'
+            ");
+        }
     }
 };

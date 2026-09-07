@@ -32,7 +32,6 @@ class CirculationController extends Controller
             ->orderBy('name')
             ->get();
 
-
         /*
          * =====================================================
          * DATA BUKU
@@ -40,7 +39,6 @@ class CirculationController extends Controller
          */
 
         $books = Book::orderBy('judul_buku')->get();
-
 
         /*
          * =====================================================

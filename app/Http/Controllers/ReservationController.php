@@ -4,10 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\BookCopy;
+use App\Models\Borrowing;
+use App\Models\BorrowingDetail;
+use App\Models\LibraryZone;
 use App\Models\Member;
 use App\Models\Reservation;
 use App\Models\Shelf;
-use App\Models\LibraryZone;
+use App\Models\User;
+use App\Notifications\ReservationStatusNotification;
+use App\Services\RealtimeService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,10 +21,10 @@ use Illuminate\Support\Facades\Schema;
 class ReservationController extends Controller
 {
     /*
-    |--------------------------------------------------------------------------
-    | DAFTAR RESERVASI
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | DAFTAR RESERVASI
+     * |--------------------------------------------------------------------------
+     */
 
     public function index(Request $request)
     {
@@ -34,7 +39,6 @@ class ReservationController extends Controller
             now()->format('Y-m-d')
         );
 
-
         /*
          * =====================================================
          * ANGGOTA AKTIF
@@ -48,7 +52,6 @@ class ReservationController extends Controller
             ->orderBy('name')
             ->get();
 
-
         /*
          * =====================================================
          * BUKU
@@ -56,7 +59,6 @@ class ReservationController extends Controller
          */
 
         $books = Book::orderBy('judul_buku')->get();
-
 
         /*
          * =====================================================
@@ -69,37 +71,22 @@ class ReservationController extends Controller
 
         $query = Reservation::with([
             'member',
+            'user',
             'book',
             'bookCopy.shelf.zone.floor',
         ]);
 
-
         /*
          * =====================================================
-         * TENTUKAN KOLOM BATAS WAKTU
+         * TENTUKAN KOLOM TANGGAL
          * =====================================================
          *
-         * Prioritas:
-         *
-         * 1. due_at
-         * 2. expires_at
-         * 3. reserved_at
+         * Gunakan 'reserved_at' sebagai basis agar semua reservasi
+         * (termasuk reservasi online pengguna yang expires_at = null)
+         * otomatis masuk dan tampil di tabel admin.
          */
 
-        $dueColumn = Schema::hasColumn(
-            'reservations',
-            'due_at'
-        )
-            ? 'due_at'
-            : (
-                Schema::hasColumn(
-                    'reservations',
-                    'expires_at'
-                )
-                    ? 'expires_at'
-                    : 'reserved_at'
-            );
-
+        $dateColumn = 'reserved_at';
 
         /*
          * =====================================================
@@ -108,11 +95,9 @@ class ReservationController extends Controller
          */
 
         if (
-            $request->filled('start_date')
-            &&
+            $request->filled('start_date') &&
             $request->filled('end_date')
         ) {
-
             $startDate = Carbon::parse(
                 $request->start_date
             )->startOfDay();
@@ -128,62 +113,55 @@ class ReservationController extends Controller
                     $endDate,
                 ]
             );
-
         } elseif (
             $request->filled('start_date')
         ) {
-
             $query->whereDate(
                 'reserved_at',
                 '>=',
                 $request->start_date
             );
-
         } elseif (
             $request->filled('end_date')
         ) {
-
             $query->whereDate(
                 'reserved_at',
                 '<=',
                 $request->end_date
             );
-
         } elseif (
-            $request->filled('month')
-            &&
+            $request->filled('month') &&
             $request->filled('year')
         ) {
-
             /*
-             * Filter bulan berdasarkan due date
-             * / expires_at / reserved_at.
+             * Filter bulan berdasarkan reserved_at.
              */
 
             $query
                 ->whereYear(
-                    $dueColumn,
+                    $dateColumn,
                     $request->year
                 )
                 ->whereMonth(
-                    $dueColumn,
+                    $dateColumn,
                     $request->month
                 );
-
         } else {
-
             /*
              * Default:
-             * tampilkan data dalam satu bulan terakhir.
+             * tampilkan data dalam 1 bulan terakhir,
+             * DAN selalu sertakan reservasi yang masih 'menunggu' atau 'disetujui'
+             * agar permintaan reservasi baru dari user langsung terlihat.
              */
 
-            $query->where(
-                $dueColumn,
-                '>=',
-                now()->subMonth()->startOfDay()
-            );
+            $query->where(function ($q) use ($dateColumn) {
+                $q->where(
+                    $dateColumn,
+                    '>=',
+                    now()->subMonth()->startOfDay()
+                )->orWhereIn('status', ['menunggu', 'disetujui']);
+            });
         }
-
 
         /*
          * =====================================================
@@ -193,8 +171,8 @@ class ReservationController extends Controller
 
         $reservations = $query
             ->latest('reserved_at')
+            ->latest('id')
             ->get();
-
 
         /*
          * =====================================================
@@ -221,7 +199,6 @@ class ReservationController extends Controller
             )
             ->toArray();
 
-
         /*
          * =====================================================
          * KIRIM KE VIEW
@@ -240,12 +217,11 @@ class ReservationController extends Controller
         );
     }
 
-
     /*
-    |--------------------------------------------------------------------------
-    | SIMPAN RESERVASI
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | SIMPAN RESERVASI
+     * |--------------------------------------------------------------------------
+     */
 
     public function store(Request $request)
     {
@@ -260,30 +236,25 @@ class ReservationController extends Controller
                 'required',
                 'exists:members,id',
             ],
-
             'book_id' => [
                 'required',
                 'exists:books,id',
             ],
-
             'reserved_at' => [
                 'required',
                 'date',
             ],
-
             'expires_at' => [
                 'nullable',
                 'date',
                 'after_or_equal:reserved_at',
             ],
-
             'seat_number' => [
                 'nullable',
                 'string',
                 'regex:/^[ABC][1-8]$/',
             ],
         ]);
-
 
         /*
          * =====================================================
@@ -296,7 +267,6 @@ class ReservationController extends Controller
                 $validated['seat_number']
             )
         ) {
-
             $seatAlreadyBooked =
                 Reservation::whereDate(
                     'reserved_at',
@@ -315,20 +285,17 @@ class ReservationController extends Controller
                     )
                     ->exists();
 
-
             if ($seatAlreadyBooked) {
-
                 return back()
                     ->withInput()
                     ->with(
                         'error',
-                        'Kursi ' .
-                        $validated['seat_number'] .
-                        ' sudah dipesan oleh pengguna lain pada tanggal tersebut.'
+                        'Kursi '
+                            . $validated['seat_number']
+                            . ' sudah dipesan oleh pengguna lain pada tanggal tersebut.'
                     );
             }
         }
-
 
         /*
          * =====================================================
@@ -340,7 +307,6 @@ class ReservationController extends Controller
             function () use (
                 $validated
             ) {
-
                 /*
                  * =================================================
                  * KUNCI BUKU
@@ -352,7 +318,6 @@ class ReservationController extends Controller
                         $validated['book_id']
                     );
 
-
                 /*
                  * =================================================
                  * CEK STOK
@@ -362,13 +327,11 @@ class ReservationController extends Controller
                 if (
                     $book->available_stock < 1
                 ) {
-
                     abort(
                         422,
                         'Buku sedang tidak tersedia.'
                     );
                 }
-
 
                 /*
                  * =================================================
@@ -390,15 +353,12 @@ class ReservationController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-
                 if (!$bookCopy) {
-
                     abort(
                         422,
                         'Tidak ada eksemplar buku yang tersedia.'
                     );
                 }
-
 
                 /*
                  * =================================================
@@ -414,7 +374,6 @@ class ReservationController extends Controller
                         $validated['seat_number']
                     )
                 ) {
-
                     $seatAlreadyBooked =
                         Reservation::whereDate(
                             'reserved_at',
@@ -434,18 +393,15 @@ class ReservationController extends Controller
                             ->lockForUpdate()
                             ->exists();
 
-
                     if ($seatAlreadyBooked) {
-
                         abort(
                             422,
-                            'Kursi ' .
-                            $validated['seat_number'] .
-                            ' baru saja dipesan oleh pengguna lain.'
+                            'Kursi '
+                                . $validated['seat_number']
+                                . ' baru saja dipesan oleh pengguna lain.'
                         );
                     }
                 }
-
 
                 /*
                  * =================================================
@@ -456,28 +412,21 @@ class ReservationController extends Controller
                 $reservationData = [
                     'member_id' =>
                         $validated['member_id'],
-
                     'book_id' =>
                         $validated['book_id'],
-
                     'book_copy_id' =>
                         $bookCopy->id,
-
                     'reserved_at' =>
                         $validated['reserved_at'],
-
                     'expires_at' =>
                         $validated['expires_at']
-                        ?? null,
-
+                            ?? null,
                     'seat_number' =>
                         $validated['seat_number']
-                        ?? null,
-
+                            ?? null,
                     'status' =>
                         'menunggu',
                 ];
-
 
                 /*
                  * =================================================
@@ -491,13 +440,10 @@ class ReservationController extends Controller
                         'due_at'
                     )
                 ) {
-
                     $reservationData['due_at'] =
                         $validated['expires_at']
-                        ??
-                        $validated['reserved_at'];
+                            ?? $validated['reserved_at'];
                 }
-
 
                 /*
                  * =================================================
@@ -505,10 +451,9 @@ class ReservationController extends Controller
                  * =================================================
                  */
 
-                Reservation::create(
+                $createdReservation = Reservation::create(
                     $reservationData
                 );
-
 
                 /*
                  * =================================================
@@ -520,7 +465,6 @@ class ReservationController extends Controller
                     'status' => 'reserved',
                 ]);
 
-
                 /*
                  * =================================================
                  * KURANGI STOK
@@ -531,6 +475,25 @@ class ReservationController extends Controller
             }
         );
 
+        // Broadcast real-time event untuk Admin
+        if (isset($createdReservation) && $createdReservation) {
+            $createdReservation->load(['member', 'book']);
+            RealtimeService::publish('reservation.created', [
+                'id'                    => $createdReservation->id,
+                'user_id'               => $createdReservation->user_id,
+                'member_id'             => $createdReservation->member_id,
+                'member_name'           => $createdReservation->member?->name ?? 'Anggota',
+                'is_online_user'        => false,
+                'book_id'               => $createdReservation->book_id,
+                'book_title'            => $createdReservation->book?->title ?? $createdReservation->book?->judul_buku ?? '-',
+                'reserved_at'           => $createdReservation->reserved_at ? $createdReservation->reserved_at->toDateString() : now()->toDateString(),
+                'reserved_at_formatted' => $createdReservation->reserved_at ? $createdReservation->reserved_at->format('d/m/Y') : now()->format('d/m/Y'),
+                'expires_at'            => $createdReservation->expires_at ? $createdReservation->expires_at->format('d/m/Y') : null,
+                'status'                => 'menunggu',
+                'status_label'          => 'Menunggu',
+                'seat_number'           => $createdReservation->seat_number,
+            ]);
+        }
 
         /*
          * =====================================================
@@ -548,18 +511,16 @@ class ReservationController extends Controller
             );
     }
 
-
     /*
-    |--------------------------------------------------------------------------
-    | UPDATE STATUS RESERVASI
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | UPDATE STATUS RESERVASI
+     * |--------------------------------------------------------------------------
+     */
 
     public function updateStatus(
         Request $request,
         Reservation $reservation
     ) {
-
         /*
          * =====================================================
          * VALIDASI
@@ -573,7 +534,6 @@ class ReservationController extends Controller
             ],
         ]);
 
-
         /*
          * =====================================================
          * TRANSACTION
@@ -585,7 +545,6 @@ class ReservationController extends Controller
                 $validated,
                 $reservation
             ) {
-
                 /*
                  * Kunci reservation.
                  */
@@ -596,14 +555,11 @@ class ReservationController extends Controller
                             $reservation->id
                         );
 
-
                 $oldStatus =
                     $reservation->status;
 
-
                 $newStatus =
                     $validated['status'];
-
 
                 /*
                  * =================================================
@@ -615,10 +571,8 @@ class ReservationController extends Controller
                     $oldStatus ===
                     $newStatus
                 ) {
-
                     return;
                 }
-
 
                 /*
                  * =================================================
@@ -633,8 +587,7 @@ class ReservationController extends Controller
                             'ditolak',
                             'dibatalkan',
                         ]
-                    )
-                    &&
+                    ) &&
                     !in_array(
                         $oldStatus,
                         [
@@ -643,7 +596,6 @@ class ReservationController extends Controller
                         ]
                     )
                 ) {
-
                     /*
                      * ---------------------------------------------
                      * RELEASE BOOK COPY
@@ -653,7 +605,6 @@ class ReservationController extends Controller
                     if (
                         $reservation->book_copy_id
                     ) {
-
                         $bookCopy =
                             BookCopy::lockForUpdate()
                                 ->find(
@@ -661,21 +612,17 @@ class ReservationController extends Controller
                                         ->book_copy_id
                                 );
 
-
                         if (
-                            $bookCopy
-                            &&
+                            $bookCopy &&
                             $bookCopy->status ===
-                            'reserved'
+                                'reserved'
                         ) {
-
                             $bookCopy->update([
                                 'status' =>
                                     'available',
                             ]);
                         }
                     }
-
 
                     /*
                      * ---------------------------------------------
@@ -689,10 +636,8 @@ class ReservationController extends Controller
                                 $reservation->book_id
                             );
 
-
                     $book->increment('stok');
                 }
-
 
                 /*
                  * =================================================
@@ -712,8 +657,7 @@ class ReservationController extends Controller
                             'ditolak',
                             'dibatalkan',
                         ]
-                    )
-                    &&
+                    ) &&
                     !in_array(
                         $newStatus,
                         [
@@ -722,7 +666,6 @@ class ReservationController extends Controller
                         ]
                     )
                 ) {
-
                     /*
                      * ---------------------------------------------
                      * KUNCI BUKU
@@ -735,7 +678,6 @@ class ReservationController extends Controller
                                 $reservation->book_id
                             );
 
-
                     /*
                      * ---------------------------------------------
                      * CEK STOK
@@ -745,13 +687,11 @@ class ReservationController extends Controller
                     if (
                         $book->stok < 1
                     ) {
-
                         abort(
                             422,
                             'Stok buku tidak tersedia untuk mengaktifkan kembali reservasi.'
                         );
                     }
-
 
                     /*
                      * ---------------------------------------------
@@ -771,15 +711,12 @@ class ReservationController extends Controller
                             ->lockForUpdate()
                             ->first();
 
-
                     if (!$bookCopy) {
-
                         abort(
                             422,
                             'Tidak ada eksemplar buku yang tersedia untuk mengaktifkan kembali reservasi.'
                         );
                     }
-
 
                     /*
                      * ---------------------------------------------
@@ -792,7 +729,6 @@ class ReservationController extends Controller
                             'reserved',
                     ]);
 
-
                     /*
                      * ---------------------------------------------
                      * HUBUNGKAN RESERVATION
@@ -804,7 +740,6 @@ class ReservationController extends Controller
                             $bookCopy->id,
                     ]);
 
-
                     /*
                      * ---------------------------------------------
                      * KURANGI STOK
@@ -814,6 +749,80 @@ class ReservationController extends Controller
                     $book->decrement('stok');
                 }
 
+                /*
+                 * =================================================
+                 * OTOMASI PEMINJAMAN SAAT DISETUJUI (REQUIREMENT 2.2)
+                 * =================================================
+                 */
+                $createdBorrowing = null;
+                $tApprove = now();
+                $borrowedAt = $tApprove->copy();
+                $dueAt = $tApprove->copy()->addDays(14); // Tepat 2 minggu (14 hari) terhitung sejak T_approve
+
+                if ($newStatus === 'disetujui') {
+                    // Pastikan member terhubung (jika reservasi dibuat user online)
+                    if (!$reservation->member_id && $reservation->user_id) {
+                        $user = $reservation->user;
+                        if ($user) {
+                            $member = Member::where('user_id', $user->id)
+                                ->orWhere('email', $user->email)
+                                ->orWhere('name', $user->name)
+                                ->first();
+                            if (!$member) {
+                                $member = Member::create([
+                                    'user_id'  => $user->id,
+                                    'name'     => $user->name,
+                                    'email'    => $user->email,
+                                    'phone'    => $user->phone ?: '-',
+                                    'division' => 'Anggota',
+                                    'status'   => 'Aktif',
+                                ]);
+                            }
+                            $reservation->member_id = $member->id;
+                            $reservation->save();
+                        }
+                    }
+
+                    // Pastikan book copy ada dan statusnya berubah menjadi 'borrowed'
+                    if ($reservation->book_copy_id) {
+                        $bookCopy = BookCopy::lockForUpdate()->find($reservation->book_copy_id);
+                        if ($bookCopy) {
+                            $bookCopy->update(['status' => 'borrowed']);
+                        }
+                    } else {
+                        $bookCopy = BookCopy::where('book_id', $reservation->book_id)
+                            ->whereIn('status', ['available', 'tersedia'])
+                            ->lockForUpdate()
+                            ->first();
+                        if ($bookCopy) {
+                            $bookCopy->update(['status' => 'borrowed']);
+                            $reservation->book_copy_id = $bookCopy->id;
+                            $reservation->save();
+                        }
+                    }
+
+                    // Buat data pinjam jika belum pernah dibuat (Idempoten)
+                    if (!$reservation->borrowing_id && $reservation->member_id) {
+                        $createdBorrowing = Borrowing::create([
+                            'member_id'   => $reservation->member_id,
+                            'borrowed_at' => $borrowedAt->toDateString(),
+                            'due_at'      => $dueAt->toDateString(),
+                            'status'      => 'dipinjam',
+                            'seat_number' => $reservation->seat_number,
+                        ]);
+
+                        BorrowingDetail::create([
+                            'borrowing_id' => $createdBorrowing->id,
+                            'book_id'      => $reservation->book_id,
+                            'book_copy_id' => $reservation->book_copy_id,
+                            'quantity'     => 1,
+                        ]);
+
+                        $reservation->borrowing_id = $createdBorrowing->id;
+                    } elseif ($reservation->borrowing_id) {
+                        $createdBorrowing = Borrowing::find($reservation->borrowing_id);
+                    }
+                }
 
                 /*
                  * =================================================
@@ -825,9 +834,73 @@ class ReservationController extends Controller
                     'status' =>
                         $newStatus,
                 ]);
+
+                /*
+                 * =================================================
+                 * KIRIM NOTIFIKASI KE USER (JIKA ALLOW NOTIFICATION)
+                 * =================================================
+                 */
+                if (in_array($newStatus, ['disetujui', 'ditolak']) && $oldStatus !== $newStatus) {
+                    $targetUser = $reservation->user;
+                    if (!$targetUser && $reservation->member) {
+                        $targetUser = User::where('id', $reservation->member->user_id)
+                            ->orWhere('email', $reservation->member->email)
+                            ->first();
+                    }
+
+                    if ($targetUser && $targetUser->is_notification_enabled) {
+                        $targetUser->notify(new ReservationStatusNotification($reservation, $newStatus));
+                    }
+                }
+
+                /*
+                 * =================================================
+                 * BROADCAST REAL-TIME VIA SSE (REQUIREMENT 2.1)
+                 * =================================================
+                 */
+                $reservation->load(['member', 'book']);
+                $bookTitle = $reservation->book?->title ?? $reservation->book?->judul_buku ?? 'Buku';
+                $memberName = $reservation->member?->name ?? $reservation->user?->name ?? 'Anggota';
+
+                if ($newStatus === 'disetujui') {
+                    RealtimeService::publish('reservation.approved', [
+                        'id'           => $reservation->id,
+                        'user_id'      => $reservation->user_id,
+                        'status'       => 'disetujui',
+                        'status_label' => 'Dipinjam/Siap Diambil',
+                        'book_title'   => $bookTitle,
+                        'member_name'  => $memberName,
+                        'borrowed_at'  => $borrowedAt->format('d/m/Y'),
+                        'due_at'       => $dueAt->format('d/m/Y'),
+                    ]);
+
+                    if ($createdBorrowing) {
+                        RealtimeService::publish('borrowing.created', [
+                            'id'                    => $createdBorrowing->id,
+                            'member_id'             => $createdBorrowing->member_id,
+                            'member_name'           => $memberName,
+                            'book_id'               => $reservation->book_id,
+                            'book_title'            => $bookTitle,
+                            'borrowed_at'           => $createdBorrowing->borrowed_at->toDateString(),
+                            'borrowed_at_formatted' => $createdBorrowing->borrowed_at->format('d/m/Y'),
+                            'due_at'                => $createdBorrowing->due_at->toDateString(),
+                            'due_at_formatted'      => $createdBorrowing->due_at->format('d/m/Y'),
+                            'status'                => 'dipinjam',
+                            'display_status'        => 'Sedang Dipinjam',
+                            'year'                  => (int) $createdBorrowing->borrowed_at->year,
+                            'month'                 => (int) $createdBorrowing->borrowed_at->month,
+                        ]);
+                    }
+                } else {
+                    RealtimeService::publish('reservation.updated', [
+                        'id'           => $reservation->id,
+                        'user_id'      => $reservation->user_id,
+                        'status'       => $newStatus,
+                        'status_label' => ucfirst($newStatus),
+                    ]);
+                }
             }
         );
-
 
         /*
          * =====================================================
@@ -845,17 +918,15 @@ class ReservationController extends Controller
             );
     }
 
-
     /*
-    |--------------------------------------------------------------------------
-    | BOOK LOCATOR
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | BOOK LOCATOR
+     * |--------------------------------------------------------------------------
+     */
 
     public function locator(
         Reservation $reservation
     ) {
-
         /*
          * =====================================================
          * LOAD DATA
@@ -868,7 +939,6 @@ class ReservationController extends Controller
             'bookCopy.shelf.zone.floor',
         ]);
 
-
         /*
          * =====================================================
          * CEK BOOK COPY
@@ -878,13 +948,11 @@ class ReservationController extends Controller
         if (
             !$reservation->bookCopy
         ) {
-
             abort(
                 404,
                 'Eksemplar buku tidak ditemukan.'
             );
         }
-
 
         /*
          * =====================================================
@@ -897,17 +965,14 @@ class ReservationController extends Controller
                 ->bookCopy
                 ->shelf;
 
-
         if (
             !$targetShelf
         ) {
-
             abort(
                 404,
                 'Rak buku belum ditentukan.'
             );
         }
-
 
         /*
          * =====================================================
@@ -918,17 +983,14 @@ class ReservationController extends Controller
         $targetZone =
             $targetShelf->zone;
 
-
         if (
             !$targetZone
         ) {
-
             abort(
                 404,
                 'Zona rak belum ditentukan.'
             );
         }
-
 
         /*
          * =====================================================
@@ -939,17 +1001,14 @@ class ReservationController extends Controller
         $targetFloor =
             $targetZone->floor;
 
-
         if (
             !$targetFloor
         ) {
-
             abort(
                 404,
                 'Lantai rak belum ditentukan.'
             );
         }
-
 
         /*
          * =====================================================
@@ -963,7 +1022,6 @@ class ReservationController extends Controller
                 $targetFloor->id
             )
                 ->pluck('id');
-
 
         /*
          * =====================================================
@@ -983,7 +1041,6 @@ class ReservationController extends Controller
                 ->orderBy('code')
                 ->get();
 
-
         /*
          * =====================================================
          * DATA BOOK COPY UNTUK 3D LOCATOR
@@ -993,54 +1050,36 @@ class ReservationController extends Controller
         $bookCopies =
             $shelves
                 ->flatMap(
-                    function ($shelf)
-                    use ($reservation) {
-
-                        return $shelf->copies
+                    function ($shelf) use ($reservation) {
+                        return $shelf
+                            ->copies
                             ->map(
-                                function ($copy)
-                                use (
+                                function ($copy) use (
                                     $shelf,
                                     $reservation
                                 ) {
-
                                     return [
-
                                         'id' =>
                                             $copy->id,
-
                                         'book_id' =>
                                             $copy->book_id,
-
                                         'title' =>
                                             $copy->book?->title
-                                            ??
-                                            'Buku',
-
+                                                ?? 'Buku',
                                         'barcode' =>
                                             $copy->barcode,
-
                                         'status' =>
                                             $copy->status,
-
                                         'shelf_id' =>
                                             $shelf->id,
-
                                         'shelf' =>
                                             $shelf->code,
-
                                         'section' =>
-                                            (int)
-                                            $copy->section,
-
+                                            (int) $copy->section,
                                         'row' =>
-                                            (int)
-                                            $copy->row,
-
+                                            (int) $copy->row,
                                         'column' =>
-                                            (int)
-                                            $copy->column,
-
+                                            (int) $copy->column,
                                         'is_target' =>
                                             $copy->id ===
                                             $reservation
@@ -1053,7 +1092,6 @@ class ReservationController extends Controller
                 ->values()
                 ->toArray();
 
-
         /*
          * =====================================================
          * KIRIM KE VIEW LOCATOR
@@ -1065,35 +1103,29 @@ class ReservationController extends Controller
             [
                 'reservation' =>
                     $reservation,
-
                 'targetShelf' =>
                     $targetShelf,
-
                 'shelves' =>
                     $shelves,
-
                 'bookCopies' =>
                     $bookCopies,
             ]
         );
     }
 
-
     /*
-    |--------------------------------------------------------------------------
-    | HAPUS RESERVASI
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | HAPUS RESERVASI
+     * |--------------------------------------------------------------------------
+     */
 
     public function destroy(
         Reservation $reservation
     ) {
-
         DB::transaction(
             function () use (
                 $reservation
             ) {
-
                 /*
                  * =================================================
                  * KUNCI RESERVATION
@@ -1105,7 +1137,6 @@ class ReservationController extends Controller
                         ->findOrFail(
                             $reservation->id
                         );
-
 
                 /*
                  * =================================================
@@ -1126,7 +1157,6 @@ class ReservationController extends Controller
                         ]
                     )
                 ) {
-
                     /*
                      * ---------------------------------------------
                      * RELEASE BOOK COPY
@@ -1136,7 +1166,6 @@ class ReservationController extends Controller
                     if (
                         $reservation->book_copy_id
                     ) {
-
                         $bookCopy =
                             BookCopy::lockForUpdate()
                                 ->find(
@@ -1144,21 +1173,17 @@ class ReservationController extends Controller
                                         ->book_copy_id
                                 );
 
-
                         if (
-                            $bookCopy
-                            &&
+                            $bookCopy &&
                             $bookCopy->status ===
-                            'reserved'
+                                'reserved'
                         ) {
-
                             $bookCopy->update([
                                 'status' =>
                                     'available',
                             ]);
                         }
                     }
-
 
                     /*
                      * ---------------------------------------------
@@ -1172,12 +1197,8 @@ class ReservationController extends Controller
                                 $reservation->book_id
                             );
 
-
-                    $book->increment(
-                        'available_stock'
-                    );
+                    $book->increment('stok');
                 }
-
 
                 /*
                  * =================================================
@@ -1188,7 +1209,6 @@ class ReservationController extends Controller
                 $reservation->delete();
             }
         );
-
 
         /*
          * =====================================================

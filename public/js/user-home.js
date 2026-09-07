@@ -242,6 +242,26 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
 
+                    /* ==============================
+                       BOOK ID (FAVORITE + RESERVASI)
+                    =============================== */
+
+                    const modalBookId = document.getElementById('modalBookId');
+                    if (modalBookId) {
+                        modalBookId.value = book.dataset.id || '';
+                    }
+
+                    const modalReservationBookId = document.getElementById('modalReservationBookId');
+                    if (modalReservationBookId) {
+                        modalReservationBookId.value = book.dataset.id || '';
+                    }
+
+                    const modalCatalogBtn = document.getElementById('modalCatalogBtn');
+                    if (modalCatalogBtn && book.dataset.title) {
+                        modalCatalogBtn.href = '/catalog?search=' + encodeURIComponent(book.dataset.title);
+                    }
+
+
 
                     /* ==============================
                        COVER

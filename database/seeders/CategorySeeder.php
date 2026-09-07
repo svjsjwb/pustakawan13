@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Subcategory;
 use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
@@ -55,140 +56,54 @@ class CategorySeeder extends Seeder
             ]
         );
 
+
         /*
          * |--------------------------------------------------------------------------
-         * | SUB KATEGORI LEVEL 2
+         * | SUB KATEGORI LEVEL 2 (via tabel subcategories)
          * |--------------------------------------------------------------------------
          */
 
-        Category::updateOrCreate(
-            [
-                'name' => 'Cerita Anak',
-                'parent_id' => $anak->id,
+        $subcategoryData = [
+            $anak->id => [
+                'Cerita Anak',
+                'Komik Anak',
+                'Pendidikan Anak',
+                'Dongeng',
+                'Novel',
+                'Cerpen',
             ],
-            [
-                'level' => 2,
-            ]
-        );
+            $remaja->id => [
+                'Novel Remaja',
+                'Komik Remaja',
+                'Pengembangan Diri',
+                'Agama & Moral',
+                'Cerpen',
+            ],
+            $dewasa->id => [
+                'Novel Dewasa',
+                'Bisnis & Ekonomi',
+                'Teknologi & Sains',
+                'Sejarah & Budaya',
+                'Agama',
+                'Cerpen',
+            ],
+            $pendidikan->id => [
+                'Tingkat SD/MI',
+                'Tingkat SMP/MTs',
+                'Tingkat SMA/SMK',
+                'Perguruan Tinggi',
+            ],
+        ];
 
-        Category::updateOrCreate(
-            [
-                'name' => 'Komik Anak',
-                'parent_id' => $anak->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'Pendidikan Anak',
-                'parent_id' => $anak->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'Novel Remaja',
-                'parent_id' => $remaja->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'Komik Remaja',
-                'parent_id' => $remaja->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'Pengembangan Diri',
-                'parent_id' => $remaja->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'Novel Dewasa',
-                'parent_id' => $dewasa->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'Bisnis',
-                'parent_id' => $dewasa->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'Teknologi',
-                'parent_id' => $dewasa->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'SD',
-                'parent_id' => $pendidikan->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'SMP',
-                'parent_id' => $pendidikan->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'SMA',
-                'parent_id' => $pendidikan->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
-
-        Category::updateOrCreate(
-            [
-                'name' => 'Perguruan Tinggi',
-                'parent_id' => $pendidikan->id,
-            ],
-            [
-                'level' => 2,
-            ]
-        );
+        foreach ($subcategoryData as $categoryId => $subcategories) {
+            foreach ($subcategories as $subName) {
+                Subcategory::updateOrCreate(
+                    [
+                        'category_id' => $categoryId,
+                        'name'        => $subName,
+                    ]
+                );
+            }
+        }
     }
 }

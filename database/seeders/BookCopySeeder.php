@@ -43,7 +43,8 @@ class BookCopySeeder extends Seeder
 
         $slotIndex = 0;
         foreach ($books as $book) {
-            for ($copyNumber = 1; $copyNumber <= $book->stok; $copyNumber++) {
+            $stockCount = $book->stok ?? $book->stock ?? 1;
+            for ($copyNumber = 1; $copyNumber <= $stockCount; $copyNumber++) {
                 if (!isset($slots[$slotIndex])) {
                     break;
                 }
@@ -60,6 +61,7 @@ class BookCopySeeder extends Seeder
                         'shelf_id' => $slot['shelf_id'],
                         'row'      => $slot['row'],
                         'column'   => $slot['column'],
+                        'section'  => 1,
                         'side'     => 'front',
                         'status'   => 'available',
                     ]
@@ -70,4 +72,3 @@ class BookCopySeeder extends Seeder
         }
     }
 }
-

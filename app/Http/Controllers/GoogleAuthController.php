@@ -14,7 +14,9 @@ class GoogleAuthController extends Controller
      */
     public function redirect()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with(['prompt' => 'select_account'])
+            ->redirect();
     }
 
     /**
@@ -24,20 +26,24 @@ class GoogleAuthController extends Controller
     {
         try {
             $googleUser = Socialite::driver('google')->user();
-        } catch (InvalidStateException $e) {
-            return redirect()
-                ->route('login')
-                ->with(
-                    'error',
-                    'Sesi login Google sudah kedaluwarsa. Silakan login dengan Google lagi.'
-                );
+        } catch (\Throwable $e) {
+            try {
+                $googleUser = Socialite::driver('google')->stateless()->user();
+            } catch (\Throwable $ex) {
+                return redirect()
+                    ->route('login')
+                    ->with(
+                        'error',
+                        'Sesi login Google sudah kedaluwarsa. Silakan login dengan Google lagi.'
+                    );
+            }
         }
 
         /*
-         * |--------------------------------------------------------------------------
-         * | CARI USER BERDASARKAN GOOGLE ID
-         * |--------------------------------------------------------------------------
-         */
+        |--------------------------------------------------------------------------
+        | Cari berdasarkan Google ID
+        |--------------------------------------------------------------------------
+        */
 
         $user = User::where(
             'google_id',
@@ -45,10 +51,10 @@ class GoogleAuthController extends Controller
         )->first();
 
         /*
-         * |--------------------------------------------------------------------------
-         * | JIKA BELUM ADA, CARI BERDASARKAN EMAIL
-         * |--------------------------------------------------------------------------
-         */
+        |--------------------------------------------------------------------------
+        | Kalau belum ditemukan, cari berdasarkan email
+        |--------------------------------------------------------------------------
+        */
 
         if (!$user) {
             $user = User::where(
@@ -57,21 +63,16 @@ class GoogleAuthController extends Controller
             )->first();
 
             /*
-             * |--------------------------------------------------------------------------
-             * | EMAIL SUDAH TERDAFTAR
-             * |--------------------------------------------------------------------------
-             */
+            |--------------------------------------------------------------------------
+            | Email sudah ada → hubungkan akun dengan Google
+            |--------------------------------------------------------------------------
+            */
 
             if ($user) {
                 $user->update([
                     'google_id' => $googleUser->getId(),
                 ]);
-            }
-            /*
-             * |--------------------------------------------------------------------------
-             * | USER GOOGLE BARU
-             * |--------------------------------------------------------------------------
-             */ else {
+            } else {
                 $user = User::create([
                     'name' => $googleUser->getName()
                         ?: $googleUser->getNickname()
@@ -79,32 +80,26 @@ class GoogleAuthController extends Controller
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
                     'password' => null,
-
-                    /*
-                     * |--------------------------------------------------------------------------
-                     * | USER BARU DEFAULT = USER
-                     * |--------------------------------------------------------------------------
-                     */
                     'role' => 'user',
                 ]);
             }
         }
 
         /*
-         * |--------------------------------------------------------------------------
-         * | LOGIN USER
-         * |--------------------------------------------------------------------------
-         */
+        |--------------------------------------------------------------------------
+        | Login user
+        |--------------------------------------------------------------------------
+        */
 
         Auth::login($user);
 
         request()->session()->regenerate();
 
         /*
-         * |--------------------------------------------------------------------------
-         * | CEK ROLE
-         * |--------------------------------------------------------------------------
-         */
+        |--------------------------------------------------------------------------
+        | Redirect berdasarkan role
+        |--------------------------------------------------------------------------
+        */
 
         if ($user->role === 'admin') {
             return redirect()
@@ -114,12 +109,6 @@ class GoogleAuthController extends Controller
                     'Selamat datang di Dashboard Admin.'
                 );
         }
-
-        /*
-         * |--------------------------------------------------------------------------
-         * | USER BIASA
-         * |--------------------------------------------------------------------------
-         */
 
         return redirect()
             ->route('user.home')

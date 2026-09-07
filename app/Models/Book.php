@@ -15,7 +15,6 @@ class Book extends Model
 
     protected $fillable = [
         'judul_buku',
-        'sku',
         'penulis',
         'category_id',
         'subcategory_id',
@@ -25,8 +24,15 @@ class Book extends Model
         'kode_buku',
         'ddc',
         'rak',
+        'sku',
         'edition',
     ];
+
+    /*
+     * |--------------------------------------------------------------------------
+     * | ACCESSORS (alias kolom lama → baru)
+     * |--------------------------------------------------------------------------
+     */
 
     public function getTitleAttribute(): ?string
     {
@@ -115,5 +121,28 @@ class Book extends Model
         return $this->hasMany(
             BookCopy::class
         );
+    }
+
+    /*
+     * |--------------------------------------------------------------------------
+     * | FAVORITES
+     * |--------------------------------------------------------------------------
+     */
+
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(
+            UserFavorite::class,
+            'book_id'
+        );
+    }
+
+    public function isFavoritedBy(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        return $this->favorites()->where('user_id', $user->id)->exists();
     }
 }

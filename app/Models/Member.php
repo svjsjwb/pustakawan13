@@ -2,21 +2,30 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Member extends Model
 {
+    use HasFactory;
+
+    protected $table = 'members';
+
     protected $fillable = [
+        'user_id',
         'name',
         'email',
+        'division',
         'phone',
         'address',
         'status',
     ];
 
-    public function borrowings(): HasMany
+    /**
+     * Relasi ke Akun Pengguna (User)
+     */
+    public function user()
     {
-        return $this->hasMany(Borrowing::class);
+        return $this->belongsTo(User::class);
     }
 }
