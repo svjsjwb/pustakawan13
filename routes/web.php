@@ -231,7 +231,6 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     Route::get('/user/announcements', [UserAnnouncementController::class, 'index'])->name('user.announcements');
 
     // NOTIFIKASI
-    Route::get('/notifications', [UserNotificationController::class, 'index'])->name('user.notifications');
     Route::post('/user/notifications/dismiss',     [UserNotificationController::class, 'dismiss'])->name('user.notifications.dismiss');
     Route::post('/user/notifications/dismiss-all', [UserNotificationController::class, 'dismissAll'])->name('user.notifications.dismiss-all');
 

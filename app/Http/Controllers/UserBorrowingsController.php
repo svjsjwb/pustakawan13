@@ -7,7 +7,6 @@ use App\Models\Member;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class UserBorrowingsController extends Controller
 {
@@ -61,7 +60,7 @@ class UserBorrowingsController extends Controller
         }
 
         $validated = $request->validate([
-            'return_date' => 'required|date',
+            'extension_days' => 'required|integer|in:3,7,14',
         ]);
 
         if ($borrowing->status !== 'dipinjam') {
@@ -82,16 +81,8 @@ class UserBorrowingsController extends Controller
             return response()->json(['message' => 'Buku tidak dapat diperpanjang karena sedang dalam antrean reservasi.'], 409);
         }
 
-        $currentDue = $borrowing->due_at->copy()->startOfDay();
-        $newDue = Carbon::parse($validated['return_date'])->startOfDay();
-        $maximumDue = $currentDue->copy()->addDays(14);
-
-        if ($newDue->lt($currentDue) || $newDue->gt($maximumDue)) {
-            return response()->json(['message' => 'Tanggal pengembalian harus berada antara jatuh tempo saat ini dan maksimal 14 hari setelahnya.'], 422);
-        }
-
         $borrowing->update([
-            'due_at' => $newDue->toDateString(),
+            'due_at' => $borrowing->due_at->copy()->addDays((int) $validated['extension_days']),
             'extension_status' => 'disetujui',
             'extension_reason' => 'Perpanjangan mandiri oleh pengguna',
         ]);
