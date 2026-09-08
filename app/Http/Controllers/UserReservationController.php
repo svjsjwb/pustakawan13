@@ -25,6 +25,10 @@ class UserReservationController extends Controller
     {
         $user = Auth::user();
 
+        if ($user && $user->role !== 'user') {
+            return redirect()->route('dashboard');
+        }
+
         $reservations = Reservation::with('book')
             ->where('user_id', $user->id)
             ->orderByRaw("FIELD(status, 'menunggu', 'disetujui', 'selesai', 'dibatalkan', 'ditolak')")
@@ -46,13 +50,24 @@ class UserReservationController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        if ($user && $user->role !== 'user') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya pengguna umum (role user) yang dapat membuat reservasi.',
+                ], 403);
+            }
+            return back()->with('reservation_error', 'Akun Administrator tidak dapat membuat reservasi buku online untuk anggota.');
+        }
+
         $request->validate([
             'book_id'     => 'required|exists:books,id',
             'reserved_at' => 'nullable|date',
             'seat_number' => 'nullable|string|max:10',
         ]);
 
-        $user   = Auth::user();
         $bookId = (int) $request->book_id;
         $reservedAt = $request->filled('reserved_at') ? $request->reserved_at : now()->toDateString();
         $seatNumber = $request->filled('seat_number') ? $request->seat_number : null;
@@ -78,11 +93,15 @@ class UserReservationController extends Controller
                 'Kamu sudah memiliki reservasi aktif untuk buku ini.');
         }
 
-        // Hubungkan ke data member
-        $member = Member::where('user_id', $user->id)
-            ->orWhere('email', $user->email)
-            ->orWhere('name', $user->name)
-            ->first();
+        // Hubungkan ke data member: prioritaskan user_id
+        $member = Member::where('user_id', $user->id)->first();
+
+        if (!$member && $user->email) {
+            $member = Member::where('email', $user->email)->first();
+            if ($member && !$member->user_id) {
+                $member->update(['user_id' => $user->id]);
+            }
+        }
 
         if (!$member) {
             $member = Member::create([

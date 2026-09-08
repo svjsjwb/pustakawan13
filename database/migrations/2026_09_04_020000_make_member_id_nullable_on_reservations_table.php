@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -12,6 +14,10 @@ return new class extends Migration
     {
         if (DB::getDriverName() === 'mysql') {
             DB::statement('ALTER TABLE reservations MODIFY member_id BIGINT UNSIGNED NULL;');
+        } else {
+            Schema::table('reservations', function (Blueprint $table) {
+                $table->unsignedBigInteger('member_id')->nullable()->change();
+            });
         }
     }
 
@@ -22,6 +28,10 @@ return new class extends Migration
     {
         if (DB::getDriverName() === 'mysql') {
             DB::statement('ALTER TABLE reservations MODIFY member_id BIGINT UNSIGNED NOT NULL;');
+        } else {
+            Schema::table('reservations', function (Blueprint $table) {
+                $table->unsignedBigInteger('member_id')->nullable(false)->change();
+            });
         }
     }
 };

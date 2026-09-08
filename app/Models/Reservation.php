@@ -52,6 +52,23 @@ class Reservation extends Model
         return $this->belongsTo(Borrowing::class);
     }
 
+    // ─── Alias Atribut Bahasa Indonesia ───────────────
+
+    public function getIdReservasiAttribute(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getBukuIdAttribute(): ?int
+    {
+        return $this->book_id;
+    }
+
+    public function getNamaUserAttribute(): string
+    {
+        return $this->user?->name ?? $this->member?->name ?? '-';
+    }
+
     // ─── Helpers ─────────────────────────────────────
 
     /**

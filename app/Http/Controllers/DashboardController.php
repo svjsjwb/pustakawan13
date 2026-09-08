@@ -109,7 +109,7 @@ class DashboardController extends Controller
          */
 
         $reservations =
-            Reservation::with(['member', 'book'])
+            Reservation::with(['member', 'user', 'book'])
                 ->latest()
                 ->take(20)
                 ->get();

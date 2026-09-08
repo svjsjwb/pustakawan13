@@ -445,7 +445,7 @@
                             </strong>
 
                             <span>
-                                {{ $reservation->member->name ?? '-' }}
+                                {{ $reservation->user->name ?? $reservation->member->name ?? '-' }}
                             </span>
 
                         </div>
@@ -537,7 +537,7 @@
                     </div>
 
                     <div>
-                        {{ $reservation->member->name ?? '-' }}
+                        {{ $reservation->user->name ?? $reservation->member->name ?? '-' }}
                     </div>
 
                     <div>

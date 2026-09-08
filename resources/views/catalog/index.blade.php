@@ -495,7 +495,7 @@
 
                 <div class="catalog-modal-actions" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
 
-                    @auth
+                    @if(auth()->check() && auth()->user()->role === 'user')
                     <form action="{{ route('user.reservations.store') }}" method="POST" id="catalogReservationForm" style="margin: 0;">
                         @csrf
                         <input type="hidden" name="book_id" id="catalogModalReservationBookId" value="">
@@ -511,7 +511,7 @@
                             Buat Reservasi
                         </button>
                     </form>
-                    @endauth
+                    @endif
 
                     <button
                         type="button"

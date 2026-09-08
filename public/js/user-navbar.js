@@ -37,30 +37,44 @@ document.addEventListener('DOMContentLoaded', function () {
     const notifText = document.getElementById('userNotifText');
     const notifOpts = document.querySelectorAll('.notif-opt');
 
-    const STORAGE_KEY = 'pustakawan_user_profile_data';
+    const authUserId = account ? account.getAttribute('data-user-id') : null;
+    const STORAGE_KEY = authUserId && authUserId !== '0' ? `pustakawan_user_profile_data_${authUserId}` : null;
 
+    // Bersihkan key lama yang tidak ber-scope user agar tidak menimpa profil lintas sesi
+    try {
+        localStorage.removeItem('pustakawan_user_profile_data');
+    } catch (e) {}
 
     /* =========================================================
        0. LOAD SAVED PROFILE FROM LOCAL STORAGE (PERSISTENCE)
     ========================================================= */
 
     function loadCachedProfile() {
+        if (!STORAGE_KEY) return;
         try {
             const cached = localStorage.getItem(STORAGE_KEY);
             if (cached) {
                 const data = JSON.parse(cached);
                 if (data.name) {
-                    nameDisplays.forEach(el => el.textContent = data.name);
-                    if (profileInputName) profileInputName.value = data.name;
+                    nameDisplays.forEach(el => {
+                        if (!el.textContent || el.textContent.trim() === '' || el.textContent.trim() === 'Pengguna') {
+                            el.textContent = data.name;
+                        }
+                    });
+                    if (profileInputName && !profileInputName.value) profileInputName.value = data.name;
                 }
                 if (data.email) {
-                    emailDisplays.forEach(el => el.textContent = data.email);
-                    if (profileInputEmail) profileInputEmail.value = data.email;
+                    emailDisplays.forEach(el => {
+                        if (!el.textContent || el.textContent.trim() === '') {
+                            el.textContent = data.email;
+                        }
+                    });
+                    if (profileInputEmail && !profileInputEmail.value) profileInputEmail.value = data.email;
                 }
-                if (data.phone && profileInputPhone) {
+                if (data.phone && profileInputPhone && !profileInputPhone.value) {
                     profileInputPhone.value = data.phone;
                 }
-                if (data.location && profileInputLocation) {
+                if (data.location && profileInputLocation && !profileInputLocation.value) {
                     profileInputLocation.value = data.location;
                 }
                 if (data.avatar) {
@@ -364,17 +378,19 @@ document.addEventListener('DOMContentLoaded', function () {
             nameDisplays.forEach(el => el.textContent = newName);
 
             // Cache in LocalStorage
-            try {
-                const cachedData = {
-                    name: newName,
-                    email: profileInputEmail ? profileInputEmail.value : '',
-                    phone: newPhone,
-                    location: newLocation,
-                    avatar: currentAvatarBase64 || (avatarDisplays[0] ? avatarDisplays[0].src : null),
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedData));
-            } catch (err) {
-                console.warn('LocalStorage error:', err);
+            if (STORAGE_KEY) {
+                try {
+                    const cachedData = {
+                        name: newName,
+                        email: profileInputEmail ? profileInputEmail.value : '',
+                        phone: newPhone,
+                        location: newLocation,
+                        avatar: currentAvatarBase64 || (avatarDisplays[0] ? avatarDisplays[0].src : null),
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedData));
+                } catch (err) {
+                    console.warn('LocalStorage error:', err);
+                }
             }
 
             // Loading state

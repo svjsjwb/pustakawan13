@@ -141,13 +141,13 @@
 
 
             {{-- USER ACCOUNT (Frame 1000006625) --}}
-            <div class="user-navbar-account">
+            <div class="user-navbar-account" data-user-id="{{ auth()->id() ?? 0 }}">
 
                 @php
                     $userAvatar = auth()->user()->avatar ?? null;
                     $userAvatarUrl = $userAvatar ? asset('storage/' . $userAvatar) : asset('images/avatar-user.jpg');
-                    $userName = auth()->user()->name ?? 'Moreno Oetomo';
-                    $userEmail = auth()->user()->email ?? 'echooetomo@gmail.com';
+                    $userName = auth()->user()->name ?? 'Pengguna';
+                    $userEmail = auth()->user()->email ?? '';
                 @endphp
 
                 <button
