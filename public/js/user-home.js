@@ -415,6 +415,8 @@ document.addEventListener('DOMContentLoaded', function () {
         closeModal
     );
 
+    const CATALOG_PATHS = ['/catalog', '/user/catalog'];
+
     catalogButton?.addEventListener(
         'click',
         function (event) {
@@ -422,7 +424,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const catalogUrl =
                 new URL(catalogButton.href, window.location.origin);
 
-            if (window.location.pathname === catalogUrl.pathname) {
+            const alreadyOnCatalog =
+                CATALOG_PATHS.includes(window.location.pathname);
+
+            if (alreadyOnCatalog) {
                 event.preventDefault();
                 closeModal();
             }

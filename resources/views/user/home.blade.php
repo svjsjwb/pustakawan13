@@ -701,7 +701,7 @@
             <div class="user-book-actions">
 
                 <a
-                    href="{{ route('user.catalog') }}"
+                    href="{{ route('catalog') }}"
                     class="user-book-catalog-btn"
                     id="userBookCatalogButton">
 
