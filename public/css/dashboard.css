@@ -1507,3 +1507,490 @@
 
 }
 }
+
+
+/* =========================================================
+   AKTIVITAS MANUAL - TOMBOL TAMBAH & EDIT
+========================================================= */
+
+/* Tombol "+ Tambah Aktivitas" di bagian paling bawah
+   panel Aktivitas Terbaru, mengikuti gaya tombol
+   "Lihat semua buku" (class panel-link). */
+
+.activity-panel .panel-link {
+
+    align-self: center;
+
+    margin: 0 auto 10px;
+
+}
+
+
+/* Dropdown edit aktivitas manual lain */
+
+.activity-edit-select {
+
+    align-self: center;
+
+    width: fit-content;
+
+    max-width: 85%;
+
+    margin: 0 auto 15px;
+
+    padding: 6px 10px;
+
+    border: 1px solid #cfe0de;
+
+    border-radius: 8px;
+
+    background: #f7fafa;
+
+    color: #344444;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+
+}
+
+.activity-edit-select:focus {
+
+    outline: none;
+
+    border-color: #287b7b;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(40, 123, 123, 0.12);
+}
+
+
+/* Tombol edit kecil untuk aktivitas manual */
+
+.activity-edit-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 24px;
+
+    width: 24px;
+
+    height: 24px;
+
+    margin-left: 6px;
+
+    padding: 0;
+
+    border: 1px solid #cfe4e2;
+
+    border-radius: 50%;
+
+    background: #eef7f6;
+
+    color: #287b7b;
+
+    font-size: 11px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease;
+
+}
+
+.activity-edit-btn:hover {
+
+    background: #287b7b;
+
+    border-color: #287b7b;
+
+    color: #ffffff;
+
+}
+
+
+/* =========================================================
+   MODAL TAMBAH / EDIT AKTIVITAS
+========================================================= */
+
+.activity-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 9999;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+}
+
+.activity-modal.open {
+
+    display: flex;
+
+}
+
+.activity-modal-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        rgba(13, 34, 34, 0.45);
+
+}
+
+.activity-modal-box {
+
+    position: relative;
+
+    width: 100%;
+
+    max-width: 460px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2ebeb;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 20px 45px
+        rgba(13, 34, 34, 0.25);
+
+    box-sizing: border-box;
+
+}
+
+.activity-modal-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 17px 20px 12px;
+
+    border-bottom: 1px solid #edf1f1;
+
+}
+
+.activity-modal-header h3 {
+
+    margin: 0;
+
+    color: #182828;
+
+    font-size: 15px;
+
+    font-weight: 750;
+
+}
+
+.activity-modal-close {
+
+    width: 28px;
+
+    height: 28px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #f2f5f5;
+
+    color: #546262;
+
+    font-size: 18px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+}
+
+.activity-modal-close:hover {
+
+    background: #ffe2e2;
+
+    color: #c35d5d;
+
+}
+
+.activity-modal-box form {
+
+    padding: 16px 18px 18px;
+
+}
+
+.activity-form-field {
+
+    margin-bottom: 14px;
+
+}
+
+.activity-form-field label {
+
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #344444;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+.activity-form-input {
+
+    width: 100%;
+
+    padding: 9px 11px;
+
+    border: 1px solid #d7e2e2;
+
+    border-radius: 8px;
+
+    background: #fbfcfc;
+
+    color: #253333;
+
+    font-size: 12px;
+
+    font-family: inherit;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+
+}
+
+.activity-form-input:focus {
+
+    outline: none;
+
+    border-color: #287b7b;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(40, 123, 123, 0.12);
+}
+
+textarea.activity-form-input {
+
+    resize: vertical;
+
+    min-height: 84px;
+
+}
+
+.activity-form-error {
+
+    display: block;
+
+    margin-top: 6px;
+
+    color: #c35d5d;
+
+    font-size: 10px;
+
+}
+
+.activity-modal-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 6px;
+
+}
+
+.activity-btn-cancel,
+.activity-btn-simpan {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 9px 18px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.activity-btn-cancel {
+
+    border: 1px solid #d4dfdf;
+
+    background: #ffffff;
+
+    color: #566464;
+
+}
+
+.activity-btn-cancel:hover {
+
+    background: #f2f5f5;
+
+    border-color: #bcd1d1;
+
+}
+
+.activity-btn-simpan {
+
+    border: 1px solid #287b7b;
+
+    background: #287b7b;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 3px 8px
+        rgba(40, 123, 123, 0.18);
+}
+
+.activity-btn-simpan:hover {
+
+    background: #216969;
+
+    border-color: #216969;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   AKSI EDIT: HAPUS & PIN
+========================================================= */
+
+.activity-modal-edit-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 14px;
+
+    padding-top: 14px;
+
+    border-top: 1px solid #edf1f1;
+
+}
+
+.activity-btn-hapus,
+.activity-btn-pin {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 8px 16px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.activity-btn-hapus {
+
+    border: 1px solid #e3b4b4;
+
+    background: #fff5f5;
+
+    color: #c35d5d;
+
+}
+
+.activity-btn-hapus:hover {
+
+    background: #ffe2e2;
+
+    border-color: #d99a9a;
+
+    transform: translateY(-1px);
+}
+
+.activity-btn-pin {
+
+    border: 1px solid #d4c9a8;
+
+    background: #fffaf0;
+
+    color: #a07c1f;
+
+}
+
+.activity-btn-pin:hover {
+
+    background: #fff3d6;
+
+    border-color: #cbb98a;
+
+    transform: translateY(-1px);
+}

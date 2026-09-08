@@ -255,16 +255,6 @@
 
                     <div class="book-actions">
 
-
-                        {{-- Kelola Eksemplar --}}
-                        <a
-                            href="{{ route('books.copies.index', $book) }}"
-                            class="action-copy"
-                            title="Kelola eksemplar">
-                            📚
-                        </a>
-
-
                         {{-- Edit --}}
                         <a
                             href="{{ route('books.edit', $book) }}"

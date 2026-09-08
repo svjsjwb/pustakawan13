@@ -21,6 +21,7 @@ return new class extends Migration
 
             $table->enum('status', [
                 'dipinjam',
+                'diperpanjang',
                 'dikembalikan',
                 'terlambat'
             ])->default('dipinjam');

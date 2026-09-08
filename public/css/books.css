@@ -52,7 +52,9 @@
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 32px 36px 30px;
-    box-shadow: 0 4px 16px rgba(27, 42, 58, 0.05), 0 1px 3px rgba(27, 42, 58, 0.02);
+    box-shadow:
+        0 4px 16px rgba(27, 42, 58, 0.05),
+        0 1px 3px rgba(27, 42, 58, 0.02);
 }
 
 /* Header Form */
@@ -79,7 +81,10 @@
     line-height: 1.5;
 }
 
-/* Section Title */
+/* =========================================================
+   SECTION TITLE
+========================================================= */
+
 .form-section-heading {
     display: flex;
     align-items: center;
@@ -115,7 +120,10 @@
     letter-spacing: 0.01em;
 }
 
-/* Alert Notification */
+/* =========================================================
+   ALERT NOTIFICATION
+========================================================= */
+
 .form-alert-error {
     background: #fef2f2;
     border: 1px solid #fee2e2;
@@ -320,7 +328,9 @@
     background: #f8fafc;
     border: 1.5px dashed #cbd5e1;
     border-radius: 10px;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease;
 }
 
 .cover-upload-area:hover {
@@ -335,7 +345,7 @@
     border-radius: 8px;
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -427,7 +437,6 @@
     border-top: 1px solid #f1f5f9;
 }
 
-/* TOMBOL BATAL */
 .book-btn-cancel,
 .btn-cancel {
     display: inline-flex;
@@ -454,7 +463,6 @@
     color: #1e293b;
 }
 
-/* TOMBOL SIMPAN */
 .book-btn-save,
 .btn-save,
 .btn-add-top {
@@ -493,166 +501,93 @@
 
 
 /* =========================================================
-   =========================================================
    MANAJEMEN BUKU
-   =========================================================
-   ========================================================= */
-
-
-/* =========================================================
-   BOOK TOOLBAR
 ========================================================= */
 
 .book-toolbar {
     width: 100%;
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     margin-top: 22px;
-
     margin-bottom: 18px;
 }
 
-
-/* =========================================================
-   TOOLBAR LEFT & RIGHT
-========================================================= */
-
 .toolbar-left {
     display: flex;
-
     align-items: center;
-
     gap: 10px;
 }
 
-
 .toolbar-right {
     display: flex;
-
     align-items: center;
-
     justify-content: flex-end;
 }
 
-
-/* =========================================================
-   SEARCH BUKU TOOLBAR
-========================================================= */
-
 .book-search-wrapper {
     position: relative;
-
     display: flex;
-
     align-items: center;
 }
 
-
 .book-search-icon {
     position: absolute;
-
     left: 12px;
-
     width: 15px;
-
     height: 15px;
-
     color: #64748b;
-
     pointer-events: none;
-
     transition: color 0.2s ease;
 }
 
-
 .book-search-input {
     width: 220px;
-
     height: 38px;
-
     padding: 0 14px 0 34px;
-
     border: 1.5px solid #287f80;
-
     border-radius: 7px;
-
     background-color: #ffffff;
-
     color: #19364f;
-
     font-family: inherit;
-
     font-size: 12.5px;
-
     font-weight: 500;
-
     outline: none;
-
     box-sizing: border-box;
-
     transition:
         border-color 0.2s ease,
         box-shadow 0.2s ease,
         background-color 0.2s ease;
 }
 
-
 .book-search-input::placeholder {
     color: #94a3b8;
-
     font-weight: 400;
 }
 
-
 .book-search-input:focus {
     border-color: #236f70;
-
     background-color: #ffffff;
-
-    box-shadow:
-        0 0 0 3px rgba(40, 127, 128, 0.12);
+    box-shadow: 0 0 0 3px rgba(40, 127, 128, 0.12);
 }
-
 
 .book-search-wrapper:focus-within .book-search-icon {
     color: #287f80;
 }
 
-
-/* =========================================================
-   BUTTON TOOLBAR
-========================================================= */
-
 .book-toolbar-btn {
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
-
     height: 38px;
-
     padding: 0 18px;
-
     border-radius: 7px;
-
     font-size: 13px;
-
     font-weight: 600;
-
     text-decoration: none;
-
     white-space: nowrap;
-
     cursor: pointer;
-
     box-sizing: border-box;
-
     transition:
         background-color 0.2s ease,
         border-color 0.2s ease,
@@ -661,368 +596,639 @@
         transform 0.15s ease;
 }
 
-
-/* =========================================================
-   BUTTON DAFTAR BUKU
-========================================================= */
-
 .book-toolbar-list {
     background: #ffffff;
-
     border: 1px solid #287f80;
-
     color: #287f80;
 }
 
-
 .book-toolbar-list:hover {
     background: #287f80;
-
     border-color: #287f80;
-
     color: #ffffff;
-
     box-shadow: 0 3px 8px rgba(40, 127, 128, 0.15);
-
     transform: translateY(-1px);
 }
-
-
-/* =========================================================
-   BUTTON TAMBAH BUKU
-========================================================= */
 
 .book-toolbar-add {
     background: #287f80;
-
     border: 1px solid #287f80;
-
     color: #ffffff;
 }
-
 
 .book-toolbar-add:hover {
     background: #236f70;
-
     border-color: #236f70;
-
     color: #ffffff;
-
     box-shadow: 0 3px 8px rgba(40, 127, 128, 0.2);
-
     transform: translateY(-1px);
 }
 
-
-/* =========================================================
-   HEADER TABEL
-========================================================= */
-
 .books-table-header {
     width: 100%;
-
     display: flex;
-
     align-items: flex-start;
-
     justify-content: space-between;
-
     margin-bottom: 10px;
-
     padding-bottom: 10px;
-
     border-bottom: 1px solid #e5e8e8;
-
     box-sizing: border-box;
 }
-
-
-/* =========================================================
-   JUDUL TABEL
-========================================================= */
 
 .books-table-title {
     display: flex;
-
     align-items: center;
-
     min-height: 42px;
 }
 
-
 .books-table-title span {
     font-size: 14px;
-
     font-weight: 700;
-
     color: #19364f;
 }
-
-
-/* =========================================================
-   CONTROL KANAN
-========================================================= */
 
 .books-table-controls {
     display: flex;
-
     align-items: flex-start;
-
     justify-content: flex-end;
-
     margin-left: auto;
 }
 
-
-/* =========================================================
-   WRAPPER FILTER
-========================================================= */
-
 .category-filter-wrapper {
     display: flex;
-
     flex-direction: column;
-
     align-items: flex-end;
-
     gap: 5px;
 }
 
-
-/* =========================================================
-   FILTER KATEGORI
-========================================================= */
-
 .books-category-filter {
     width: 180px;
-
     height: 38px;
-
     padding: 0 34px 0 13px;
-
     border: 1.5px solid #287f80;
-
     border-radius: 7px;
-
     background-color: #ffffff;
-
     color: #19364f;
-
     font-family: inherit;
-
     font-size: 12px;
-
     font-weight: 600;
-
     outline: none;
-
     cursor: pointer;
-
     box-sizing: border-box;
-
     appearance: auto;
-
     transition:
         border-color 0.2s ease,
         box-shadow 0.2s ease,
         background-color 0.2s ease;
 }
 
-
-/* =========================================================
-   FILTER HOVER
-========================================================= */
-
 .books-category-filter:hover {
     border-color: #236f70;
-
     background-color: #f8fbfb;
 }
 
-
-/* =========================================================
-   FILTER FOCUS
-========================================================= */
-
 .books-category-filter:focus {
     border-color: #236f70;
-
-    box-shadow:
-        0 0 0 3px rgba(40, 127, 128, 0.12);
+    box-shadow: 0 0 0 3px rgba(40, 127, 128, 0.12);
 }
-
-
-/* =========================================================
-   TOTAL BUKU
-   BERADA DI BAWAH FILTER
-========================================================= */
 
 .book-total {
     display: block;
-
     width: 100%;
-
     padding-right: 2px;
-
     color: #64747b;
-
     font-size: 12px;
-
     font-weight: 500;
-
     line-height: 16px;
-
     text-align: right;
-
     white-space: nowrap;
-
     box-sizing: border-box;
 }
 
-
-/* =========================================================
-   TABLE WRAPPER
-========================================================= */
-
 .table-wrapper {
     width: 100%;
-
     overflow-x: auto;
-
     background: #ffffff;
 }
 
-
-/* =========================================================
-   TABLE
-========================================================= */
-
 .books-table {
     width: 100%;
-
     border-collapse: collapse;
-
     table-layout: auto;
+}
+
+.books-table thead th {
+    padding: 0 15px 12px;
+    border-bottom: 1px solid #dfe5e5;
+    color: #718087;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.books-table tbody td {
+    padding: 16px 15px;
+    border-bottom: 1px solid #e8ecec;
+    color: #19364f;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.books-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.books-table tbody tr:hover {
+    background: #f8fbfb;
+}
+
+.books-table tbody td:first-child {
+    font-weight: 500;
+}
+
+.books-table tbody td:first-child strong {
+    color: #19364f;
+    font-weight: 700;
+}
+
+.book-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.action-edit,
+.action-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 6px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+.action-edit {
+    border: 1px solid #d4dddd;
+    background: #ffffff;
+    color: #287f80;
+}
+
+.action-edit:hover {
+    background: #eef7f7;
+    border-color: #287f80;
+    transform: translateY(-1px);
+}
+
+.action-delete {
+    border: 1px solid #e0cccc;
+    background: #ffffff;
+    color: #c15b5b;
+}
+
+.action-delete:hover {
+    background: #fff3f3;
+    border-color: #c15b5b;
+    transform: translateY(-1px);
+}
+
+.empty-books {
+    padding: 35px 15px !important;
+    color: #7c898e !important;
+    text-align: center;
+    font-size: 13px !important;
 }
 
 
 /* =========================================================
-   TABLE HEADER
+   EDIT BOOK NAVIGATION
+   KIRI - KANAN
 ========================================================= */
 
-.books-table thead th {
-    padding: 0 15px 12px;
+.book-edit-navigation {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 16px;
+}
 
-    border-bottom: 1px solid #dfe5e5;
+.book-edit-tab {
+    flex: 1 1 0;
+    min-width: 0;
 
-    color: #718087;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    min-height: 64px;
+    padding: 12px 16px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    color: #64747b;
+    text-decoration: none;
+
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.book-edit-tab:hover {
+    background: #f8fbfb;
+    border-color: #b9d6d6;
+}
+
+.book-edit-tab.active {
+    background: #eef7f7;
+    border-color: #287f80;
+    color: #19364f;
+    box-shadow: 0 2px 8px rgba(40, 127, 128, 0.08);
+}
+
+.book-edit-tab-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #f1f6f6;
+    color: #287f80;
+}
+
+.book-edit-tab.active .book-edit-tab-icon {
+    background: #dceeee;
+}
+
+.book-edit-tab-icon svg {
+    width: 19px;
+    height: 19px;
+}
+
+.book-edit-tab strong {
+    display: block;
+    margin-bottom: 3px;
+
+    font-size: 13px;
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+.book-edit-tab small {
+    display: block;
 
     font-size: 11px;
+    line-height: 1.3;
 
+    color: #7b8b91;
+}
+
+
+/* =========================================================
+   EKSEMPLAR TOOLBAR
+========================================================= */
+
+.book-copy-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 4px 0 16px;
+
+    margin-bottom: 4px;
+
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.book-copy-label {
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 10px;
     font-weight: 700;
 
     letter-spacing: 0.08em;
 
-    text-transform: uppercase;
+    color: #287f80;
+}
+
+.book-copy-toolbar h3 {
+    margin: 0;
+
+    font-size: 16px;
+    line-height: 1.3;
+
+    color: #19364f;
+    font-weight: 700;
+}
+
+.book-copy-add-btn {
+    text-decoration: none;
+}
+
+.book-copy-add-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+
+/* =========================================================
+   EKSEMPLAR TABLE
+========================================================= */
+
+.book-copy-table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+
+    margin-top: 16px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+}
+
+.book-copy-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 12px;
+}
+
+.book-copy-table thead th {
+    padding: 12px 14px;
+
+    background: #f7fbfb;
+
+    border-bottom: 1px solid #dfe9e9;
+
+    color: #52666c;
+
+    font-size: 10.5px;
+    font-weight: 700;
 
     text-align: left;
 
     white-space: nowrap;
 }
 
+.book-copy-table tbody td {
+    padding: 13px 14px;
 
-/* =========================================================
-   TABLE BODY
-========================================================= */
+    border-bottom: 1px solid #edf2f2;
 
-.books-table tbody td {
-    padding: 16px 15px;
-
-    border-bottom: 1px solid #e8ecec;
-
-    color: #19364f;
-
-    font-size: 13px;
+    color: #334155;
 
     vertical-align: middle;
 }
 
-
-/* =========================================================
-   TABLE HOVER
-========================================================= */
-
-.books-table tbody tr {
-    transition: background-color 0.15s ease;
+.book-copy-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
-
-.books-table tbody tr:hover {
-    background: #f8fbfb;
+.book-copy-table tbody tr:hover {
+    background: #fbfdfd;
 }
 
-
-/* =========================================================
-   JUDUL BUKU
-========================================================= */
-
-.books-table tbody td:first-child {
-    font-weight: 500;
+.copy-number {
+    color: #87959a !important;
+    font-weight: 600;
 }
 
-
-.books-table tbody td:first-child strong {
+.copy-barcode {
     color: #19364f;
-
     font-weight: 700;
 }
 
 
 /* =========================================================
-   BOOK ACTIONS
+   STATUS EKSEMPLAR
 ========================================================= */
 
-.book-actions {
-    display: flex;
-
+.copy-status {
+    display: inline-flex;
     align-items: center;
 
-    gap: 7px;
+    min-height: 24px;
+
+    padding: 3px 9px;
+
+    border-radius: 20px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.copy-status.available {
+    background: #eef8ef;
+    border: 1px solid #cfe5d0;
+    color: #35703a;
+}
+
+.copy-status.reserved {
+    background: #faf5e9;
+    border: 1px solid #eadfbe;
+    color: #8a6a27;
+}
+
+.copy-status.borrowed {
+    background: #edf5fa;
+    border: 1px solid #d0e2ee;
+    color: #35657e;
+}
+
+.copy-status.danger {
+    background: #fdf0f0;
+    border: 1px solid #efd2d2;
+    color: #a94444;
+}
+
+.copy-status.maintenance {
+    background: #f3f0fa;
+    border: 1px solid #ddd5ed;
+    color: #66518c;
 }
 
 
 /* =========================================================
-   ACTION BUTTON
+   LOKASI EKSEMPLAR
 ========================================================= */
 
-.action-edit,
-.action-delete {
+.copy-location {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.copy-location strong {
+    color: #19364f;
+    font-size: 11.5px;
+}
+
+.copy-location span {
+    color: #53666c;
+    font-size: 10.5px;
+}
+
+.copy-location small {
+    color: #8a989d;
+    font-size: 9.5px;
+}
+
+.copy-no-location {
+    color: #9aa7ac;
+    font-size: 10.5px;
+    font-style: italic;
+}
+
+
+/* =========================================================
+   EDIT BUTTON EKSEMPLAR
+========================================================= */
+
+.copy-edit-btn {
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
 
-    width: 30px;
+    gap: 5px;
 
-    height: 30px;
+    min-height: 31px;
 
+    padding: 0 10px;
+
+    background: #e8f5f5;
+
+    border: 1px solid #d2eaea;
+    border-radius: 7px;
+
+    color: #287f80;
+
+    font-size: 10.5px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.copy-edit-btn:hover {
+    background: #dceeee;
+    border-color: #bcdcdc;
+}
+
+.copy-edit-btn svg {
+    width: 13px;
+    height: 13px;
+}
+
+
+/* =========================================================
+   EMPTY EKSEMPLAR
+========================================================= */
+
+.copy-empty {
+    padding: 38px 20px !important;
+    text-align: center;
+}
+
+.copy-empty div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.copy-empty strong {
+    color: #52666c;
+    font-size: 12.5px;
+}
+
+.copy-empty span {
+    color: #94a3a8;
+    font-size: 10.5px;
+}
+
+
+/* =========================================================
+   BOOK COPY ACTIONS
+========================================================= */
+
+.copy-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.copy-delete-form {
+    margin: 0;
     padding: 0;
+}
 
-    border-radius: 6px;
+.copy-edit-btn,
+.copy-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
 
-    font-size: 14px;
+    min-height: 42px;
+    padding: 0 14px;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
 
     text-decoration: none;
 
     cursor: pointer;
 
-    box-sizing: border-box;
-
     transition:
         background-color 0.2s ease,
         border-color 0.2s ease,
-        transform 0.15s ease;
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.copy-edit-btn svg,
+.copy-delete-btn svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
 }
 
 
@@ -1030,21 +1236,15 @@
    EDIT
 ========================================================= */
 
-.action-edit {
-    border: 1px solid #d4dddd;
-
-    background: #ffffff;
-
-    color: #287f80;
+.copy-edit-btn {
+    background: #e8f5f5;
+    border: 1px solid #cde8e8;
+    color: #247f82;
 }
 
-
-.action-edit:hover {
-    background: #eef7f7;
-
-    border-color: #287f80;
-
-    transform: translateY(-1px);
+.copy-edit-btn:hover {
+    background: #d9eeee;
+    border-color: #b9dddd;
 }
 
 
@@ -1052,41 +1252,61 @@
    DELETE
 ========================================================= */
 
-.action-delete {
-    border: 1px solid #e0cccc;
-
-    background: #ffffff;
-
-    color: #c15b5b;
+.copy-delete-btn {
+    background: #fff0f0;
+    border: 1px solid #f5cccc;
+    color: #d64545;
 }
 
-
-.action-delete:hover {
-    background: #fff3f3;
-
-    border-color: #c15b5b;
-
-    transform: translateY(-1px);
+.copy-delete-btn:hover {
+    background: #ffe1e1;
+    border-color: #efb5b5;
 }
 
 
 /* =========================================================
-   EMPTY DATA
+   RESPONSIVE
 ========================================================= */
 
-.empty-books {
-    padding: 35px 15px !important;
+@media (max-width: 768px) {
 
-    color: #7c898e !important;
+    .copy-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-    text-align: center;
+    .copy-edit-btn,
+    .copy-delete-btn {
+        width: 100%;
+    }
 
-    font-size: 13px !important;
+}
+
+/* =========================================================
+   RESPONSIVE EDIT NAVIGATION
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .book-edit-navigation {
+        flex-direction: row !important;
+        gap: 8px;
+    }
+
+    .book-edit-tab {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .book-edit-tab small {
+        display: none;
+    }
+
 }
 
 
 /* =========================================================
-   RESPONSIVE - TABLET & MOBILE
+   RESPONSIVE - TABLET
 ========================================================= */
 
 @media (max-width: 800px) {
@@ -1130,76 +1350,57 @@
 
     .book-toolbar {
         margin-top: 18px;
-
         margin-bottom: 15px;
 
         flex-direction: column;
-
         align-items: stretch;
-
         gap: 12px;
     }
-
 
     .toolbar-left {
         width: 100%;
     }
 
-
     .toolbar-right {
         width: 100%;
     }
-
 
     .book-search-wrapper {
         width: 100%;
     }
 
-
     .book-search-input {
         width: 100%;
     }
-
 
     .book-toolbar-btn {
         width: 100%;
     }
 
-
     .books-table-header {
         flex-direction: column;
-
         align-items: stretch;
-
         gap: 12px;
     }
-
 
     .books-table-title {
         min-height: auto;
     }
 
-
     .books-table-controls {
         width: 100%;
-
         margin-left: 0;
-
         justify-content: flex-end;
     }
 
-
     .category-filter-wrapper {
         width: 100%;
-
         align-items: flex-end;
     }
-
 
     .books-category-filter {
         width: 180px;
     }
-
 
     .book-total {
         text-align: right;
@@ -1218,60 +1419,47 @@
         width: 100%;
     }
 
-
     .toolbar-left {
         flex-direction: column;
-
         align-items: stretch;
     }
-
 
     .toolbar-right {
         width: 100%;
     }
 
-
     .book-search-wrapper {
         width: 100%;
     }
-
 
     .book-search-input {
         width: 100%;
     }
 
-
     .book-toolbar-btn {
         width: 100%;
     }
-
 
     .books-table-controls {
         width: 100%;
     }
 
-
     .category-filter-wrapper {
         width: 100%;
-
         align-items: stretch;
     }
-
 
     .books-category-filter {
         width: 100%;
     }
 
-
     .book-total {
         text-align: right;
     }
 
-
     .books-table thead th,
     .books-table tbody td {
         padding-left: 10px;
-
         padding-right: 10px;
     }
 

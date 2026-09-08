@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Member;
 use App\Models\Borrowing;
+use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -88,16 +89,12 @@ class ReportController extends Controller
 
     /**
      * ============================================================
-     * TENTUKAN PERIODE DARI CALENDAR
+     * TENTUKAN PERIODE DARI CALENDAR / DATE RANGE PICKER
+     * ============================================================
      *
      * day   = 1 hari
-     * week  = Senin - Minggu
-     * month = tanggal 1 - akhir bulan
-     * ============================================================
-     */
-    /**
-     * ============================================================
-     * TENTUKAN PERIODE DARI CALENDAR / DATE RANGE PICKER
+     * week  = maksimal 7 hari
+     * month = lebih dari 7 hari
      * ============================================================
      */
     private function getPeriod(Request $request)
@@ -107,17 +104,30 @@ class ReportController extends Controller
 
         if ($startDateInput && $endDateInput) {
             try {
-                $startDate = Carbon::createFromFormat('Y-m-d', $startDateInput)->startOfDay();
-                $endDate = Carbon::createFromFormat('Y-m-d', $endDateInput)->endOfDay();
+                $startDate = Carbon::createFromFormat(
+                    'Y-m-d',
+                    $startDateInput
+                )->startOfDay();
+
+                $endDate = Carbon::createFromFormat(
+                    'Y-m-d',
+                    $endDateInput
+                )->endOfDay();
 
                 if ($startDate->gt($endDate)) {
                     $temp = $startDate;
+
                     $startDate = $endDate->copy()->startOfDay();
                     $endDate = $temp->copy()->endOfDay();
                 }
 
-                $diffDays = $startDate->diffInDays($endDate) + 1;
-                $label = $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y');
+                $diffDays =
+                    $startDate->diffInDays($endDate) + 1;
+
+                $label =
+                    $startDate->translatedFormat('d M Y')
+                    . ' - '
+                    . $endDate->translatedFormat('d M Y');
 
                 if ($diffDays <= 1) {
                     $rangeType = 'day';
@@ -137,16 +147,28 @@ class ReportController extends Controller
                     'endDateInput' => $endDate->format('Y-m-d'),
                 ];
             } catch (\Exception $e) {
-                // Lanjut ke default jika parsing error
+                // Lanjut ke default jika parsing error.
             }
         }
 
         /*
-         * Default periode: Awal bulan s/d Akhir bulan ini
+         * Default periode:
+         * awal bulan sampai akhir bulan ini.
          */
-        $startDate = now()->startOfMonth()->startOfDay();
-        $endDate = now()->endOfMonth()->endOfDay();
-        $label = $startDate->translatedFormat('d M Y') . ' - ' . $endDate->translatedFormat('d M Y');
+        $startDate =
+            now()
+            ->startOfMonth()
+            ->startOfDay();
+
+        $endDate =
+            now()
+            ->endOfMonth()
+            ->endOfDay();
+
+        $label =
+            $startDate->translatedFormat('d M Y')
+            . ' - '
+            . $endDate->translatedFormat('d M Y');
 
         return [
             'type' => 'month',
@@ -170,7 +192,6 @@ class ReportController extends Controller
         $reports =
             $this->getReports($request);
 
-
         /*
          * ========================================================
          * PERIODE CALENDAR
@@ -178,7 +199,6 @@ class ReportController extends Controller
          */
         $period =
             $this->getPeriod($request);
-
 
         $startDate =
             $period['start'];
@@ -203,13 +223,39 @@ class ReportController extends Controller
 
 
         /*
+ * ========================================================
+ * PERIODE BADGE KANAN
+ * ========================================================
+ *
+ * Selalu menunjukkan awal dan akhir bulan saat ini.
+ * Tidak mengikuti filter calendar.
+ */
+        $reportMonthStart =
+            now()
+            ->startOfMonth();
+
+        $reportMonthEnd =
+            now()
+            ->endOfMonth();
+
+        $reportMonthLabel =
+            $reportMonthStart->translatedFormat('d M Y')
+            . ' - '
+            . $reportMonthEnd->translatedFormat('d M Y');
+
+
+        /*
          * ========================================================
          * DATA PEMINJAMAN BUKU
          * ========================================================
          *
-         * Filter query database menggunakan whereBetween pada kolom borrowed_at / created_at.
+         * Filter berdasarkan tanggal peminjaman.
          */
-        $borrowings = Borrowing::with(['member', 'details.book'])
+        $borrowings =
+            Borrowing::with([
+                'member',
+                'details.book'
+            ])
             ->whereBetween(
                 'borrowed_at',
                 [
@@ -220,29 +266,64 @@ class ReportController extends Controller
             ->latest('borrowed_at')
             ->get();
 
-        $borrowedBooks = $borrowings->count();
-
-        // Ringkasan metrik peminjaman
-        $totalBorrowed = $borrowings->count();
-        $totalReturned = $borrowings->where('status', 'dikembalikan')->count();
-        $totalActiveBorrow = $borrowings->where('status', 'dipinjam')->count();
-        $totalLate = $borrowings->where('status', 'dipinjam')
-            ->filter(function ($item) {
-                return $item->due_at && Carbon::parse($item->due_at)->isPast();
-            })->count();
+        $borrowedBooks =
+            $borrowings->count();
 
 
         /*
-         * Grafik peminjaman.
+         * ========================================================
+         * RINGKASAN METRIK PEMINJAMAN
+         * ========================================================
+         */
+        $totalBorrowed =
+            $borrowings->count();
+
+        $totalReturned =
+            $borrowings
+            ->where(
+                'status',
+                'dikembalikan'
+            )
+            ->count();
+
+        $totalActiveBorrow =
+            $borrowings
+            ->where(
+                'status',
+                'dipinjam'
+            )
+            ->count();
+
+        $totalLate =
+            $borrowings
+            ->where(
+                'status',
+                'dipinjam'
+            )
+            ->filter(function ($item) {
+
+                return $item->due_at
+                    && Carbon::parse(
+                        $item->due_at
+                    )->isPast();
+            })
+            ->count();
+
+
+        /*
+         * ========================================================
+         * GRAFIK PEMINJAMAN
+         * ========================================================
          */
         [
             $borrowChartLabels,
             $borrowChartBars
-        ] = $this->generateBorrowChart(
-            $startDate,
-            $endDate,
-            $periodType
-        );
+        ] =
+            $this->generateBorrowChart(
+                $startDate,
+                $endDate,
+                $periodType
+            );
 
 
         /*
@@ -273,11 +354,12 @@ class ReportController extends Controller
         [
             $lateChartLabels,
             $lateChartBars
-        ] = $this->generateLateChart(
-            $startDate,
-            $endDate,
-            $periodType
-        );
+        ] =
+            $this->generateLateChart(
+                $startDate,
+                $endDate,
+                $periodType
+            );
 
 
         /*
@@ -294,71 +376,158 @@ class ReportController extends Controller
                     $startDate,
                     $endDate
                 ]
-            )->count();
+            )
+            ->count();
 
 
         [
             $collectionChartLabels,
             $collectionChartBars
-        ] = $this->generateCollectionChart(
-            $startDate,
-            $endDate,
-            $periodType
-        );
+        ] =
+            $this->generateCollectionChart(
+                $startDate,
+                $endDate,
+                $periodType
+            );
 
 
         /*
          * ========================================================
          * ANGGOTA AKTIF
          * ========================================================
+         *
+         * PENTING:
+         *
+         * Tidak menggunakan status member saat ini.
+         *
+         * Laporan ini bersifat HISTORIS.
+         *
+         * Member dihitung aktif apabila memiliki aktivitas
+         * peminjaman atau reservasi yang beririsan dengan
+         * periode laporan.
          */
+        $activeMemberIds =
+            $this->getActiveMemberIds(
+                $startDate,
+                $endDate
+            );
+
         $activeMembers =
-            Member::where(
-                'status',
-                'aktif'
-            )
-            ->whereBetween(
-                'created_at',
-                [
-                    $startDate,
-                    $endDate
-                ]
-            )
-            ->count();
-
-
-        [
-            $memberChartLabels,
-            $memberChartBars
-        ] = $this->generateMemberChart(
-            $startDate,
-            $endDate,
-            $periodType
-        );
+            count($activeMemberIds);
 
 
         /*
-         * Format data untuk kebutuhan ekspor PDF / Excel
+         * ========================================================
+         * GRAFIK ANGGOTA AKTIF
+         * ========================================================
          */
-        $borrowingsExportData = $borrowings->map(function ($item, $index) {
-            $bookTitles = $item->details->map(function ($d) {
-                return ($d->book->title ?? 'Buku') . ($d->quantity > 1 ? ' (' . $d->quantity . 'x)' : '');
-            })->implode(', ');
+        [
+            $memberChartLabels,
+            $memberChartBars
+        ] =
+            $this->generateMemberChart(
+                $startDate,
+                $endDate,
+                $periodType
+            );
 
-            $isLate = ($item->status === 'dipinjam' && $item->due_at && Carbon::parse($item->due_at)->isPast());
-            $statusText = $item->status === 'dikembalikan' ? 'Dikembalikan' : ($isLate ? 'Terlambat' : 'Dipinjam');
 
-            return [
-                'no' => $index + 1,
-                'member_name' => $item->member->name ?? ('Anggota #' . $item->member_id),
-                'member_code' => $item->member->member_code ?? '-',
-                'books' => $bookTitles ?: 'Tidak ada rincian',
-                'borrowed_at' => Carbon::parse($item->borrowed_at)->translatedFormat('d M Y'),
-                'due_at' => $item->due_at ? Carbon::parse($item->due_at)->translatedFormat('d M Y') : '-',
-                'returned_at' => $item->returned_at ? Carbon::parse($item->returned_at)->translatedFormat('d M Y') : '-',
-                'status' => $statusText,
-            ];
-        })->values()->toArray();
+        /*
+         * ========================================================
+         * FORMAT DATA UNTUK EXPORT PDF / EXCEL
+         * ========================================================
+         */
+        $borrowingsExportData =
+            $borrowings
+            ->map(function ($item, $index) {
+
+                $bookTitles =
+                    $item->details
+                    ->map(function ($d) {
+
+                        return ($d->book->title ?? 'Buku')
+                            .
+                            (
+                                $d->quantity > 1
+                                ? ' (' . $d->quantity . 'x)'
+                                : ''
+                            );
+                    })
+                    ->implode(', ');
+
+
+                $isLate =
+                    (
+                        $item->status === 'dipinjam'
+                        &&
+                        $item->due_at
+                        &&
+                        Carbon::parse(
+                            $item->due_at
+                        )->isPast()
+                    );
+
+
+                $statusText =
+                    $item->status === 'dikembalikan'
+                    ? 'Dikembalikan'
+                    : (
+                        $isLate
+                        ? 'Terlambat'
+                        : 'Dipinjam'
+                    );
+
+
+                return [
+                    'no' =>
+                    $index + 1,
+
+                    'member_name' =>
+                    $item->member->name
+                        ??
+                        ('Anggota #' . $item->member_id),
+
+                    'member_code' =>
+                    $item->member->member_code
+                        ??
+                        '-',
+
+                    'books' =>
+                    $bookTitles
+                        ?:
+                        'Tidak ada rincian',
+
+                    'borrowed_at' =>
+                    Carbon::parse(
+                        $item->borrowed_at
+                    )->translatedFormat(
+                        'd M Y'
+                    ),
+
+                    'due_at' =>
+                    $item->due_at
+                        ? Carbon::parse(
+                            $item->due_at
+                        )->translatedFormat(
+                            'd M Y'
+                        )
+                        : '-',
+
+                    'returned_at' =>
+                    $item->returned_at
+                        ? Carbon::parse(
+                            $item->returned_at
+                        )->translatedFormat(
+                            'd M Y'
+                        )
+                        : '-',
+
+                    'status' =>
+                    $statusText,
+                ];
+            })
+            ->values()
+            ->toArray();
 
 
         /*
@@ -373,6 +542,7 @@ class ReportController extends Controller
 
                 'borrowings',
                 'borrowingsExportData',
+
                 'totalBorrowed',
                 'totalReturned',
                 'totalActiveBorrow',
@@ -390,6 +560,7 @@ class ReportController extends Controller
                 'endDateInput',
                 'startDate',
                 'endDate',
+                'reportMonthLabel',
 
                 'borrowChartLabels',
                 'borrowChartBars',
@@ -404,6 +575,155 @@ class ReportController extends Controller
                 'memberChartBars'
             )
         );
+    }
+
+
+    /**
+     * ============================================================
+     * AMBIL MEMBER AKTIF BERDASARKAN AKTIVITAS HISTORIS
+     * ============================================================
+     *
+     * Member dianggap aktif dalam sebuah periode apabila:
+     *
+     * 1. Memiliki peminjaman yang beririsan dengan periode tersebut
+     *    ATAU
+     *
+     * 2. Memiliki reservasi yang beririsan dengan periode tersebut.
+     *
+     * Status member saat ini TIDAK digunakan.
+     *
+     * Contoh:
+     *
+     * Peminjaman:
+     * 02 Sep - 10 Sep
+     *
+     * Minggu 1:
+     * 01 Sep - 07 Sep
+     * -> dihitung
+     *
+     * Minggu 2:
+     * 08 Sep - 14 Sep
+     * -> tetap dihitung
+     *
+     * Minggu 3:
+     * 15 Sep - 21 Sep
+     * -> tidak dihitung
+     */
+    private function getActiveMemberIds(
+        $startDate,
+        $endDate
+    ) {
+        /*
+         * ========================================================
+         * PEMINJAMAN
+         * ========================================================
+         *
+         * Sebuah peminjaman beririsan dengan periode apabila:
+         *
+         * borrowed_at <= akhir periode
+         *
+         * DAN
+         *
+         * returned_at masih NULL
+         * ATAU
+         * returned_at >= awal periode
+         *
+         * Dengan begitu:
+         *
+         * 02 Sep - 10 Sep
+         *
+         * tetap terhitung di minggu 1 dan minggu 2.
+         */
+        $borrowingMemberIds =
+            Borrowing::query()
+            ->whereDate(
+                'borrowed_at',
+                '<=',
+                $endDate
+            )
+            ->where(function ($query) use ($startDate) {
+
+                $query
+                    ->whereNull(
+                        'returned_at'
+                    )
+                    ->orWhereDate(
+                        'returned_at',
+                        '>=',
+                        $startDate
+                    );
+            })
+            ->pluck(
+                'member_id'
+            );
+
+
+        /*
+         * ========================================================
+         * RESERVASI
+         * ========================================================
+         *
+         * Reservasi yang ditolak atau dibatalkan tidak dihitung.
+         *
+         * Reservasi dianggap beririsan apabila:
+         *
+         * reserved_at <= akhir periode
+         *
+         * DAN
+         *
+         * expires_at masih NULL
+         * ATAU
+         * expires_at >= awal periode.
+         */
+        $reservationMemberIds =
+            Reservation::query()
+            ->whereNotIn(
+                'status',
+                [
+                    'ditolak',
+                    'dibatalkan',
+                ]
+            )
+            ->whereDate(
+                'reserved_at',
+                '<=',
+                $endDate
+            )
+            ->where(function ($query) use ($startDate) {
+
+                $query
+                    ->whereNull(
+                        'expires_at'
+                    )
+                    ->orWhereDate(
+                        'expires_at',
+                        '>=',
+                        $startDate
+                    );
+            })
+            ->pluck(
+                'member_id'
+            );
+
+
+        /*
+         * ========================================================
+         * GABUNGKAN MEMBER
+         * ========================================================
+         *
+         * Satu member hanya dihitung satu kali walaupun:
+         *
+         * - punya beberapa peminjaman
+         * - punya beberapa reservasi
+         * - punya peminjaman + reservasi
+         */
+        return $borrowingMemberIds
+            ->merge(
+                $reservationMemberIds
+            )
+            ->unique()
+            ->values()
+            ->all();
     }
 
 
@@ -487,28 +807,218 @@ class ReportController extends Controller
 
     /**
      * ============================================================
-     * GRAFIK MEMBER
+     * GRAFIK ANGGOTA AKTIF
      * ============================================================
+     *
+     * Berbeda dari grafik lama.
+     *
+     * Grafik ini menghitung member berdasarkan aktivitas historis
+     * pada setiap bagian periode.
+     *
+     * Untuk periode bulanan:
+     *
+     * M1 = minggu pertama dari rentang laporan
+     * M2 = minggu kedua
+     * M3 = minggu ketiga
+     * M4 = minggu keempat
+     * M5 = minggu kelima jika ada
      */
     private function generateMemberChart(
         $startDate,
         $endDate,
         $type
     ) {
-        return $this->generateDateChart(
-            Member::query()
-                ->where(
-                    'status',
-                    'aktif'
-                ),
-            'created_at',
-            $startDate,
-            $endDate,
-            $type,
-            function ($query) {
-                return $query;
+        /*
+         * ========================================================
+         * HARIAN
+         * ========================================================
+         *
+         * Jika laporan hanya 1 hari, satu angka mewakili
+         * member yang memiliki aktivitas pada hari tersebut.
+         */
+        if ($type === 'day') {
+
+            $dayStart =
+                $startDate
+                ->copy()
+                ->startOfDay();
+
+            $dayEnd =
+                $endDate
+                ->copy()
+                ->endOfDay();
+
+            $memberIds =
+                $this->getActiveMemberIds(
+                    $dayStart,
+                    $dayEnd
+                );
+
+            return [
+                ['Hari'],
+                $this->normalizeBars([
+                    count($memberIds)
+                ])
+            ];
+        }
+
+
+        /*
+         * ========================================================
+         * RENTANG MINGGUAN
+         * ========================================================
+         *
+         * Jika user memilih rentang <= 7 hari,
+         * satu bar = satu hari.
+         */
+        if ($type === 'week') {
+
+            $labels = [];
+
+            $bars = [];
+
+            $cursor =
+                $startDate->copy();
+
+
+            while (
+                $cursor->lte(
+                    $endDate
+                )
+            ) {
+
+                $dayStart =
+                    $cursor
+                    ->copy()
+                    ->startOfDay();
+
+                $dayEnd =
+                    $cursor
+                    ->copy()
+                    ->endOfDay();
+
+
+                $memberIds =
+                    $this->getActiveMemberIds(
+                        $dayStart,
+                        $dayEnd
+                    );
+
+
+                $labels[] =
+                    $cursor->translatedFormat(
+                        'D'
+                    );
+
+
+                $bars[] =
+                    count($memberIds);
+
+
+                $cursor->addDay();
             }
-        );
+
+
+            return [
+                $labels,
+                $this->normalizeBars(
+                    $bars
+                )
+            ];
+        }
+
+
+        /*
+         * ========================================================
+         * BULANAN
+         * ========================================================
+         *
+         * Rentang lebih dari 7 hari dibagi menjadi blok 7 hari
+         * dari tanggal mulai laporan.
+         *
+         * Contoh:
+         *
+         * 01 - 07 = M1
+         * 08 - 14 = M2
+         * 15 - 21 = M3
+         * 22 - 28 = M4
+         * 29 - 30 = M5
+         */
+        $labels = [];
+
+        $bars = [];
+
+        $cursor =
+            $startDate->copy();
+
+        $weekNumber = 1;
+
+
+        while (
+            $cursor->lte(
+                $endDate
+            )
+        ) {
+
+            $weekStart =
+                $cursor
+                ->copy()
+                ->startOfDay();
+
+
+            $weekEnd =
+                $cursor
+                ->copy()
+                ->addDays(6)
+                ->endOfDay();
+
+
+            if (
+                $weekEnd->gt(
+                    $endDate
+                )
+            ) {
+                $weekEnd =
+                    $endDate->copy();
+            }
+
+
+            /*
+             * Ambil member yang aktif dalam minggu tersebut.
+             */
+            $memberIds =
+                $this->getActiveMemberIds(
+                    $weekStart,
+                    $weekEnd
+                );
+
+
+            $labels[] =
+                'M' . $weekNumber;
+
+
+            $bars[] =
+                count($memberIds);
+
+
+            /*
+             * Pindah ke hari pertama minggu berikutnya.
+             */
+            $cursor =
+                $weekEnd
+                ->copy()
+                ->addSecond();
+
+            $weekNumber++;
+        }
+
+
+        return [
+            $labels,
+            $this->normalizeBars(
+                $bars
+            )
+        ];
     }
 
 
@@ -516,6 +1026,15 @@ class ReportController extends Controller
      * ============================================================
      * GENERATE GRAFIK BERDASARKAN PERIODE
      * ============================================================
+     *
+     * Method ini tetap digunakan oleh:
+     *
+     * - Peminjaman
+     * - Keterlambatan
+     * - Koleksi Buku
+     *
+     * Grafik anggota aktif menggunakan generateMemberChart()
+     * sendiri karena membutuhkan logika overlap periode.
      */
     private function generateDateChart(
         $query,
@@ -549,36 +1068,39 @@ class ReportController extends Controller
 
             $bars = [];
 
+
             foreach ($labels as $hour) {
 
                 $start =
                     $startDate
-                        ->copy()
-                        ->setHour(
-                            (int) $hour
-                        )
-                        ->startOfHour();
+                    ->copy()
+                    ->setHour(
+                        (int) $hour
+                    )
+                    ->startOfHour();
+
 
                 $end =
                     $start
-                        ->copy()
-                        ->addHours(3)
-                        ->endOfHour();
+                    ->copy()
+                    ->addHours(3)
+                    ->endOfHour();
 
 
                 $count =
                     (clone $query)
-                        ->whereBetween(
-                            $column,
-                            [
-                                $start,
-                                $end
-                            ]
-                        )
-                        ->count();
+                    ->whereBetween(
+                        $column,
+                        [
+                            $start,
+                            $end
+                        ]
+                    )
+                    ->count();
 
 
-                $bars[] = $count;
+                $bars[] =
+                    $count;
             }
 
 
@@ -615,12 +1137,15 @@ class ReportController extends Controller
             ) {
 
                 $dayStart =
-                    $cursor->copy()
-                        ->startOfDay();
+                    $cursor
+                    ->copy()
+                    ->startOfDay();
+
 
                 $dayEnd =
-                    $cursor->copy()
-                        ->endOfDay();
+                    $cursor
+                    ->copy()
+                    ->endOfDay();
 
 
                 $labels[] =
@@ -631,14 +1156,14 @@ class ReportController extends Controller
 
                 $bars[] =
                     (clone $query)
-                        ->whereBetween(
-                            $column,
-                            [
-                                $dayStart,
-                                $dayEnd
-                            ]
-                        )
-                        ->count();
+                    ->whereBetween(
+                        $column,
+                        [
+                            $dayStart,
+                            $dayEnd
+                        ]
+                    )
+                    ->count();
 
 
                 $cursor->addDay();
@@ -668,7 +1193,6 @@ class ReportController extends Controller
         $cursor =
             $startDate->copy();
 
-
         $weekNumber = 1;
 
 
@@ -679,13 +1203,16 @@ class ReportController extends Controller
         ) {
 
             $weekStart =
-                $cursor->copy()
-                    ->startOfDay();
+                $cursor
+                ->copy()
+                ->startOfDay();
+
 
             $weekEnd =
-                $cursor->copy()
-                    ->addDays(6)
-                    ->endOfDay();
+                $cursor
+                ->copy()
+                ->addDays(6)
+                ->endOfDay();
 
 
             if (
@@ -705,20 +1232,20 @@ class ReportController extends Controller
 
             $bars[] =
                 (clone $query)
-                    ->whereBetween(
-                        $column,
-                        [
-                            $weekStart,
-                            $weekEnd
-                        ]
-                    )
-                    ->count();
+                ->whereBetween(
+                    $column,
+                    [
+                        $weekStart,
+                        $weekEnd
+                    ]
+                )
+                ->count();
 
 
             $cursor =
                 $weekEnd
-                    ->copy()
-                    ->addSecond();
+                ->copy()
+                ->addSecond();
 
             $weekNumber++;
         }
@@ -770,10 +1297,9 @@ class ReportController extends Controller
                     8,
                     round(
                         ($value / $max)
-                        * 100
+                            * 100
                     )
                 );
-
             },
             $values
         );
@@ -847,28 +1373,28 @@ class ReportController extends Controller
                 ],
                 [
                     'jenis.required' =>
-                        'Jenis laporan wajib dipilih.',
+                    'Jenis laporan wajib dipilih.',
 
                     'kategori.required' =>
-                        'Kategori buku wajib dipilih.',
+                    'Kategori buku wajib dipilih.',
 
                     'status.required' =>
-                        'Status wajib dipilih.',
+                    'Status wajib dipilih.',
 
                     'anggota.required' =>
-                        'Anggota wajib dipilih.',
+                    'Anggota wajib dipilih.',
 
                     'urutan.required' =>
-                        'Urutan wajib dipilih.',
+                    'Urutan wajib dipilih.',
 
                     'tanggal_mulai.required' =>
-                        'Tanggal mulai wajib diisi.',
+                    'Tanggal mulai wajib diisi.',
 
                     'tanggal_selesai.required' =>
-                        'Tanggal selesai wajib diisi.',
+                    'Tanggal selesai wajib diisi.',
 
                     'tanggal_selesai.after_or_equal' =>
-                        'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+                    'Tanggal selesai tidak boleh sebelum tanggal mulai.',
                 ]
             );
 
@@ -881,10 +1407,10 @@ class ReportController extends Controller
 
         $newId =
             empty($reports)
-                ? 1
-                : max(
-                    array_keys($reports)
-                ) + 1;
+            ? 1
+            : max(
+                array_keys($reports)
+            ) + 1;
 
 
         $validated['id'] =

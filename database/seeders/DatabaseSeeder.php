@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
 
             ShelfSeeder::class,
 
+            RackSeeder::class,
+
             BookCopySeeder::class,
 
             AdminSeeder::class,

@@ -346,10 +346,59 @@
 </div>
 
 
+{{-- =========================================================
+     PENGUMUMAN (ANNOUNCEMENT) POPUP
+     Hanya muncul jika ada aktivitas MANUAL yang belum dibaca.
+========================================================= --}}
+
+@if(isset($unreadAnnouncement) && $unreadAnnouncement)
+
+<div
+    class="announcement-modal"
+    id="announcementModal"
+    aria-hidden="false"
+    data-announcement-id="{{ $unreadAnnouncement->id }}">
+
+    <div class="announcement-modal-overlay"></div>
+
+    <div class="announcement-modal-box">
+
+        <div class="announcement-modal-header">
+            📢 Pengumuman
+        </div>
+
+        <div class="announcement-modal-body">
+
+            <h2>
+                {{ $unreadAnnouncement->title }}
+            </h2>
+
+            <p>
+                {{ $unreadAnnouncement->description ?? '' }}
+            </p>
+
+        </div>
+
+        <button
+            type="button"
+            class="announcement-close-btn"
+            id="announcementCloseBtn">
+
+            Tutup
+
+        </button>
+
+    </div>
+
+</div>
+
+@endif
+
 
 {{-- =========================================================
      BOOK DETAIL MODAL
-========================================================= --}}
+========================================================== --}}
+</parameter>
 
 <div
     id="userBookModal"
@@ -609,6 +658,66 @@
 
 <script
     src="{{ asset('js/userBook3d.js') }}">
+</script>
+
+<script>
+    (function () {
+
+        const announcementModal =
+            document.getElementById('announcementModal');
+
+        if (!announcementModal) {
+            return;
+        }
+
+        const closeBtn =
+            document.getElementById('announcementCloseBtn');
+
+        const activityId =
+            announcementModal.getAttribute('data-announcement-id');
+
+        const markAsReadUrl =
+            '{{ route('activities.markAsRead', ['activity' => '__ID__']) }}'
+            .replace('__ID__', activityId);
+
+
+        function closeAnnouncement() {
+
+            // Simpan status "sudah dibaca" ke database
+            // agar popup tidak muncul lagi pada refresh berikutnya.
+            fetch(markAsReadUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN':
+                        document.querySelector(
+                            'meta[name="csrf-token"]'
+                        )?.getAttribute('content') ?? '',
+                    'Content-Type': 'application/json'
+                }
+            }).catch(function () {
+                // Abaikan error jaringan agar popup tetap bisa ditutup.
+            });
+
+            announcementModal.classList.add('hidden');
+            announcementModal.setAttribute('aria-hidden', 'true');
+        }
+
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeAnnouncement);
+        }
+
+
+        // Tutup juga saat klik overlay
+        const overlay = announcementModal.querySelector(
+            '.announcement-modal-overlay'
+        );
+
+        if (overlay) {
+            overlay.addEventListener('click', closeAnnouncement);
+        }
+
+    })();
 </script>
 
 @endpush

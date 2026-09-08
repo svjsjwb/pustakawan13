@@ -377,15 +377,14 @@
 
             <a href="{{ route('reservations.index') }}" class="panel-link">
                 Lihat semua buku
-
             </a>
 
         </div>
 
 
         {{-- =================================================
-     AKTIVITAS TERBARU
-================================================== --}}
+             AKTIVITAS TERBARU
+        ================================================== --}}
 
         <div class="dashboard-panel activity-panel">
 
@@ -470,6 +469,24 @@
 
                     </time>
 
+
+                    {{-- EDIT (HANYA AKTIVITAS MANUAL) --}}
+                    @if(($activity['type'] ?? '') === 'manual')
+
+                    <button
+                        type="button"
+                        class="activity-edit-btn"
+                        data-activity-id="{{ $activity['id'] }}"
+                        data-activity-title="{{ $activity['title'] }}"
+                        data-activity-description="{{ $activity['description'] }}"
+                        title="Edit aktivitas">
+
+                        ✎
+
+                    </button>
+
+                    @endif
+
                 </div>
 
                 @empty
@@ -483,6 +500,23 @@
                 @endforelse
 
             </div>
+
+
+            {{-- TOMBOL TAMBAH AKTIVITAS
+                 Mengikuti gaya tombol "Lihat semua buku"
+                 pada panel Buku Terpopuler.
+                 Diletakkan di bagian PALING BAWAH panel,
+                 bukan di header. --}}
+
+            <a
+                href="#"
+                class="panel-link"
+                id="btnAddActivity"
+                onclick="return false;">
+
+                + Tambah Aktivitas
+
+            </a>
 
         </div>
 
@@ -523,7 +557,6 @@
                 class="reservation-see-all">
 
                 Lihat semua reservasi
-
 
             </a>
 
@@ -642,5 +675,354 @@
     </div>
 
 </section>
+
+
+
+
+{{-- =========================================================
+     MODAL TAMBAH / EDIT AKTIVITAS (ADMIN)
+========================================================= --}}
+
+<div
+    class="activity-modal"
+    id="activityModal"
+    aria-hidden="true">
+
+    <div
+        class="activity-modal-overlay"
+        id="activityModalOverlay">
+    </div>
+
+
+    <div class="activity-modal-box">
+
+        <div class="activity-modal-header">
+
+            <h3 id="activityModalTitle">
+                Tambah Aktivitas
+            </h3>
+
+            <button
+                type="button"
+                class="activity-modal-close"
+                id="activityModalClose"
+                aria-label="Tutup">
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            id="activityForm"
+            method="POST"
+            action="{{ route('activities.store') }}">
+
+            @csrf
+
+            <input
+                type="hidden"
+                name="_method"
+                id="activityFormMethod"
+                value="POST">
+
+            <div class="activity-form-field">
+
+                <label for="activityTitle">
+                    Judul Aktivitas
+                </label>
+
+                <input
+                    type="text"
+                    name="title"
+                    id="activityTitle"
+                    class="activity-form-input"
+                    placeholder="Contoh: Perpustakaan Tutup"
+                    required
+                    maxlength="255">
+
+                @error('title')
+
+                <span class="activity-form-error">
+                    {{ $message }}
+                </span>
+
+                @enderror
+
+            </div>
+
+
+            <div class="activity-form-field">
+
+                <label for="activityDescription">
+                    Deskripsi Aktivitas
+                </label>
+
+                <textarea
+                    name="description"
+                    id="activityDescription"
+                    class="activity-form-input"
+                    placeholder="Contoh: Perpustakaan akan tutup pada tanggal 5 September."
+                    rows="4"></textarea>
+
+            </div>
+
+
+            <div class="activity-modal-actions">
+
+                <button
+                    type="button"
+                    class="activity-btn-cancel"
+                    id="btnCancelActivity">
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="activity-btn-simpan">
+                    Simpan
+                </button>
+
+            </div>
+
+
+            {{-- AKSI EDIT: HAPUS & PIN (HANYA TAMPIL SAAT EDIT) --}}
+
+            <div
+                class="activity-modal-edit-actions"
+                id="activityEditActions"
+                hidden>
+
+                <button
+                    type="button"
+                    class="activity-btn-hapus"
+                    id="btnDeleteActivity">
+                    🗑 Hapus
+                </button>
+
+                <button
+                    type="button"
+                    class="activity-btn-pin"
+                    id="btnPinActivity">
+                    📌 Pin
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+
+@push('scripts')
+
+<script>
+    (function () {
+
+        const modal =
+            document.getElementById('activityModal');
+
+        const modalTitle =
+            document.getElementById('activityModalTitle');
+
+        const form =
+            document.getElementById('activityForm');
+
+        const formMethod =
+            document.getElementById('activityFormMethod');
+
+        const titleInput =
+            document.getElementById('activityTitle');
+
+        const descInput =
+            document.getElementById('activityDescription');
+
+        const btnAdd =
+            document.getElementById('btnAddActivity');
+
+        const btnClose =
+            document.getElementById('activityModalClose');
+
+        const btnCancel =
+            document.getElementById('btnCancelActivity');
+
+        const overlay =
+            document.getElementById('activityModalOverlay');
+
+        const editActions =
+            document.getElementById('activityEditActions');
+
+        const btnDelete =
+            document.getElementById('btnDeleteActivity');
+
+        const btnPin =
+            document.getElementById('btnPinActivity');
+
+        let currentEditId = null;
+
+
+        function openModal() {
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeModal() {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+
+        // TAMBAH
+        btnAdd.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            formMethod.value = 'POST';
+            form.action =
+                '{{ route('activities.store') }}';
+
+            modalTitle.textContent = 'Tambah Aktivitas';
+            titleInput.value = '';
+            descInput.value = '';
+
+            titleInput.removeAttribute('readonly');
+            descInput.removeAttribute('readonly');
+
+            currentEditId = null;
+            editActions.hidden = true;
+
+            openModal();
+            titleInput.focus();
+        });
+
+
+        // BATAL
+        btnCancel.addEventListener('click', closeModal);
+
+
+        // CLOSE
+        btnClose.addEventListener('click', closeModal);
+
+
+        // TUTUP SAAT KLIK OVERLAY
+        overlay.addEventListener('click', closeModal);
+
+
+        // EDIT (TOMbol PADA ITEM AKTIVITAS MANUAL)
+        document.querySelectorAll('.activity-edit-btn').forEach(function (btn) {
+
+            btn.addEventListener('click', function (e) {
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                const id =
+                    btn.getAttribute('data-activity-id');
+                const title =
+                    btn.getAttribute('data-activity-title');
+                const description =
+                    btn.getAttribute('data-activity-description');
+
+                formMethod.value = 'PUT';
+                form.action =
+                    '{{ url('activities') }}' + '/' + id;
+
+                modalTitle.textContent = 'Edit Aktivitas';
+
+                titleInput.value = title;
+                descInput.value = description ?? '';
+
+                titleInput.removeAttribute('readonly');
+                descInput.removeAttribute('readonly');
+
+                currentEditId = id;
+                editActions.hidden = false;
+
+                openModal();
+                titleInput.focus();
+            });
+        });
+
+
+        // HAPUS
+        if (btnDelete) {
+
+            btnDelete.addEventListener('click', function () {
+
+                if (!currentEditId) {
+                    return;
+                }
+
+                if (!confirm('Hapus aktivitas ini?')) {
+                    return;
+                }
+
+                const deleteForm = document.createElement('form');
+                deleteForm.method = 'POST';
+                deleteForm.action =
+                    '{{ url('activities') }}' + '/' + currentEditId;
+
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_token';
+                csrf.value =
+                    document.querySelector(
+                        'meta[name="csrf-token"]'
+                    )?.getAttribute('content') ?? '';
+
+                const method = document.createElement('input');
+                method.type = 'hidden';
+                method.name = '_method';
+                method.value = 'DELETE';
+
+                deleteForm.appendChild(csrf);
+                deleteForm.appendChild(method);
+                document.body.appendChild(deleteForm);
+                deleteForm.submit();
+            });
+        }
+
+
+        // PIN / LEPAS PIN
+        if (btnPin) {
+
+            btnPin.addEventListener('click', function () {
+
+                if (!currentEditId) {
+                    return;
+                }
+
+                const pinForm = document.createElement('form');
+                pinForm.method = 'POST';
+                pinForm.action =
+                    '{{ url('activities') }}' + '/' + currentEditId + '/pin';
+
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_token';
+                csrf.value =
+                    document.querySelector(
+                        'meta[name="csrf-token"]'
+                    )?.getAttribute('content') ?? '';
+
+                const method = document.createElement('input');
+                method.type = 'hidden';
+                method.name = '_method';
+                method.value = 'PATCH';
+
+                pinForm.appendChild(csrf);
+                pinForm.appendChild(method);
+                document.body.appendChild(pinForm);
+                pinForm.submit();
+            });
+        }
+
+    })();
+</script>
+
+@endpush
 
 @endsection

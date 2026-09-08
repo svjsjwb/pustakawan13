@@ -19,11 +19,11 @@ class MemberSeeder extends Seeder
                 'email' => 'ahmad@example.com',
                 'phone' => '081234567801',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
             [
-                'member_number' => 'M002',  
+                'member_number' => 'M002',
                 'name' => 'Budi Santoso',
                 'nis_nip' => '0987654321',
                 'gender' => 'Laki-laki',
@@ -31,7 +31,7 @@ class MemberSeeder extends Seeder
                 'email' => 'budi@example.com',
                 'phone' => '081234567802',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
             [
@@ -43,7 +43,7 @@ class MemberSeeder extends Seeder
                 'email' => 'citra@example.com',
                 'phone' => '081234567803',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
             [
@@ -55,7 +55,7 @@ class MemberSeeder extends Seeder
                 'email' => 'dimas@example.com',
                 'phone' => '081234567804',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
             [
@@ -67,7 +67,7 @@ class MemberSeeder extends Seeder
                 'email' => 'eka@example.com',
                 'phone' => '081234567805',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
             [
@@ -79,7 +79,7 @@ class MemberSeeder extends Seeder
                 'email' => 'fajar@example.com',
                 'phone' => '081234567806',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
             [
@@ -91,7 +91,7 @@ class MemberSeeder extends Seeder
                 'email' => 'gita@example.com',
                 'phone' => '081234567807',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
             [
@@ -103,7 +103,7 @@ class MemberSeeder extends Seeder
                 'email' => 'hendra@example.com',
                 'phone' => '081234567808',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
             [
@@ -115,7 +115,7 @@ class MemberSeeder extends Seeder
                 'email' => 'intan@example.com',
                 'phone' => '081234567809',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
             [
@@ -127,7 +127,7 @@ class MemberSeeder extends Seeder
                 'email' => 'joko@example.com',
                 'phone' => '081234567810',
                 'address' => 'Surakarta',
-                'status' => 'aktif',
+                'status' => 'Tidak Aktif',
                 'registered_at' => now(),
             ],
         ]);

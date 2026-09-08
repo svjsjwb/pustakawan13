@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\Member;
 use App\Models\Borrowing;
 use App\Models\Reservation;
+use App\Models\Activity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -276,19 +277,78 @@ class DashboardController extends Controller
 
         /*
          * ========================================================
+         * 5. AKTIVITAS MANUAL (ANNOUNCEMENT)
+         * ========================================================
+         *
+         * Aktivitas yang dibuat admin melalui tombol
+         * "+ Tambah Aktivitas". Hanya aktivitas inilah yang
+         * muncul sebagai popup announcement di halaman /home.
+         */
+
+        $manualActivities =
+            Activity::latest()
+                ->get();
+
+        foreach ($manualActivities as $manualActivity) {
+
+            $activities->push([
+
+                'id' =>
+                    $manualActivity->id,
+
+                'type' =>
+                    'manual',
+
+                'title' =>
+                    $manualActivity->title ?? '-',
+
+                'description' =>
+                    $manualActivity->description ?? '-',
+
+                'created_at' =>
+                    $manualActivity->created_at,
+
+                'pinned_at' =>
+                    $manualActivity->pinned_at,
+
+                'icon' =>
+                    '📢',
+            ]);
+        }
+
+
+        /*
+         * ========================================================
          * URUTKAN AKTIVITAS
          * ========================================================
          *
          * Yang paling baru selalu di atas.
+         *
+         * Termasuk aktivitas manual yang baru dibuat.
          */
 
         $activities =
             $activities
-                ->sortByDesc(
-                    'created_at'
-                )
+                ->sortBy([
+                    ['pinned_at', 'desc'],
+                    ['created_at', 'desc'],
+                ])
                 ->take(4)
                 ->values();
+
+
+        /*
+         * ========================================================
+         * SEMUA AKTIVITAS MANUAL (UNTUK FORM EDIT)
+         * ========================================================
+         *
+         * Dikirim ke view agar panel dashboard dapat membuat
+         * form "Edit Aktivitas" tanpa query tambahan.
+         */
+
+        $allManualActivities =
+            Activity::latest()
+                ->get();
 
 
         /*
@@ -309,7 +369,8 @@ class DashboardController extends Controller
                 'max7',
 
                 'reservations',
-                'activities'
+                'activities',
+                'allManualActivities'
             )
         );
     }
