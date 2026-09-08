@@ -45,85 +45,85 @@
     ========================= --}}
 
     <form
-        method="GET"
-        action="{{ route('catalog') }}"
-        class="filters"
-        id="catalog-filter-form">
+    method="GET"
+    action="{{ route('catalog') }}"
+    class="filters"
+    id="catalog-filter-form">
 
-        {{-- SEARCH --}}
-        <input
-            type="text"
-            name="search"
-            value="{{ request('search') }}"
-            placeholder="Cari judul atau pengarang...">
+    {{-- SEARCH --}}
+    <input
+        type="text"
+        name="search"
+        value="{{ request('search') }}"
+        placeholder="Cari judul atau pengarang...">
 
 
-        {{-- =========================
-         CATEGORY DROPDOWN
-    ========================= --}}
+    {{-- =========================================================
+         KATEGORI
+    ========================================================= --}}
 
-        @php
+    @php
         $selectedCategoryId = request('category');
         $selectedSubcategoryId = request('subcategory');
 
         $selectedCategory = $categories->firstWhere(
-        'id',
-        $selectedCategoryId
+            'id',
+            $selectedCategoryId
         );
 
         $selectedSubcategory = null;
 
         if ($selectedCategory && $selectedSubcategoryId) {
-        $selectedSubcategory = $selectedCategory->subcategories
-        ->firstWhere('id', $selectedSubcategoryId);
+            $selectedSubcategory = $selectedCategory->subcategories
+                ->firstWhere('id', $selectedSubcategoryId);
         }
-        @endphp
+    @endphp
 
 
-        <div class="catalog-category-dropdown">
+    <div class="catalog-category-dropdown">
 
-            {{-- TOMBOL UTAMA --}}
-            <button
-                type="button"
-                class="catalog-category-trigger">
+        {{-- TOMBOL KATEGORI --}}
+        <button
+            type="button"
+            class="catalog-category-trigger">
 
-                <span>
-                    @if($selectedSubcategory)
+            <span>
+                @if($selectedSubcategory)
                     {{ $selectedSubcategory->name }}
-                    @elseif($selectedCategory)
+                @elseif($selectedCategory)
                     {{ $selectedCategory->name }}
-                    @else
+                @else
                     Semua Kategori
-                    @endif
-                </span>
+                @endif
+            </span>
 
-                <span class="catalog-category-arrow">
-                    ⌄
-                </span>
+            <span class="catalog-category-arrow">
+                ⌄
+            </span>
 
-            </button>
+        </button>
 
 
-            {{-- MENU KATEGORI --}}
-            <div class="catalog-category-menu">
+        {{-- MENU KATEGORI --}}
+        <div class="catalog-category-menu">
 
-                {{-- SEMUA KATEGORI --}}
-                <a
-                    href="{{ route('catalog', array_filter([
+            {{-- SEMUA KATEGORI --}}
+            <a
+                href="{{ route('catalog', array_filter([
                     'search' => request('search'),
                     'status' => request('status'),
                     'per_page' => request('per_page'),
                 ])) }}"
-                    class="catalog-category-option
-                    {{ !$selectedCategoryId && !$selectedSubcategoryId ? 'active' : '' }}">
+                class="catalog-category-option
+                {{ !$selectedCategoryId && !$selectedSubcategoryId ? 'active' : '' }}">
 
-                    Semua Kategori
+                Semua Kategori
 
-                </a>
+            </a>
 
 
-                {{-- KATEGORI --}}
-                @foreach($categories as $category)
+            {{-- KATEGORI --}}
+            @foreach($categories as $category)
 
                 <div class="catalog-category-item">
 
@@ -135,16 +135,18 @@
                             'per_page' => request('per_page'),
                         ])) }}"
                         class="catalog-category-option
-                            {{ (string) $selectedCategoryId === (string) $category->id && !$selectedSubcategoryId ? 'active' : '' }}">
+                        {{ (string) $selectedCategoryId === (string) $category->id && !$selectedSubcategoryId ? 'active' : '' }}">
 
                         <span>
                             {{ $category->name }}
                         </span>
 
                         @if($category->subcategories->count())
-                        <span class="catalog-category-arrow">
-                            ›
-                        </span>
+
+                            <span class="catalog-category-arrow">
+                                ›
+                            </span>
+
                         @endif
 
                     </a>
@@ -153,60 +155,62 @@
                     {{-- SUBKATEGORI --}}
                     @if($category->subcategories->count())
 
-                    <div class="catalog-subcategory-menu">
+                        <div class="catalog-subcategory-menu">
 
-                        {{-- SEMUA DALAM KATEGORI --}}
-                        <a
-                            href="{{ route('catalog', array_filter([
+                            {{-- SEMUA DALAM KATEGORI --}}
+                            <a
+                                href="{{ route('catalog', array_filter([
                                     'search' => request('search'),
                                     'category' => $category->id,
                                     'status' => request('status'),
                                     'per_page' => request('per_page'),
                                 ])) }}"
-                            class="catalog-subcategory-option
-                                    {{ (string) $selectedCategoryId === (string) $category->id && !$selectedSubcategoryId ? 'active' : '' }}">
+                                class="catalog-subcategory-option
+                                {{ (string) $selectedCategoryId === (string) $category->id && !$selectedSubcategoryId ? 'active' : '' }}">
 
-                            Semua {{ $category->name }}
+                                Semua {{ $category->name }}
 
-                        </a>
+                            </a>
 
 
-                        {{-- SUBKATEGORI --}}
-                        @foreach($category->subcategories as $subcategory)
+                            {{-- SUBKATEGORI --}}
+                            @foreach($category->subcategories as $subcategory)
 
-                        <a
-                            href="{{ route('catalog', array_filter([
+                                <a
+                                    href="{{ route('catalog', array_filter([
                                         'search' => request('search'),
                                         'category' => $category->id,
                                         'subcategory' => $subcategory->id,
                                         'status' => request('status'),
                                         'per_page' => request('per_page'),
                                     ])) }}"
-                            class="catalog-subcategory-option
-                                        {{ (string) $selectedSubcategoryId === (string) $subcategory->id ? 'active' : '' }}">
+                                    class="catalog-subcategory-option
+                                    {{ (string) $selectedSubcategoryId === (string) $subcategory->id ? 'active' : '' }}">
 
-                            └─ {{ $subcategory->name }}
+                                    └─ {{ $subcategory->name }}
 
-                        </a>
+                                </a>
 
-                        @endforeach
+                            @endforeach
 
-                    </div>
+                        </div>
 
                     @endif
 
                 </div>
 
-                @endforeach
-
-            </div>
+            @endforeach
 
         </div>
 
+    </div>
 
-        {{-- =========================
+
+    {{-- =========================================================
          STATUS
-    ========================= --}}
+    ========================================================= --}}
+
+    <div class="catalog-status-dropdown">
 
         <select
             name="status"
@@ -230,7 +234,13 @@
 
         </select>
 
-    </form>
+        <span class="catalog-status-arrow">
+            ⌄
+        </span>
+
+    </div>
+
+</form>
 
 
     {{-- =========================

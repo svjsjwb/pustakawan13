@@ -17,8 +17,16 @@ class CatalogController extends Controller
         */
 
         $categories = Category::with('subcategories')
-            ->orderBy('name')
-            ->get();
+            ->get()
+            ->sortBy(function ($category) {
+                return [
+                    'Buku Pendidikan' => 1,
+                    'Anak' => 2,
+                    'Remaja' => 3,
+                    'Dewasa' => 4,
+                ][$category->name] ?? 99;
+            })
+            ->values();
 
 
         /*
