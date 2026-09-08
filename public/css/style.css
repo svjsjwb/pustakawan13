@@ -38,6 +38,44 @@ body {
   min-height: 100vh;
 }
 
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* =========================================================
+   GLOBAL ANTI SELECT
+========================================================= */
+
+body,
+body * {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+input,
+textarea,
+select {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+
+img,
+svg {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
 h1,
 h2,
 h3,
@@ -939,5 +977,44 @@ tbody tr:hover {
   .content {
     padding: 18px 16px 50px;
   }
+
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* =========================================================
+   GLOBAL ANTI SELECT
+========================================================= */
+
+body,
+body * {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+/* Tetap izinkan input */
+input,
+textarea,
+select {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+
+/* Gambar tidak bisa di-drag */
+img,
+svg {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
 
 }

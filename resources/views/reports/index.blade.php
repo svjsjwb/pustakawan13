@@ -445,63 +445,66 @@
 
 
                 /*
-                 * =================================================
-                 * KOLEKSI
-                 * =================================================
-                 */
+ * =================================================
+ * KOLEKSI
+ * =================================================
+ */
 
-                elseif (
-                    str_contains(
-                        $jenis,
-                        'Koleksi'
-                    )
-                ) {
+elseif (
+    str_contains(
+        $jenis,
+        'Koleksi'
+    )
+) {
 
-                    $type =
-                        'collection';
+    $jenis =
+        'Laporan Koleksi Buku Baru';
 
-                    $category =
-                        'Koleksi';
+    $type =
+        'collection';
 
-                    $icon =
-                        '📚';
+    $category =
+        'Koleksi';
 
-                    $valNum =
-                        $totalBooks ?? 0;
+    $icon =
+        '📚';
 
-                    $badge =
-                        number_format(
-                            $valNum,
-                            0,
-                            ',',
-                            '.'
-                        )
-                        . ' Buku';
+    $valNum =
+        $totalBooks ?? 0;
 
-                    $badgeClass =
-                        'neutral';
+    $badge =
+        number_format(
+            $valNum,
+            0,
+            ',',
+            '.'
+        )
+        . ' Buku';
 
-                    $value =
-                        number_format(
-                            $valNum,
-                            0,
-                            ',',
-                            '.'
-                        );
+    $badgeClass =
+        'neutral';
 
-                    $valueLabel =
-                        'total koleksi';
+    $value =
+        number_format(
+            $valNum,
+            0,
+            ',',
+            '.'
+        );
 
-                    $description =
-                        'Rekap buku yang tercatat dalam periode laporan yang dipilih.';
+    $valueLabel =
+        'total koleksi';
 
-                    $bars =
-                        $collectionChartBars ?? [];
+    $description =
+        'Rekap buku yang tercatat dalam periode laporan yang dipilih.';
 
-                    $labels =
-                        $collectionChartLabels ?? [];
+    $bars =
+        $collectionChartBars ?? [];
 
-                }
+    $labels =
+        $collectionChartLabels ?? [];
+
+}
 
 
                 /*
@@ -569,7 +572,7 @@
                 class="report-card"
                 onclick="openReportDetail(this)"
 
-                data-report="{{ $report['jenis'] }}"
+                data-report="{{ $jenis }}"
 
                 data-value="{{ $value }}"
 
@@ -603,8 +606,12 @@
                         </span>
 
                         <h3>
-                            {{ $report['jenis'] }}
-                        </h3>
+    {{
+        str_contains($report['jenis'], 'Koleksi')
+            ? 'Laporan Koleksi Buku Baru'
+            : $report['jenis']
+    }}
+</h3>
 
                     </div>
 

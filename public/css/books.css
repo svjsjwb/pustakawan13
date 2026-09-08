@@ -1275,4 +1275,98 @@
         padding-right: 10px;
     }
 
+/* =========================================================
+   ANTI SELECT / ANTI DRAG
+========================================================= */
+
+.page-header,
+.page-header *,
+.book-toolbar,
+.book-toolbar *,
+.books-table-header,
+.books-table-header *,
+.table-wrapper,
+.table-wrapper *,
+.books-table,
+.books-table * {
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    -webkit-user-drag: none;
+    user-drag: none;
+
+}
+
+/* Input pencarian tetap bisa diketik */
+
+.book-search-input {
+
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+
+}
+
+/* Select kategori tetap bisa dipilih */
+
+.books-category-filter {
+
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+
+}
+
+/* Gambar dan SVG tidak bisa didrag */
+
+img,
+svg {
+
+    -webkit-user-drag: none;
+    user-drag: none;
+
+}
+
+/* =========================================================
+   ANTI SELECT / ANTI DRAG
+========================================================= */
+
+.page-header,
+.page-header *,
+.book-toolbar,
+.book-toolbar *,
+.books-table-header,
+.books-table-header *,
+.table-wrapper,
+.table-wrapper *,
+.books-table,
+.books-table * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+.book-search-input,
+.books-category-filter {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+img,
+svg {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
 }

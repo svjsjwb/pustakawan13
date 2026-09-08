@@ -81,6 +81,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const overlay =
         document.getElementById('userBookModalOverlay');
 
+    const catalogButton =
+        document.getElementById('userBookCatalogButton');
+
     const title =
         document.getElementById('modalBookTitle');
 
@@ -410,6 +413,21 @@ document.addEventListener('DOMContentLoaded', function () {
     overlay?.addEventListener(
         'click',
         closeModal
+    );
+
+    catalogButton?.addEventListener(
+        'click',
+        function (event) {
+
+            const catalogUrl =
+                new URL(catalogButton.href, window.location.origin);
+
+            if (window.location.pathname === catalogUrl.pathname) {
+                event.preventDefault();
+                closeModal();
+            }
+
+        }
     );
 
 

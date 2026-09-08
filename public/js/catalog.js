@@ -1,12 +1,95 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    const modal =
-        document.getElementById('book-modal');
+    /*
+    |--------------------------------------------------------------------------
+    | ANTI SELECT / ANTI DRAG
+    |--------------------------------------------------------------------------
+    */
+
+    document.addEventListener('selectstart', function (e) {
+        e.preventDefault();
+    });
+
+    document.addEventListener('dragstart', function (e) {
+        e.preventDefault();
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | MODAL
+    |--------------------------------------------------------------------------
+    */
+
+    const modal = document.getElementById('book-modal');
 
     if (!modal) {
         return;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | BOOK 3D ROTATION
+    |--------------------------------------------------------------------------
+    */
+
+    const book = document.getElementById('book3D');
+
+    if (book) {
+
+        let isDragging = false;
+
+        let rotX = 0;
+        let rotY = -15;
+
+        const defaultX = 0;
+        const defaultY = -15;
+
+       book.style.transform =
+    'rotateX(0deg) rotateY(-15deg)';
+
+        book.addEventListener('mousedown', function () {
+
+            isDragging = true;
+
+            book.style.transition = 'none';
+
+        });
+
+        document.addEventListener('mouseup', function () {
+
+            if (!isDragging) return;
+
+            isDragging = false;
+
+            rotX = defaultX;
+            rotY = defaultY;
+
+            book.style.transition =
+                'transform .8s ease';
+
+            book.style.transform =
+                `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+
+        });
+
+        document.addEventListener('mousemove', function (e) {
+
+            if (!isDragging) return;
+
+            rotY += e.movementX * 0.5;
+            rotX -= e.movementY * 0.2;
+
+            rotX = Math.max(
+                -40,
+                Math.min(40, rotX)
+            );
+
+            book.style.transform =
+                `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+
+        });
+
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -23,14 +106,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalTitle =
         document.getElementById('modal-title');
 
-    const modalCoverTitle =
-        document.getElementById('modal-cover-title');
-
-    const modalCoverImage =
-        document.getElementById('modal-cover-image');
-
-    const modalBookBox =
-        document.getElementById('modal-book-box');
+    const modalBookTitle =
+        document.getElementById('modalBookTitle');
 
     const modalAuthor =
         document.getElementById('modal-author');
@@ -47,15 +124,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalStock =
         document.getElementById('modal-stock');
 
-    const modalCategoryDetail =
-        document.getElementById('modal-category-detail');
-
-    const modalAuthorDetail =
-        document.getElementById('modal-author-detail');
-
-    const modalStatusDetail =
-        document.getElementById('modal-status-detail');
-
     const modalPublisher =
         document.getElementById('modal-publisher');
 
@@ -68,6 +136,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalIsbn =
         document.getElementById('modal-isbn');
 
+    const bookFront =
+        document.getElementById('bookFront');
 
     /*
     |--------------------------------------------------------------------------
@@ -79,360 +149,224 @@ document.addEventListener('DOMContentLoaded', function () {
         .querySelectorAll('.book-card')
         .forEach(function (card) {
 
-            card.addEventListener(
-                'click',
-                function () {
+            card.addEventListener('click', function () {
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | DATA BUKU
-                    |--------------------------------------------------------------------------
-                    */
+                const title =
+                    card.dataset.title || '-';
 
-                    const title =
-                        card.dataset.title ||
-                        '-';
+                const author =
+                    card.dataset.author || '-';
 
-                    const author =
-                        card.dataset.author ||
-                        '-';
+                const category =
+                    card.dataset.category || '-';
 
-                    const category =
-                        card.dataset.category ||
-                        '-';
+                const stock =
+                    card.dataset.stock || '0';
 
-                    const stock =
-                        card.dataset.stock ||
-                        '0';
+                const status =
+                    card.dataset.status || 'Tersedia';
 
-                    const status =
-                        card.dataset.status ||
-                        'Tersedia';
+                const description =
+                    card.dataset.description ||
+                    'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.';
 
-                    const description =
-                        card.dataset.description ||
-                        'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.';
+                const cover =
+                    card.dataset.cover || '';
 
-                    const cover =
-                        card.dataset.cover ||
-                        '';
+                const publisher =
+                    card.dataset.publisher || '-';
 
-                    const publisher =
-                        card.dataset.publisher ||
-                        '-';
+                const year =
+                    card.dataset.year || '-';
 
-                    const year =
-                        card.dataset.year ||
-                        '-';
+                const callNumber =
+                    card.dataset.callNumber || '-';
 
-                    const callNumber =
-                        card.dataset.callNumber ||
-                        '-';
+                const isbn =
+                    card.dataset.isbn || '-';
 
-                    const isbn =
-                        card.dataset.isbn ||
-                        '-';
+                /*
+                |--------------------------------------------------------------------------
+                | ISI MODAL
+                |--------------------------------------------------------------------------
+                */
 
+                if (modalTitle) {
+                    modalTitle.textContent = title;
+                }
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | INFORMASI UTAMA
-                    |--------------------------------------------------------------------------
-                    */
+                if (modalBookTitle) {
+                    modalBookTitle.textContent = title;
+                }
 
-                    if (modalTitle) {
+                if (modalAuthor) {
+                    modalAuthor.textContent =
+                        'Penulis: ' + author;
+                }
 
-                        modalTitle.textContent =
-                            title;
+                if (modalCategory) {
+                    modalCategory.textContent = category;
+                }
 
-                    }
+                if (modalStock) {
+                    modalStock.textContent = stock;
+                }
 
+                if (modalPublisher) {
+                    modalPublisher.textContent = publisher;
+                }
 
-                    if (modalCoverTitle) {
+                if (modalYear) {
+                    modalYear.textContent = year;
+                }
 
-                        modalCoverTitle.textContent =
-                            title;
+                if (modalCallNumber) {
+                    modalCallNumber.textContent =
+                        callNumber;
+                }
 
-                    }
+                if (modalIsbn) {
+                    modalIsbn.textContent = isbn;
+                }
 
+                if (modalDescription) {
+                    modalDescription.textContent =
+                        description;
+                }
 
-                    if (modalAuthor) {
+                /*
+                |--------------------------------------------------------------------------
+                | COVER BUKU 3D
+                |--------------------------------------------------------------------------
+                */
 
-                        modalAuthor.textContent =
-                            'Penulis: ' +
-                            author;
+                if (cover) {
 
-                    }
+    bookFront.innerHTML = '';
 
+    bookFront.style.backgroundImage =
+        `url('${cover}')`;
 
-                    if (modalCategory) {
+    bookFront.style.backgroundSize =
+        'cover';
 
-                        modalCategory.textContent =
-                            category;
+    bookFront.style.backgroundPosition =
+        'center';
+}
 
-                    }
+                /*
+                |--------------------------------------------------------------------------
+                | STATUS
+                |--------------------------------------------------------------------------
+                */
 
+                if (modalStatus) {
 
-                    if (modalStock) {
+                    modalStatus.textContent = status;
 
-                        modalStock.textContent =
-                            stock;
+                    modalStatus.classList.remove(
+                        'available',
+                        'borrowed'
+                    );
 
-                    }
+                    if (status === 'Tersedia') {
 
+                        modalStatus.classList.add(
+                            'available'
+                        );
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | DETAIL
-                    |--------------------------------------------------------------------------
-                    */
+                    } else {
 
-                    if (modalCategoryDetail) {
-
-                        modalCategoryDetail.textContent =
-                            category;
-
-                    }
-
-
-                    if (modalAuthorDetail) {
-
-                        modalAuthorDetail.textContent =
-                            author;
-
-                    }
-
-
-                    if (modalStatusDetail) {
-
-                        modalStatusDetail.textContent =
-                            status;
-
-                    }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | INFORMASI TAMBAHAN
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (modalPublisher) {
-
-                        modalPublisher.textContent =
-                            publisher;
-
-                    }
-
-
-                    if (modalYear) {
-
-                        modalYear.textContent =
-                            year;
-
-                    }
-
-
-                    if (modalCallNumber) {
-
-                        modalCallNumber.textContent =
-                            callNumber;
-
-                    }
-
-
-                    if (modalIsbn) {
-
-                        modalIsbn.textContent =
-                            isbn;
-
-                    }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | DESKRIPSI
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (modalDescription) {
-
-                        modalDescription.textContent =
-                            description;
-
-                    }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | COVER IMAGE
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (
-                        cover &&
-                        modalCoverImage &&
-                        modalBookBox
-                    ) {
-
-                        modalCoverImage.src =
-                            cover;
-
-                        modalCoverImage.style.display =
-                            'block';
-
-                        modalBookBox.style.display =
-                            'none';
-
-                    } else if (
-                        modalCoverImage &&
-                        modalBookBox
-                    ) {
-
-                        modalCoverImage.style.display =
-                            'none';
-
-                        modalBookBox.style.display =
-                            'flex';
-
-                    }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | STATUS
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (modalStatus) {
-
-                        modalStatus.textContent =
-                            status;
-
-
-                        modalStatus.classList.remove(
-                            'available',
+                        modalStatus.classList.add(
                             'borrowed'
                         );
 
-
-                        if (
-                            status ===
-                            'Tersedia'
-                        ) {
-
-                            modalStatus.classList.add(
-                                'available'
-                            );
-
-                        } else {
-
-                            modalStatus.classList.add(
-                                'borrowed'
-                            );
-
-                        }
-
                     }
 
+                }
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | BUKA MODAL
-                    |--------------------------------------------------------------------------
-                    */
+                /*
+                |--------------------------------------------------------------------------
+                | RESET POSISI BUKU
+                |--------------------------------------------------------------------------
+                */
 
-                    modal.classList.add(
-                        'open'
-                    );
+                if (book) {
 
+                    book.style.transition =
+                        'transform .6s ease';
 
-                    document.body.style.overflow =
-                        'hidden';
+                    book.style.transform =
+                        'rotateX(-8deg) rotateY(-30deg)';
 
                 }
-            );
+
+                /*
+                |--------------------------------------------------------------------------
+                | OPEN MODAL
+                |--------------------------------------------------------------------------
+                */
+
+                modal.classList.add('open');
+
+                document.body.style.overflow =
+                    'hidden';
+
+            });
 
         });
 
-
     /*
     |--------------------------------------------------------------------------
-    | TUTUP MODAL
+    | CLOSE MODAL
     |--------------------------------------------------------------------------
     */
 
     function closeModal() {
 
-        modal.classList.remove(
-            'open'
-        );
+        modal.classList.remove('open');
 
-
-        document.body.style.overflow =
-            '';
+        document.body.style.overflow = '';
 
     }
 
-
     /*
     |--------------------------------------------------------------------------
-    | TOMBOL CLOSE
+    | BUTTONS
     |--------------------------------------------------------------------------
     */
 
     if (modalClose) {
-
         modalClose.addEventListener(
             'click',
             closeModal
         );
-
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | TOMBOL ACTION
-    |--------------------------------------------------------------------------
-    */
-
     if (modalAction) {
-
         modalAction.addEventListener(
             'click',
             closeModal
         );
-
     }
-
 
     /*
     |--------------------------------------------------------------------------
-    | KLIK LUAR MODAL
+    | CLICK OUTSIDE
     |--------------------------------------------------------------------------
     */
 
-    modal.addEventListener(
-        'click',
-        function (event) {
+    modal.addEventListener('click', function (event) {
 
-            if (
-                event.target ===
-                modal
-            ) {
-
-                closeModal();
-
-            }
-
+        if (event.target === modal) {
+            closeModal();
         }
-    );
 
+    });
 
     /*
     |--------------------------------------------------------------------------
-    | ESC
+    | ESC KEY
     |--------------------------------------------------------------------------
     */
 
@@ -442,9 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (
                 event.key === 'Escape' &&
-                modal.classList.contains(
-                    'open'
-                )
+                modal.classList.contains('open')
             ) {
 
                 closeModal();

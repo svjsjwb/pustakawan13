@@ -165,7 +165,7 @@ class ShelfSeeder extends Seeder
 
                 'row_count' => 3,
 
-                'column_count' => 30
+                'column_count' => 30,
 
 
                 /*

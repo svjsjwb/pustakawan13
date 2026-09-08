@@ -278,4 +278,106 @@ class CirculationController extends Controller
                 'Buku berhasil dikembalikan.'
             );
     }
+
+    public function extend(
+        Request $request,
+        Borrowing $borrowing
+    ) {
+        if ($borrowing->status === 'dikembalikan') {
+            return back()->with(
+                'error',
+                'Peminjaman sudah selesai.'
+            );
+        }
+
+        $request->validate([
+            'due_at' => [
+                'required',
+                'date',
+                'after:today'
+            ]
+        ]);
+
+        $borrowing->update([
+            'due_at' => $request->due_at
+        ]);
+
+        return redirect()
+            ->route('circulation')
+            ->with(
+                'success',
+                'Tanggal pengembalian berhasil diperpanjang.'
+            );
+    }
+
+    /**
+     * Setujui Permintaan Perpanjangan
+     */
+    public function approveExtension(Borrowing $borrowing)
+    {
+        if ($borrowing->extension_status !== 'menunggu') {
+            return back()->with('error', 'Tidak ada permintaan perpanjangan yang menunggu persetujuan.');
+        }
+
+        $newDue = $borrowing->extension_requested_due_at;
+        if (!$newDue) {
+            $newDue = $borrowing->due_at->addDays(7);
+        }
+
+        $borrowing->update([
+            'due_at' => $newDue,
+            'extension_status' => 'disetujui',
+            'extension_admin_notes' => 'Disetujui oleh Admin',
+        ]);
+
+        $borrowing->load('details.book', 'member');
+        $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+
+        $user = \App\Models\User::where('email', $borrowing->member?->email)->first();
+        if ($user) {
+            \App\Models\AppNotification::notifyUser(
+                $user->id,
+                'extension_approved',
+                'Perpanjangan Peminjaman Disetujui',
+                "Perpanjangan untuk buku \"{$bookTitle}\" disetujui. Batas pengembalian baru: " . $borrowing->due_at->format('d M Y'),
+                ['borrowing_id' => $borrowing->id]
+            );
+        }
+
+        return back()->with('success', 'Perpanjangan peminjaman berhasil disetujui.');
+    }
+
+    /**
+     * Tolak Permintaan Perpanjangan
+     */
+    public function rejectExtension(Request $request, Borrowing $borrowing)
+    {
+        if ($borrowing->extension_status !== 'menunggu') {
+            return back()->with('error', 'Tidak ada permintaan perpanjangan yang menunggu.');
+        }
+
+        $notes = $request->input('admin_notes', 'Ditolak oleh Admin');
+
+        $borrowing->update([
+            'extension_status' => 'ditolak',
+            'extension_admin_notes' => $notes,
+        ]);
+
+        $borrowing->load('details.book', 'member');
+        $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+
+        $user = \App\Models\User::where('email', $borrowing->member?->email)->first();
+        if ($user) {
+            \App\Models\AppNotification::notifyUser(
+                $user->id,
+                'extension_rejected',
+                'Perpanjangan Peminjaman Ditolak',
+                "Permintaan perpanjangan buku \"{$bookTitle}\" ditolak. Catatan: {$notes}",
+                ['borrowing_id' => $borrowing->id]
+            );
+        }
+
+        return back()->with('success', 'Perpanjangan peminjaman telah ditolak.');
+    }
 }
+

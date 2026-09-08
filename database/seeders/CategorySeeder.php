@@ -10,22 +10,34 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         Category::insert([
-            [
-                'name' => 'Novel',
-                'description' => 'Koleksi Novel'
-            ],
-            [
-                'name' => 'Teknologi',
-                'description' => 'Buku Teknologi'
-            ],
-            [
-                'name' => 'Sejarah',
-                'description' => 'Buku Sejarah'
-            ],
-            [
-                'name' => 'Pendidikan',
-                'description' => 'Buku Pendidikan'
-            ]
-        ]);
+    [
+        'name' => 'Anak-Anak',
+        'description' => 'Buku untuk anak-anak'
+    ],
+    [
+        'name' => 'Remaja',
+        'description' => 'Buku untuk remaja'
+    ],
+    [
+        'name' => 'Dewasa',
+        'description' => 'Buku untuk dewasa'
+    ],
+    [
+        'name' => 'Pendidikan',
+        'description' => 'Buku pendidikan'
+    ],
+    [
+        'name' => 'Novel',
+        'description' => 'Koleksi novel'
+    ],
+    [
+        'name' => 'Teknologi',
+        'description' => 'Buku teknologi'
+    ],
+    [
+        'name' => 'Sejarah',
+        'description' => 'Buku sejarah'
+    ]
+]);
     }
 }

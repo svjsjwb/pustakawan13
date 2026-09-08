@@ -385,13 +385,13 @@
                                     @elseif($reservation->status === 'disetujui')
 
                                         <span class="reservation-status approved">
-                                            Disetujui
+                                            Setuju
                                         </span>
 
                                     @elseif($reservation->status === 'ditolak')
 
                                         <span class="reservation-status rejected">
-                                            Ditolak
+                                            Tolak
                                         </span>
 
                                     @elseif($reservation->status === 'dibatalkan')
@@ -454,7 +454,7 @@
                                                     type="submit"
                                                     class="btn-approve"
                                                 >
-                                                    Setujui
+                                                    Setuju
                                                 </button>
 
                                             </form>
@@ -547,7 +547,7 @@
                                         )
 
                                             <span class="action-done">
-                                                —
+                                                Selesai
                                             </span>
 
                                         @endif

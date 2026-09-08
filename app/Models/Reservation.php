@@ -14,6 +14,7 @@ class Reservation extends Model
         'reserved_at',
         'expires_at',
         'status',
+        'rejection_reason',
         'seat_number',
     ];
 
@@ -35,5 +36,17 @@ class Reservation extends Model
     public function bookCopy(): BelongsTo
     {
         return $this->belongsTo(BookCopy::class);
+    }
+
+    public function getDisplayStatusAttribute(): string
+    {
+        return match ($this->status) {
+            'menunggu'   => 'Menunggu Persetujuan',
+            'disetujui'  => 'Disetujui',
+            'ditolak'    => 'Ditolak',
+            'dibatalkan' => 'Dibatalkan',
+            'selesai'    => 'Selesai',
+            default      => ucfirst($this->status),
+        };
     }
 }

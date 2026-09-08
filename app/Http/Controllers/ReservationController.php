@@ -635,8 +635,35 @@ class ReservationController extends Controller
 
             $reservation->update([
                 'status' =>
-                    $newStatus
+                    $newStatus,
+                'rejection_reason' =>
+                    $newStatus === 'ditolak' ? ($request->input('rejection_reason') ?? 'Ditolak oleh Admin') : $reservation->rejection_reason,
             ]);
+
+            // Kirim notifikasi ke user
+            $reservation->load('member', 'book');
+            $user = \App\Models\User::where('email', $reservation->member?->email)->first();
+            if ($user) {
+                $bookTitle = $reservation->book?->title ?? 'Buku';
+                if ($newStatus === 'disetujui') {
+                    \App\Models\AppNotification::notifyUser(
+                        $user->id,
+                        'reservation_approved',
+                        'Reservasi Disetujui',
+                        "Reservasi Anda untuk buku \"{$bookTitle}\" telah disetujui.",
+                        ['reservation_id' => $reservation->id]
+                    );
+                } elseif ($newStatus === 'ditolak') {
+                    $reason = $request->input('rejection_reason', 'Ditolak oleh Admin');
+                    \App\Models\AppNotification::notifyUser(
+                        $user->id,
+                        'reservation_rejected',
+                        'Reservasi Ditolak',
+                        "Reservasi Anda untuk buku \"{$bookTitle}\" ditolak. Alasan: {$reason}",
+                        ['reservation_id' => $reservation->id]
+                    );
+                }
+            }
         });
 
 

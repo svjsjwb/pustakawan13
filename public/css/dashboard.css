@@ -1,4 +1,21 @@
 /* =========================================================
+   ANTI SELECT / ANTI DRAG DASHBOARD
+========================================================= */
+
+.dashboard-page,
+.dashboard-page * {
+
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+
+    -webkit-user-drag: none !important;
+    user-drag: none !important;
+
+}
+
+/* =========================================================
    DASHBOARD - MODERN LIBRARY ADMIN
    Topbar & Footer TIDAK DISENTUH
 ========================================================= */
@@ -1031,6 +1048,8 @@
 
 .reservation-panel {
     width: 100%;
+}
+
 /* =========================================================
    DASHBOARD TABLE
 ========================================================= */
@@ -1505,5 +1524,14 @@
 
     }
 
+    .dashboard-page ::selection {
+    background: transparent;
+    color: inherit;
 }
+
+.dashboard-page ::-moz-selection {
+    background: transparent;
+    color: inherit;
+}
+
 }

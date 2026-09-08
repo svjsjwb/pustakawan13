@@ -8,17 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('book_copies', function (Blueprint $table) {
-            $table->unsignedTinyInteger('section')
-                ->default(1)
-                ->after('shelf_id');
-        });
+        if (!Schema::hasColumn('book_copies', 'section')) {
+            Schema::table('book_copies', function (Blueprint $table) {
+                $table->unsignedTinyInteger('section')
+                    ->default(1)
+                    ->after('shelf_id');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('book_copies', function (Blueprint $table) {
-            $table->dropColumn('section');
-        });
+        if (Schema::hasColumn('book_copies', 'section')) {
+            Schema::table('book_copies', function (Blueprint $table) {
+                $table->dropColumn('section');
+            });
+        }
     }
 };

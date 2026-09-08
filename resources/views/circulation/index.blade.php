@@ -503,35 +503,49 @@
 
                                     @if($borrowing->status !== 'dikembalikan')
 
-                                        <form
-                                            action="{{ route(
-                                                'circulation.return',
-                                                $borrowing
-                                            ) }}"
-                                            method="POST"
-                                            class="return-form"
-                                        >
+    <div class="action-group">
 
-                                            @csrf
+        {{-- SELESAI --}}
 
-                                            @method('PATCH')
+        <form
+            action="{{ route('circulation.return', $borrowing) }}"
+            method="POST"
+        >
 
-                                            <button
-                                                type="submit"
-                                                class="btn-secondary"
-                                            >
-                                                Kembalikan
-                                            </button>
+            @csrf
+            @method('PATCH')
 
-                                        </form>
+            <button
+                type="submit"
+                class="btn-success"
+            >
+                Selesai
+            </button>
 
-                                    @else
+        </form>
 
-                                        <span class="completed-text">
-                                            Selesai
-                                        </span>
 
-                                    @endif
+        {{-- PERPANJANG --}}
+
+        {{-- PERPANJANG --}}
+
+<button
+    type="button"
+    class="btn-warning extend-btn"
+    data-id="{{ $borrowing->id }}"
+>
+    Perpanjang
+</button>
+
+    </div>
+
+@else
+
+    <span class="completed-badge">
+        Selesai
+    </span>
+
+@endif
 
                                 </td>
 
@@ -619,6 +633,92 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
     }
+
+});
+
+</script>
+
+<div id="extendModal" class="extend-modal">
+
+    <div class="extend-modal-content">
+
+        <h4>Perpanjang Peminjaman</h4>
+
+        <form
+            id="extendForm"
+            method="POST"
+        >
+            @csrf
+            @method('PATCH')
+
+            <input
+                type="date"
+                name="due_at"
+                required
+            >
+
+            <div class="extend-actions">
+
+                <button
+                    type="button"
+                    id="closeExtendModal"
+                    class="btn-cancel"
+                >
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-warning"
+                >
+                    Simpan
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const modal =
+        document.getElementById('extendModal');
+
+    const form =
+        document.getElementById('extendForm');
+
+    const closeBtn =
+        document.getElementById('closeExtendModal');
+
+    document.querySelectorAll('.extend-btn')
+        .forEach(button => {
+
+            button.addEventListener('click', function () {
+
+                const id =
+                    this.dataset.id;
+
+                form.action =
+                    '/circulation/' +
+                    id +
+                    '/extend';
+
+                modal.classList.add('show');
+
+            });
+
+        });
+
+    closeBtn.addEventListener('click', function () {
+
+        modal.classList.remove('show');
+
+    });
 
 });
 

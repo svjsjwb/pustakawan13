@@ -25,6 +25,23 @@ body {
     background-image: url('/images/bg-ts.jpeg');
     background-size: cover;
     background-position: center;
+
+    pointer-events: none;
+}
+
+.login-card{
+    position: relative;
+    z-index: 9999;
+}
+
+.login-role-switch{
+    position: relative;
+    z-index: 9999;
+}
+
+.role-btn{
+    position: relative;
+    z-index: 9999;
 }
 
 /* PANEL */
@@ -145,6 +162,38 @@ body {
 
 .login-card button:hover {
     background: #205d5e;
+}
+
+/* =========================================
+   LOGIN ROLE SWITCH
+========================================= */
+
+.login-role-switch{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.role-btn{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+    background:#e5e7eb;
+    color:#374151;
+    transition:.3s;
+}
+
+.role-btn:hover{
+    transform:translateY(-2px);
+}
+
+.role-btn.active{
+    background:#2b7a78;
+    color:#fff;
 }
 
 @media (max-width: 768px) {

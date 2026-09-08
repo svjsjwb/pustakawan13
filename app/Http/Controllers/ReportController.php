@@ -42,7 +42,7 @@ class ReportController extends Controller
 
             3 => [
                 'id' => 3,
-                'jenis' => 'Laporan Koleksi Buku',
+                'jenis' => 'Laporan Koleksi Buku Baru',
                 'kategori' => 'Semua Buku',
                 'status' => 'Tersedia',
                 'anggota' => 'Semua Anggota',

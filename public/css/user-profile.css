@@ -1,0 +1,452 @@
+/* =========================================================
+   USER PROFILE – TEAL DESIGN SYSTEM & TABS 2026
+   Palette:
+     --primary:       #0f766e;
+     --primary-dark:  #115e59;
+     --primary-light: #14b8a6;
+     --background:    #f8fafc;
+     --surface:       #ffffff;
+     --border:        #dbe4e6;
+   ========================================================= */
+
+.uprof-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 28px;
+    align-items: start;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-top: 10px;
+}
+
+/* ── Left Sidebar Card ───────────────────────────────────── */
+.uprof-left {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.uprof-avatar-card {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 16px 40px rgba(15, 118, 110, 0.25);
+    border: 1px solid rgba(153, 246, 228, 0.2);
+}
+
+.uprof-avatar-circle {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 3px solid rgba(153, 246, 228, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    margin: 0 auto 14px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.uprof-name {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+}
+
+.uprof-role-label {
+    margin: 0 0 14px;
+    font-size: 12px;
+    color: #99f6e4;
+    font-weight: 600;
+}
+
+.uprof-member-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(153, 246, 228, 0.3);
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.uprof-member-badge svg {
+    width: 13px;
+    height: 13px;
+    color: #99f6e4;
+}
+
+.uprof-quick-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.uprof-qstat {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.uprof-qstat strong {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+}
+
+.uprof-qstat span {
+    font-size: 10.5px;
+    color: #99f6e4;
+    font-weight: 600;
+}
+
+/* ── Right Content: Tabs System ───────────────────────────── */
+.uprof-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Tabs Bar */
+.uprof-tabs-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 6px;
+    box-shadow: var(--shadow-sm);
+}
+
+.uprof-tab-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.uprof-tab-btn svg {
+    width: 17px;
+    height: 17px;
+    color: var(--text-subtle);
+    transition: var(--transition);
+}
+
+.uprof-tab-btn:hover {
+    color: var(--primary);
+    background: var(--primary-subtle);
+}
+
+.uprof-tab-btn.active {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(15, 118, 110, 0.25);
+}
+
+.uprof-tab-btn.active svg {
+    color: #ffffff;
+}
+
+/* Tab Panels */
+.uprof-tab-pane {
+    display: none;
+}
+
+.uprof-tab-pane.active {
+    display: block;
+    animation: uprofFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes uprofFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Card */
+.uprof-section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+}
+
+.uprof-section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16.5px;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.uprof-section-head svg {
+    width: 20px;
+    height: 20px;
+    color: var(--primary);
+}
+
+/* Form Styles */
+.uprof-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.uprof-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.uprof-form-group label {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.uprof-form-group input {
+    height: 44px;
+    padding: 0 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--background);
+    outline: none;
+    box-sizing: border-box;
+    transition: var(--transition);
+}
+
+.uprof-form-group input:focus {
+    border-color: var(--primary);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px var(--primary-subtle);
+}
+
+.uprof-form-group input:disabled {
+    background: var(--border-subtle);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+.uprof-form-group small {
+    font-size: 11.5px;
+    color: var(--text-muted);
+}
+
+.uprof-error {
+    font-size: 11.5px;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* Info Grid */
+.uprof-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.uprof-info-box {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+}
+
+.uprof-info-box span {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.uprof-info-box strong {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* Switch Row in Preferences */
+.uprof-pref-group {
+    margin-bottom: 24px;
+}
+
+.uprof-pref-group:last-child {
+    margin-bottom: 0;
+}
+
+.uprof-pref-group-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+}
+
+.uprof-pref-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.uprof-pref-row:last-child {
+    border-bottom: none;
+}
+
+.uprof-pref-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 2px;
+}
+
+.uprof-pref-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Switch Widget */
+.eg-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.eg-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.eg-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--border);
+    border-radius: 34px;
+    transition: var(--transition);
+}
+
+.eg-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: var(--transition);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.eg-switch input:checked + .eg-slider {
+    background-color: var(--primary);
+}
+
+.eg-switch input:checked + .eg-slider:before {
+    transform: translateX(22px);
+}
+
+/* Theme Selector Grid */
+.uprof-theme-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.uprof-theme-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 14px;
+    background: var(--background);
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.uprof-theme-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.uprof-theme-btn:hover {
+    border-color: var(--primary);
+    color: var(--text);
+}
+
+.uprof-theme-btn.active {
+    background: var(--primary-subtle);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+    .uprof-layout { grid-template-columns: 1fr; }
+    .uprof-left { flex-direction: row; flex-wrap: wrap; }
+    .uprof-avatar-card { flex: 1; min-width: 260px; }
+    .uprof-shortcuts { flex: 1; min-width: 220px; }
+}
+
+@media (max-width: 640px) {
+    .uprof-form-row { grid-template-columns: 1fr; }
+    .uprof-info-grid { grid-template-columns: 1fr; }
+    .uprof-tabs-bar { flex-direction: column; }
+    .uprof-tab-btn { width: 100%; }
+}
