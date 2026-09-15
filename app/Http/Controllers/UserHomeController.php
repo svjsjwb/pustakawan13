@@ -8,6 +8,7 @@ use App\Models\Borrowing;
 use App\Models\Reservation;
 use App\Models\Member;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class UserHomeController extends Controller
 {
@@ -51,7 +52,7 @@ class UserHomeController extends Controller
                     'status_raw'     => $lastBorrow->extension_status === 'menunggu' ? 'menunggu' : $lastBorrow->status,
                     'date'           => $lastBorrow->created_at,
                     'notes'          => $lastBorrow->rejection_reason ?? ($lastBorrow->extension_reason ?? null),
-                    'link'           => route('user.loans'),
+                    'link'           => route('borrowings.index'),
                 ]);
             }
 
@@ -67,33 +68,28 @@ class UserHomeController extends Controller
                     'status_raw'     => $lastReserve->status,
                     'date'           => $lastReserve->created_at,
                     'notes'          => $lastReserve->rejection_reason,
-                    'link'           => route('user.reservations'),
+                    'link'           => route('user.reservations.show', $lastReserve->id),
                 ]);
             }
 
             $latestRequest = $requests->sortByDesc('date')->first();
         }
 
-        // Buku terbaru
-        $latestBooks = Book::with('category')
-            ->latest()
-            ->take(8)
-            ->get();
-
         // Buku populer
         $popularBooks = Book::with('category')
             ->where('available_stock', '>', 0)
             ->orderByDesc('available_stock')
-            ->take(8)
+            ->take(10)
             ->get();
 
         // Kategori
-        $categories = Category::orderBy('name')
-            ->take(8)
-            ->get();
+        $categoryOrder = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
+        $categories = Category::whereIn('name', $categoryOrder)
+            ->get()
+            ->sortBy(fn ($category) => array_search($category->name, $categoryOrder, true))
+            ->values();
 
         return view('user.home', compact(
-            'latestBooks',
             'popularBooks',
             'categories',
             'user',
@@ -103,5 +99,29 @@ class UserHomeController extends Controller
             'historyCount',
             'latestRequest'
         ));
+    }
+
+    public function search(Request $request)
+    {
+        $keyword = trim((string) $request->input('q', ''));
+
+        if ($keyword === '') {
+            return response()->json(['books' => []]);
+        }
+
+        $books = Book::with('category')
+            ->whereRaw('LOWER(title) LIKE ?', [mb_strtolower($keyword) . '%'])
+            ->orderBy('title')
+            ->take(8)
+            ->get()
+            ->map(fn ($book) => [
+                'title' => $book->title,
+                'author' => $book->author ?: 'Penulis tidak diketahui',
+                'category' => $book->category?->name ?: 'Koleksi',
+                'cover' => $book->cover ? asset('storage/' . $book->cover) : null,
+                'url' => route('user.catalog', ['search' => $book->title]),
+            ]);
+
+        return response()->json(['books' => $books]);
     }
 }

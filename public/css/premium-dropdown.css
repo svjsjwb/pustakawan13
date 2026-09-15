@@ -496,20 +496,23 @@ body.dark-theme {
     color: #0F766E;
 }
 
-/* 6. Dikembalikan — Emerald (returned) */
+/* 6. Selesai / Dikembalikan — Sky Blue */
+.status-selesai,
 .status-dikembalikan {
-    background: rgba(22, 163, 74, 0.10);
-    color: #14532D;
-    border-color: rgba(22, 163, 74, 0.28);
-    box-shadow: 0 2px 6px rgba(22, 163, 74, 0.10);
+    background: rgba(2, 132, 199, 0.10);
+    color: #0369a1;
+    border-color: rgba(2, 132, 199, 0.28);
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.10);
 }
+.status-selesai:hover,
 .status-dikembalikan:hover {
-    background: rgba(22, 163, 74, 0.18);
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.18);
+    background: rgba(2, 132, 199, 0.18);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.18);
 }
+.status-selesai .status-badge-icon,
 .status-dikembalikan .status-badge-icon {
-    background: rgba(22, 163, 74, 0.2);
-    color: #16A34A;
+    background: rgba(2, 132, 199, 0.2);
+    color: #0284c7;
 }
 
 /* 7. Terlambat — Red (overdue) */
@@ -577,3 +580,181 @@ body.dark-theme {
 .pd-backdrop.active {
     display: block;
 }
+
+/* ==========================================================================
+   MODERN ACTIVE SUB-CATEGORY FILTER & RESET SYSTEM (SaaS 2026)
+   ========================================================================== */
+.pd-subcat-btn {
+    width: 100%;
+    border: 1px solid transparent;
+    background: none;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+}
+
+/* 4. STATUS FILTER AKTIF: Teal Gradient, Teks Putih, Border Premium, Shadow Lembut, Checkmark */
+.pd-item.active-subcat,
+.pd-item.is-selected.active-subcat {
+    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(20, 184, 166, 0.45) !important;
+    box-shadow: 0 4px 14px rgba(15, 118, 110, 0.28) !important;
+    transform: translateY(-1px);
+}
+
+.pd-item.active-subcat:hover {
+    background: linear-gradient(135deg, #0d655f 0%, #0f766e 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 18px rgba(15, 118, 110, 0.35) !important;
+}
+
+.pd-item.active-subcat .pd-item-icon {
+    background: rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+}
+
+.pd-item.active-subcat .pd-category-count {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.pd-item.active-subcat .pd-item-check {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-radius: 50%;
+}
+
+.pd-item.active-subcat .check-text {
+    font-size: 12px;
+    font-weight: 900;
+}
+
+/* Parent Dropdown Trigger when subcategory is active */
+.pd-select-wrapper.has-active-category .pd-trigger {
+    border-color: #0f766e;
+    background: rgba(15, 118, 110, 0.08);
+    color: #0f766e;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.18), 0 3px 10px rgba(15, 118, 110, 0.1);
+}
+
+.pd-trigger-count {
+    background: rgba(15, 118, 110, 0.12);
+    color: #0f766e;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+/* Active Filter Meta Bar & Chips */
+.saas-active-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--pd-surface, #ffffff);
+    border: 1px solid var(--pd-border, #e2e8f0);
+    border-radius: 16px;
+    margin-bottom: 24px;
+    font-size: 13.5px;
+    color: var(--pd-text, #334155);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.saas-meta-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.saas-active-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25);
+}
+
+.saas-active-filter-badge .check-icon {
+    font-size: 11px;
+}
+
+.saas-active-filter-badge .btn-remove-chip {
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    color: #ffffff;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 2px;
+    transition: background 0.15s ease;
+}
+
+.saas-active-filter-badge .btn-remove-chip:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+
+/* 5. TOMBOL RESET SEMUA FILTER */
+.saas-reset-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #dc2626;
+    background: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.saas-reset-filter:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+.saas-reset-filter:active {
+    transform: translateY(0);
+}
+
+/* Loading state for catalog grid during AJAX fetch */
+#catalogGridContainer {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#catalogGridContainer.loading {
+    opacity: 0.45;
+    pointer-events: none;
+    transform: scale(0.995);
+}
+

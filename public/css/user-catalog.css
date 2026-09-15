@@ -111,6 +111,19 @@ h1, h2, h3, h4, h5, h6,
     opacity: 0.9;
 }
 
+.saas-hero-content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 34px;
+}
+
+.saas-hero-text {
+    min-width: 0;
+}
+
     width: 8px;
     height: 8px;
     background: #a8d5d1;
@@ -162,14 +175,12 @@ h1, h2, h3, h4, h5, h6,
     padding: 20px 24px;
     min-width: 155px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    transition: var(--saas-transition);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
     cursor: default;
 }
 
 .saas-stat-card:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(168, 213, 209, 0.45);
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
 }
 
@@ -1241,6 +1252,7 @@ h1, h2, h3, h4, h5, h6,
     }
     .saas-hero-content {
         grid-template-columns: 1fr;
+        gap: 24px;
     }
     .saas-modal-layout {
         grid-template-columns: 1fr;
@@ -1270,6 +1282,7 @@ h1, h2, h3, h4, h5, h6,
     }
     .saas-stats-grid {
         flex-direction: column;
+        align-items: stretch;
     }
 
     .saas-category-dropdowns,

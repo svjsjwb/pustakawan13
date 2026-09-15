@@ -16,13 +16,25 @@
     <link rel="stylesheet" href="{{ asset('css/user-layout.css') }}">
     <link rel="stylesheet" href="{{ asset('css/user-theme.css') }}">
 
-    {{-- Anti-flash dark mode initializer --}}
+    {{-- Anti-flash dark mode & layout density initializer --}}
     <script>
         (function() {
-            var theme = localStorage.getItem('lib_theme') || 'light';
+            var dbTheme = @json(Auth::check() ? (Auth::user()->theme ?? null) : null);
+            var storedTheme = localStorage.getItem('lib_theme');
+            var theme = storedTheme === 'dark' || storedTheme === 'light'
+                ? storedTheme
+                : (dbTheme === 'dark' || dbTheme === 'light' ? dbTheme : 'light');
             if (theme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
             }
+            localStorage.setItem('lib_theme', theme);
+
+            var dbDensity = @json(Auth::check() ? (Auth::user()->layout_density ?? null) : null);
+            var density = dbDensity || localStorage.getItem('lib_density') || 'normal';
+            document.documentElement.setAttribute('data-density', density);
+            localStorage.setItem('lib_density', density);
         })();
     </script>
     @stack('styles')

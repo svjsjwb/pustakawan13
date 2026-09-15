@@ -1,5 +1,5 @@
 @extends('layouts.user')
-@section('title', 'Riwayat Peminjaman – Perpustakaan Digital')
+@section('title', 'Riwayat Peminjaman - Perpustakaan Digital')
 @section('page-title', 'Riwayat Peminjaman')
 
 @push('styles')
@@ -8,59 +8,19 @@
 
 @section('content')
 
-{{-- Page Header (Senada Beranda) --}}
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 28px;">
-    <div>
-        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; background: var(--primary-light); border: 1px solid rgba(40, 123, 120, 0.25); border-radius: 9999px; font-size: 11px; font-weight: 800; color: var(--primary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">
-            <span>📋</span> ARSIP PEMINJAMAN BUKU
-        </div>
-        <h1 style="font-size: 28px; font-weight: 800; color: var(--text); margin: 0 0 6px; font-family: 'Poppins', sans-serif; letter-spacing: -0.02em;">
-            Riwayat Peminjaman Buku
-        </h1>
-        <p style="font-size: 14.5px; color: var(--text-muted); margin: 0;">
-            Pantau catatan peminjaman, tanggal tenggat waktu, dan status buku yang pernah Anda pinjam.
-        </p>
+<section class="user-page-hero">
+    <div class="user-page-hero-pattern"></div>
+    <div class="user-page-hero-copy">
+        <h1>Riwayat Peminjaman Buku</h1>
+        <p>Pantau seluruh aktivitas peminjaman dan reservasi buku Anda, mulai dari transaksi aktif, menunggu persetujuan, hingga riwayat yang telah selesai.</p>
     </div>
-
-    <button onclick="window.print()" class="eg-btn-block" style="width: auto; padding: 12px 22px; font-size: 13.5px; background: var(--surface); color: var(--text); border: 1.5px solid var(--border); box-shadow: var(--shadow-sm);">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-            <rect x="6" y="14" width="12" height="8"></rect>
-        </svg>
-        <span>Cetak Riwayat</span>
-    </button>
-</div>
-
-{{-- 3 STAT CARDS DI ATAS: Total Dipinjam, Sedang Dipinjam, Selesai --}}
-<div class="eg-stats-grid">
-    {{-- Card 1: Total Dipinjam --}}
-    <div class="eg-stat-card">
-        <div class="eg-stat-icon">📚</div>
-        <div class="eg-stat-info">
-            <div class="num">{{ $stats['total_borrowed'] ?? 0 }}</div>
-            <div class="label">Total Dipinjam</div>
-        </div>
+    <div class="user-page-hero-stats" aria-label="Ringkasan riwayat peminjaman">
+        <div><span>Total Dipinjam</span><strong>{{ $stats['total_borrowed'] }}</strong><small>seluruh transaksi</small></div>
+        <div><span>Total Reservasi</span><strong>{{ $stats['total_reservations'] }}</strong><small>seluruh reservasi</small></div>
+        <div><span>Sedang Dipinjam</span><strong>{{ $stats['active_borrowed'] }}</strong><small>buku aktif</small></div>
+        <div><span>Selesai</span><strong>{{ $stats['returned_borrowed'] }}</strong><small>sudah dikembalikan</small></div>
     </div>
-
-    {{-- Card 2: Sedang Dipinjam --}}
-    <div class="eg-stat-card">
-        <div class="eg-stat-icon" style="background: rgba(245, 158, 11, 0.12); color: #b45309;">📖</div>
-        <div class="eg-stat-info">
-            <div class="num">{{ $stats['active_borrowed'] ?? 0 }}</div>
-            <div class="label">Sedang Dipinjam</div>
-        </div>
-    </div>
-
-    {{-- Card 3: Selesai --}}
-    <div class="eg-stat-card">
-        <div class="eg-stat-icon" style="background: var(--primary-light); color: var(--primary);">✓</div>
-        <div class="eg-stat-info">
-            <div class="num">{{ $stats['returned_borrowed'] ?? 0 }}</div>
-            <div class="label">Selesai</div>
-        </div>
-    </div>
-</div>
+</section>
 
 {{-- Filter Bar --}}
 <form method="GET" action="{{ route('user.history') }}" class="eg-filter-bar" id="historyFilterForm">
@@ -78,63 +38,8 @@
 
     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
 
-        {{-- CUSTOM STATUS DROPDOWN --}}
-        <div class="pd-select-wrapper" data-form-id="historyFilterForm" data-input-id="historyStatusInput">
-            <button type="button" class="pd-trigger {{ request('status') ? 'has-value' : '' }}" aria-haspopup="listbox" aria-expanded="false">
-                <span class="pd-trigger-icon">
-                    @if(request('status') === 'dipinjam')
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                    @elseif(request('status') === 'dikembalikan')
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    @elseif(request('status') === 'terlambat')
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    @else
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
-                    @endif
-                </span>
-                <span class="pd-trigger-label">
-                    @if(request('status') === 'dipinjam') Dipinjam
-                    @elseif(request('status') === 'dikembalikan') Dikembalikan
-                    @elseif(request('status') === 'terlambat') Terlambat
-                    @else Semua Status
-                    @endif
-                </span>
-                <span class="pd-trigger-arrow">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                </span>
-            </button>
-            <input type="hidden" name="status" id="historyStatusInput" value="{{ request('status', '') }}">
-            <div class="pd-panel" role="listbox" aria-label="Filter Status Riwayat">
-                <div class="pd-item {{ empty(request('status')) ? 'is-selected' : '' }}" role="option" data-value="" data-label="Semua Status">
-                    <span class="pd-item-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
-                    </span>
-                    <span class="pd-item-label">Semua Status</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                </div>
-                <div class="pd-item {{ request('status') === 'dipinjam' ? 'is-selected' : '' }}" role="option" data-value="dipinjam" data-label="Dipinjam">
-                    <span class="pd-item-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                    </span>
-                    <span class="pd-item-label">Dipinjam</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                </div>
-                <div class="pd-item status-green {{ request('status') === 'dikembalikan' ? 'is-selected' : '' }}" role="option" data-value="dikembalikan" data-label="Dikembalikan">
-                    <span class="pd-item-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    </span>
-                    <span class="pd-item-label">Dikembalikan</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                </div>
-                <div class="pd-item status-red {{ request('status') === 'terlambat' ? 'is-selected' : '' }}" role="option" data-value="terlambat" data-label="Terlambat">
-                    <span class="pd-item-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    </span>
-                    <span class="pd-item-label">Terlambat</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                </div>
-            </div>
-        </div>
+        {{-- CUSTOM STATUS DROPDOWN (hanya Dikembalikan, karena riwayat = selesai) --}}
+        {{-- Filter status dihapus karena riwayat sudah pasti hanya 'dikembalikan' --}}
 
         {{-- CUSTOM MONTH DROPDOWN --}}
         @php
@@ -183,16 +88,26 @@
             Filter
         </button>
 
-        @if(request('search') || request('status') || request('month'))
+        @if(request('search') || request('month'))
             <a href="{{ route('user.history') }}" style="color: #dc2626; font-size: 13px; font-weight: 700; text-decoration: none;">
-                × Reset Filter
+                &times; Reset Filter
             </a>
         @endif
     </div>
 </form>
 
-{{-- Daftar Riwayat Buku --}}
-@if(!$member || $borrowings->isEmpty())
+{{-- Semua Riwayat: Gabungan Peminjaman + Reservasi --}}
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0 6px;">
+    <div>
+        <span style="font-size: 11px; font-weight: 800; letter-spacing: .08em; color: var(--primary); text-transform: uppercase;">Semua Aktivitas</span>
+        <h2 style="margin: 4px 0 0; font-size: 20px; color: var(--text);">Semua Riwayat</h2>
+    </div>
+    @if($activities->isNotEmpty())
+        <span style="font-size: 13px; color: var(--text-muted);">{{ $activities->count() }} aktivitas</span>
+    @endif
+</div>
+
+@if(!$member || $activities->isEmpty())
     <div class="eg-empty-state">
         <div class="eg-empty-icon">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -202,9 +117,11 @@
                 <line x1="8" y1="17" x2="16" y2="17"></line>
             </svg>
         </div>
-        <h3 class="eg-empty-title">Belum ada riwayat peminjaman</h3>
+        <h3 class="eg-empty-title">{{ request('search') ? 'Tidak ditemukan' : 'Belum ada riwayat' }}</h3>
         <p class="eg-empty-desc">
-            Riwayat peminjaman buku akan tercatat secara otomatis setelah Anda meminjam buku melalui katalog perpustakaan.
+            {{ request('search')
+                ? 'Tidak ada riwayat yang sesuai dengan kata kunci pencarian Anda.'
+                : 'Riwayat akan muncul secara otomatis setelah Anda melakukan peminjaman atau reservasi buku.' }}
         </p>
         <a href="{{ route('user.catalog') }}" class="eg-btn-block" style="width: auto; display: inline-flex; padding: 12px 28px; margin: 0 auto;">
             Jelajahi Katalog Buku
@@ -215,33 +132,17 @@
         <table class="eg-table">
             <thead>
                 <tr>
-                    <th style="width: 45%;">Buku</th>
-                    <th style="width: 20%;">Tanggal Pinjam</th>
-                    <th style="width: 20%;">Tanggal Kembali</th>
-                    <th style="width: 15%; text-align: right;">Status</th>
+                    <th style="width: 42%;">Buku</th>
+                    <th style="width: 18%;">Tanggal</th>
+                    <th style="width: 13%; text-align: center;">Jenis</th>
+                    <th style="width: 27%; text-align: right;">Status</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($borrowings as $b)
-                @php
-                    $detail = $b->details->first();
-                    $book = $detail?->book;
-                    $status = strtolower($b->status);
-                    $badgeClass = match($status) {
-                        'dipinjam'     => 'status-dipinjam',
-                        'dikembalikan' => 'status-dikembalikan',
-                        'terlambat'    => 'status-terlambat',
-                        default        => 'status-dipinjam',
-                    };
-                    $statusLabel = match($status) {
-                        'dipinjam'     => 'Dipinjam',
-                        'dikembalikan' => 'Dikembalikan',
-                        'terlambat'    => 'Terlambat',
-                        default        => ucfirst($b->status),
-                    };
-                @endphp
+                @foreach($activities as $item)
+                @php $book = $item->book; @endphp
                 <tr>
-                    {{-- 1. COVER BUKU & JUDUL --}}
+                    {{-- Cover & Judul --}}
                     <td>
                         <div style="display: flex; align-items: center; gap: 14px;">
                             @if($book?->cover)
@@ -258,7 +159,7 @@
                                     {{ $book?->title ?? 'Judul Tidak Tersedia' }}
                                 </h4>
                                 <p style="font-size: 12.5px; color: var(--text-muted); margin: 0 0 4px;">
-                                    ✍️ {{ $book?->author ?? 'Penulis Anonim' }}
+                                    {{ $book?->author ?? 'Penulis Anonim' }}
                                 </p>
                                 @if($book?->category)
                                     <span style="font-size: 11px; padding: 2px 8px; background: var(--primary-light); color: var(--primary); border-radius: 9999px; font-weight: 700;">
@@ -269,54 +170,33 @@
                         </div>
                     </td>
 
-                    {{-- 2. TANGGAL PINJAM --}}
+                    {{-- Tanggal --}}
                     <td>
                         <div style="font-weight: 600; color: var(--text);">
-                            📅 {{ $b->borrowed_at ? \Carbon\Carbon::parse($b->borrowed_at)->format('d M Y') : $b->created_at->format('d M Y') }}
+                            {{ $item->date_label }}
                         </div>
                         <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">
-                            Batas: {{ $b->due_at ? \Carbon\Carbon::parse($b->due_at)->format('d M Y') : '-' }}
+                            {{ $item->extra }}
                         </div>
                     </td>
 
-                    {{-- 3. TANGGAL KEMBALI --}}
-                    <td>
-                        @if($b->returned_at)
-                            <div style="font-weight: 600; color: var(--primary);">
-                                ✓ {{ \Carbon\Carbon::parse($b->returned_at)->format('d M Y') }}
-                            </div>
-                            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">
-                                Selesai
-                            </div>
+                    {{-- Jenis Aktivitas --}}
+                    <td style="text-align: center;">
+                        @if($item->type === 'borrowing')
+                            <span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 9999px; background: rgba(39,132,130,0.12); color: var(--primary); white-space: nowrap;">
+                                Peminjaman
+                            </span>
                         @else
-                            <div style="font-weight: 600; color: var(--text-muted);">
-                                Belum Dikembalikan
-                            </div>
-                            @if($b->due_at && now()->gt($b->due_at))
-                                <div style="font-size: 11.5px; color: #dc2626; font-weight: 700; margin-top: 2px;">
-                                    Lewat Tenggat
-                                </div>
-                            @endif
+                            <span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 9999px; background: rgba(124,58,237,0.10); color: #7c3aed; white-space: nowrap;">
+                                Reservasi
+                            </span>
                         @endif
                     </td>
 
-                    {{-- 4. STATUS (BADGE: Dipinjam, Dikembalikan, Terlambat) --}}
+                    {{-- Status --}}
                     <td style="text-align: right;">
-                        <span class="status-badge {{ $badgeClass }}">
-                            @if($status === 'dipinjam')
-                                <span class="status-badge-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                                </span>
-                            @elseif($status === 'dikembalikan')
-                                <span class="status-badge-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
-                                </span>
-                            @elseif($status === 'terlambat')
-                                <span class="status-badge-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                </span>
-                            @endif
-                            <span>{{ $statusLabel }}</span>
+                        <span class="status-badge {{ $item->badge_class }}">
+                            {{ $item->status_label }}
                         </span>
                     </td>
                 </tr>
@@ -324,13 +204,6 @@
             </tbody>
         </table>
     </div>
-
-    {{-- Pagination --}}
-    @if($borrowings->hasPages())
-        <div style="display: flex; justify-content: center; margin-top: 30px;">
-            {{ $borrowings->links('partials.user-catalog-pagination') }}
-        </div>
-    @endif
 @endif
 
 @push('scripts')

@@ -59,16 +59,12 @@ class UserBorrowingsController extends Controller
             abort(403, 'Akses tidak sah.');
         }
 
-        $validated = $request->validate([
-            'extension_days' => 'required|integer|in:3,7,14',
-        ]);
-
         if ($borrowing->status !== 'dipinjam') {
             return response()->json(['message' => 'Buku tidak sedang dipinjam.'], 422);
         }
 
         if ($borrowing->due_at?->isPast()) {
-            return response()->json(['message' => 'Buku tidak dapat diperpanjang karena sudah terlambat.'], 422);
+            return response()->json(['message' => 'Buku tidak dapat diperpanjang karena sudah melewati tanggal jatuh tempo.'], 422);
         }
 
         $bookIds = $borrowing->details()->pluck('book_id');
@@ -81,22 +77,55 @@ class UserBorrowingsController extends Controller
             return response()->json(['message' => 'Buku tidak dapat diperpanjang karena sedang dalam antrean reservasi.'], 409);
         }
 
+        $currentDue = $borrowing->due_at;
+        $maxExtensionDays = 14;
+        $maxDate = $currentDue->copy()->addDays($maxExtensionDays);
+
+        $validated = $request->validate([
+            'new_due_date' => [
+                'required',
+                'date',
+                'after:' . $currentDue->toDateString(),
+                'before_or_equal:' . $maxDate->toDateString(),
+            ],
+        ], [
+            'new_due_date.required'        => 'Tanggal pengembalian baru wajib dipilih.',
+            'new_due_date.date'            => 'Format tanggal tidak valid.',
+            'new_due_date.after'           => 'Tanggal baru harus setelah tanggal jatuh tempo saat ini.',
+            'new_due_date.before_or_equal' => "Perpanjangan maksimal adalah {$maxExtensionDays} hari.",
+        ]);
+
+        $newDueDate = \Carbon\Carbon::parse($validated['new_due_date']);
+        $extensionDays = (int) $currentDue->diffInDays($newDueDate);
+
         $borrowing->update([
-            'due_at' => $borrowing->due_at->copy()->addDays((int) $validated['extension_days']),
+            'due_at'           => $newDueDate,
             'extension_status' => 'disetujui',
-            'extension_reason' => 'Perpanjangan mandiri oleh pengguna',
+            'extension_reason' => "Perpanjangan mandiri oleh pengguna (+{$extensionDays} hari)",
         ]);
 
         $activeBorrowings = Borrowing::where('member_id', $member->id)
             ->where('status', 'dipinjam')
             ->get();
 
+        $user = Auth::user();
+        if ($user && method_exists($user, 'notificationsAllowed') && $user->notificationsAllowed('extension')) {
+            $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+            \App\Models\AppNotification::notifyAdmin(
+                'extension_approved',
+                'Perpanjangan Peminjaman Mandiri',
+                "{$user->name} memperpanjang peminjaman buku \"{$bookTitle}\" (+{$extensionDays} hari) hingga {$borrowing->due_at->format('d M Y')}.",
+                ['borrowing_id' => $borrowing->id]
+            );
+        }
+
         return response()->json([
-            'message' => 'Peminjaman berhasil diperpanjang.',
-            'due_at' => $borrowing->due_at->format('d M Y'),
+            'message'        => 'Peminjaman berhasil diperpanjang.',
+            'due_at'         => $borrowing->due_at->format('d M Y'),
             'days_remaining' => (int) now()->diffInDays($borrowing->due_at, false),
+            'extension_days' => $extensionDays,
             'near_due_count' => $activeBorrowings->filter(fn ($item) => ($item->due_at ? now()->diffInDays($item->due_at, false) : 99) >= 0 && ($item->due_at ? now()->diffInDays($item->due_at, false) : 99) <= 3)->count(),
-            'overdue_count' => $activeBorrowings->filter(fn ($item) => ($item->due_at ? now()->diffInDays($item->due_at, false) : 0) < 0)->count(),
+            'overdue_count'  => $activeBorrowings->filter(fn ($item) => ($item->due_at ? now()->diffInDays($item->due_at, false) : 0) < 0)->count(),
         ]);
     }
 }

@@ -14,19 +14,15 @@
     <div class="saas-hero-bg-pattern"></div>
     <div class="saas-hero-content">
         <div class="saas-hero-text">
-            <div class="saas-hero-badge">
-                <span class="pulse-dot"></span>
-                <span>Perpustakaan Digital</span>
-            </div>
             <h1 class="saas-hero-title">
                 Katalog <span class="highlight">Koleksi Buku</span>
             </h1>
             <p class="saas-hero-desc">
-                Eksplorasi ribuan literatur akademik, fiksi, ensiklopedia, dan riset terkini secara interaktif dengan visual 3D dan ketersediaan real-time.
+                Jelajahi beragam koleksi buku pilihan dari berbagai kategori untuk menemukan bacaan yang sesuai dengan minat dan kebutuhan Anda.
             </p>
         </div>
 
-        {{-- Small Stat Cards on Right --}}
+        {{-- Ringkasan total koleksi --}}
         <div class="saas-stats-grid">
             <div class="saas-stat-card">
                 <div class="saas-stat-icon">
@@ -36,29 +32,7 @@
                     </svg>
                 </div>
                 <div class="saas-stat-val counter" data-target="{{ $stats['total_titles'] ?? 0 }}">0</div>
-                <div class="saas-stat-label">Total Judul</div>
-            </div>
-
-            <div class="saas-stat-card">
-                <div class="saas-stat-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                </div>
-                <div class="saas-stat-val counter" data-target="{{ $stats['available_count'] ?? 0 }}">0</div>
-                <div class="saas-stat-label">Tersedia</div>
-            </div>
-
-            <div class="saas-stat-card">
-                <div class="saas-stat-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                </div>
-                <div class="saas-stat-val counter" data-target="{{ $stats['borrowed_count'] ?? 0 }}">0</div>
-                <div class="saas-stat-label">Sedang Dipinjam</div>
+                <div class="saas-stat-label">Total Koleksi Buku</div>
             </div>
         </div>
     </div>
@@ -104,61 +78,81 @@
 <div class="saas-filters-row">
     {{-- Category dropdowns --}}
     <div class="saas-category-dropdowns">
+        {{-- Semua Kategori Button --}}
         @php
-            $categoryGroups = [
-                'Semua Kategori' => ['Semua Buku'],
-                'Anak-Anak' => ['Fiksi', 'Nonfiksi'],
-                'Remaja' => ['Fiksi', 'Nonfiksi'],
-                'Dewasa' => ['Fiksi', 'Nonfiksi'],
-                'Pendidikan' => ['SD', 'SMP', 'SMA'],
-            ];
+            $isAllActive = empty($mainCategory) && empty($subCategory);
         @endphp
+        <div class="pd-select-wrapper pd-category-wrapper {{ $isAllActive ? 'has-active-category' : '' }}" id="wrapperAllCategories">
+            <button type="button"
+                    class="pd-trigger {{ $isAllActive ? 'has-value' : '' }}"
+                    id="triggerAllCategories"
+                    onclick="selectSubcategory('', '')"
+                    aria-label="Semua Kategori">
+                <span class="pd-trigger-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                </span>
+                <span class="pd-trigger-label">Semua Kategori</span>
+                <span class="pd-trigger-count">{{ $stats['total_titles'] ?? 0 }}</span>
+            </button>
+        </div>
 
-        @foreach($categoryGroups as $groupName => $subcategories)
+        {{-- Dropdowns for Pendidikan, Anak-Anak, Remaja, Dewasa --}}
+        @foreach($catalogHierarchy as $groupName => $subcategories)
             @php
-                $groupCategory = $categories->first(function ($category) use ($groupName) {
-                    return strcasecmp($category->name, $groupName) === 0
-                        || strcasecmp($category->name, 'Buku ' . $groupName) === 0;
-                });
-                $isAllCategories = $groupName === 'Semua Kategori';
-                $groupCount = $isAllCategories ? ($stats['total_titles'] ?? 0) : ($groupCategory?->books_count ?? 0);
-                $isGroupActive = $isAllCategories
-                    ? empty($activeCategory)
-                    : ($groupCategory && (string) $activeCategory === (string) $groupCategory->id);
-                $groupParams = array_merge(request()->except('category', 'cat_name', 'page'), $isAllCategories ? [] : [
-                    'category' => $groupCategory?->id,
-                ]);
+                $isGroupActive = ($mainCategory === $groupName);
+                $activeSubName = $isGroupActive ? $subCategory : '';
+                $groupTotal = $mainCounts[$groupName] ?? 0;
             @endphp
 
             <div class="pd-select-wrapper pd-category-wrapper {{ $isGroupActive ? 'has-active-category' : '' }}"
-                 data-category-group="{{ $groupName }}">
+                 data-category-group="{{ $groupName }}"
+                 id="catWrapper_{{ Str::slug($groupName) }}">
                 <button type="button"
                         class="pd-trigger {{ $isGroupActive ? 'has-value' : '' }}"
                         aria-haspopup="true"
-                        aria-expanded="false">
+                        aria-expanded="false"
+                        id="catTrigger_{{ Str::slug($groupName) }}">
                     <span class="pd-trigger-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                         </svg>
                     </span>
-                    <span class="pd-trigger-label">{{ $isAllCategories ? $groupName : 'Kategori ' . $groupName }}</span>
+                    <span class="pd-trigger-label" id="catLabel_{{ Str::slug($groupName) }}">
+                        @if($isGroupActive && $activeSubName)
+                            {{ $groupName }}: {{ $activeSubName }} ✓
+                        @else
+                            {{ $groupName }}
+                        @endif
+                    </span>
                     <span class="pd-trigger-arrow">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </span>
                 </button>
 
                 <div class="pd-panel pd-category-panel" role="menu" aria-label="{{ $groupName }}">
-                    @foreach($subcategories as $subcategory)
-                        <a href="{{ route('user.catalog', $groupParams) }}"
-                           class="pd-item {{ $isGroupActive ? 'is-selected' : '' }}"
-                           role="menuitem">
+                    <div class="pd-panel-header">{{ $groupName }} ({{ $groupTotal }} Buku)</div>
+                    @foreach($subcategories as $subKey => $subLabel)
+                        @php
+                            $isItemActive = ($isGroupActive && $subCategory === $subKey);
+                            $count = $subCounts[$groupName . '::' . $subKey] ?? 0;
+                        @endphp
+                        <button type="button"
+                                class="pd-item pd-subcat-btn {{ $isItemActive ? 'is-selected active-subcat' : '' }}"
+                                data-main="{{ $groupName }}"
+                                data-sub="{{ $subKey }}"
+                                onclick="selectSubcategory('{{ $groupName }}', '{{ $subKey }}', event)">
                             <span class="pd-item-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 6h16M4 12h16M4 18h10"></path>
+                                </svg>
                             </span>
-                            <span class="pd-item-label">{{ $subcategory }}</span>
-                            <span class="pd-category-count">{{ $groupCount }}</span>
-                        </a>
+                            <span class="pd-item-label">{{ $subLabel }}</span>
+                            <span class="pd-item-check"><span class="check-text">✓</span></span>
+                            <span class="pd-category-count">{{ $count }}</span>
+                        </button>
                     @endforeach
                 </div>
             </div>
@@ -169,23 +163,22 @@
     <div class="saas-dropdowns-group">
 
         {{-- STATUS FILTER DROPDOWN --}}
-            <div class="pd-select-wrapper pd-filter-control" id="pdStatusWrapper"
+        <div class="pd-select-wrapper pd-filter-control" id="pdStatusWrapper"
              data-filter-key="status"
-             data-current-value="{{ request('status', '') }}">
-            <button type="button" class="pd-trigger {{ request('status') ? 'has-value' : '' }}" id="pdStatusTrigger" aria-haspopup="listbox" aria-expanded="false">
+             data-current-value="{{ $status }}">
+            <button type="button" class="pd-trigger {{ $status ? 'has-value' : '' }}" id="pdStatusTrigger" aria-haspopup="listbox" aria-expanded="false">
                 <span class="pd-trigger-icon" id="pdStatusIcon">
-                    {{-- Icon changes based on selected --}}
-                    @if(request('status') === 'tersedia')
+                    @if($status === 'tersedia')
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    @elseif(request('status') === 'habis')
+                    @elseif($status === 'habis')
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                     @else
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     @endif
                 </span>
                 <span class="pd-trigger-label" id="pdStatusLabel">
-                    @if(request('status') === 'tersedia') Tersedia
-                    @elseif(request('status') === 'habis') Habis
+                    @if($status === 'tersedia') Tersedia
+                    @elseif($status === 'habis') Habis
                     @else Semua Status
                     @endif
                 </span>
@@ -194,26 +187,26 @@
                 </span>
             </button>
             <div class="pd-panel" role="listbox" aria-label="Filter Status Buku" id="pdStatusPanel">
-                <div class="pd-item {{ empty(request('status')) ? 'is-selected' : '' }}" role="option" data-value="" data-label="Semua Status">
+                <div class="pd-item {{ empty($status) ? 'is-selected' : '' }}" role="option" data-value="" data-label="Semua Status" onclick="selectStatus('', 'Semua Status')">
                     <span class="pd-item-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     </span>
                     <span class="pd-item-label">Semua Status</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                    <span class="pd-item-check"><span class="check-text">✓</span></span>
                 </div>
-                <div class="pd-item status-green {{ request('status') === 'tersedia' ? 'is-selected' : '' }}" role="option" data-value="tersedia" data-label="Tersedia">
+                <div class="pd-item status-green {{ $status === 'tersedia' ? 'is-selected' : '' }}" role="option" data-value="tersedia" data-label="Tersedia" onclick="selectStatus('tersedia', 'Tersedia')">
                     <span class="pd-item-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </span>
                     <span class="pd-item-label">Tersedia</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                    <span class="pd-item-check"><span class="check-text">✓</span></span>
                 </div>
-                <div class="pd-item status-red {{ request('status') === 'habis' ? 'is-selected' : '' }}" role="option" data-value="habis" data-label="Habis">
+                <div class="pd-item status-red {{ $status === 'habis' ? 'is-selected' : '' }}" role="option" data-value="habis" data-label="Habis" onclick="selectStatus('habis', 'Habis')">
                     <span class="pd-item-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                     </span>
                     <span class="pd-item-label">Habis</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                    <span class="pd-item-check"><span class="check-text">✓</span></span>
                 </div>
             </div>
         </div>
@@ -238,34 +231,34 @@
                 </span>
             </button>
             <div class="pd-panel" role="listbox" aria-label="Urutkan Berdasarkan" id="pdSortPanel">
-                <div class="pd-item {{ $activeSort === 'terbaru' ? 'is-selected' : '' }}" role="option" data-value="terbaru" data-label="Terbaru">
+                <div class="pd-item {{ $activeSort === 'terbaru' ? 'is-selected' : '' }}" role="option" data-value="terbaru" data-label="Terbaru" onclick="selectSort('terbaru', 'Terbaru')">
                     <span class="pd-item-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                     </span>
                     <span class="pd-item-label">Terbaru</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                    <span class="pd-item-check"><span class="check-text">✓</span></span>
                 </div>
-                <div class="pd-item {{ $activeSort === 'terlama' ? 'is-selected' : '' }}" role="option" data-value="terlama" data-label="Terlama">
+                <div class="pd-item {{ $activeSort === 'terlama' ? 'is-selected' : '' }}" role="option" data-value="terlama" data-label="Terlama" onclick="selectSort('terlama', 'Terlama')">
                     <span class="pd-item-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </span>
                     <span class="pd-item-label">Terlama</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                    <span class="pd-item-check"><span class="check-text">✓</span></span>
                 </div>
                 <div class="pd-divider"></div>
-                <div class="pd-item {{ $activeSort === 'az' ? 'is-selected' : '' }}" role="option" data-value="az" data-label="Judul (A-Z)">
+                <div class="pd-item {{ $activeSort === 'az' ? 'is-selected' : '' }}" role="option" data-value="az" data-label="Judul (A-Z)" onclick="selectSort('az', 'Judul (A-Z)')">
                     <span class="pd-item-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l4-4 4 4"/><path d="M7 4v8"/><path d="M11 17h6l-6 4h6"/></svg>
                     </span>
                     <span class="pd-item-label">Judul (A–Z)</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                    <span class="pd-item-check"><span class="check-text">✓</span></span>
                 </div>
-                <div class="pd-item {{ $activeSort === 'za' ? 'is-selected' : '' }}" role="option" data-value="za" data-label="Judul (Z-A)">
+                <div class="pd-item {{ $activeSort === 'za' ? 'is-selected' : '' }}" role="option" data-value="za" data-label="Judul (Z-A)" onclick="selectSort('za', 'Judul (Z-A)')">
                     <span class="pd-item-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h6l-6 4h6"/><path d="M11 4v8l4-4 4 4V4"/></svg>
                     </span>
                     <span class="pd-item-label">Judul (Z–A)</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                    <span class="pd-item-check"><span class="check-text">✓</span></span>
                 </div>
             </div>
         </div>
@@ -273,139 +266,15 @@
     </div>
 </div>
 
-{{-- Result Meta / Reset indicator --}}
-<div class="saas-active-meta">
-    <div>
-        @if($search)
-            Hasil untuk pencarian "<strong>{{ $search }}</strong>" —
-        @endif
-        Menampilkan <strong>{{ $books->total() }}</strong> koleksi buku
-    </div>
-
-    @if($search || $activeCategory || request('status') || (request('sort') && request('sort') !== 'terbaru'))
-        <a href="{{ route('user.catalog') }}" class="saas-reset-filter">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-            <span>Reset Semua Filter</span>
-        </a>
-    @endif
+{{-- Result Meta / Reset indicator (AJAX Container) --}}
+<div class="saas-active-meta" id="catalogMetaContainer">
+    @include('user.partials.catalog-meta')
 </div>
 
-{{-- 4. 5-COLUMN RESPONSIVE BOOK GRID --}}
-@if($books->isEmpty())
-    <div class="eg-card eg-empty-state">
-        <div class="eg-empty-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-        </div>
-        <h3 class="eg-empty-title">Tidak Ada Buku Ditemukan</h3>
-        <p class="eg-empty-desc">
-            Buku yang Anda cari tidak sesuai dengan kata kunci atau filter saat ini. Silakan coba kata kunci lain atau bersihkan filter.
-        </p>
-        <a href="{{ route('user.catalog') }}" class="saas-btn-primary" style="max-width: 220px; margin: 0 auto;">
-            Lihat Semua Koleksi
-        </a>
-    </div>
-@else
-    <div class="saas-book-grid">
-        @foreach($books as $book)
-            @php
-                $isFav = in_array($book->id, $favoriteIds);
-                $isAvailable = ($book->available_stock ?? 0) > 0;
-            @endphp
-            <div class="saas-book-card"
-                 onclick="openCatalogModal(this)"
-                 data-id="{{ $book->id }}"
-                 data-title="{{ $book->title }}"
-                 data-author="{{ $book->author ?? '-' }}"
-                 data-category="{{ $book->category->name ?? 'Umum' }}"
-                 data-publisher="{{ $book->publisher ?? '-' }}"
-                 data-year="{{ $book->publication_year ?? '-' }}"
-                 data-isbn="{{ $book->isbn ?? '-' }}"
-                 data-rak="{{ $book->rak ?? '-' }}"
-                 data-stock="{{ $book->available_stock ?? 0 }}"
-                 data-description="{{ $book->description ?? 'Deskripsi buku belum tersedia.' }}"
-                 data-cover="{{ $book->cover ? asset('storage/'.$book->cover) : '' }}"
-                 data-fav="{{ $isFav ? '1' : '0' }}"
-                 data-borrowed="{{ in_array($book->id, $borrowedBookIds ?? []) ? '1' : '0' }}"
-                 data-reserved="{{ in_array($book->id, $reservedBookIds ?? []) ? '1' : '0' }}">
-
-                {{-- Cover & Badges --}}
-                <div class="saas-card-cover-wrapper">
-                    @if($book->cover)
-                        <img src="{{ asset('storage/'.$book->cover) }}"
-                             alt="{{ $book->title }}"
-                             class="saas-card-cover-img"
-                             loading="lazy">
-                    @else
-                        <div class="saas-card-cover-fallback">
-                            <span class="fallback-letter">{{ strtoupper(substr($book->title, 0, 1)) }}</span>
-                            <span class="fallback-title">{{ Str::limit($book->title, 34) }}</span>
-                        </div>
-                    @endif
-
-                    {{-- Category Badge --}}
-                    <span class="saas-card-badge">
-                        {{ Str::limit($book->category->name ?? 'Umum', 18) }}
-                    </span>
-
-                    {{-- Availability Badge --}}
-                    <span class="saas-stock-badge {{ $isAvailable ? 'available' : 'unavailable' }}">
-                        {{ $isAvailable ? 'Tersedia' : 'Habis' }}
-                    </span>
-
-                    {{-- Hover Overlay Action Buttons --}}
-                    <div class="saas-card-overlay">
-                        <button type="button" class="saas-overlay-btn btn-detail" onclick="event.stopPropagation(); openCatalogModal(this.closest('.saas-book-card'))">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                            <span>Detail 3D</span>
-                        </button>
-
-                        <button type="button" class="saas-overlay-btn btn-reserve" onclick="event.stopPropagation(); triggerReservationModal({{ $book->id }}, this.closest('.saas-book-card'))">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                <line x1="16" y1="2" x2="16" y2="6"></line>
-                                <line x1="8" y1="2" x2="8" y2="6"></line>
-                                <line x1="3" y1="10" x2="21" y2="10"></line>
-                            </svg>
-                            <span>Reservasi</span>
-                        </button>
-                    </div>
-                </div>
-
-                {{-- Book Info --}}
-                <div class="saas-card-body">
-                    <h3 class="saas-card-title" title="{{ $book->title }}">{{ $book->title }}</h3>
-                    <p class="saas-card-author">✍️ {{ $book->author ?? 'Penulis Anonim' }}</p>
-                    <p class="saas-card-publisher">🏢 {{ $book->publisher ?? 'Penerbit -' }}</p>
-
-                    <div class="saas-card-footer">
-                        <span style="font-weight: 600; color: {{ $isAvailable ? 'var(--primary)' : '#DC2626' }};">
-                            {{ $isAvailable ? ($book->available_stock . ' eksemplar') : 'Stok Kosong' }}
-                        </span>
-                        @if($book->rak)
-                            <span style="color: var(--saas-text-muted); font-weight: 500;">📍 {{ $book->rak }}</span>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
-
-    {{-- Pagination --}}
-    @if($books->hasPages())
-        <div class="ucat-pagination-wrapper">
-            {{ $books->links('partials.user-catalog-pagination') }}
-        </div>
-    @endif
-@endif
+{{-- 4. 5-COLUMN RESPONSIVE BOOK GRID (AJAX Container) --}}
+<div id="catalogGridContainer">
+    @include('user.partials.catalog-grid')
+</div>
 
 
 {{-- ==========================================================================
@@ -487,7 +356,6 @@
                 <span class="saas-modal-cat-tag" id="modalBookCategory">Kategori</span>
                 <h2 class="saas-modal-book-title" id="modalBookTitle">Judul Buku</h2>
                 <div class="saas-modal-book-author">
-                    <span>✍️</span>
                     <span id="modalBookAuthor">Penulis Buku</span>
                 </div>
 
@@ -680,17 +548,269 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ── 2. Filter Helper ────────────────────────────────────────────────────────
-function applyFilter(key, value) {
-    const url = new URL(window.location.href);
-    if (value) {
-        url.searchParams.set(key, value);
-    } else {
-        url.searchParams.delete(key);
-    }
-    url.searchParams.delete('page');
-    window.location.href = url.toString();
+// ── 2. Realtime AJAX Catalog Filter Engine (SaaS 2026) ─────────────────────────
+window.catalogState = {
+    search: "{{ $search }}",
+    main_category: "{{ $mainCategory }}",
+    sub_category: "{{ $subCategory }}",
+    status: "{{ $status }}",
+    sort: "{{ $activeSort }}",
+    page: 1
+};
+
+function fetchCatalog(newParams = {}, pushHistory = true) {
+    Object.assign(window.catalogState, newParams);
+
+    const gridContainer = document.getElementById('catalogGridContainer');
+    const metaContainer = document.getElementById('catalogMetaContainer');
+    if (gridContainer) gridContainer.classList.add('loading');
+
+    const params = new URLSearchParams();
+    if (window.catalogState.search) params.set('search', window.catalogState.search);
+    if (window.catalogState.main_category) params.set('main_category', window.catalogState.main_category);
+    if (window.catalogState.sub_category) params.set('sub_category', window.catalogState.sub_category);
+    if (window.catalogState.status) params.set('status', window.catalogState.status);
+    if (window.catalogState.sort && window.catalogState.sort !== 'terbaru') params.set('sort', window.catalogState.sort);
+    if (window.catalogState.page && window.catalogState.page > 1) params.set('page', window.catalogState.page);
+
+    params.set('ajax', '1');
+
+    const catalogUrl = "{{ route('user.catalog') }}";
+    fetch(catalogUrl + '?' + params.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            if (gridContainer && data.grid_html) {
+                gridContainer.innerHTML = data.grid_html;
+            }
+            if (metaContainer && data.meta_html) {
+                metaContainer.innerHTML = data.meta_html;
+            }
+
+            // Sync visual states for subcategories
+            syncCategoryUiState(window.catalogState.main_category, window.catalogState.sub_category);
+
+            // Sync visual state for status dropdown
+            syncStatusUiState(window.catalogState.status);
+
+            // Sync visual state for sort dropdown
+            syncSortUiState(window.catalogState.sort);
+
+            // Update browser URL
+            if (pushHistory) {
+                params.delete('ajax');
+                const cleanQuery = params.toString();
+                const newUrl = window.location.pathname + (cleanQuery ? ('?' + cleanQuery) : '');
+                window.history.pushState(window.catalogState, '', newUrl);
+            }
+        }
+    })
+    .catch(err => {
+        console.error('Error filtering catalog:', err);
+    })
+    .finally(() => {
+        if (gridContainer) gridContainer.classList.remove('loading');
+    });
 }
+
+function selectSubcategory(mainCategory, subCategory, e) {
+    if (e) e.stopPropagation();
+
+    // Close any open dropdowns
+    document.querySelectorAll('.pd-select-wrapper.is-open').forEach(w => {
+        w.classList.remove('is-open');
+        w.querySelector('.pd-trigger')?.classList.remove('is-open');
+    });
+    const bd = document.querySelector('.pd-backdrop');
+    if (bd) bd.classList.remove('active');
+
+    // Only one subcategory can be active! Clean old filters and query database
+    fetchCatalog({
+        main_category: mainCategory,
+        sub_category: subCategory,
+        page: 1
+    });
+}
+
+function selectStatus(status, label) {
+    // Close open dropdowns
+    document.querySelectorAll('.pd-select-wrapper.is-open').forEach(w => w.classList.remove('is-open'));
+    const bd = document.querySelector('.pd-backdrop');
+    if (bd) bd.classList.remove('active');
+
+    fetchCatalog({ status: status, page: 1 });
+}
+
+function selectSort(sort, label) {
+    // Close open dropdowns
+    document.querySelectorAll('.pd-select-wrapper.is-open').forEach(w => w.classList.remove('is-open'));
+    const bd = document.querySelector('.pd-backdrop');
+    if (bd) bd.classList.remove('active');
+
+    fetchCatalog({ sort: sort, page: 1 });
+}
+
+function resetAllCatalogFilters() {
+    const searchInput = document.getElementById('saasSearchInput');
+    if (searchInput) searchInput.value = '';
+
+    fetchCatalog({
+        search: '',
+        main_category: '',
+        sub_category: '',
+        status: '',
+        sort: 'terbaru',
+        page: 1
+    });
+}
+
+function clearCategoryFilter() {
+    fetchCatalog({
+        main_category: '',
+        sub_category: '',
+        page: 1
+    });
+}
+
+function clearStatusFilter() {
+    fetchCatalog({
+        status: '',
+        page: 1
+    });
+}
+
+function syncCategoryUiState(mainCat, subCat) {
+    // 1. Remove active state from all subcategory buttons
+    document.querySelectorAll('.pd-subcat-btn').forEach(btn => {
+        btn.classList.remove('is-selected', 'active-subcat');
+    });
+
+    // 2. Remove active state from all category wrappers and reset trigger labels
+    const groups = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
+    groups.forEach(g => {
+        const slug = g.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        const wrapper = document.getElementById('catWrapper_' + slug);
+        const trigger = document.getElementById('catTrigger_' + slug);
+        const label = document.getElementById('catLabel_' + slug);
+
+        if (wrapper) wrapper.classList.remove('has-active-category');
+        if (trigger) trigger.classList.remove('has-value');
+        if (label) label.textContent = g;
+    });
+
+    const allCatWrapper = document.getElementById('wrapperAllCategories');
+    const allCatTrigger = document.getElementById('triggerAllCategories');
+
+    // 3. If a subcategory is selected, highlight only that one
+    if (mainCat && subCat) {
+        if (allCatWrapper) allCatWrapper.classList.remove('has-active-category');
+        if (allCatTrigger) allCatTrigger.classList.remove('has-value');
+
+        const activeBtn = document.querySelector(`.pd-subcat-btn[data-main="${mainCat}"][data-sub="${subCat}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('is-selected', 'active-subcat');
+        }
+
+        const slug = mainCat.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        const activeWrapper = document.getElementById('catWrapper_' + slug);
+        const activeTrigger = document.getElementById('catTrigger_' + slug);
+        const activeLabel = document.getElementById('catLabel_' + slug);
+
+        if (activeWrapper) activeWrapper.classList.add('has-active-category');
+        if (activeTrigger) activeTrigger.classList.add('has-value');
+        if (activeLabel) activeLabel.textContent = `${mainCat}: ${subCat} ✓`;
+    } else {
+        // "Semua Kategori" is active
+        if (allCatWrapper) allCatWrapper.classList.add('has-active-category');
+        if (allCatTrigger) allCatTrigger.classList.add('has-value');
+    }
+}
+
+function syncStatusUiState(status) {
+    const trigger = document.getElementById('pdStatusTrigger');
+    const label = document.getElementById('pdStatusLabel');
+    if (label) {
+        if (status === 'tersedia') label.textContent = 'Tersedia';
+        else if (status === 'habis') label.textContent = 'Habis';
+        else label.textContent = 'Semua Status';
+    }
+    if (trigger) {
+        trigger.classList.toggle('has-value', Boolean(status));
+    }
+    document.querySelectorAll('#pdStatusPanel .pd-item').forEach(item => {
+        const val = item.getAttribute('data-value') || '';
+        item.classList.toggle('is-selected', val === (status || ''));
+    });
+}
+
+function syncSortUiState(sort) {
+    const trigger = document.getElementById('pdSortTrigger');
+    const label = document.getElementById('pdSortLabel');
+    if (label) {
+        if (sort === 'terlama') label.textContent = 'Terlama';
+        else if (sort === 'az') label.textContent = 'Judul (A-Z)';
+        else if (sort === 'za') label.textContent = 'Judul (Z-A)';
+        else label.textContent = 'Terbaru';
+    }
+    if (trigger) {
+        trigger.classList.toggle('has-value', Boolean(sort && sort !== 'terbaru'));
+    }
+    document.querySelectorAll('#pdSortPanel .pd-item').forEach(item => {
+        const val = item.getAttribute('data-value') || '';
+        item.classList.toggle('is-selected', val === (sort || 'terbaru'));
+    });
+}
+
+// Search hanya berjalan saat klik tombol "Cari Buku" (form submit), TIDAK saat mengetik
+document.addEventListener('DOMContentLoaded', () => {
+    const searchForm = document.getElementById('searchFilterForm');
+    const searchInput = document.getElementById('saasSearchInput');
+
+    // Submit form via AJAX saat klik "Cari Buku"
+    if (searchForm && searchInput) {
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            fetchCatalog({ search: searchInput.value.trim(), page: 1 });
+        });
+    }
+
+    // Intercept pagination clicks inside gridContainer
+    const gridContainer = document.getElementById('catalogGridContainer');
+    if (gridContainer) {
+        gridContainer.addEventListener('click', (e) => {
+            const link = e.target.closest('.ucat-pagination-wrapper a, .pagination a');
+            if (link && link.href) {
+                e.preventDefault();
+                const url = new URL(link.href);
+                const pageNum = url.searchParams.get('page') || 1;
+                fetchCatalog({ page: pageNum });
+                window.scrollTo({ top: 350, behavior: 'smooth' });
+            }
+        });
+    }
+});
+
+// Handle browser Back/Forward
+window.addEventListener('popstate', (e) => {
+    if (e.state) {
+        fetchCatalog(e.state, false);
+    } else {
+        const url = new URL(window.location.href);
+        fetchCatalog({
+            search: url.searchParams.get('search') || '',
+            main_category: url.searchParams.get('main_category') || '',
+            sub_category: url.searchParams.get('sub_category') || '',
+            status: url.searchParams.get('status') || '',
+            sort: url.searchParams.get('sort') || 'terbaru',
+            page: url.searchParams.get('page') || 1,
+        }, false);
+    }
+});
 
 // ── 3. Solid 3D Book 360° Drag Rotation Engine ──────────────────────────────
 let currentRotY = -25;

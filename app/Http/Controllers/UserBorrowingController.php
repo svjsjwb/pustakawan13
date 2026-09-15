@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppNotification;
 use App\Models\Borrowing;
 use App\Models\BorrowingDetail;
 use App\Models\Book;
@@ -46,7 +47,6 @@ class UserBorrowingController extends Controller
                         : null;
                     return $b;
                 });
-
         }
 
         return view('user.loans', compact('borrowings', 'completedBorrowings', 'member', 'completedCount'));
@@ -99,17 +99,17 @@ class UserBorrowingController extends Controller
                 }
 
                 $borrowing = Borrowing::create([
-                    'member_id' => $member->id,
+                    'member_id'   => $member->id,
                     'borrowed_at' => $borrowedAt->toDateString(),
-                    'due_at' => $dueAt->toDateString(),
-                    'status' => 'dipinjam',
+                    'due_at'      => $dueAt->toDateString(),
+                    'status'      => 'dipinjam',
                 ]);
 
                 BorrowingDetail::create([
                     'borrowing_id' => $borrowing->id,
-                    'book_id' => $book->id,
+                    'book_id'      => $book->id,
                     'book_copy_id' => $copy->id,
-                    'quantity' => 1,
+                    'quantity'     => 1,
                 ]);
 
                 $copy->update(['status' => 'borrowed']);
@@ -119,13 +119,12 @@ class UserBorrowingController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['message' => $exception->getMessage()], 409);
             }
-
             return back()->with('error', $exception->getMessage());
         }
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Buku berhasil dipinjam.',
+                'message'      => 'Buku berhasil dipinjam.',
                 'redirect_url' => route('borrowings.index'),
             ]);
         }
@@ -134,11 +133,12 @@ class UserBorrowingController extends Controller
     }
 
     /**
-     * User mengajukan perpanjangan peminjaman
+     * User mengajukan perpanjangan peminjaman menggunakan date picker.
+     * Validasi: tanggal harus > due_at sekarang dan max 14 hari dari due_at.
      */
     public function requestExtension(Request $request, Borrowing $borrowing)
     {
-        $user = Auth::user();
+        $user   = Auth::user();
         $member = Member::where('email', $user->email)->first();
 
         if (!$member || $borrowing->member_id !== $member->id) {
@@ -153,29 +153,47 @@ class UserBorrowingController extends Controller
             return back()->with('error', 'Anda sudah mengajukan perpanjangan untuk peminjaman ini yang sedang menunggu persetujuan.');
         }
 
+        // Batas perpanjangan: max 14 hari dari jatuh tempo saat ini
+        $maxExtensionDays = 14;
+        $currentDue       = $borrowing->due_at; // Carbon instance
+        $maxDate          = $currentDue->copy()->addDays($maxExtensionDays);
+
         $validated = $request->validate([
-            'extension_days' => 'required|integer|in:3,7,14',
-            'reason'         => 'nullable|string|max:500',
+            'new_due_date' => [
+                'required',
+                'date',
+                'after:' . $currentDue->toDateString(),
+                'before_or_equal:' . $maxDate->toDateString(),
+            ],
+            'reason' => 'nullable|string|max:500',
+        ], [
+            'new_due_date.required'        => 'Tanggal pengembalian baru wajib dipilih.',
+            'new_due_date.date'            => 'Format tanggal tidak valid.',
+            'new_due_date.after'           => 'Tanggal harus lebih besar dari tanggal jatuh tempo saat ini.',
+            'new_due_date.before_or_equal' => "Perpanjangan melebihi batas maksimum {$maxExtensionDays} hari.",
         ]);
 
-        $requestedDue = $borrowing->due_at->copy()->addDays((int) $validated['extension_days']);
+        $requestedDue  = \Carbon\Carbon::parse($validated['new_due_date']);
+        $extensionDays = (int) $currentDue->diffInDays($requestedDue);
 
         $borrowing->update([
             'extension_status'           => 'menunggu',
             'extension_requested_due_at' => $requestedDue->toDateString(),
-            'extension_reason'           => $validated['reason'] ?? 'Perpanjangan peminjaman ' . $validated['extension_days'] . ' hari',
+            'extension_reason'           => $validated['reason'] ?? "Perpanjangan peminjaman {$extensionDays} hari",
         ]);
 
         $borrowing->load('details.book');
         $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
 
-        // Notifikasi ke Admin
-        AppNotification::notifyAdmin(
-            'extension_request',
-            'Permintaan Perpanjangan Peminjaman',
-            "{$user->name} mengajukan perpanjangan peminjaman buku \"{$bookTitle}\" hingga " . $requestedDue->format('d M Y') . ".",
-            ['borrowing_id' => $borrowing->id]
-        );
+        // Notifikasi ke Admin — cek preferensi user
+        if ($user->notificationsAllowed('extension')) {
+            AppNotification::notifyAdmin(
+                'extension_request',
+                'Permintaan Perpanjangan Peminjaman',
+                "{$user->name} mengajukan perpanjangan peminjaman buku \"{$bookTitle}\" hingga " . $requestedDue->format('d M Y') . ".",
+                ['borrowing_id' => $borrowing->id]
+            );
+        }
 
         return back()->with('success', 'Permintaan perpanjangan berhasil diajukan dan sedang menunggu persetujuan Admin.');
     }

@@ -18,8 +18,12 @@
 
         <strong>JAM OPERASIONAL</strong>
 
-        <span>Senin - Jumat: 07.00 - 17.30 WIB</span>
-        <span>Sabtu - Minggu: Libur</span>
+        @if(auth()->user()?->role === 'user')
+            <span>Senin - Jumat : 07:30 - 16:30</span>
+        @else
+            <span>Senin - Jumat: 07.00 - 17.30 WIB</span>
+        @endif
+        <span>Sabtu - Minggu : Libur</span>
 
     </div>
 
@@ -29,7 +33,11 @@
         <strong>ALAMAT</strong>
 
         <span>
-            Jl. Prof. DR. Supomo No.93,
+            @if(auth()->user()?->role === 'user')
+                Jl. Prof. DR. Supomo No. 23,
+            @else
+                Jl. Prof. DR. Supomo No.93,
+            @endif
             Sriwedari, Kec. Laweyan,
         </span>
 

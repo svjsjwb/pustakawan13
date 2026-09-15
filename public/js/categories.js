@@ -9,63 +9,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const data = {
 
         "Pendidikan": {
-            "SD": [
-                "Kelas 1",
-                "Kelas 2",
-                "Kelas 3",
-                "Kelas 4",
-                "Kelas 5",
-                "Kelas 6"
-            ],
-            "SMP": [
-                "Kelas 7",
-                "Kelas 8",
-                "Kelas 9"
-            ],
-            "SMA": [
-                "Kelas 10",
-                "Kelas 11",
-                "Kelas 12"
-            ]
+            "SD": [],
+            "SMP": [],
+            "SMA": []
         },
 
         "Anak-anak": {
-            "Dongeng": [
-                "Fabel",
-                "Legenda",
-                "Cerita Rakyat"
-            ],
-            "Aktivitas": [
-                "Mewarnai",
-                "Puzzle",
-                "Kerajinan"
-            ]
+            "Fiksi": [],
+            "Non Fiksi": []
         },
 
         "Remaja": {
-            "Novel": [
-                "Romance",
-                "Fantasi",
-                "Petualangan"
-            ],
-            "Pengembangan Diri": [
-                "Motivasi",
-                "Karier",
-                "Public Speaking"
-            ]
+            "Fiksi": [],
+            "Non Fiksi": []
         },
 
         "Dewasa": {
-            "Bisnis": [
-                "Manajemen",
-                "Marketing",
-                "Keuangan"
-            ],
-            "Teknologi": [
-                "Programming",
-                "AI",
-                "Data Science"
-            ]
+            "Fiksi": [],
+            "Non Fiksi": []
         }
 
     };

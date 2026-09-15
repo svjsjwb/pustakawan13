@@ -8,64 +8,18 @@
 
 @section('content')
 
-{{-- Page Header (Senada Beranda) --}}
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 28px;">
-    <div>
-        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; background: var(--primary-light); border: 1px solid rgba(40, 123, 120, 0.25); border-radius: 9999px; font-size: 11px; font-weight: 800; color: var(--primary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">
-            <span>📅</span> LAYANAN RESERVASI BUKU
-        </div>
-        <h1 style="font-size: 28px; font-weight: 800; color: var(--text); margin: 0 0 6px; font-family: 'Poppins', sans-serif; letter-spacing: -0.02em;">
-            Daftar Reservasi Buku
-        </h1>
-        <p style="font-size: 14.5px; color: var(--text-muted); margin: 0;">
-            Pantau status permohonan reservasi koleksi buku Anda secara real-time.
-        </p>
+<section class="user-page-hero">
+    <div class="user-page-hero-pattern"></div>
+    <div class="user-page-hero-copy">
+        <h1>Daftar Reservasi Buku</h1>
+        <p>Pantau seluruh proses reservasi buku Anda mulai dari pengajuan, persetujuan, hingga buku tersedia dan siap untuk diambil sesuai jadwal yang ditentukan.</p>
     </div>
-
-    <a href="{{ route('user.catalog') }}" class="eg-btn-block" style="width: auto; padding: 12px 24px; font-size: 13.5px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-        </svg>
-        <span>Jelajahi Katalog Buku</span>
-    </a>
-</div>
-
-{{-- 3 Stat Cards di Atas: Reservasi Aktif, Menunggu Persetujuan, Siap Diambil --}}
-<div class="eg-stats-grid">
-    {{-- Card 1: Reservasi Aktif --}}
-    <div class="eg-stat-card">
-        <div class="eg-stat-icon">
-            📚
-        </div>
-        <div class="eg-stat-info">
-            <div class="num">{{ $statusCounts['aktif'] ?? 0 }}</div>
-            <div class="label">Reservasi Aktif</div>
-        </div>
+    <div class="user-page-hero-stats" aria-label="Ringkasan reservasi">
+        <div><span>Total Reservasi Aktif</span><strong>{{ $statusCounts['aktif'] ?? 0 }}</strong><small>reservasi berjalan</small></div>
+        <div><span>Menunggu Persetujuan</span><strong>{{ $statusCounts['menunggu'] ?? 0 }}</strong><small>perlu diproses</small></div>
+        <div><span>Siap Diambil</span><strong>{{ $statusCounts['siap_diambil'] ?? 0 }}</strong><small>buku tersedia</small></div>
     </div>
-
-    {{-- Card 2: Menunggu Persetujuan --}}
-    <div class="eg-stat-card">
-        <div class="eg-stat-icon" style="background: rgba(245, 158, 11, 0.12); color: #b45309;">
-            ⏳
-        </div>
-        <div class="eg-stat-info">
-            <div class="num">{{ $statusCounts['menunggu'] ?? 0 }}</div>
-            <div class="label">Menunggu Persetujuan</div>
-        </div>
-    </div>
-
-    {{-- Card 3: Siap Diambil --}}
-    <div class="eg-stat-card">
-        <div class="eg-stat-icon" style="background: rgba(18, 63, 61, 0.14); color: #123f3d;">
-            📦
-        </div>
-        <div class="eg-stat-info">
-            <div class="num">{{ $statusCounts['siap_diambil'] ?? 0 }}</div>
-            <div class="label">Siap Diambil</div>
-        </div>
-    </div>
-</div>
+</section>
 
 {{-- Filter & Search Bar --}}
 <form method="GET" action="{{ route('user.reservations') }}" class="eg-filter-bar" id="reservationFilterForm">
@@ -245,9 +199,9 @@
                 <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
         </div>
-        <h3 class="eg-empty-title">Belum ada reservasi buku.</h3>
+        <h3 class="eg-empty-title">{{ request('search') ? 'Buku tidak ditemukan' : 'Belum ada reservasi buku.' }}</h3>
         <p class="eg-empty-desc">
-            Anda belum memiliki riwayat pengajuan reservasi buku. Silakan jelajahi koleksi buku di katalog dan ajukan reservasi.
+            {{ request('search') ? 'Tidak ada reservasi buku yang sesuai dengan kata kunci pencarian Anda.' : 'Anda belum memiliki riwayat pengajuan reservasi buku. Silakan jelajahi koleksi buku di katalog dan ajukan reservasi.' }}
         </p>
         <a href="{{ route('user.catalog') }}" class="eg-btn-block" style="width: auto; display: inline-flex; padding: 12px 28px; margin: 0 auto;">
             Jelajahi Katalog Buku
@@ -302,7 +256,7 @@
                                     {{ $book?->title ?? 'Judul Tidak Diketahui' }}
                                 </h4>
                                 <p style="font-size: 12.5px; color: var(--text-muted); margin: 0 0 4px;">
-                                    ✍️ {{ $book?->author ?? 'Penulis -' }}
+                                    {{ $book?->author ?? 'Penulis -' }}
                                 </p>
                                 @if($book?->category)
                                     <span style="font-size: 11px; padding: 2px 8px; background: var(--primary-light); color: var(--primary); border-radius: 9999px; font-weight: 700;">
@@ -316,7 +270,7 @@
                     {{-- 2. TANGGAL RESERVASI --}}
                     <td>
                         <div style="font-weight: 600; color: var(--text);">
-                            📅 {{ $res->reserved_at ? \Carbon\Carbon::parse($res->reserved_at)->format('d M Y') : $res->created_at->format('d M Y') }}
+                            {{ $res->reserved_at ? \Carbon\Carbon::parse($res->reserved_at)->format('d M Y') : $res->created_at->format('d M Y') }}
                         </div>
                         @if($res->expires_at)
                             <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">

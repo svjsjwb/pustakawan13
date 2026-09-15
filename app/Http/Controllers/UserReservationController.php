@@ -31,10 +31,10 @@ class UserReservationController extends Controller
                 ->where('member_id', $member->id);
 
             // Filter Pencarian
-            if ($search = $request->input('search')) {
+            $search = trim((string) $request->input('search', ''));
+            if ($search !== '') {
                 $query->whereHas('book', function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                      ->orWhere('author', 'like', "%{$search}%");
+                    $q->where('title', 'like', "{$search}%");
                 });
             }
 

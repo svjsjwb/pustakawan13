@@ -4,35 +4,34 @@
         <a href="{{ route('user.home') }}" class="eg-brand">
             <div class="eg-brand-badge">P</div>
             <div class="eg-brand-text">
-                <span class="title">Pustakawan</span>
-                <span class="sub">Perpustakaan Digital</span>
+                <span class="title">Perpustakaan Tiga Serangkai</span>
             </div>
         </a>
 
         {{-- Center Navigation --}}
         <ul class="eg-nav-menu">
             <li>
-                <a href="{{ route('dashboard') }}" class="eg-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" class="eg-nav-link {{ request()->routeIs('dashboard', 'user.home') ? 'active' : '' }}">
                     Beranda
                 </a>
             </li>
             <li>
-                <a href="{{ route('catalog') }}" class="eg-nav-link {{ request()->routeIs('catalog') ? 'active' : '' }}">
+                <a href="{{ route('catalog') }}" class="eg-nav-link {{ request()->routeIs('catalog', 'user.catalog') ? 'active' : '' }}">
                     Katalog
                 </a>
             </li>
             <li>
-                <a href="{{ route('reservations.index') }}" class="eg-nav-link {{ request()->routeIs('reservations.index') ? 'active' : '' }}">
-                    Reservasi
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('borrowings.index') }}" class="eg-nav-link {{ request()->routeIs('borrowings.index') ? 'active' : '' }}">
+                <a href="{{ route('borrowings.index') }}" class="eg-nav-link {{ request()->routeIs('borrowings.index', 'user.borrowings', 'user.loans') ? 'active' : '' }}">
                     Peminjaman
                 </a>
             </li>
             <li>
-                <a href="{{ route('history') }}" class="eg-nav-link {{ request()->routeIs('history') ? 'active' : '' }}">
+                <a href="{{ route('reservations.index') }}" class="eg-nav-link {{ request()->routeIs('reservations.index', 'user.reservations', 'user.reservations.show') ? 'active' : '' }}">
+                    Reservasi
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('history') }}" class="eg-nav-link {{ request()->routeIs('history', 'user.history') ? 'active' : '' }}">
                     Riwayat
                 </a>
             </li>
@@ -63,7 +62,7 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
-                            <span>Tandai Semua Dibaca</span>
+                            <span>Tandai Selesai</span>
                         </button>
                     </div>
 
@@ -73,64 +72,9 @@
                     </div>
 
                     {{-- Bottom Footer --}}
-                    <button type="button" class="eg-notif-footer" id="egNotifFooterLink" onclick="openEgNotifFull()">
-                        <span>Lihat Semua Notifikasi</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            {{-- 1b. FULLSCREEN NOTIFICATION CENTER (BUKAN DROPDOWN) --}}
-            <div class="eg-notif-full-overlay" id="egNotifFullModal" aria-hidden="true">
-                <div class="eg-notif-full-card" role="dialog" aria-modal="true" aria-label="Semua Notifikasi">
-                    {{-- Sticky Header --}}
-                    <div class="eg-notif-full-head">
-                        <div class="eg-notif-full-heading">
-                            <div class="eg-notif-full-head-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3>Semua Notifikasi</h3>
-                                <p>Kelola seluruh aktivitas akun Anda</p>
-                            </div>
-                        </div>
-                        <div class="eg-notif-full-actions">
-                            <button type="button" class="eg-notif-full-markall" onclick="markAllNotificationsAsReadFull()">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                <span>Tandai Semua Dibaca</span>
-                            </button>
-                            <button type="button" class="eg-notif-full-close" onclick="closeEgNotifFull()" aria-label="Tutup">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    {{-- Filter Tabs --}}
-                    <div class="eg-notif-full-filters" id="egNotifFullFilters" role="tablist">
-                        <button type="button" class="eg-notif-filter-btn active" data-filter="all" role="tab" aria-selected="true" onclick="setNotifFullFilter('all', this)">
-                            Semua <span class="eg-notif-filter-count" id="egFullCountAll">0</span>
-                        </button>
-                        <button type="button" class="eg-notif-filter-btn" data-filter="unread" role="tab" aria-selected="false" onclick="setNotifFullFilter('unread', this)">
-                            Belum Dibaca <span class="eg-notif-filter-count" id="egFullCountUnread">0</span>
-                        </button>
-                        <button type="button" class="eg-notif-filter-btn" data-filter="read" role="tab" aria-selected="false" onclick="setNotifFullFilter('read', this)">
-                            Dibaca <span class="eg-notif-filter-count" id="egFullCountRead">0</span>
-                        </button>
-                    </div>
-
-                    {{-- Scrollable Notification List --}}
-                    <div class="eg-notif-full-list" id="egNotifFullList"></div>
+                    <a href="{{ route('user.notifications') }}" class="eg-notif-footer" id="egNotifFooterLink">
+                        <span>Lihat Semua Notifikasi &rarr;</span>
+                    </a>
                 </div>
             </div>
 
@@ -162,11 +106,11 @@
                         </div>
                     </div>
 
-                    {{-- Menu Items Sesuai Prompt --}}
+                    {{-- Menu Items --}}
                     <ul class="eg-drop-menu-list">
                         {{-- 1. My Profile --}}
                         <li>
-                            <a href="{{ route('user.profile') }}" class="eg-drop-menu-item">
+                            <a href="{{ route('user.profile') }}" class="eg-drop-menu-item {{ request()->routeIs('user.profile') ? 'active' : '' }}">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -180,25 +124,58 @@
                             </a>
                         </li>
 
-                        {{-- 2. Notification (Toggle Status: Allow / Off) --}}
+                        {{-- 2. Favorit Saya --}}
                         <li>
-                            <button type="button" class="eg-drop-menu-item" onclick="toggleGlobalNotificationPref(event)">
+                            <a href="{{ route('user.favorites') }}" class="eg-drop-menu-item {{ request()->routeIs('user.favorites') ? 'active' : '' }}">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                                         </svg>
                                     </div>
-                                    <span>Notification</span>
+                                    <span>Favorit Saya</span>
                                 </div>
-                                <span class="eg-notif-status-pill" id="egMenuNotifStatus">Allow</span>
-                            </button>
+                                <span class="eg-drop-menu-chevron">›</span>
+                            </a>
+                        </li>
+
+                        {{-- 3. Reservasi Saya --}}
+                        <li>
+                            <a href="{{ route('user.reservations') }}" class="eg-drop-menu-item {{ request()->routeIs('user.reservations') ? 'active' : '' }}">
+                                <div class="eg-drop-menu-item-left">
+                                    <div class="eg-drop-menu-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                    </div>
+                                    <span>Reservasi Saya</span>
+                                </div>
+                                <span class="eg-drop-menu-chevron">›</span>
+                            </a>
+                        </li>
+
+                        {{-- 4. Riwayat Aktivitas --}}
+                        <li>
+                            <a href="{{ route('user.history') }}" class="eg-drop-menu-item {{ request()->routeIs('user.history') ? 'active' : '' }}">
+                                <div class="eg-drop-menu-item-left">
+                                    <div class="eg-drop-menu-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="1 4 1 10 7 10"></polyline>
+                                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                        </svg>
+                                    </div>
+                                    <span>Riwayat Aktivitas</span>
+                                </div>
+                                <span class="eg-drop-menu-chevron">›</span>
+                            </a>
                         </li>
 
                         <div class="eg-drop-divider"></div>
 
-                        {{-- 6. Log Out --}}
+                        {{-- 5. Log Out --}}
                         <li>
                             <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
                                 @csrf
@@ -233,11 +210,11 @@
 
     {{-- Mobile Drawer --}}
     <div id="egMobileDrawer" style="display:none; padding:16px 24px; background:var(--surface); border-top:1px solid var(--border); flex-direction:column; gap:8px;">
-        <a href="{{ route('dashboard') }}" class="eg-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Beranda</a>
-        <a href="{{ route('catalog') }}" class="eg-nav-link {{ request()->routeIs('catalog') ? 'active' : '' }}">Katalog</a>
-        <a href="{{ route('reservations.index') }}" class="eg-nav-link {{ request()->routeIs('reservations.index') ? 'active' : '' }}">Reservasi</a>
-        <a href="{{ route('borrowings.index') }}" class="eg-nav-link {{ request()->routeIs('borrowings.index') ? 'active' : '' }}">Peminjaman</a>
-        <a href="{{ route('history') }}" class="eg-nav-link {{ request()->routeIs('history') ? 'active' : '' }}">Riwayat</a>
+        <a href="{{ route('dashboard') }}" class="eg-nav-link {{ request()->routeIs('dashboard', 'user.home') ? 'active' : '' }}">Beranda</a>
+        <a href="{{ route('catalog') }}" class="eg-nav-link {{ request()->routeIs('catalog', 'user.catalog') ? 'active' : '' }}">Katalog</a>
+        <a href="{{ route('borrowings.index') }}" class="eg-nav-link {{ request()->routeIs('borrowings.index', 'user.borrowings', 'user.loans') ? 'active' : '' }}">Peminjaman</a>
+        <a href="{{ route('reservations.index') }}" class="eg-nav-link {{ request()->routeIs('reservations.index', 'user.reservations', 'user.reservations.show') ? 'active' : '' }}">Reservasi</a>
+        <a href="{{ route('history') }}" class="eg-nav-link {{ request()->routeIs('history', 'user.history') ? 'active' : '' }}">Riwayat</a>
     </div>
 </header>
 
@@ -272,25 +249,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ── Notification Pref Toggle from Profile Menu ────────────────────────────────
-function toggleGlobalNotificationPref(e) {
-    e.stopPropagation();
-    const current = localStorage.getItem('lib_notifications') !== '0';
-    const nextVal = !current;
-    localStorage.setItem('lib_notifications', nextVal ? '1' : '0');
-    updateNotifMenuStatus(nextVal);
-    if (window.showToast) {
-        window.showToast(`Notification ${nextVal ? 'Allow' : 'Off'}`, 'info');
-    }
-}
-
-function updateNotifMenuStatus(allowed) {
-    const pill = document.getElementById('egMenuNotifStatus');
-    if (pill) {
-        pill.textContent = allowed ? 'Allow' : 'Off';
-        pill.classList.toggle('off', !allowed);
-    }
-}
+// ── Notification Pref stored in localStorage (used by profile page) ────────────
 
 // ── Notification Helpers & Icons Engine (SaaS 2026) ──────────────────────────
 let EG_NOTIF_ALL = [];
@@ -434,7 +393,7 @@ function renderNotifications(items, unreadCount) {
                         <span>${timeStr}</span>
                     </div>
                 </div>
-                ${isUnread ? '<span class="eg-notif-item-dot" title="Belum dibaca"></span>' : ''}
+                    ${isUnread ? '<span class="eg-notif-item-dot" title="Notifikasi baru"></span>' : ''}
             </a>
         `;
     }).join('');
@@ -480,7 +439,7 @@ function markAllNotificationsAsRead() {
     }).catch(() => {});
 
     if (window.showToast) {
-        window.showToast('Semua notifikasi telah ditandai dibaca', 'info');
+        window.showToast('Notifikasi telah ditandai dibaca', 'info');
     }
 }
 
@@ -492,11 +451,8 @@ function toggleEgMobileNav() {
     }
 }
 
-// ── Init Notifications & Preferences on Load ──────────────────────────────────
+// ── Init Notifications on Load ───────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    const notifAllowed = localStorage.getItem('lib_notifications') !== '0';
-    updateNotifMenuStatus(notifAllowed);
-
     // Fetch dynamic notifications from backend API
     fetch('/api/notifications')
         .then(r => r.json())

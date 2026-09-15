@@ -8,33 +8,62 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         if (!$user) {
-            return response()->json(['count' => 0, 'items' => []]);
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json(['unread_count' => 0, 'notifications' => []]);
+            }
+            return redirect()->route('login');
         }
 
-        $query = AppNotification::latest();
+        // Jika request dari AJAX/API navbar dropdown
+        if ($request->is('api/*') || $request->expectsJson()) {
+            $query = AppNotification::latest();
 
-        if ($user->isAdmin()) {
-            $query->where('role', 'admin');
-        } else {
-            $query->where('user_id', $user->id)->where('role', 'user');
+            if ($user->isAdmin()) {
+                $query->where('role', 'admin');
+            } else {
+                $query->where('user_id', $user->id)->where('role', 'user');
+            }
+
+            $unreadCount = (clone $query)->where('is_read', false)->count();
+            $notifications = $query->take(15)->get();
+
+            return response()->json([
+                'unread_count' => $unreadCount,
+                'notifications' => $notifications,
+            ]);
         }
 
-        $unreadCount = (clone $query)->where('is_read', false)->count();
-        $notifications = $query->take(15)->get();
+        // Halaman web user notifications
+        $tab = $request->query('tab', 'all');
+        $baseQuery = AppNotification::where('user_id', $user->id)->where('role', 'user');
 
-        return response()->json([
-            'unread_count' => $unreadCount,
-            'notifications' => $notifications,
-        ]);
+        $totalCount = (clone $baseQuery)->count();
+        $unreadCount = (clone $baseQuery)->where('is_read', false)->count();
+        $readCount = (clone $baseQuery)->where('is_read', true)->count();
+
+        $query = clone $baseQuery;
+        if ($tab === 'unread') {
+            $query->where('is_read', false);
+        } elseif ($tab === 'read') {
+            $query->where('is_read', true);
+        }
+
+        $notifications = $query->latest()->paginate(15)->withQueryString();
+
+        return view('user.notifications', compact('notifications', 'totalCount', 'unreadCount', 'readCount', 'tab'));
     }
 
     public function markAsRead($id)
     {
         $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false], 401);
+        }
+
         $notif = AppNotification::findOrFail($id);
 
         if ($user->isAdmin() && $notif->role === 'admin') {
@@ -50,7 +79,7 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
-            return response()->json(['success' => false]);
+            return response()->json(['success' => false], 401);
         }
 
         if ($user->isAdmin()) {

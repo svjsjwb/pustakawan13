@@ -202,6 +202,7 @@ Route::middleware(['auth', 'role.user'])->group(function () {
 
     // BERANDA
     Route::get('/home', [UserHomeController::class, 'index'])->name('user.home');
+    Route::get('/user/search', [UserHomeController::class, 'search'])->name('user.search');
 
     // KATALOG
     Route::get('/user/catalog', [UserCatalogController::class, 'index'])->name('user.catalog');
@@ -231,13 +232,15 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     Route::get('/user/announcements', [UserAnnouncementController::class, 'index'])->name('user.announcements');
 
     // NOTIFIKASI
+    Route::get('/notifications',                   [NotificationController::class, 'index'])->name('user.notifications');
     Route::post('/user/notifications/dismiss',     [UserNotificationController::class, 'dismiss'])->name('user.notifications.dismiss');
     Route::post('/user/notifications/dismiss-all', [UserNotificationController::class, 'dismissAll'])->name('user.notifications.dismiss-all');
 
     // PROFIL
-    Route::get('/user/profile',           [UserProfileController::class, 'index'])->name('user.profile');
-    Route::post('/user/profile/update',   [UserProfileController::class, 'update'])->name('user.profile.update');
-    Route::post('/user/profile/password', [UserProfileController::class, 'changePassword'])->name('user.profile.password');
+    Route::get('/user/profile',                [UserProfileController::class, 'index'])->name('user.profile');
+    Route::post('/user/profile/update',        [UserProfileController::class, 'update'])->name('user.profile.update');
+    Route::post('/user/profile/password',      [UserProfileController::class, 'changePassword'])->name('user.profile.password');
+    Route::post('/user/profile/preferences',   [UserProfileController::class, 'updatePreferences'])->name('user.profile.preferences');
 
     // BANTUAN
     Route::get('/user/help', [UserHelpController::class, 'index'])->name('user.help');

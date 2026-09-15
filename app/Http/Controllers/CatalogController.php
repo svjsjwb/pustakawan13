@@ -28,11 +28,10 @@ class CatalogController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('author', 'like', "%{$search}%");
-            });
+            $search = trim((string) $request->search);
+            if ($search !== '') {
+                $query->where('title', 'like', "{$search}%");
+            }
         }
 
         $perPage = (int) $request->input('per_page', 25);

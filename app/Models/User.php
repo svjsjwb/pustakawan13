@@ -23,6 +23,20 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'theme',
+        'layout_density',
+        'allow_notifications',
+        'email_notifications',
+        'reservation_notifications',
+        'borrowing_notifications',
+        'extension_notifications',
+        'return_reminder_notifications',
+        'late_return_notifications',
+        'fine_notifications',
+        'favorite_categories',
+        'favorite_genres',
+        'last_theme_used',
+        'last_login_at',
     ];
 
     /**
@@ -43,8 +57,19 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'email_verified_at'             => 'datetime',
+            'last_login_at'                 => 'datetime',
+            'password'                      => 'hashed',
+            'allow_notifications'           => 'boolean',
+            'email_notifications'           => 'boolean',
+            'reservation_notifications'     => 'boolean',
+            'borrowing_notifications'       => 'boolean',
+            'extension_notifications'       => 'boolean',
+            'return_reminder_notifications' => 'boolean',
+            'late_return_notifications'     => 'boolean',
+            'fine_notifications'            => 'boolean',
+            'favorite_categories'           => 'array',
+            'favorite_genres'               => 'array',
         ];
     }
 
@@ -62,6 +87,29 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    /**
+     * Cek apakah notifikasi jenis tertentu diizinkan.
+     * Types: reservation, borrowing, extension, return_reminder, late_return, email
+     */
+    public function notificationsAllowed(string $type = ''): bool
+    {
+        // Jika master switch OFF, tidak ada notifikasi yang boleh dikirim
+        if (!($this->allow_notifications ?? true)) {
+            return false;
+        }
+
+        return match ($type) {
+            'reservation'     => (bool) ($this->reservation_notifications ?? true),
+            'borrowing'       => (bool) ($this->borrowing_notifications ?? true),
+            'extension'       => (bool) ($this->extension_notifications ?? true),
+            'return_reminder' => (bool) ($this->return_reminder_notifications ?? true),
+            'late_return',
+            'fine'            => (bool) ($this->late_return_notifications ?? $this->fine_notifications ?? true),
+            'email'           => (bool) ($this->email_notifications ?? true),
+            default           => true,
+        };
     }
 
     public function member()

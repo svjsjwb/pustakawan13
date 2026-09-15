@@ -27,7 +27,7 @@
 <div class="ul-page-header">
     <div>
         <p class="ul-page-kicker">KOLEKSI SAYA</p>
-        <h1 class="ul-page-h1">❤️ Favorit Saya</h1>
+        <h1 class="ul-page-h1">Favorit Saya</h1>
     </div>
     <a href="{{ route('user.catalog') }}" class="ul-btn ul-btn-outline">
         + Tambah dari Katalog

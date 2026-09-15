@@ -492,13 +492,13 @@
 
         <div class="rsv-header-info">
             <span class="rsv-category-pill">
-                📚 {{ $book?->category->name ?? 'Koleksi Umum' }}
+                {{ $book?->category->name ?? 'Koleksi Umum' }}
             </span>
             <h1 class="rsv-book-title">
                 {{ $book?->title ?? 'Judul Buku Tidak Diketahui' }}
             </h1>
             <p class="rsv-book-author">
-                <span>✍️ Penulis:</span>
+                <span>Penulis:</span>
                 <strong>{{ $book?->author ?? 'Penulis Anonim' }}</strong>
                 @if($book?->publisher)
                     <span style="opacity: 0.5;">•</span>
@@ -543,116 +543,48 @@
             Pantau progres tahapan permohonan hingga buku siap diambil
         </p>
 
-        @if($status === 'ditolak')
-            {{-- Flow Khusus Ditolak: ✓ Menunggu -> ✕ Ditolak --}}
-            <div class="rsv-tracking-timeline is-rejected-flow">
-                <div class="rsv-tracking-bar-bg" style="background: linear-gradient(90deg, #16A34A 50%, #DC2626 50%);"></div>
+        @php
+            $isMenunggu = $status === 'menunggu';
+            $isDisetujui = $status === 'disetujui';
+            $isSiapDiambil = $status === 'siap_diambil';
+            $isSelesai = $status === 'selesai';
+            $isDitolak = $status === 'ditolak';
+            $doneVerifikasi = in_array($status, ['disetujui', 'siap_diambil', 'selesai']);
+            $donePersetujuan = in_array($status, ['siap_diambil', 'selesai']);
+            $donePengambilan = $isSelesai;
+        @endphp
 
-                {{-- Step 1: Menunggu (Done) --}}
-                <div class="rsv-tracking-step is-done">
-                    <div class="rsv-step-node">
-                        ✓
-                    </div>
-                    <div class="rsv-step-label">
-                        ✓ Menunggu
-                    </div>
-                    <p class="rsv-step-desc">
-                        Diajukan {{ $reservation->created_at->format('d M Y') }}
-                    </p>
-                </div>
+        <div class="rsv-tracking-timeline">
+            <div class="rsv-tracking-bar-bg"></div>
 
-                {{-- Step 2: Ditolak (Active Rejected) --}}
-                <div class="rsv-tracking-step is-rejected">
-                    <div class="rsv-step-node">
-                        ✕
-                    </div>
-                    <div class="rsv-step-label">
-                        ✕ Ditolak
-                    </div>
-                    <p class="rsv-step-desc">
-                        {{ $reservation->updated_at->format('d M Y') }}
-                    </p>
-                </div>
+            {{-- Langkah 1: Pengajuan Reservasi --}}
+            <div class="rsv-tracking-step is-done">
+                <div class="rsv-step-node">✓</div>
+                <div class="rsv-step-label">✓ Pengajuan Reservasi</div>
+                <p class="rsv-step-desc">Selesai · {{ $reservation->created_at->format('d M Y') }}</p>
             </div>
-        @else
-            {{-- Flow Normal: ✓ Menunggu -> ✓ Disetujui -> ● Siap Diambil -> ○ Selesai --}}
-            @php
-                $isMenunggu   = ($status === 'menunggu');
-                $isDisetujui  = ($status === 'disetujui');
-                $isSiapDiambil = ($status === 'siap_diambil');
-                $isSelesai    = ($status === 'selesai');
 
-                $doneMenunggu    = in_array($status, ['disetujui', 'siap_diambil', 'selesai']);
-                $doneDisetujui   = in_array($status, ['siap_diambil', 'selesai']);
-                $doneSiapDiambil = in_array($status, ['selesai']);
-            @endphp
-
-            <div class="rsv-tracking-timeline">
-                <div class="rsv-tracking-bar-bg"></div>
-
-                {{-- Step 1: Menunggu --}}
-                <div class="rsv-tracking-step {{ $isMenunggu ? 'is-active is-warning' : ($doneMenunggu ? 'is-done' : 'is-upcoming') }}">
-                    <div class="rsv-step-node">
-                        @if($doneMenunggu) ✓ @elseif($isMenunggu) ● @else ○ @endif
-                    </div>
-                    <div class="rsv-step-label">
-                        @if($doneMenunggu) ✓ @elseif($isMenunggu) ● @else ○ @endif Menunggu
-                    </div>
-                    <p class="rsv-step-desc">
-                        {{ $reservation->created_at->format('d M Y') }}
-                    </p>
-                </div>
-
-                {{-- Step 2: Disetujui --}}
-                <div class="rsv-tracking-step {{ $isDisetujui ? 'is-active' : ($doneDisetujui ? 'is-done' : 'is-upcoming') }}">
-                    <div class="rsv-step-node">
-                        @if($doneDisetujui) ✓ @elseif($isDisetujui) ● @else ○ @endif
-                    </div>
-                    <div class="rsv-step-label">
-                        @if($doneDisetujui) ✓ @elseif($isDisetujui) ● @else ○ @endif Disetujui
-                    </div>
-                    <p class="rsv-step-desc">
-                        @if($doneDisetujui || $isDisetujui)
-                            {{ $reservation->updated_at->format('d M Y') }}
-                        @else
-                            Menunggu verifikasi
-                        @endif
-                    </p>
-                </div>
-
-                {{-- Step 3: Siap Diambil --}}
-                <div class="rsv-tracking-step {{ $isSiapDiambil ? 'is-active' : ($doneSiapDiambil ? 'is-done' : 'is-upcoming') }}">
-                    <div class="rsv-step-node">
-                        @if($doneSiapDiambil) ✓ @elseif($isSiapDiambil) ● @else ○ @endif
-                    </div>
-                    <div class="rsv-step-label">
-                        @if($doneSiapDiambil) ✓ @elseif($isSiapDiambil) ● @else ○ @endif Siap Diambil
-                    </div>
-                    <p class="rsv-step-desc">
-                        @if($isSiapDiambil)
-                            Batas: {{ $reservation->expires_at ? \Carbon\Carbon::parse($reservation->expires_at)->format('d M Y') : '-' }}
-                        @elseif($doneSiapDiambil)
-                            Telah diambil
-                        @else
-                            Penyiapan buku
-                        @endif
-                    </p>
-                </div>
-
-                {{-- Step 4: Selesai --}}
-                <div class="rsv-tracking-step {{ $isSelesai ? 'is-done' : 'is-upcoming' }}">
-                    <div class="rsv-step-node">
-                        @if($isSelesai) ✓ @else ○ @endif
-                    </div>
-                    <div class="rsv-step-label">
-                        @if($isSelesai) ✓ @else ○ @endif Selesai
-                    </div>
-                    <p class="rsv-step-desc">
-                        @if($isSelesai) Selesai @else Tahap akhir @endif
-                    </p>
-                </div>
+            {{-- Langkah 2: Verifikasi Perpustakaan --}}
+            <div class="rsv-tracking-step {{ $isMenunggu ? 'is-active is-warning' : ($isDitolak ? 'is-rejected' : ($doneVerifikasi ? 'is-done' : 'is-upcoming')) }}">
+                <div class="rsv-step-node">@if($isDitolak) ✕ @elseif($doneVerifikasi) ✓ @elseif($isMenunggu) ● @else ○ @endif</div>
+                <div class="rsv-step-label">@if($isDitolak) ✕ Ditolak @elseif($doneVerifikasi) ✓ Verifikasi Perpustakaan @elseif($isMenunggu) ● Verifikasi Perpustakaan @else ○ Verifikasi Perpustakaan @endif</div>
+                <p class="rsv-step-desc">@if($isDitolak) Ditolak @elseif($doneVerifikasi) Selesai @else Menunggu Persetujuan @endif</p>
             </div>
-        @endif
+
+            {{-- Langkah 3: Persetujuan Reservasi --}}
+            <div class="rsv-tracking-step {{ $isDisetujui ? 'is-active' : ($donePersetujuan ? 'is-done' : 'is-upcoming') }}">
+                <div class="rsv-step-node">@if($donePersetujuan) ✓ @elseif($isDisetujui) ● @else ○ @endif</div>
+                <div class="rsv-step-label">@if($donePersetujuan) ✓ Persetujuan Reservasi @elseif($isDisetujui) ● Persetujuan Reservasi @else ○ Persetujuan Reservasi @endif</div>
+                <p class="rsv-step-desc">@if($donePersetujuan) Selesai @elseif($isDisetujui) Sedang Diproses @else Belum Selesai @endif</p>
+            </div>
+
+            {{-- Langkah 4: Pengambilan Buku --}}
+            <div class="rsv-tracking-step {{ $isSelesai ? 'is-done' : ($isSiapDiambil ? 'is-active' : 'is-upcoming') }}">
+                <div class="rsv-step-node">@if($donePengambilan) ✓ @elseif($isSiapDiambil) ● @else ○ @endif</div>
+                <div class="rsv-step-label">@if($donePengambilan) ✓ Pengambilan Buku @elseif($isSiapDiambil) ● Pengambilan Buku @else ○ Pengambilan Buku @endif</div>
+                <p class="rsv-step-desc">@if($donePengambilan) Selesai @elseif($isSiapDiambil) Menunggu Pengambilan @else Menunggu @endif</p>
+            </div>
+        </div>
     </div>
 
     {{-- =========================================================================
@@ -680,7 +612,7 @@
             {{-- Tanggal Pengajuan --}}
             <div class="rsv-info-box">
                 <div class="rsv-info-label">
-                    <span>📅</span> Tanggal Pengajuan
+                    Tanggal Pengajuan
                 </div>
                 <div class="rsv-info-val">
                     {{ $tanggalPengajuan }}
@@ -733,66 +665,7 @@
     </div>
 
     {{-- =========================================================================
-         4. INFORMASI PENGGUNA (Nama, Kontak, Keanggotaan, Meja)
-         ========================================================================= --}}
-    <div class="rsv-card rsv-section-card">
-        <h2 class="rsv-section-title">
-            <span>👤</span> Informasi Pengguna
-        </h2>
-        <p class="rsv-section-subtitle">
-            Data pemustaka yang mengajukan reservasi
-        </p>
-
-        <div class="rsv-info-grid">
-            {{-- Nama Pemustaka --}}
-            <div class="rsv-info-box">
-                <div class="rsv-info-label">
-                    <span>👤</span> Nama Pemustaka
-                </div>
-                <div class="rsv-info-val">
-                    {{ $member->name ?? Auth::user()->name }}
-                </div>
-            </div>
-
-            {{-- Email / Akun --}}
-            <div class="rsv-info-box">
-                <div class="rsv-info-label">
-                    <span>✉️</span> Email / Akun
-                </div>
-                <div class="rsv-info-val">
-                    {{ $member->email ?? Auth::user()->email }}
-                </div>
-            </div>
-
-            {{-- Nomor Telepon --}}
-            <div class="rsv-info-box">
-                <div class="rsv-info-label">
-                    <span>📞</span> Nomor Telepon
-                </div>
-                <div class="rsv-info-val">
-                    {{ $member->phone && $member->phone !== '-' ? $member->phone : 'Tidak ada data telepon' }}
-                </div>
-            </div>
-
-            {{-- Status Keanggotaan --}}
-            <div class="rsv-info-box">
-                <div class="rsv-info-label">
-                    <span>🛡️</span> Status Keanggotaan
-                </div>
-                <div class="rsv-info-val" style="display: flex; align-items: center; gap: 8px;">
-                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16A34A;"></span>
-                    <span>{{ ucfirst($member->status ?? 'Aktif') }}</span>
-                    @if($reservation->seat_number)
-                        <span style="opacity: 0.5;">•</span>
-                        <span style="font-size: 13px; color: var(--primary);">Meja: #{{ $reservation->seat_number }}</span>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- =========================================================================
-         5. TOMBOL "KEMBALI KE RESERVASI" (SATU-SATUNYA TOMBOL DI PALING BAWAH)
+         4. TOMBOL "KEMBALI KE RESERVASI" (SATU-SATUNYA TOMBOL DI PALING BAWAH)
          ========================================================================= --}}
     <div class="rsv-actions-bar">
         <a href="{{ route('user.reservations') }}" class="rsv-btn-back-large">

@@ -40,7 +40,6 @@
     </script>
 
     @stack('styles')
-    @stack('scripts')
 
 </head>
 
