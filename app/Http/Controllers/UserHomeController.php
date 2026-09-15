@@ -151,7 +151,7 @@ class UserHomeController extends Controller
             ], 401);
         }
 
-        // Jika user memiliki password (bukan akun OAuth murni tanpa password)
+        // Akun Google tanpa password boleh langsung membuat password manual.
         if (!empty($user->password)) {
             $request->validate([
                 'current_password' => 'required|string',

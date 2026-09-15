@@ -17,6 +17,7 @@ class Reservation extends Model
         'reserved_at',
         'expires_at',
         'status',
+        'rejection_reason',
         'seat_number',
     ];
 

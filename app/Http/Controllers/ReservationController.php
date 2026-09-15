@@ -11,11 +11,14 @@ use App\Models\Member;
 use App\Models\Reservation;
 use App\Models\Shelf;
 use App\Models\User;
+use App\Mail\ReservationStatusMail;
 use App\Notifications\ReservationStatusNotification;
 use App\Services\RealtimeService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 
 class ReservationController extends Controller
@@ -409,7 +412,11 @@ class ReservationController extends Controller
                  * =================================================
                  */
 
+                $member = Member::lockForUpdate()
+                    ->findOrFail($validated['member_id']);
+
                 $reservationData = [
+                    'user_id' => $member->user_id,
                     'member_id' =>
                         $validated['member_id'],
                     'book_id' =>
@@ -532,6 +539,12 @@ class ReservationController extends Controller
                 'required',
                 'in:menunggu,disetujui,ditolak,dibatalkan,selesai',
             ],
+            'rejection_reason' => [
+                'required_if:status,ditolak',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
         ]);
 
         $newStatus = $validated['status'];
@@ -565,7 +578,8 @@ class ReservationController extends Controller
          * =====================================================
          */
 
-        $originalUserId = $reservation->user_id;
+        $originalUserId = $reservation->user_id
+            ?: $reservation->member?->user_id;
 
         /*
          * =====================================================
@@ -577,6 +591,9 @@ class ReservationController extends Controller
          */
 
         $createdBorrowing = null;
+        $notificationEmail = null;
+        $emailStatus = null;
+        $emailFailed = false;
         $borrowedAt = now();
         $dueAt = now()->addDays(14);
 
@@ -587,6 +604,8 @@ class ReservationController extends Controller
                     $reservation,
                     $originalUserId,
                     &$createdBorrowing,
+                    &$notificationEmail,
+                    &$emailStatus,
                     $borrowedAt,
                     $dueAt
                 ) {
@@ -887,6 +906,10 @@ class ReservationController extends Controller
                         }
                     }
 
+                    if ($newStatus === 'ditolak') {
+                        $reservation->rejection_reason = $validated['rejection_reason'] ?? null;
+                    }
+
                     /*
                      * =================================================
                      * UPDATE STATUS
@@ -909,6 +932,11 @@ class ReservationController extends Controller
                             $targetUser = User::where('id', $reservation->member->user_id)
                                 ->orWhere('email', $reservation->member->email)
                                 ->first();
+                        }
+
+                        if ($targetUser?->email) {
+                            $notificationEmail = $targetUser->email;
+                            $emailStatus = $newStatus;
                         }
 
                         if ($targetUser && $targetUser->is_notification_enabled) {
@@ -964,6 +992,21 @@ class ReservationController extends Controller
                     }
                 }
             );
+
+            if ($notificationEmail && $emailStatus) {
+                try {
+                    Mail::to($notificationEmail)->send(
+                        new ReservationStatusMail($reservation->fresh(['user', 'member', 'book', 'borrowing']), $emailStatus)
+                    );
+                } catch (\Throwable $mailException) {
+                    $emailFailed = true;
+                    Log::warning('Email status reservasi gagal dikirim.', [
+                        'reservation_id' => $reservation->id,
+                        'recipient' => $notificationEmail,
+                        'error' => $mailException->getMessage(),
+                    ]);
+                }
+            }
         } catch (\Exception $e) {
             /*
              * AC-3: Jika terjadi exception di dalam transaksi
@@ -991,7 +1034,9 @@ class ReservationController extends Controller
             )
             ->with(
                 'success',
-                'Status reservasi berhasil diperbarui.'
+                $emailFailed
+                    ? 'Status reservasi berhasil diperbarui, tetapi email gagal dikirim. Periksa konfigurasi SMTP.'
+                    : 'Status reservasi berhasil diperbarui.'
             );
     }
 

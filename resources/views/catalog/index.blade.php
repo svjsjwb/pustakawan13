@@ -1,4 +1,4 @@
-@extends(auth()->check() && auth()->user()->role === 'user' ? 'layouts.user' : 'layouts.app')
+@extends(auth()->check() && strtolower((string) auth()->user()->role) !== 'admin' ? 'layouts.user' : 'layouts.app')
 
 @section('title', 'Katalog Buku')
 
@@ -495,7 +495,7 @@
 
                 <div class="catalog-modal-actions" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
 
-                    @if(auth()->check() && auth()->user()->role === 'user')
+                    @if(auth()->check() && strtolower((string) auth()->user()->role) !== 'admin')
                     <form action="{{ route('user.reservations.store') }}" method="POST" id="catalogReservationForm" style="margin: 0;">
                         @csrf
                         <input type="hidden" name="book_id" id="catalogModalReservationBookId" value="">

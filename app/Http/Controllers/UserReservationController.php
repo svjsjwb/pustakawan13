@@ -25,12 +25,18 @@ class UserReservationController extends Controller
     {
         $user = Auth::user();
 
-        if ($user && $user->role !== 'user') {
+        if ($user && strtolower((string) $user->role) === 'admin') {
             return redirect()->route('dashboard');
         }
 
         $reservations = Reservation::with('book')
-            ->where('user_id', $user->id)
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->orWhereHas('member', function ($memberQuery) use ($user) {
+                        $memberQuery->where('user_id', $user->id)
+                            ->orWhere('email', $user->email);
+                    });
+            })
             ->orderByRaw("FIELD(status, 'menunggu', 'disetujui', 'selesai', 'dibatalkan', 'ditolak')")
             ->orderBy('created_at', 'desc')
             ->paginate(8);
@@ -52,7 +58,7 @@ class UserReservationController extends Controller
     {
         $user = Auth::user();
 
-        if ($user && $user->role !== 'user') {
+        if ($user && strtolower((string) $user->role) === 'admin') {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -73,23 +79,35 @@ class UserReservationController extends Controller
         $seatNumber = $request->filled('seat_number') ? $request->seat_number : null;
 
         // BR-1: Maks 3 reservasi aktif
-        $activeCount = Reservation::where('user_id', $user->id)
+        $activeCount = Reservation::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->orWhereHas('member', function ($memberQuery) use ($user) {
+                    $memberQuery->where('user_id', $user->id)
+                        ->orWhere('email', $user->email);
+                });
+        })
             ->whereIn('status', ['menunggu', 'disetujui'])
             ->count();
 
         if ($activeCount >= self::MAX_ACTIVE_RESERVATIONS) {
-            return back()->with('reservation_error',
+            return redirect()->route('user.reservations')->with('reservation_error',
                 'Kamu sudah memiliki ' . self::MAX_ACTIVE_RESERVATIONS . ' reservasi aktif. Selesaikan atau batalkan reservasi yang ada sebelum menambah yang baru.');
         }
 
         // BR-4: Tidak boleh reservasi buku yang sudah direservasi (aktif)
-        $alreadyReserved = Reservation::where('user_id', $user->id)
+        $alreadyReserved = Reservation::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->orWhereHas('member', function ($memberQuery) use ($user) {
+                    $memberQuery->where('user_id', $user->id)
+                        ->orWhere('email', $user->email);
+                });
+        })
             ->where('book_id', $bookId)
             ->whereIn('status', ['menunggu', 'disetujui'])
             ->exists();
 
         if ($alreadyReserved) {
-            return back()->with('reservation_error',
+            return redirect()->route('user.reservations')->with('reservation_error',
                 'Kamu sudah memiliki reservasi aktif untuk buku ini.');
         }
 

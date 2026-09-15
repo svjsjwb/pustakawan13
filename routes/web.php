@@ -12,6 +12,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\FineController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\LibraryEventController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\RealtimeEventController;
 use App\Http\Controllers\RegisterController;
@@ -106,6 +107,11 @@ Route::get('/dashboard', [
 ])
     ->middleware(['auth', 'admin', 'no.back'])
     ->name('dashboard');
+
+Route::post('/library-events/broadcast', [
+    LibraryEventController::class,
+    'broadcast',
+])->middleware(['auth', 'admin'])->name('library-events.broadcast');
 
 
 // =========================================================
@@ -208,22 +214,22 @@ Route::patch(
 Route::get('/reservations', [
     ReservationController::class,
     'index'
-])->name('reservations.index');
+])->middleware(['auth', 'admin', 'no.back'])->name('reservations.index');
 
 Route::post('/reservations', [
     ReservationController::class,
     'store'
-])->name('reservations.store');
+])->middleware(['auth', 'admin', 'no.back'])->name('reservations.store');
 
 Route::patch('/reservations/{reservation}/status', [
     ReservationController::class,
     'updateStatus'
-])->name('reservations.updateStatus');
+])->middleware(['auth', 'admin', 'no.back'])->name('reservations.updateStatus');
 
 Route::delete('/reservations/{reservation}', [
     ReservationController::class,
     'destroy'
-])->name('reservations.destroy');
+])->middleware(['auth', 'admin', 'no.back'])->name('reservations.destroy');
 
 
 // =========================================================

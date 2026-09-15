@@ -1127,6 +1127,14 @@
                                                     value="ditolak"
                                                 >
 
+                                                <textarea
+                                                    name="rejection_reason"
+                                                    required
+                                                    maxlength="1000"
+                                                    placeholder="Alasan penolakan"
+                                                    style="display:block;width:180px;margin:6px 0;padding:6px;border:1px solid #cbd5e1;border-radius:4px;"
+                                                ></textarea>
+
 
                                                 <button
                                                     type="submit"
@@ -1496,7 +1504,8 @@
                                         <input type="hidden" name="_token" value="${csrfToken}">
                                         <input type="hidden" name="_method" value="PATCH">
                                         <input type="hidden" name="status" value="ditolak">
-                                        <button type="submit" class="btn-reject" onclick="return confirm('Tolak reservasi ini?')">Tolak</button>
+                                        <input type="hidden" name="rejection_reason" value="">
+                                        <button type="submit" class="btn-reject" onclick="const reason = prompt('Alasan penolakan:'); if (!reason || !reason.trim()) return false; this.form.rejection_reason.value = reason.trim(); return confirm('Tolak reservasi ini?')">Tolak</button>
                                     </form>
                                 </div>
                             </td>

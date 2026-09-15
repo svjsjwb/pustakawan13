@@ -17,6 +17,7 @@ class Borrowing extends Model
         'due_at',
         'returned_at',
         'status',
+        'is_reminder_sent',
         'seat_number',
     ];
 
@@ -24,6 +25,7 @@ class Borrowing extends Model
         'borrowed_at' => 'date',
         'due_at' => 'date',
         'returned_at' => 'date',
+        'is_reminder_sent' => 'boolean',
     ];
 
     public function member(): BelongsTo

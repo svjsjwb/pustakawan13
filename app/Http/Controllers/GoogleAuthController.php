@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WelcomeMail;
+use App\Models\Member;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 
@@ -24,6 +29,8 @@ class GoogleAuthController extends Controller
      */
     public function callback()
     {
+        $createdViaGoogle = false;
+
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (\Throwable $e) {
@@ -39,48 +46,68 @@ class GoogleAuthController extends Controller
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Cari berdasarkan Google ID
-        |--------------------------------------------------------------------------
-        */
+        $googleId = (string) $googleUser->getId();
+        $googleEmail = strtolower(trim((string) $googleUser->getEmail()));
+        $googleName = $googleUser->getName()
+            ?: $googleUser->getNickname()
+            ?: 'User';
 
-        $user = User::where(
-            'google_id',
-            $googleUser->getId()
-        )->first();
+        if ($googleId === '' || $googleEmail === '') {
+            return redirect()
+                ->route('login')
+                ->with('error', 'Akun Google tidak menyediakan identitas email yang valid.');
+        }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Kalau belum ditemukan, cari berdasarkan email
-        |--------------------------------------------------------------------------
-        */
+        $user = DB::transaction(function () use (
+            $googleId,
+            $googleEmail,
+            $googleName,
+            &$createdViaGoogle
+        ) {
+            $user = User::where('google_id', $googleId)->first();
 
-        if (!$user) {
-            $user = User::where(
-                'email',
-                $googleUser->getEmail()
-            )->first();
+            if (!$user) {
+                $user = User::whereRaw('LOWER(email) = ?', [$googleEmail])->first();
+            }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Email sudah ada → hubungkan akun dengan Google
-            |--------------------------------------------------------------------------
-            */
-
-            if ($user) {
-                $user->update([
-                    'google_id' => $googleUser->getId(),
-                ]);
-            } else {
-                $user = User::create([
-                    'name' => $googleUser->getName()
-                        ?: $googleUser->getNickname()
-                        ?: 'User',
-                    'email' => $googleUser->getEmail(),
-                    'google_id' => $googleUser->getId(),
+            if (!$user) {
+                $createdViaGoogle = true;
+                return User::create([
+                    'name' => $googleName,
+                    'email' => $googleEmail,
+                    'google_id' => $googleId,
                     'password' => null,
                     'role' => 'user',
+                ]);
+            }
+
+            $user->forceFill([
+                'name' => $googleName,
+                'email' => $googleEmail,
+                'google_id' => $googleId,
+            ])->save();
+
+            Member::where(function ($query) use ($user, $googleEmail) {
+                $query->where('user_id', $user->id)
+                    ->orWhere('email', $user->email)
+                    ->orWhere('email', $googleEmail);
+            })->update([
+                'user_id' => $user->id,
+                'name' => $googleName,
+                'email' => $googleEmail,
+            ]);
+
+            return $user->fresh();
+        });
+
+        if ($createdViaGoogle && $user->email) {
+            try {
+                Mail::to($user->email)->send(new WelcomeMail($user));
+            } catch (\Throwable $mailException) {
+                Log::warning('Email sambutan Google gagal dikirim.', [
+                    'user_id' => $user->id,
+                    'recipient' => $user->email,
+                    'error' => $mailException->getMessage(),
                 ]);
             }
         }

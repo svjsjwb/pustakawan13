@@ -295,7 +295,7 @@
                             </svg>
                         </div>
                         <div class="security-intro-text">
-                            <strong>Perbarui Kata Sandi</strong>
+                            <strong>{{ auth()->user()?->password ? 'Perbarui Kata Sandi' : 'Buat Password Manual' }}</strong>
                             <span>Gunakan kata sandi yang kuat dengan minimal 8 karakter kombinasi huruf dan angka.</span>
                         </div>
                     </div>
@@ -306,6 +306,7 @@
                     <div class="user-profile-fields-list">
 
                         {{-- 1. Password Saat Ini --}}
+                        @if (auth()->user()?->password)
                         <div class="user-profile-field-row">
                             <label class="user-profile-field-label" for="securityCurrentPassword">
                                 Password Saat Ini <span class="required-mark">*</span>
@@ -337,6 +338,7 @@
                                 </button>
                             </div>
                         </div>
+                        @endif
 
                         {{-- 2. Password Baru --}}
                         <div class="user-profile-field-row">

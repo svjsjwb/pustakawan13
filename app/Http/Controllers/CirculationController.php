@@ -652,6 +652,9 @@ class CirculationController extends Controller
 
             'status' =>
                 'diperpanjang',
+
+            'is_reminder_sent' =>
+                false,
         ]);
 
 
