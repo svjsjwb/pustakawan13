@@ -9,8 +9,9 @@
     href="{{ asset('css/circulation.css') }}">
 
 <style>
+
     /* =========================================================
-       NAVIGATOR BULAN & FILTER BAR SIRKULASI
+       NAVIGATOR BULAN & FILTER
     ========================================================= */
 
     .circulation-filter-bar {
@@ -19,21 +20,25 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
+
         margin-top: 14px;
         margin-bottom: 14px;
-        padding: 0;
-        background: transparent;
-        border: none;
     }
 
     .month-navigator {
         display: inline-flex;
         align-items: center;
+
         background: #ffffff;
+
         border: 1px solid #d1d5db;
         border-radius: 8px;
+
         padding: 3px 6px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+        box-shadow:
+            0 1px 2px rgba(0, 0, 0, .05);
+
         gap: 4px;
     }
 
@@ -41,17 +46,24 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+
         width: 28px;
         height: 28px;
+
+        border: none;
         border-radius: 6px;
+
+        background: transparent;
         color: #374151;
+
         text-decoration: none;
+
         font-size: 16px;
         font-weight: 700;
-        transition: all 0.15s ease;
-        background: transparent;
-        border: none;
+
         cursor: pointer;
+
+        transition: all .15s ease;
     }
 
     .btn-nav-month:hover {
@@ -60,27 +72,38 @@
     }
 
     .month-display-label {
+        min-width: 130px;
+
+        padding: 0 10px;
+
+        color: #1f2937;
+
         font-size: 13px;
         font-weight: 600;
-        color: #1f2937;
-        padding: 0 10px;
-        min-width: 130px;
+
         text-align: center;
+
         user-select: none;
     }
 
     .btn-today-badge {
         display: inline-flex;
         align-items: center;
-        font-size: 11px;
-        font-weight: 600;
-        color: #287b7b;
-        background: #e6f4f4;
+
+        padding: 5px 10px;
+
         border: 1px solid #a8d5d5;
         border-radius: 6px;
-        padding: 5px 10px;
+
+        background: #e6f4f4;
+        color: #287b7b;
+
+        font-size: 11px;
+        font-weight: 600;
+
         text-decoration: none;
-        transition: all 0.15s ease;
+
+        transition: all .15s ease;
     }
 
     .btn-today-badge:hover {
@@ -95,32 +118,28 @@
 
     .borrowing-search-wrap input {
         width: 100%;
+
         padding: 7px 12px;
-        font-size: 12px;
+
         border: 1px solid #d1d5db;
         border-radius: 6px;
+
         background: #ffffff;
+
         outline: none;
+
+        font-size: 12px;
+
         transition:
-            border-color 0.15s ease,
-            box-shadow 0.15s ease;
+            border-color .15s ease,
+            box-shadow .15s ease;
     }
 
     .borrowing-search-wrap input:focus {
         border-color: #287b7b;
-        box-shadow:
-            0 0 0 2px rgba(40, 123, 123, 0.15);
-    }
 
-    .period-info-badge {
-        display: inline-flex;
-        align-items: center;
-        font-size: 11px;
-        color: #4b5563;
-        background: #f3f4f6;
-        padding: 2px 8px;
-        border-radius: 4px;
-        margin-top: 4px;
+        box-shadow:
+            0 0 0 2px rgba(40, 123, 123, .15);
     }
 
 
@@ -143,7 +162,9 @@
         .borrowing-search-wrap input {
             width: 100%;
         }
+
     }
+
 </style>
 
 @endpush
@@ -162,9 +183,9 @@
 
     @if(session('success'))
 
-    <div class="alert-success">
-        {{ session('success') }}
-    </div>
+        <div class="alert-success">
+            {{ session('success') }}
+        </div>
 
     @endif
 
@@ -175,9 +196,9 @@
 
     @if(session('error'))
 
-    <div class="alert-error">
-        {{ session('error') }}
-    </div>
+        <div class="alert-error">
+            {{ session('error') }}
+        </div>
 
     @endif
 
@@ -188,21 +209,21 @@
 
     @if($errors->any())
 
-    <div class="alert-error">
+        <div class="alert-error">
 
-        <ul class="error-list">
+            <ul class="error-list">
 
-            @foreach($errors->all() as $error)
+                @foreach($errors->all() as $error)
 
-            <li>
-                {{ $error }}
-            </li>
+                    <li>
+                        {{ $error }}
+                    </li>
 
-            @endforeach
+                @endforeach
 
-        </ul>
+            </ul>
 
-    </div>
+        </div>
 
     @endif
 
@@ -215,7 +236,8 @@
 
 
         {{-- =================================================
-             KIRI - FORM PEMINJAMAN
+             KIRI
+             FORM PEMINJAMAN
         ================================================== --}}
 
         <div class="card form-card">
@@ -230,8 +252,6 @@
                     Pilih anggota, buku, dan tanggal peminjaman.
                 </p>
 
-
-                {{-- FORM PEMINJAMAN --}}
 
                 <form
                     action="{{ route('circulation.store') }}"
@@ -260,15 +280,15 @@
 
                             @foreach($members as $member)
 
-                            <option
-                                value="{{ $member->id }}"
-                                @selected(
-                                    old('member_id') == $member->id
-                                )>
+                                <option
+                                    value="{{ $member->id }}"
+                                    @selected(
+                                        old('member_id') == $member->id
+                                    )>
 
-                                {{ $member->name }}
+                                    {{ $member->name }}
 
-                            </option>
+                                </option>
 
                             @endforeach
 
@@ -296,30 +316,30 @@
 
                             @foreach($books as $book)
 
-                            <option
-                                value="{{ $book->id }}"
-                                @selected(
-                                    old('book_id') == $book->id
-                                )
-                                @disabled(
-                                    $book->available_stock <= 0
-                                )>
+                                <option
+                                    value="{{ $book->id }}"
+                                    @selected(
+                                        old('book_id') == $book->id
+                                    )
+                                    @disabled(
+                                        $book->available_stock <= 0
+                                    )>
 
-                                {{ $book->title }}
+                                    {{ $book->title }}
 
-                                —
+                                    —
 
-                                @if($book->available_stock > 0)
+                                    @if($book->available_stock > 0)
 
-                                    Stok {{ $book->available_stock }}
+                                        Stok {{ $book->available_stock }}
 
-                                @else
+                                    @else
 
-                                    STOK HABIS
+                                        STOK HABIS
 
-                                @endif
+                                    @endif
 
-                            </option>
+                                </option>
 
                             @endforeach
 
@@ -390,7 +410,8 @@
 
 
         {{-- =================================================
-             KANAN - DAFTAR PEMINJAMAN
+             KANAN
+             DAFTAR PEMINJAMAN
         ================================================== --}}
 
         <div class="card borrowing-card">
@@ -398,7 +419,7 @@
             <div class="card-pad">
 
 
-                {{-- HEADER DAFTAR --}}
+                {{-- HEADER --}}
 
                 <div class="borrowing-header">
 
@@ -422,7 +443,7 @@
                 </div>
 
 
-                {{-- FILTER BAR --}}
+                {{-- FILTER --}}
 
                 <div class="circulation-filter-bar">
 
@@ -438,8 +459,6 @@
                         ">
 
                         <div class="month-navigator">
-
-                            {{-- BULAN SEBELUMNYA --}}
 
                             <a
                                 href="{{ route(
@@ -457,16 +476,12 @@
                             </a>
 
 
-                            {{-- BULAN AKTIF --}}
-
                             <span class="month-display-label">
 
                                 {{ $monthLabel }}
 
                             </span>
 
-
-                            {{-- BULAN BERIKUTNYA --}}
 
                             <a
                                 href="{{ route(
@@ -486,18 +501,16 @@
                         </div>
 
 
-                        {{-- BULAN INI --}}
-
                         @if(!$isCurrentMonth)
 
-                        <a
-                            href="{{ route('circulation') }}"
-                            class="btn-today-badge"
-                            title="Kembali ke Bulan Berjalan">
+                            <a
+                                href="{{ route('circulation') }}"
+                                class="btn-today-badge"
+                                title="Kembali ke Bulan Berjalan">
 
-                            Bulan Ini
+                                Bulan Ini
 
-                        </a>
+                            </a>
 
                         @endif
 
@@ -562,308 +575,283 @@
 
                             @forelse($borrowings as $borrowing)
 
-                            @php
+                                @php
 
-                                /*
-                                 * =================================================
-                                 * STATUS TERLAMBAT
-                                 * =================================================
-                                 *
-                                 * Status terlambat hanya diberikan
-                                 * kepada peminjaman yang masih berstatus
-                                 * dipinjam dan sudah melewati jatuh tempo.
-                                 */
+                                    $isLate =
+                                        $borrowing->status === 'dipinjam'
+                                        &&
+                                        now()->startOfDay()->gt(
+                                            \Carbon\Carbon::parse(
+                                                $borrowing->due_at
+                                            )->startOfDay()
+                                        );
 
-                                $isLate =
-                                    $borrowing->status === 'dipinjam'
-                                    &&
-                                    now()->startOfDay()->gt(
-                                        \Carbon\Carbon::parse(
-                                            $borrowing->due_at
-                                        )->startOfDay()
-                                    );
 
+                                    if ($isLate) {
 
-                                /*
-                                 * =================================================
-                                 * STATUS YANG DITAMPILKAN
-                                 * =================================================
-                                 */
+                                        $displayStatus =
+                                            'terlambat';
 
-                                if ($isLate) {
+                                    } else {
 
-                                    $displayStatus = 'terlambat';
+                                        $displayStatus =
+                                            $borrowing->status;
 
-                                } else {
+                                    }
 
-                                    $displayStatus =
-                                        $borrowing->status;
+                                @endphp
 
-                                }
 
-                            @endphp
+                                <tr class="borrowing-row">
 
 
-                            <tr class="borrowing-row">
+                                    {{-- ANGGOTA --}}
 
+                                    <td class="member-cell">
 
-                                {{-- ANGGOTA --}}
+                                        {{ $borrowing->member->name ?? '-' }}
 
-                                <td class="member-cell">
+                                    </td>
 
-                                    {{ $borrowing->member->name ?? '-' }}
 
-                                </td>
+                                    {{-- BUKU --}}
 
+                                    <td class="book-cell">
 
-                                {{-- BUKU --}}
+                                        @forelse(
+                                            $borrowing->details
+                                            as $detail
+                                        )
 
-                                <td class="book-cell">
+                                            <span>
 
-                                    @forelse(
-                                        $borrowing->details
-                                        as $detail
-                                    )
+                                                {{ $detail->book->title ?? '-' }}
 
-                                    <span>
-
-                                        {{ $detail->book->title ?? '-' }}
-
-                                    </span>
-
-                                    @if(!$loop->last)
-
-                                    <br>
-
-                                    @endif
-
-                                    @empty
-
-                                    -
-
-                                    @endforelse
-
-                                </td>
-
-
-                                {{-- TANGGAL PINJAM --}}
-
-                                <td>
-
-                                    {{ \Carbon\Carbon::parse(
-                                        $borrowing->borrowed_at
-                                    )->format('d/m/Y') }}
-
-                                </td>
-
-
-                                {{-- TANGGAL PENGEMBALIAN --}}
-
-                                <td>
-
-                                    {{ \Carbon\Carbon::parse(
-                                        $borrowing->due_at
-                                    )->format('d/m/Y') }}
-
-                                </td>
-
-
-                                {{-- =================================================
-                                     STATUS
-                                ================================================== --}}
-
-                                <td>
-
-                                    {{-- SEDANG DIPINJAM --}}
-
-                                    @if(
-                                        $displayStatus === 'dipinjam'
-                                    )
-
-                                    <span class="status-badge aktif">
-
-                                        <span class="status-dot"></span>
-
-                                        Sedang Dipinjam
-
-                                    </span>
-
-
-                                    {{-- DIPERPANJANG --}}
-
-                                    @elseif(
-                                        $displayStatus === 'diperpanjang'
-                                    )
-
-                                    <span class="status-badge diperpanjang">
-
-                                        <span class="status-dot"></span>
-
-                                        Diperpanjang
-
-                                    </span>
-
-
-                                    {{-- TERLAMBAT --}}
-
-                                    @elseif(
-                                        $displayStatus === 'terlambat'
-                                    )
-
-                                    <span class="status-badge terlambat">
-
-                                        <span class="status-dot"></span>
-
-                                        Terlambat
-
-                                    </span>
-
-
-                                    {{-- SELESAI --}}
-
-                                    @elseif(
-                                        $displayStatus === 'dikembalikan'
-                                    )
-
-                                    <span class="status-badge kembali">
-
-                                        <span class="status-dot"></span>
-
-                                        Selesai
-
-                                    </span>
-
-
-                                    {{-- FALLBACK --}}
-
-                                    @else
-
-                                    <span class="status-badge aktif">
-
-                                        <span class="status-dot"></span>
-
-                                        {{ ucfirst(
-                                            str_replace(
-                                                '_',
-                                                ' ',
-                                                $displayStatus
-                                            )
-                                        ) }}
-
-                                    </span>
-
-                                    @endif
-
-                                </td>
-
-
-                                {{-- =================================================
-                                     AKSI
-                                ================================================== --}}
-
-                                <td>
-
-                                    @if(
-                                        $borrowing->status !==
-                                        'dikembalikan'
-                                    )
-
-                                    <div class="borrowing-action-buttons">
-
-
-                                        {{-- PERPANJANG --}}
-
-                                        <button
-                                            type="button"
-                                            class="btn-extend"
-                                            onclick="openExtendModal(
-                                                {{ $borrowing->id }},
-
-                                                @js(
-                                                    $borrowing->details
-                                                        ->first()
-                                                        ->book
-                                                        ->title
-                                                        ?? '-'
-                                                ),
-
-                                                @js(
-                                                    \Carbon\Carbon::parse(
-                                                        $borrowing->due_at
-                                                    )->format('d/m/Y')
-                                                )
-                                            )">
-
-                                            <span class="extend-icon">
-                                                ↻
                                             </span>
 
-                                            Perpanjang
+                                            @if(!$loop->last)
 
-                                        </button>
+                                                <br>
+
+                                            @endif
+
+                                        @empty
+
+                                            -
+
+                                        @endforelse
+
+                                    </td>
 
 
-                                        {{-- KEMBALIKAN --}}
+                                    {{-- PINJAM --}}
 
-                                        <form
-                                            action="{{ route(
-                                                'circulation.return',
-                                                $borrowing
-                                            ) }}"
-                                            method="POST"
-                                            class="return-form"
-                                            onsubmit="
-                                                return confirm(
-                                                    'Yakin buku ini sudah dikembalikan?'
-                                                );
-                                            ">
+                                    <td>
 
-                                            @csrf
+                                        {{ \Carbon\Carbon::parse(
+                                            $borrowing->borrowed_at
+                                        )->format('d/m/Y') }}
 
-                                            @method('PATCH')
+                                    </td>
 
-                                            <button
-                                                type="submit"
-                                                class="btn-secondary">
 
-                                                Kembalikan
+                                    {{-- PENGEMBALIAN --}}
 
-                                            </button>
+                                    <td>
 
-                                        </form>
+                                        {{ \Carbon\Carbon::parse(
+                                            $borrowing->due_at
+                                        )->format('d/m/Y') }}
 
-                                    </div>
+                                    </td>
 
-                                    @else
 
-                                    <span class="completed-text">
+                                    {{-- STATUS --}}
 
-                                        Selesai
+                                    <td>
 
-                                    </span>
+                                        @if(
+                                            $displayStatus === 'dipinjam'
+                                        )
 
-                                    @endif
+                                            <span class="status-badge aktif">
 
-                                </td>
+                                                <span class="status-dot"></span>
 
-                            </tr>
+                                                Sedang Dipinjam
+
+                                            </span>
+
+
+                                        @elseif(
+                                            $displayStatus === 'diperpanjang'
+                                        )
+
+                                            <span class="status-badge diperpanjang">
+
+                                                <span class="status-dot"></span>
+
+                                                Diperpanjang
+
+                                            </span>
+
+
+                                        @elseif(
+                                            $displayStatus === 'terlambat'
+                                        )
+
+                                            <span class="status-badge terlambat">
+
+                                                <span class="status-dot"></span>
+
+                                                Terlambat
+
+                                            </span>
+
+
+                                        @elseif(
+                                            $displayStatus === 'dikembalikan'
+                                        )
+
+                                            <span class="status-badge kembali">
+
+                                                <span class="status-dot"></span>
+
+                                                Selesai
+
+                                            </span>
+
+
+                                        @else
+
+                                            <span class="status-badge aktif">
+
+                                                <span class="status-dot"></span>
+
+                                                {{ ucfirst(
+                                                    str_replace(
+                                                        '_',
+                                                        ' ',
+                                                        $displayStatus
+                                                    )
+                                                ) }}
+
+                                            </span>
+
+                                        @endif
+
+                                    </td>
+
+
+                                    {{-- AKSI --}}
+
+                                    <td>
+
+                                        @if(
+                                            $borrowing->status !==
+                                            'dikembalikan'
+                                        )
+
+                                            <div class="borrowing-action-buttons">
+
+
+                                                {{-- =================================
+                                                     PERPANJANG
+                                                ================================== --}}
+
+                                                <button
+                                                    type="button"
+                                                    class="btn-extend"
+                                                    onclick="openExtendModal(
+                                                        {{ $borrowing->id }},
+
+                                                        @js(
+                                                            $borrowing->details
+                                                                ->first()
+                                                                ->book
+                                                                ->title
+                                                                ?? '-'
+                                                        ),
+
+                                                        @js(
+                                                            \Carbon\Carbon::parse(
+                                                                $borrowing->due_at
+                                                            )->format('d/m/Y')
+                                                        )
+                                                    )">
+
+                                                    <span class="extend-icon">
+                                                        ↻
+                                                    </span>
+
+                                                    Perpanjang
+
+                                                </button>
+
+
+                                                {{-- =================================
+                                                     KEMBALIKAN
+                                                ================================== --}}
+
+                                                <form
+                                                    action="{{ route(
+                                                        'circulation.return',
+                                                        $borrowing
+                                                    ) }}"
+                                                    method="POST"
+                                                    class="return-form"
+                                                    onsubmit="
+                                                        return confirm(
+                                                            'Yakin buku ini sudah dikembalikan?'
+                                                        );
+                                                    ">
+
+                                                    @csrf
+
+                                                    @method('PATCH')
+
+                                                    <button
+                                                        type="submit"
+                                                        class="btn-secondary">
+
+                                                        Kembalikan
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+
+                                        @else
+
+                                            <span class="completed-text">
+
+                                                Selesai
+
+                                            </span>
+
+                                        @endif
+
+                                    </td>
+
+                                </tr>
 
 
                             @empty
 
-                            <tr>
+                                <tr>
 
-                                <td
-                                    colspan="6"
-                                    class="empty-state">
+                                    <td
+                                        colspan="6"
+                                        class="empty-state">
 
-                                    Belum ada transaksi peminjaman
-                                    pada periode
-                                    {{ $monthLabel }}.
+                                        Belum ada transaksi peminjaman
+                                        pada periode
+                                        {{ $monthLabel }}.
 
-                                </td>
+                                    </td>
 
-                            </tr>
+                                </tr>
 
                             @endforelse
 
@@ -883,7 +871,7 @@
 
 
 {{-- =========================================================
-     MODAL PERPANJANG PEMINJAMAN
+     MODAL INPUT PERPANJANGAN
 ========================================================= --}}
 
 <div
@@ -899,9 +887,13 @@
     </div>
 
 
-    {{-- CARD MODAL --}}
+    {{-- CARD --}}
 
-    <div class="extend-modal-card">
+    <div
+        class="extend-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="extendLoanTitle">
 
 
         {{-- CLOSE --}}
@@ -922,21 +914,15 @@
         <div class="extend-modal-header">
 
             <span class="extend-modal-label">
-
                 PERPANJANG PEMINJAMAN
-
             </span>
 
-            <h3>
-
+            <h3 id="extendLoanTitle">
                 Perpanjang Waktu Baca
-
             </h3>
 
             <p>
-
                 Tentukan tambahan waktu peminjaman buku.
-
             </p>
 
         </div>
@@ -957,7 +943,7 @@
         </div>
 
 
-        {{-- JATUH TEMPO --}}
+        {{-- TANGGAL --}}
 
         <div class="extend-current-date">
 
@@ -972,7 +958,7 @@
         </div>
 
 
-        {{-- FORM PERPANJANG --}}
+        {{-- FORM --}}
 
         <form
             id="extendLoanForm"
@@ -983,14 +969,10 @@
             @method('PATCH')
 
 
-            {{-- INPUT HARI --}}
-
             <div class="extend-input-group">
 
                 <label for="extension_days">
-
                     Tambah waktu baca
-
                 </label>
 
 
@@ -1013,15 +995,13 @@
 
 
                 <small>
-
                     Masukkan antara 1–30 hari.
-
                 </small>
 
             </div>
 
 
-            {{-- BUTTON --}}
+            {{-- ACTION --}}
 
             <div class="extend-modal-actions">
 
@@ -1053,14 +1033,138 @@
 
 
 {{-- =========================================================
-     JAVASCRIPT LIVE SEARCH
+     MODAL KONFIRMASI
+========================================================= --}}
+
+<div
+    id="extendConfirmModal"
+    class="extend-confirm-modal"
+    aria-hidden="true">
+
+
+    {{-- OVERLAY --}}
+
+    <div
+        class="extend-confirm-overlay"
+        onclick="closeExtendConfirmModal()">
+    </div>
+
+
+    {{-- CARD --}}
+
+    <div
+        class="extend-confirm-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="extendConfirmTitle">
+
+
+        {{-- ICON --}}
+
+        <div class="extend-confirm-icon">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <path
+                    d="M20 11a8.1 8.1 0 0 0-14.8-4.5L3 9"
+                />
+
+                <path
+                    d="M3 4v5h5"
+                />
+
+                <path
+                    d="M4 13a8.1 8.1 0 0 0 14.8 4.5L21 15"
+                />
+
+                <path
+                    d="M21 20v-5h-5"
+                />
+
+            </svg>
+
+        </div>
+
+
+        {{-- LABEL --}}
+
+        <span class="extend-confirm-label">
+            KONFIRMASI
+        </span>
+
+
+        {{-- TITLE --}}
+
+        <h3 id="extendConfirmTitle">
+            Konfirmasi Perpanjangan
+        </h3>
+
+
+        {{-- DESCRIPTION --}}
+
+        <p class="extend-confirm-description">
+
+            Yakin ingin memperpanjang masa peminjaman selama
+
+            <strong id="extendConfirmDays">
+                7
+            </strong>
+
+            hari?
+
+        </p>
+
+
+        {{-- BUTTON --}}
+
+        <div class="extend-confirm-actions">
+
+            <button
+                type="button"
+                class="extend-confirm-cancel"
+                onclick="closeExtendConfirmModal()">
+
+                Batal
+
+            </button>
+
+
+            <button
+                type="button"
+                class="extend-confirm-submit"
+                onclick="submitExtendLoan()">
+
+                Ya, Perpanjang
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{{-- =========================================================
+     JAVASCRIPT
 ========================================================= --}}
 
 <script>
 
 document.addEventListener(
     'DOMContentLoaded',
-    function() {
+    function () {
+
+
+        /* =====================================================
+           LIVE SEARCH
+        ===================================================== */
 
         const searchInput =
             document.getElementById(
@@ -1074,60 +1178,156 @@ document.addEventListener(
             );
 
 
-        if (!searchInput) {
-            return;
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                'input',
+                function () {
+
+                    const keyword =
+                        this.value
+                            .toLowerCase()
+                            .trim();
+
+
+                    rows.forEach(
+                        function (row) {
+
+                            const text =
+                                row.textContent
+                                    .toLowerCase();
+
+
+                            row.style.display =
+                                text.includes(keyword)
+                                    ? ''
+                                    : 'none';
+
+                        }
+                    );
+
+                }
+            );
+
         }
 
 
-        searchInput.addEventListener(
-            'input',
-            function() {
+        /* =====================================================
+           FORM PERPANJANGAN
+        ===================================================== */
 
-                const keyword =
-                    this.value
-                    .toLowerCase()
-                    .trim();
-
-
-                rows.forEach(
-                    function(row) {
-
-                        const text =
-                            row.textContent
-                            .toLowerCase();
+        const extendForm =
+            document.getElementById(
+                'extendLoanForm'
+            );
 
 
-                        if (
-                            text.includes(keyword)
-                        ) {
+        const extensionInput =
+            document.getElementById(
+                'extension_days'
+            );
 
-                            row.style.display =
-                                '';
 
-                        } else {
+        if (
+            extendForm &&
+            extensionInput
+        ) {
 
-                            row.style.display =
-                                'none';
+            extendForm.addEventListener(
+                'submit',
+                function (event) {
 
-                        }
+                    /*
+                     * SELALU tahan submit pertama.
+                     *
+                     * Form baru benar-benar dikirim
+                     * melalui submitExtendLoan().
+                     */
+
+                    event.preventDefault();
+
+
+                    const days =
+                        Number(
+                            extensionInput.value
+                        );
+
+
+                    /* =========================================
+                       VALIDASI
+                    ========================================== */
+
+                    if (
+                        !Number.isInteger(days) ||
+                        days < 1 ||
+                        days > 30
+                    ) {
+
+                        extensionInput.focus();
+
+                        /*
+                         * Untuk sekarang kita pakai
+                         * custom browser message bawaan.
+                         */
+
+                        extensionInput.setCustomValidity(
+                            'Masukkan jumlah hari antara 1 sampai 30.'
+                        );
+
+                        extensionInput.reportValidity();
+
+                        extensionInput.setCustomValidity('');
+
+                        return;
 
                     }
-                );
 
-            }
-        );
+
+                    /* =========================================
+                       BUKA POPUP KONFIRMASI
+                    ========================================== */
+
+                    openExtendConfirmModal(
+                        days
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           ENTER DI INPUT
+        ===================================================== */
+
+        if (extensionInput) {
+
+            extensionInput.addEventListener(
+                'input',
+                function () {
+
+                    this.setCustomValidity('');
+
+                }
+            );
+
+        }
 
     }
 );
 
-</script>
+
+/* =========================================================
+   VARIABLE FORM
+========================================================= */
+
+let extendFormPending = null;
 
 
-{{-- =========================================================
-     JAVASCRIPT MODAL PERPANJANG
-========================================================= --}}
-
-<script>
+/* =========================================================
+   OPEN MODAL INPUT
+========================================================= */
 
 function openExtendModal(
     borrowingId,
@@ -1165,10 +1365,6 @@ function openExtendModal(
         );
 
 
-    /* =====================================================
-       CEK ELEMENT
-    ====================================================== */
-
     if (
         !modal ||
         !form ||
@@ -1186,40 +1382,36 @@ function openExtendModal(
     }
 
 
-    /* =====================================================
-       DATA BUKU
-    ====================================================== */
+    /* =========================================
+       DATA
+    ========================================== */
 
     title.textContent =
         bookTitle || '-';
 
 
-    /* =====================================================
-       TANGGAL JATUH TEMPO
-    ====================================================== */
-
     due.textContent =
         currentDue || '-';
 
 
-    /* =====================================================
+    /* =========================================
        ACTION FORM
-    ====================================================== */
+    ========================================== */
 
     form.action =
         `/circulation/${borrowingId}/extend`;
 
 
-    /* =====================================================
-       DEFAULT
-    ====================================================== */
+    /* =========================================
+       DEFAULT 7 HARI
+    ========================================== */
 
     input.value = 7;
 
 
-    /* =====================================================
-       BUKA MODAL
-    ====================================================== */
+    /* =========================================
+       OPEN
+    ========================================== */
 
     modal.classList.add(
         'open'
@@ -1236,26 +1428,25 @@ function openExtendModal(
         'hidden';
 
 
-    /* =====================================================
-       FOCUS INPUT
-    ====================================================== */
+    /* =========================================
+       FOCUS
+    ========================================== */
 
     setTimeout(
-        function() {
+        function () {
 
             input.focus();
-
             input.select();
 
         },
-        100
+        150
     );
 
 }
 
 
 /* =========================================================
-   TUTUP MODAL
+   CLOSE MODAL INPUT
 ========================================================= */
 
 function closeExtendModal() {
@@ -1282,8 +1473,240 @@ function closeExtendModal() {
     );
 
 
+    /*
+     * Jangan hapus form pending di sini
+     * kalau sedang menuju popup konfirmasi.
+     */
+
+    if (!extendFormPending) {
+
+        document.body.style.overflow =
+            '';
+
+    }
+
+}
+
+
+/* =========================================================
+   OPEN MODAL KONFIRMASI
+========================================================= */
+
+function openExtendConfirmModal(
+    days
+) {
+
+    const modal =
+        document.getElementById(
+            'extendConfirmModal'
+        );
+
+
+    const daysElement =
+        document.getElementById(
+            'extendConfirmDays'
+        );
+
+
+    const inputModal =
+        document.getElementById(
+            'extendLoanModal'
+        );
+
+
+    if (
+        !modal ||
+        !daysElement
+    ) {
+
+        console.error(
+            'Modal konfirmasi perpanjangan tidak ditemukan.'
+        );
+
+        return;
+
+    }
+
+
+    /* =========================================
+       SIMPAN FORM
+    ========================================== */
+
+    extendFormPending =
+        document.getElementById(
+            'extendLoanForm'
+        );
+
+
+    if (!extendFormPending) {
+
+        console.error(
+            'Form perpanjangan tidak ditemukan.'
+        );
+
+        return;
+
+    }
+
+
+    /* =========================================
+       JUMLAH HARI
+    ========================================== */
+
+    daysElement.textContent =
+        days;
+
+
+    /* =========================================
+       TUTUP MODAL INPUT
+    ========================================== */
+
+    if (inputModal) {
+
+        inputModal.classList.remove(
+            'open'
+        );
+
+        inputModal.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+    }
+
+
+    /* =========================================
+       BUKA MODAL KONFIRMASI
+    ========================================== */
+
+    modal.classList.add(
+        'open'
+    );
+
+
+    modal.setAttribute(
+        'aria-hidden',
+        'false'
+    );
+
+
+    document.body.style.overflow =
+        'hidden';
+
+}
+
+
+/* =========================================================
+   CLOSE MODAL KONFIRMASI
+========================================================= */
+
+function closeExtendConfirmModal() {
+
+    const modal =
+        document.getElementById(
+            'extendConfirmModal'
+        );
+
+
+    if (!modal) {
+        return;
+    }
+
+
+    modal.classList.remove(
+        'open'
+    );
+
+
+    modal.setAttribute(
+        'aria-hidden',
+        'true'
+    );
+
+
+    /*
+     * Form pending dibatalkan.
+     */
+
+    extendFormPending =
+        null;
+
+
     document.body.style.overflow =
         '';
+
+}
+
+
+/* =========================================================
+   SUBMIT FINAL
+========================================================= */
+
+function submitExtendLoan() {
+
+    if (!extendFormPending) {
+
+        console.error(
+            'Tidak ada form perpanjangan yang menunggu.'
+        );
+
+        return;
+
+    }
+
+
+    const form =
+        extendFormPending;
+
+
+    /*
+     * Simpan referensi dulu.
+     */
+
+    extendFormPending =
+        null;
+
+
+    /*
+     * Tutup popup.
+     */
+
+    const modal =
+        document.getElementById(
+            'extendConfirmModal'
+        );
+
+
+    if (modal) {
+
+        modal.classList.remove(
+            'open'
+        );
+
+        modal.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+    }
+
+
+    document.body.style.overflow =
+        '';
+
+
+    /*
+     * Submit langsung ke Laravel.
+     *
+     * HTMLFormElement.submit()
+     * sengaja digunakan agar event submit
+     * tidak memunculkan popup konfirmasi
+     * lagi.
+     */
+
+    HTMLFormElement.prototype.submit.call(
+        form
+    );
 
 }
 
@@ -1294,7 +1717,7 @@ function closeExtendModal() {
 
 document.addEventListener(
     'keydown',
-    function(event) {
+    function (event) {
 
         if (
             event.key !== 'Escape'
@@ -1305,108 +1728,46 @@ document.addEventListener(
         }
 
 
-        const modal =
+        const confirmModal =
+            document.getElementById(
+                'extendConfirmModal'
+            );
+
+
+        const inputModal =
             document.getElementById(
                 'extendLoanModal'
             );
 
 
-        if (
-            modal &&
-            modal.classList.contains('open')
-        ) {
-
-            closeExtendModal();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   VALIDASI 1–30 HARI
-========================================================= */
-
-document.addEventListener(
-    'DOMContentLoaded',
-    function() {
-
-        const form =
-            document.getElementById(
-                'extendLoanForm'
-            );
-
-
-        const input =
-            document.getElementById(
-                'extension_days'
-            );
-
+        /* =========================================
+           PRIORITAS POPUP KONFIRMASI
+        ========================================== */
 
         if (
-            !form ||
-            !input
+            confirmModal &&
+            confirmModal.classList.contains('open')
         ) {
+
+            closeExtendConfirmModal();
 
             return;
 
         }
 
 
-        form.addEventListener(
-            'submit',
-            function(event) {
+        /* =========================================
+           POPUP INPUT
+        ========================================== */
 
-                const days =
-                    Number(
-                        input.value
-                    );
+        if (
+            inputModal &&
+            inputModal.classList.contains('open')
+        ) {
 
+            closeExtendModal();
 
-                /* =========================================
-                   VALIDASI
-                ========================================== */
-
-                if (
-                    !Number.isInteger(days) ||
-                    days < 1 ||
-                    days > 30
-                ) {
-
-                    event.preventDefault();
-
-
-                    alert(
-                        'Jumlah perpanjangan harus antara 1 sampai 30 hari.'
-                    );
-
-
-                    input.focus();
-
-                    return;
-
-                }
-
-
-                /* =========================================
-                   KONFIRMASI
-                ========================================== */
-
-                const confirmed =
-                    confirm(
-                        `Perpanjang masa peminjaman ${days} hari?`
-                    );
-
-
-                if (!confirmed) {
-
-                    event.preventDefault();
-
-                }
-
-            }
-        );
+        }
 
     }
 );

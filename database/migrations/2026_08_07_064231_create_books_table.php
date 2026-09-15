@@ -34,6 +34,7 @@ return new class extends Migration
             $table->string('cover')->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

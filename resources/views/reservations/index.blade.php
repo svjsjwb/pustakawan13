@@ -3,359 +3,265 @@
 @section('title', 'Reservasi Buku')
 
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('css/reservations.css') }}">
 
-<link
-    rel="stylesheet"
-    href="{{ asset('css/reservations.css') }}">
+    {{-- Flatpickr CSS --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-{{-- Flatpickr CSS --}}
-<link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 
-<link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 
-
-<style>
-    /* =====================================================
-           FILTER BAR
-        ====================================================== */
-
-    .reservation-filter-bar {
-
-        display: flex;
-
-        flex-wrap: wrap;
-
-        align-items: center;
-
-        justify-content: space-between;
-
-        gap: 12px;
-
-        margin-top: 14px;
-
-        margin-bottom: 14px;
-
-        padding: 0;
-
-        background: transparent;
-
-        border: none;
-
-    }
-
-
-    /* =====================================================
-           DATE RANGE FORM
-        ====================================================== */
-
-    .date-range-form {
-
-        display: flex;
-
-        flex-wrap: wrap;
-
-        align-items: center;
-
-        gap: 8px;
-
-    }
-
-
-    .date-range-wrapper {
-
-        position: relative;
-
-        display: flex;
-
-        align-items: center;
-
-    }
-
-
-    .date-range-icon {
-
-        position: absolute;
-
-        left: 15px;
-
-        color: #64748b;
-
-        font-size: 14px;
-
-        pointer-events: none;
-
-        z-index: 2;
-
-    }
-
-
-    .date-range-input {
-
-        margin-left: 0;
-
-        padding: 7px 12px 7px 38px;
-
-        font-size: 12px;
-
-        border: 1px solid #cbd5e1;
-
-        border-radius: 6px;
-
-        background-color: #fff;
-
-        color: #1e293b;
-
-        min-width: 230px;
-
-        cursor: pointer;
-
-        transition:
-            border-color .15s ease-in-out,
-            box-shadow .15s ease-in-out;
-
-    }
-
-
-    .date-range-input:focus {
-
-        border-color: #287b7b;
-
-        outline: 0;
-
-        box-shadow:
-            0 0 0 2px rgba(40,
-                123,
-                123,
-                .15);
-
-    }
-
-
-    /* =====================================================
-           FILTER BUTTON
-        ====================================================== */
-
-    .btn-filter-submit {
-
-        display: inline-flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        gap: 4px;
-
-        padding: 7px 14px;
-
-        font-size: 12px;
-
-        font-weight: 600;
-
-        color: #fff;
-
-        background-color: #287b7b;
-
-        border: 1px solid #287b7b;
-
-        border-radius: 6px;
-
-        cursor: pointer;
-
-        transition:
-            background-color .15s ease,
-            transform .15s ease;
-
-    }
-
-
-    .btn-filter-submit:hover {
-
-        background-color: #216969;
-
-        border-color: #216969;
-
-        transform:
-            translateY(-1px);
-
-    }
-
-
-    /* =====================================================
-           RESET BUTTON
-        ====================================================== */
-
-    .btn-filter-reset {
-
-        display: inline-flex;
-
-        align-items: center;
-
-        gap: 4px;
-
-        padding: 7px 12px;
-
-        font-size: 12px;
-
-        font-weight: 500;
-
-        color: #64748b;
-
-        background-color: #fff;
-
-        border: 1px solid #cbd5e1;
-
-        border-radius: 6px;
-
-        text-decoration: none;
-
-        cursor: pointer;
-
-        transition:
-            all .15s ease;
-
-    }
-
-
-    .btn-filter-reset:hover {
-
-        background-color: #f1f5f9;
-
-        color: #334155;
-
-        border-color: #94a3b8;
-
-    }
-
-
-    /* =====================================================
-           ACTIVE FILTER BADGE
-        ====================================================== */
-
-    .filter-badge-active {
-
-        display: inline-flex;
-
-        align-items: center;
-
-        font-size: 11px;
-
-        padding: 3px 8px;
-
-        background-color: #e0f2fe;
-
-        color: #0369a1;
-
-        border-radius: 4px;
-
-        margin-top: 4px;
-
-        font-weight: 500;
-
-    }
-
-
-    /* =====================================================
-           SEARCH
-        ====================================================== */
-
-    .reservation-search-wrapper {
-
-        flex-grow: 1;
-
-        max-width: 250px;
-
-        margin-right: 8px;
-
-    }
-
-
-    .reservation-search-wrapper input {
-
-        width: 100%;
-
-        box-sizing: border-box;
-
-        padding: 7px 12px;
-
-        font-size: 12px;
-
-        border: 1px solid #cbd5e1;
-
-        border-radius: 6px;
-
-        outline: none;
-
-        transition:
-            border-color .15s ease,
-            box-shadow .15s ease;
-
-    }
-
-
-    .reservation-search-wrapper input:focus {
-
-        border-color: #287b7b;
-
-        box-shadow:
-            0 0 0 2px rgba(40,
-                123,
-                123,
-                .10);
-
-    }
-
-
-    /* =====================================================
-           RESPONSIVE
-        ====================================================== */
-
-    @media (max-width: 700px) {
+    <style>
+        /* =====================================================
+               FILTER BAR
+            ====================================================== */
 
         .reservation-filter-bar {
 
-            align-items: stretch;
+            display: flex;
 
-            flex-direction: column;
+            flex-wrap: wrap;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            margin-top: 14px;
+
+            margin-bottom: 14px;
+
+            padding: 0;
+
+            background: transparent;
+
+            border: none;
 
         }
 
 
+        /* =====================================================
+               DATE RANGE FORM
+            ====================================================== */
+
         .date-range-form {
 
-            width: 100%;
+            display: flex;
+
+            flex-wrap: wrap;
+
+            align-items: center;
+
+            gap: 8px;
 
         }
 
 
         .date-range-wrapper {
 
-            width: 100%;
+            position: relative;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+
+        .date-range-icon {
+
+            position: absolute;
+
+            left: 15px;
+
+            color: #64748b;
+
+            font-size: 14px;
+
+            pointer-events: none;
+
+            z-index: 2;
 
         }
 
 
         .date-range-input {
 
-            width: 100%;
+            margin-left: 0;
 
-            min-width: 0;
+            padding: 7px 12px 7px 38px;
 
-            box-sizing: border-box;
+            font-size: 12px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 6px;
+
+            background-color: #fff;
+
+            color: #1e293b;
+
+            min-width: 230px;
+
+            cursor: pointer;
+
+            transition:
+                border-color .15s ease-in-out,
+                box-shadow .15s ease-in-out;
 
         }
 
 
+        .date-range-input:focus {
+
+            border-color: #287b7b;
+
+            outline: 0;
+
+            box-shadow:
+                0 0 0 2px rgba(40,
+                    123,
+                    123,
+                    .15);
+
+        }
+
+
+        /* =====================================================
+               FILTER BUTTON
+            ====================================================== */
+
+        .btn-filter-submit {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 4px;
+
+            padding: 7px 14px;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            color: #fff;
+
+            background-color: #287b7b;
+
+            border: 1px solid #287b7b;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            transition:
+                background-color .15s ease,
+                transform .15s ease;
+
+        }
+
+
+        .btn-filter-submit:hover {
+
+            background-color: #216969;
+
+            border-color: #216969;
+
+            transform:
+                translateY(-1px);
+
+        }
+
+
+        /* =====================================================
+               RESET BUTTON
+            ====================================================== */
+
+        .btn-filter-reset {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 4px;
+
+            padding: 7px 12px;
+
+            font-size: 12px;
+
+            font-weight: 500;
+
+            color: #64748b;
+
+            background-color: #fff;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 6px;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            transition:
+                all .15s ease;
+
+        }
+
+
+        .btn-filter-reset:hover {
+
+            background-color: #f1f5f9;
+
+            color: #334155;
+
+            border-color: #94a3b8;
+
+        }
+
+
+        /* =====================================================
+               ACTIVE FILTER BADGE
+            ====================================================== */
+
+        .filter-badge-active {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            font-size: 11px;
+
+            padding: 3px 8px;
+
+            background-color: #e0f2fe;
+
+            color: #0369a1;
+
+            border-radius: 4px;
+
+            margin-top: 4px;
+
+            font-weight: 500;
+
+        }
+
+
+        /* =====================================================
+               SEARCH
+            ====================================================== */
+
         .reservation-search-wrapper {
 
-            width: 100%;
+            flex-grow: 1;
 
-            max-width: none;
+            max-width: 250px;
 
-            margin-right: 0;
+            margin-right: 8px;
 
         }
 
@@ -364,1023 +270,888 @@
 
             width: 100%;
 
+            box-sizing: border-box;
+
+            padding: 7px 12px;
+
+            font-size: 12px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 6px;
+
+            outline: none;
+
+            transition:
+                border-color .15s ease,
+                box-shadow .15s ease;
+
         }
 
-    }
-</style>
 
+        .reservation-search-wrapper input:focus {
+
+            border-color: #287b7b;
+
+            box-shadow:
+                0 0 0 2px rgba(40,
+                    123,
+                    123,
+                    .10);
+
+        }
+
+
+        /* =====================================================
+               RESPONSIVE
+            ====================================================== */
+
+        @media (max-width: 700px) {
+
+            .reservation-filter-bar {
+
+                align-items: stretch;
+
+                flex-direction: column;
+
+            }
+
+
+            .date-range-form {
+
+                width: 100%;
+
+            }
+
+
+            .date-range-wrapper {
+
+                width: 100%;
+
+            }
+
+
+            .date-range-input {
+
+                width: 100%;
+
+                min-width: 0;
+
+                box-sizing: border-box;
+
+            }
+
+
+            .reservation-search-wrapper {
+
+                width: 100%;
+
+                max-width: none;
+
+                margin-right: 0;
+
+            }
+
+
+            .reservation-search-wrapper input {
+
+                width: 100%;
+
+            }
+
+        }
+    </style>
 @endpush
 
 
 @section('content')
 
-<section id="page-reservations">
+    <section id="page-reservations">
 
 
-    {{-- =====================================================
+        {{-- =====================================================
          ALERT SUCCESS
     ====================================================== --}}
 
-    @if(session('success'))
+        @if (session('success'))
+            <div class="reservation-alert success">
 
-    <div class="reservation-alert success">
+                {{ session('success') }}
 
-        {{ session('success') }}
-
-    </div>
-
-    @endif
+            </div>
+        @endif
 
 
-    {{-- =====================================================
+        {{-- =====================================================
          ALERT ERROR
     ====================================================== --}}
 
-    @if(session('error'))
+        @if (session('error'))
+            <div class="reservation-alert error">
 
-    <div class="reservation-alert error">
+                {{ session('error') }}
 
-        {{ session('error') }}
-
-    </div>
-
-    @endif
+            </div>
+        @endif
 
 
-    {{-- =====================================================
+        {{-- =====================================================
          VALIDATION ERROR
     ====================================================== --}}
 
-    @if($errors->any())
+        @if ($errors->any())
 
-    <div class="reservation-alert error">
+            <div class="reservation-alert error">
 
-        <ul>
+                <ul>
 
-            @foreach($errors->all() as $error)
+                    @foreach ($errors->all() as $error)
+                        <li>
+                            {{ $error }}
+                        </li>
+                    @endforeach
 
-            <li>
-                {{ $error }}
-            </li>
-
-            @endforeach
-
-        </ul>
-
-    </div>
-
-    @endif
-
-
-    {{-- =====================================================
-         MAIN LAYOUT
-    ====================================================== --}}
-
-    <div class="reservation-layout">
-
-
-        {{-- =================================================
-             FORM RESERVASI
-        ================================================== --}}
-
-        <div class="reservation-form-card">
-
-            <h3>
-                Reservasi Buku
-            </h3>
-
-            <p>
-                Pilih anggota, buku, dan tanggal reservasi.
-            </p>
-
-
-            <form
-                action="{{ route('reservations.store') }}"
-                method="POST"
-                id="reservationForm">
-
-                @csrf
-
-
-                {{-- =========================================
-                     ANGGOTA
-                ========================================== --}}
-
-                <div class="reservation-field">
-
-                    <label for="member_id">
-                        Anggota
-                    </label>
-
-
-                    <select
-                        name="member_id"
-                        id="member_id"
-                        required>
-
-                        <option value="">
-                            -- Pilih Anggota --
-                        </option>
-
-
-                        @foreach($members as $member)
-
-                        <option
-                            value="{{ $member->id }}"
-                            @selected(
-                            old('member_id')==$member->id
-                            )
-                            >
-
-                            {{ $member->name }}
-
-                        </option>
-
-                        @endforeach
-
-                    </select>
-
-                </div>
-
-
-                {{-- =========================================
-                     BUKU
-                ========================================== --}}
-
-                <div class="reservation-field">
-
-                    <label for="book_id">
-                        Buku
-                    </label>
-
-
-                    <select
-                        name="book_id"
-                        id="book_id"
-                        required>
-
-                        <option value="">
-                            -- Pilih Buku --
-                        </option>
-
-
-                        @foreach($books as $book)
-
-                        <option
-                            value="{{ $book->id }}"
-                            @selected(
-                            old('book_id')==$book->id
-                            )
-                            @disabled(
-                            $book->available_stock < 1
-                                )>
-
-                                {{ $book->title }}
-
-                                @if($book->available_stock < 1)
-
-                                    — Stok Habis
-
-                                    @else
-
-                                    — Stok
-                                    {{ $book->available_stock }}
-
-                                    @endif
-
-                                    </option>
-
-                                    @endforeach
-
-                    </select>
-
-                </div>
-
-
-                {{-- =========================================
-                     TANGGAL
-                ========================================== --}}
-
-                <div class="reservation-date-row">
-
-
-                    <div class="reservation-field">
-
-                        <label for="reserved_at">
-                            Tanggal Reservasi
-                        </label>
-
-
-                        <input
-                            type="date"
-                            name="reserved_at"
-                            id="reserved_at"
-                            value="{{ old(
-                                'reserved_at',
-                                $selectedDate
-                            ) }}"
-                            min="{{ now()->format('Y-m-d') }}"
-                            required>
-
-                    </div>
-
-
-                    <div class="reservation-field">
-
-                        <label for="expires_at">
-                            Tanggal Berakhir
-                        </label>
-
-
-                        <input
-                            type="date"
-                            name="expires_at"
-                            id="expires_at"
-                            value="{{ old('expires_at') }}"
-                            min="{{ old('reserved_at', $selectedDate) }}"
-                            required>
-                    </div>
-
-                </div>
-
-
-                {{-- =========================================
-                     SUBMIT
-                ========================================== --}}
-
-                <button
-                    type="submit"
-                    class="reservation-submit">
-
-                    Simpan Reservasi
-
-                </button>
-
-            </form>
-
-        </div>
-
-
-        {{-- =================================================
-             DAFTAR RESERVASI
-        ================================================== --}}
-
-        <div class="reservation-list-card">
-
-
-            {{-- =============================================
-                 HEADER
-            ============================================== --}}
-
-            <div class="reservation-list-top">
-
-                <div>
-
-                    <h3>
-                        Daftar Reservasi
-                    </h3>
-
-
-                    <span class="reservation-list-subtitle">
-                        Daftar buku yang telah direservasi.
-                    </span>
-
-
-                    @if(
-                    request('start_date')
-                    &&
-                    request('end_date')
-                    )
-
-                    <div>
-
-                        <span class="filter-badge-active">
-
-                            📅 Filter:
-
-                            {{ \Carbon\Carbon::parse(
-                                    request('start_date')
-                                )->format('d/m/Y') }}
-
-                            -
-
-                            {{ \Carbon\Carbon::parse(
-                                    request('end_date')
-                                )->format('d/m/Y') }}
-
-                        </span>
-
-                    </div>
-
-                    @endif
-
-                </div>
+                </ul>
 
             </div>
 
-
-            {{-- =============================================
-                 FILTER BAR
-            ============================================== --}}
-
-            <div class="reservation-filter-bar">
+        @endif
 
 
-                {{-- =============================================
-                     DATE RANGE
-                ============================================== --}}
+        {{-- =====================================================
+         MAIN LAYOUT
+    ====================================================== --}}
 
-                <form
-                    action="{{ route('reservations.index') }}"
-                    method="GET"
-                    class="date-range-form"
-                    id="dateRangeFilterForm">
+        <div class="reservation-layout">
 
 
-                    <div class="date-range-wrapper">
+            {{-- =================================================
+             FORM RESERVASI
+        ================================================== --}}
 
-                        <span class="date-range-icon">
-                            📅
-                        </span>
+            <div class="reservation-form-card">
 
+                <h3>
+                    Reservasi Buku
+                </h3>
 
-                        <input
-                            type="text"
-                            id="dateRangePicker"
-                            class="date-range-input"
-                            placeholder="Pilih rentang tanggal..."
-                            readonly>
-
-
-                        <input
-                            type="hidden"
-                            name="start_date"
-                            id="startDateInput"
-                            value="{{ request('start_date') }}">
+                <p>
+                    Pilih anggota, buku, dan tanggal reservasi.
+                </p>
 
 
-                        <input
-                            type="hidden"
-                            name="end_date"
-                            id="endDateInput"
-                            value="{{ request('end_date') }}">
+                <form action="{{ route('reservations.store') }}" method="POST" id="reservationForm">
+
+                    @csrf
+
+
+                    {{-- =========================================
+                     ANGGOTA
+                ========================================== --}}
+
+                    <div class="reservation-field">
+
+                        <label for="member_id">
+                            Anggota
+                        </label>
+
+
+                        <select name="member_id" id="member_id" required>
+
+                            <option value="">
+                                -- Pilih Anggota --
+                            </option>
+
+
+                            @foreach ($members as $member)
+                                <option value="{{ $member->id }}" @selected(old('member_id') == $member->id)>
+
+                                    {{ $member->name }}
+
+                                </option>
+                            @endforeach
+
+                        </select>
 
                     </div>
 
 
-                    {{-- APPLY --}}
+                    {{-- =========================================
+                     BUKU
+                ========================================== --}}
 
-                    <button
-                        type="submit"
-                        class="btn-filter-submit">
+                    <div class="reservation-field">
 
-                        Terapkan
+                        <label for="book_id">
+                            Buku
+                        </label>
+
+
+                        <select name="book_id" id="book_id" required>
+
+                            <option value="">
+                                -- Pilih Buku --
+                            </option>
+
+
+                            @foreach ($books as $book)
+                                <option value="{{ $book->id }}" @selected(old('book_id') == $book->id)
+                                    @disabled($book->available_stock < 1)>
+
+                                    {{ $book->title }}
+
+                                    @if ($book->available_stock < 1)
+                                        — Stok Habis
+                                    @else
+                                        — Stok
+                                        {{ $book->available_stock }}
+                                    @endif
+
+                                </option>
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- =========================================
+                     TANGGAL
+                ========================================== --}}
+
+                    <div class="reservation-date-row">
+
+
+                        <div class="reservation-field">
+
+                            <label for="reserved_at">
+                                Tanggal Reservasi
+                            </label>
+
+
+                            <input type="date" name="reserved_at" id="reserved_at"
+                                value="{{ old('reserved_at', $selectedDate) }}"
+                                min="{{ now()->format('Y-m-d') }}" required>
+
+                        </div>
+
+
+                        <div class="reservation-field">
+
+                            <label for="expires_at">
+                                Tanggal Berakhir
+                            </label>
+
+
+                            <input type="date" name="expires_at" id="expires_at" value="{{ old('expires_at') }}"
+                                min="{{ old('reserved_at', $selectedDate) }}" required>
+                        </div>
+
+                    </div>
+
+
+                    {{-- =========================================
+                     SUBMIT
+                ========================================== --}}
+
+                    <button type="submit" class="reservation-submit">
+
+                        Simpan Reservasi
 
                     </button>
 
-
-                    {{-- RESET --}}
-
-                    @if(
-                    request('start_date')
-                    ||
-                    request('end_date')
-                    )
-
-                    <a
-                        href="{{ route('reservations.index') }}"
-                        class="btn-filter-reset"
-                        title="Reset Filter">
-
-                        Reset
-
-                    </a>
-
-                    @endif
-
                 </form>
-
-
-                {{-- =============================================
-                     LIVE SEARCH
-                ============================================== --}}
-
-                <div class="reservation-search-wrapper">
-
-                    <input
-                        type="text"
-                        id="reservationSearch"
-                        placeholder="Cari di tabel..."
-                        autocomplete="off">
-
-                </div>
 
             </div>
 
 
             {{-- =================================================
+             DAFTAR RESERVASI
+        ================================================== --}}
+
+            <div class="reservation-list-card">
+
+
+                {{-- =============================================
+                 HEADER
+            ============================================== --}}
+
+                <div class="reservation-list-top">
+
+                    <div>
+
+                        <h3>
+                            Daftar Reservasi
+                        </h3>
+
+
+                        <span class="reservation-list-subtitle">
+                            Daftar buku yang telah direservasi.
+                        </span>
+
+
+                        @if (request('start_date') && request('end_date'))
+                            <div>
+
+                                <span class="filter-badge-active">
+
+                                    📅 Filter:
+
+                                    {{ \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') }}
+
+                                    -
+
+                                    {{ \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') }}
+
+                                </span>
+
+                            </div>
+                        @endif
+
+                    </div>
+
+                </div>
+
+
+                {{-- =============================================
+                 FILTER BAR
+            ============================================== --}}
+
+                <div class="reservation-filter-bar">
+
+
+                    {{-- =============================================
+                     DATE RANGE
+                ============================================== --}}
+
+                    <form action="{{ route('reservations.index') }}" method="GET" class="date-range-form"
+                        id="dateRangeFilterForm">
+
+
+                        <div class="date-range-wrapper">
+
+                            <span class="date-range-icon">
+                                📅
+                            </span>
+
+
+                            <input type="text" id="dateRangePicker" class="date-range-input"
+                                placeholder="Pilih rentang tanggal..." readonly>
+
+
+                            <input type="hidden" name="start_date" id="startDateInput"
+                                value="{{ request('start_date') }}">
+
+
+                            <input type="hidden" name="end_date" id="endDateInput" value="{{ request('end_date') }}">
+
+                        </div>
+
+
+                        {{-- APPLY --}}
+
+                        <button type="submit" class="btn-filter-submit">
+
+                            Terapkan
+
+                        </button>
+
+
+                        {{-- RESET --}}
+
+                        @if (request('start_date') || request('end_date'))
+                            <a href="{{ route('reservations.index') }}" class="btn-filter-reset" title="Reset Filter">
+
+                                Reset
+
+                            </a>
+                        @endif
+
+                    </form>
+
+
+                    {{-- =============================================
+                     LIVE SEARCH
+                ============================================== --}}
+
+                    <div class="reservation-search-wrapper">
+
+                        <input type="text" id="reservationSearch" placeholder="Cari di tabel..." autocomplete="off">
+
+                    </div>
+
+                </div>
+
+
+                {{-- =================================================
                  TABLE
             ================================================== --}}
 
-            <div class="reservation-table-wrap">
+                <div class="reservation-table-wrap">
 
-                <table
-                    class="reservation-table"
-                    id="reservationTable">
+                    <table class="reservation-table" id="reservationTable">
 
-                    <thead>
+                        <thead>
 
-                        <tr>
+                            <tr>
 
-                            <th>
-                                ANGGOTA
-                            </th>
+                                <th>
+                                    ANGGOTA
+                                </th>
 
-                            <th>
-                                BUKU
-                            </th>
+                                <th>
+                                    BUKU
+                                </th>
 
-                            <th>
-                                RESERVASI
-                            </th>
+                                <th>
+                                    RESERVASI
+                                </th>
 
-                            <th>
-                                BERLAKU SAMPAI
-                            </th>
+                                <th>
+                                    BERLAKU SAMPAI
+                                </th>
 
-                            <th>
-                                STATUS
-                            </th>
+                                <th>
+                                    STATUS
+                                </th>
 
-                            <th>
-                                AKSI
-                            </th>
+                                <th>
+                                    AKSI
+                                </th>
 
-                        </tr>
+                            </tr>
 
-                    </thead>
+                        </thead>
 
 
-                    <tbody>
+                        <tbody>
 
 
-                        @forelse(
-                        $reservations
-                        as $reservation
-                        )
-
-                        <tr class="reservation-row">
+                            @forelse($reservations
+                            as $reservation)
+                                <tr class="reservation-row">
 
 
-                            {{-- =========================
+                                    {{-- =========================
                                      ANGGOTA
                                 ========================== --}}
 
-                            <td>
+                                    <td>
 
-                                {{ $reservation->member->name ?? '-' }}
+                                        {{ $reservation->member->name ?? '-' }}
 
-                            </td>
+                                    </td>
 
 
-                            {{-- =========================
+                                    {{-- =========================
                                      BUKU
                                 ========================== --}}
 
-                            <td>
+                                    <td>
 
-                                {{ $reservation->book->title ?? '-' }}
+                                        {{ $reservation->book->title ?? '-' }}
 
-                            </td>
+                                    </td>
 
 
-                            {{-- =========================
+                                    {{-- =========================
                                      RESERVASI
                                 ========================== --}}
 
-                            <td>
+                                    <td>
 
-                                {{ \Carbon\Carbon::parse(
-                                        $reservation->reserved_at
-                                    )->format('d/m/Y') }}
+                                        {{ \Carbon\Carbon::parse($reservation->reserved_at)->format('d/m/Y') }}
 
-                            </td>
+                                    </td>
 
 
-                            {{-- =========================
+                                    {{-- =========================
                                      BERLAKU SAMPAI
                                 ========================== --}}
 
-                            <td>
+                                    <td>
 
-                                @if(
-                                $reservation->expires_at
-                                )
+                                        @if ($reservation->expires_at)
+                                            {{ \Carbon\Carbon::parse($reservation->expires_at)->format('d/m/Y') }}
+                                        @else
+                                            -
+                                        @endif
 
-                                {{ \Carbon\Carbon::parse(
-                                            $reservation->expires_at
-                                        )->format('d/m/Y') }}
-
-                                @else
-
-                                -
-
-                                @endif
-
-                            </td>
+                                    </td>
 
 
-                            {{-- =========================
+                                    {{-- =========================
                                      STATUS
                                 ========================== --}}
 
-                            <td>
+                                    <td>
 
-                                @if(
-                                $reservation->status ===
-                                'menunggu'
-                                )
+                                        @if ($reservation->status === 'menunggu')
+                                            <span class="reservation-status waiting">
+                                                Menunggu
+                                            </span>
+                                        @elseif($reservation->status === 'disetujui')
+                                            <span class="reservation-status approved">
+                                                Disetujui
+                                            </span>
+                                        @elseif($reservation->status === 'ditolak')
+                                            <span class="reservation-status rejected">
+                                                Ditolak
+                                            </span>
+                                        @elseif($reservation->status === 'dibatalkan')
+                                            <span class="reservation-status cancelled">
+                                                Dibatalkan
+                                            </span>
+                                        @elseif($reservation->status === 'selesai')
+                                            <span class="reservation-status finished">
+                                                Selesai
+                                            </span>
+                                        @else
+                                            <span class="reservation-status">
 
-                                <span
-                                    class="reservation-status waiting">
-                                    Menunggu
-                                </span>
+                                                {{ ucfirst($reservation->status) }}
 
+                                            </span>
+                                        @endif
 
-                                @elseif(
-                                $reservation->status ===
-                                'disetujui'
-                                )
+                                    </td>
 
-                                <span
-                                    class="reservation-status approved">
-                                    Disetujui
-                                </span>
 
+                                    {{-- =========================
+         AKSI
+    ========================== --}}
 
-                                @elseif(
-                                $reservation->status ===
-                                'ditolak'
-                                )
+                                    <td>
 
-                                <span
-                                    class="reservation-status rejected">
-                                    Ditolak
-                                </span>
+                                        <div class="reservation-actions">
 
 
-                                @elseif(
-                                $reservation->status ===
-                                'dibatalkan'
-                                )
+                                            {{-- =================================
+                 SETUJUI
+            ================================== --}}
 
-                                <span
-                                    class="reservation-status cancelled">
-                                    Dibatalkan
-                                </span>
+                                            @if ($reservation->status === 'menunggu')
+                                                <form
+                                                    action="{{ route('reservations.updateStatus', $reservation) }}"
+                                                    method="POST">
 
+                                                    @csrf
 
-                                @elseif(
-                                $reservation->status ===
-                                'selesai'
-                                )
+                                                    @method('PATCH')
 
-                                <span
-                                    class="reservation-status finished">
-                                    Selesai
-                                </span>
+                                                    <input type="hidden" name="status" value="disetujui">
 
+                                                    <button type="submit" class="btn-approve">
 
-                                @else
+                                                        Setujui
 
-                                <span
-                                    class="reservation-status">
+                                                    </button>
 
-                                    {{ ucfirst(
-                                                $reservation->status
-                                            ) }}
+                                                </form>
+                                            @endif
 
-                                </span>
 
-                                @endif
+                                            {{-- =================================
+                 TOLAK
+            ================================== --}}
 
-                            </td>
+                                            @if ($reservation->status === 'menunggu')
+                                                <form
+                                                    action="{{ route('reservations.updateStatus', $reservation) }}"
+                                                    method="POST">
 
+                                                    @csrf
 
-                            {{-- =========================
-                                     AKSI
-                                ========================== --}}
+                                                    @method('PATCH')
 
-                            <td>
+                                                    <input type="hidden" name="status" value="ditolak">
 
-                                <div class="reservation-actions">
+                                                    <button type="submit" class="btn-reject">
 
+                                                        Tolak
 
-                                    {{-- =================================
-                                             SETUJUI
-                                        ================================== --}}
+                                                    </button>
 
-                                    @if(
-                                    $reservation->status ===
-                                    'menunggu'
-                                    )
+                                                </form>
+                                            @endif
 
-                                    <form
-                                        action="{{ route(
-                                                    'reservations.updateStatus',
-                                                    $reservation
-                                                ) }}"
-                                        method="POST">
 
-                                        @csrf
+                                            {{-- =================================
+                 LOCATOR
+            ================================== --}}
 
-                                        @method('PATCH')
+                                            @if (
+                                                $reservation->book_copy_id &&
+                                                    $reservation->bookCopy?->shelf_id &&
+                                                    in_array($reservation->status, ['menunggu', 'disetujui']))
+                                                <a href="{{ route('book-locator.show', $reservation) }}"
+                                                    class="btn btn-primary">
 
+                                                    📍 Temukan Buku
 
-                                        <input
-                                            type="hidden"
-                                            name="status"
-                                            value="disetujui">
+                                                </a>
+                                            @endif
 
 
-                                        <button
-                                            type="submit"
-                                            class="btn-approve">
+                                            {{-- =================================
+                 EMPTY ACTION
+            ================================== --}}
 
-                                            Setujui
+                                            @if (
+                                                $reservation->status !== 'menunggu' &&
+                                                    !(
+                                                        $reservation->book_copy_id &&
+                                                        $reservation->bookCopy?->shelf_id &&
+                                                        in_array($reservation->status, ['menunggu', 'disetujui'])
+                                                    ))
+                                                <span class="action-done">
+                                                    —
+                                                </span>
+                                            @endif
 
-                                        </button>
 
-                                    </form>
+                                        </div>
 
-                                    @endif
+                                    </td>
 
+                                </tr>
 
-                                    {{-- =================================
-                                             LOCATOR
-                                        ================================== --}}
 
-                                    @if(
-                                    $reservation->book_copy_id
-                                    &&
-                                    $reservation->bookCopy?->shelf_id
-                                    &&
-                                    in_array(
-                                    $reservation->status,
-                                    [
-                                    'menunggu',
-                                    'disetujui'
-                                    ]
-                                    )
-                                    )
+                            @empty
 
-                                    <a
-                                        href="{{ route(
-                                                    'reservations.locator',
-                                                    $reservation
-                                                ) }}"
-                                        class="btn btn-primary">
+                                <tr>
 
-                                        📍 Temukan Buku
+                                    <td colspan="6" class="reservation-empty">
 
-                                    </a>
+                                        @if (request('start_date') && request('end_date'))
+                                            Tidak ada data reservasi pada
+                                            rentang tanggal
 
-                                    @endif
+                                            {{ \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') }}
 
+                                            s/d
 
-                                    {{-- =================================
-                                             TOLAK
-                                        ================================== --}}
+                                            {{ \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') }}.
+                                        @else
+                                            Belum ada reservasi.
+                                        @endif
 
-                                    @if(
-                                    $reservation->status ===
-                                    'menunggu'
-                                    )
+                                    </td>
 
-                                    <form
-                                        action="{{ route(
-                                                    'reservations.updateStatus',
-                                                    $reservation
-                                                ) }}"
-                                        method="POST">
+                                </tr>
+                            @endforelse
 
-                                        @csrf
+                        </tbody>
 
-                                        @method('PATCH')
+                    </table>
 
-
-                                        <input
-                                            type="hidden"
-                                            name="status"
-                                            value="ditolak">
-
-
-                                        <button
-                                            type="submit"
-                                            class="btn-reject">
-
-                                            Tolak
-
-                                        </button>
-
-                                    </form>
-
-                                    @endif
-
-
-                                    {{-- =================================
-                                             EMPTY ACTION
-                                        ================================== --}}
-
-                                    @if(
-                                    $reservation->status !==
-                                    'menunggu'
-                                    &&
-                                    !(
-                                    $reservation->book_copy_id
-                                    &&
-                                    $reservation->bookCopy?->shelf_id
-                                    &&
-                                    in_array(
-                                    $reservation->status,
-                                    [
-                                    'menunggu',
-                                    'disetujui'
-                                    ]
-                                    )
-                                    )
-                                    )
-
-                                    <span class="action-done">
-                                        —
-                                    </span>
-
-                                    @endif
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-
-                        @empty
-
-                        <tr>
-
-                            <td
-                                colspan="6"
-                                class="reservation-empty">
-
-                                @if(
-                                request('start_date')
-                                &&
-                                request('end_date')
-                                )
-
-                                Tidak ada data reservasi pada
-                                rentang tanggal
-
-                                {{
-                                            \Carbon\Carbon::parse(
-                                                request('start_date')
-                                            )->format('d/m/Y')
-                                        }}
-
-                                s/d
-
-                                {{
-                                            \Carbon\Carbon::parse(
-                                                request('end_date')
-                                            )->format('d/m/Y')
-                                        }}.
-
-                                @else
-
-                                Belum ada reservasi.
-
-                                @endif
-
-                            </td>
-
-                        </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
+                </div>
 
             </div>
 
         </div>
 
-    </div>
-
-</section>
+    </section>
 
 @endsection
 
 
 @push('scripts')
-
-{{-- =====================================================
+    {{-- =====================================================
          FLATPICKR
     ====================================================== --}}
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-<script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
-
-
-<script>
-    document.addEventListener(
-        'DOMContentLoaded',
-        function() {
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
 
 
-            /* =================================================
-               FLATPICKR RANGE
-            ================================================= */
-
-            const startDateVal =
-                @json(request('start_date'));
-
-            const endDateVal =
-                @json(request('end_date'));
+    <script>
+        document.addEventListener(
+            'DOMContentLoaded',
+            function() {
 
 
-            let defaultDateRange = [];
+                /* =================================================
+                   FLATPICKR RANGE
+                ================================================= */
+
+                const startDateVal =
+                    @json(request('start_date'));
+
+                const endDateVal =
+                    @json(request('end_date'));
 
 
-            if (
-                startDateVal &&
-                endDateVal
-            ) {
+                let defaultDateRange = [];
 
-                defaultDateRange = [
-                    startDateVal,
+
+                if (
+                    startDateVal &&
                     endDateVal
-                ];
+                ) {
 
-            } else if (
-                startDateVal
-            ) {
+                    defaultDateRange = [
+                        startDateVal,
+                        endDateVal
+                    ];
 
-                defaultDateRange = [
+                } else if (
                     startDateVal
-                ];
+                ) {
 
-            }
+                    defaultDateRange = [
+                        startDateVal
+                    ];
 
-
-            const datePicker =
-                document.getElementById(
-                    'dateRangePicker'
-                );
+                }
 
 
-            if (datePicker) {
-
-                flatpickr(
-                    datePicker, {
-
-                        mode: 'range',
-
-                        dateFormat: 'Y-m-d',
-
-                        altInput: true,
-
-                        altFormat: 'j M Y',
-
-                        locale: typeof flatpickr.l10ns.id !==
-                            'undefined' ?
-                            flatpickr.l10ns.id :
-                            'default',
-
-                        defaultDate: defaultDateRange,
-
-                        allowInput: false,
+                const datePicker =
+                    document.getElementById(
+                        'dateRangePicker'
+                    );
 
 
-                        onChange: function(
-                            selectedDates,
-                            dateStr,
-                            instance
-                        ) {
+                if (datePicker) {
 
-                            const startInput =
-                                document.getElementById(
-                                    'startDateInput'
-                                );
+                    flatpickr(
+                        datePicker, {
+
+                            mode: 'range',
+
+                            dateFormat: 'Y-m-d',
+
+                            altInput: true,
+
+                            altFormat: 'j M Y',
+
+                            locale: typeof flatpickr.l10ns.id !==
+                                'undefined' ?
+                                flatpickr.l10ns.id : 'default',
+
+                            defaultDate: defaultDateRange,
+
+                            allowInput: false,
 
 
-                            const endInput =
-                                document.getElementById(
-                                    'endDateInput'
-                                );
-
-
-                            if (
-                                selectedDates.length === 2
+                            onChange: function(
+                                selectedDates,
+                                dateStr,
+                                instance
                             ) {
 
-                                startInput.value =
-                                    instance.formatDate(
-                                        selectedDates[0],
-                                        'Y-m-d'
+                                const startInput =
+                                    document.getElementById(
+                                        'startDateInput'
                                     );
 
 
-                                endInput.value =
-                                    instance.formatDate(
-                                        selectedDates[1],
-                                        'Y-m-d'
-                                    );
-
-                            } else if (
-                                selectedDates.length === 1
-                            ) {
-
-                                startInput.value =
-                                    instance.formatDate(
-                                        selectedDates[0],
-                                        'Y-m-d'
+                                const endInput =
+                                    document.getElementById(
+                                        'endDateInput'
                                     );
 
 
-                                endInput.value = '';
+                                if (
+                                    selectedDates.length === 2
+                                ) {
 
-                            } else {
+                                    startInput.value =
+                                        instance.formatDate(
+                                            selectedDates[0],
+                                            'Y-m-d'
+                                        );
 
-                                startInput.value = '';
 
-                                endInput.value = '';
+                                    endInput.value =
+                                        instance.formatDate(
+                                            selectedDates[1],
+                                            'Y-m-d'
+                                        );
+
+                                } else if (
+                                    selectedDates.length === 1
+                                ) {
+
+                                    startInput.value =
+                                        instance.formatDate(
+                                            selectedDates[0],
+                                            'Y-m-d'
+                                        );
+
+
+                                    endInput.value = '';
+
+                                } else {
+
+                                    startInput.value = '';
+
+                                    endInput.value = '';
+
+                                }
 
                             }
-
-                        }
-
-                    }
-                );
-
-            }
-
-
-            /* =================================================
-               LIVE SEARCH
-            ================================================= */
-
-            const searchInput =
-                document.getElementById(
-                    'reservationSearch'
-                );
-
-
-            const rows =
-                document.querySelectorAll(
-                    '#reservationTable tbody tr.reservation-row'
-                );
-
-
-            if (!searchInput) {
-
-                return;
-
-            }
-
-
-            searchInput.addEventListener(
-                'input',
-                function() {
-
-                    const keyword =
-                        this.value
-                        .toLowerCase()
-                        .trim();
-
-
-                    rows.forEach(
-                        function(row) {
-
-                            const text =
-                                row.textContent
-                                .toLowerCase();
-
-
-                            row.style.display =
-                                text.includes(keyword) ?
-                                '' :
-                                'none';
 
                         }
                     );
 
                 }
-            );
 
-        }
-    );
-</script>
 
+                /* =================================================
+                   LIVE SEARCH
+                ================================================= */
+
+                const searchInput =
+                    document.getElementById(
+                        'reservationSearch'
+                    );
+
+
+                const rows =
+                    document.querySelectorAll(
+                        '#reservationTable tbody tr.reservation-row'
+                    );
+
+
+                if (!searchInput) {
+
+                    return;
+
+                }
+
+
+                searchInput.addEventListener(
+                    'input',
+                    function() {
+
+                        const keyword =
+                            this.value
+                            .toLowerCase()
+                            .trim();
+
+
+                        rows.forEach(
+                            function(row) {
+
+                                const text =
+                                    row.textContent
+                                    .toLowerCase();
+
+
+                                row.style.display =
+                                    text.includes(keyword) ?
+                                    '' :
+                                    'none';
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+        );
+    </script>
 @endpush

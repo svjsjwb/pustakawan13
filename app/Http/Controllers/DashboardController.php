@@ -32,7 +32,16 @@ class DashboardController extends Controller
             Borrowing::where(
                 'status',
                 'dipinjam'
-            )->count();
+            )
+            ->with('details')
+            ->get()
+            ->sum(function ($borrowing) {
+
+                return $borrowing->details->sum(
+                    fn($detail) =>
+                    $detail->quantity ?? 1
+                );
+            });
 
         $activeMembers =
             Member::where(
@@ -64,13 +73,13 @@ class DashboardController extends Controller
 
         $startDate =
             now()
-                ->startOfMonth()
-                ->startOfDay();
+            ->startOfMonth()
+            ->startOfDay();
 
         $endDate =
             now()
-                ->endOfMonth()
-                ->endOfDay();
+            ->endOfMonth()
+            ->endOfDay();
 
 
         /*
@@ -87,18 +96,18 @@ class DashboardController extends Controller
 
         $max7 =
             !empty($chart7Days)
-                ? max(
-                    array_column(
-                        $chart7Days,
-                        'count'
-                    )
+            ? max(
+                array_column(
+                    $chart7Days,
+                    'count'
                 )
-                : 0;
+            )
+            : 0;
 
         $max7 =
             $max7 > 0
-                ? $max7
-                : 5;
+            ? $max7
+            : 5;
 
 
         /*
@@ -117,7 +126,7 @@ class DashboardController extends Controller
                 'book'
             ])
             ->latest()
-            ->take(20)
+            ->take(5)
             ->get();
 
 
@@ -152,27 +161,27 @@ class DashboardController extends Controller
 
         $members =
             Member::latest()
-                ->take(20)
-                ->get();
+            ->take(20)
+            ->get();
 
         foreach ($members as $member) {
 
             $activities->push([
 
                 'type' =>
-                    'member',
+                'member',
 
                 'title' =>
-                    'Anggota baru',
+                'Anggota baru',
 
                 'description' =>
-                    $member->name ?? '-',
+                $member->name ?? '-',
 
                 'created_at' =>
-                    $member->created_at,
+                $member->created_at,
 
                 'icon' =>
-                    '+',
+                '+',
             ]);
         }
 
@@ -185,27 +194,27 @@ class DashboardController extends Controller
 
         $books =
             Book::latest()
-                ->take(20)
-                ->get();
+            ->take(20)
+            ->get();
 
         foreach ($books as $book) {
 
             $activities->push([
 
                 'type' =>
-                    'book',
+                'book',
 
                 'title' =>
-                    'Koleksi buku baru',
+                'Koleksi buku baru',
 
                 'description' =>
-                    $book->title ?? '-',
+                $book->title ?? '-',
 
                 'created_at' =>
-                    $book->created_at,
+                $book->created_at,
 
                 'icon' =>
-                    '+',
+                '+',
             ]);
         }
 
@@ -221,19 +230,19 @@ class DashboardController extends Controller
             $activities->push([
 
                 'type' =>
-                    'reservation',
+                'reservation',
 
                 'title' =>
-                    'Reservasi baru',
+                'Reservasi baru',
 
                 'description' =>
-                    $reservation->member?->name ?? '-',
+                $reservation->member?->name ?? '-',
 
                 'created_at' =>
-                    $reservation->created_at,
+                $reservation->created_at,
 
                 'icon' =>
-                    '+',
+                '+',
             ]);
         }
 
@@ -258,19 +267,19 @@ class DashboardController extends Controller
             $activities->push([
 
                 'type' =>
-                    'borrowing',
+                'borrowing',
 
                 'title' =>
-                    'Peminjaman baru',
+                'Peminjaman baru',
 
                 'description' =>
-                    $borrowing->member?->name ?? '-',
+                $borrowing->member?->name ?? '-',
 
                 'created_at' =>
-                    $borrowing->created_at,
+                $borrowing->created_at,
 
                 'icon' =>
-                    '+',
+                '+',
             ]);
         }
 
@@ -287,32 +296,32 @@ class DashboardController extends Controller
 
         $manualActivities =
             Activity::latest()
-                ->get();
+            ->get();
 
         foreach ($manualActivities as $manualActivity) {
 
             $activities->push([
 
                 'id' =>
-                    $manualActivity->id,
+                $manualActivity->id,
 
                 'type' =>
-                    'manual',
+                'manual',
 
                 'title' =>
-                    $manualActivity->title ?? '-',
+                $manualActivity->title ?? '-',
 
                 'description' =>
-                    $manualActivity->description ?? '-',
+                $manualActivity->description ?? '-',
 
                 'created_at' =>
-                    $manualActivity->created_at,
+                $manualActivity->created_at,
 
                 'pinned_at' =>
-                    $manualActivity->pinned_at,
+                $manualActivity->pinned_at,
 
                 'icon' =>
-                    '📢',
+                '📢',
             ]);
         }
 
@@ -329,12 +338,12 @@ class DashboardController extends Controller
 
         $activities =
             $activities
-                ->sortBy([
-                    ['pinned_at', 'desc'],
-                    ['created_at', 'desc'],
-                ])
-                ->take(4)
-                ->values();
+            ->sortBy([
+                ['pinned_at', 'desc'],
+                ['created_at', 'desc'],
+            ])
+            ->take(4)
+            ->values();
 
 
         /*
@@ -348,7 +357,7 @@ class DashboardController extends Controller
 
         $allManualActivities =
             Activity::latest()
-                ->get();
+            ->get();
 
 
         /*
@@ -401,14 +410,14 @@ class DashboardController extends Controller
 
             $weekStart =
                 $cursor
-                    ->copy()
-                    ->startOfDay();
+                ->copy()
+                ->startOfDay();
 
             $weekEnd =
                 $cursor
-                    ->copy()
-                    ->addDays(6)
-                    ->endOfDay();
+                ->copy()
+                ->addDays(6)
+                ->endOfDay();
 
 
             if (
@@ -436,8 +445,8 @@ class DashboardController extends Controller
 
             $cursor =
                 $weekEnd
-                    ->copy()
-                    ->addSecond();
+                ->copy()
+                ->addSecond();
 
             $weekNumber++;
         }
@@ -445,8 +454,8 @@ class DashboardController extends Controller
 
         $max =
             !empty($counts)
-                ? max($counts)
-                : 0;
+            ? max($counts)
+            : 0;
 
 
         $chart = [];
@@ -461,25 +470,25 @@ class DashboardController extends Controller
 
             $height =
                 $max > 0
-                    ? max(
-                        8,
-                        round(
-                            ($count / $max) * 100
-                        )
+                ? max(
+                    8,
+                    round(
+                        ($count / $max) * 100
                     )
-                    : 8;
+                )
+                : 8;
 
 
             $chart[] = [
 
                 'label' =>
-                    $label,
+                $label,
 
                 'count' =>
-                    $count,
+                $count,
 
                 'height' =>
-                    $height,
+                $height,
             ];
         }
 

@@ -16,8 +16,24 @@ class CatalogController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        $categoryOrder = [
+            'Buku Pendidikan',
+            'Anak',
+            'Remaja',
+            'Dewasa',
+        ];
+
         $categories = Category::with('subcategories')
-            ->orderBy('name')
+            ->whereIn('name', $categoryOrder)
+            ->orderByRaw("
+                CASE name
+                    WHEN 'Buku Pendidikan' THEN 1
+                    WHEN 'Anak' THEN 2
+                    WHEN 'Remaja' THEN 3
+                    WHEN 'Dewasa' THEN 4
+                    ELSE 5
+                END
+            ")
             ->get();
 
 
@@ -25,12 +41,35 @@ class CatalogController extends Controller
         |--------------------------------------------------------------------------
         | QUERY BUKU
         |--------------------------------------------------------------------------
+        |
+        | Status katalog sekarang diambil dari BookCopy:
+        |
+        | available = eksemplar tersedia
+        | borrowed  = eksemplar sedang dipinjam
+        | reserved  = eksemplar sedang direservasi
+        |
+        | Jadi satu judul tetap bisa muncul sebagai "Dipinjam"
+        | walaupun masih mempunyai eksemplar lain yang tersedia.
         */
 
         $query = Book::with([
             'category',
             'subcategory',
-        ])->latest();
+        ])
+            ->withCount([
+                'copies as available_copies_count' => function ($copyQuery) {
+                    $copyQuery->where('status', 'available');
+                },
+
+                'copies as borrowed_copies_count' => function ($copyQuery) {
+                    $copyQuery->where('status', 'borrowed');
+                },
+
+                'copies as reserved_copies_count' => function ($copyQuery) {
+                    $copyQuery->where('status', 'reserved');
+                },
+            ])
+            ->latest();
 
 
         /*
@@ -73,22 +112,36 @@ class CatalogController extends Controller
 
             if ($request->status === 'Tersedia') {
 
-                $query->where(
-                    'available_stock',
-                    '>',
-                    0
-                );
-            }
+                $query->whereHas('copies', function ($copyQuery) {
 
-            elseif (
-                $request->status === 'Dipinjam'
-            ) {
+                    $copyQuery->where(
+                        'status',
+                        'available'
+                    );
 
-                $query->where(
-                    'available_stock',
-                    '<=',
-                    0
-                );
+                });
+
+            } elseif ($request->status === 'Dipinjam') {
+
+                /*
+                 * "Sedang Dipinjam" juga mencakup buku yang sedang
+                 * mempunyai eksemplar reserved.
+                 *
+                 * Yang dicari adalah status EKSEMPLAR, bukan
+                 * available_stock pada tabel books.
+                 */
+
+                $query->whereHas('copies', function ($copyQuery) {
+
+                    $copyQuery->whereIn(
+                        'status',
+                        [
+                            'borrowed',
+                            'reserved',
+                        ]
+                    );
+
+                });
             }
         }
 
@@ -110,12 +163,11 @@ class CatalogController extends Controller
                     'like',
                     "%{$search}%"
                 )
-
-                ->orWhere(
-                    'author',
-                    'like',
-                    "%{$search}%"
-                );
+                    ->orWhere(
+                        'author',
+                        'like',
+                        "%{$search}%"
+                    );
             });
         }
 

@@ -9,6 +9,8 @@ use App\Models\Subcategory;
 use App\Models\BookCopy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use App\Models\Shelf;
 
 class BookController extends Controller
 {
@@ -18,18 +20,110 @@ class BookController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function index()
+    public function index(Request $request)
     {
-        $books = Book::with([
+        $query = Book::with([
             'category',
             'subcategory',
-        ])
-            ->latest()
-            ->get();
+        ])->latest();
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEARCH
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('search')) {
+
+            $search = trim(
+                $request->input('search')
+            );
+
+            $query->where(function ($q) use ($search) {
+
+                $q->where(
+                    'title',
+                    'like',
+                    "%{$search}%"
+                )
+                    ->orWhere(
+                        'author',
+                        'like',
+                        "%{$search}%"
+                    )
+                    ->orWhere(
+                        'isbn',
+                        'like',
+                        "%{$search}%"
+                    )
+                    ->orWhere(
+                        'sku',
+                        'like',
+                        "%{$search}%"
+                    );
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER KATEGORI
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('category')) {
+
+            $query->where(
+                'category_id',
+                $request->input('category')
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | JUMLAH BUKU PER HALAMAN
+        |--------------------------------------------------------------------------
+        */
+
+        $perPage = (int) $request->input(
+            'per_page',
+            25
+        );
+
+        if (!in_array(
+            $perPage,
+            [12, 25, 50, 100],
+            true
+        )) {
+
+            $perPage = 25;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PAGINATION
+        |--------------------------------------------------------------------------
+        */
+
+        $books = $query
+            ->paginate($perPage)
+            ->withQueryString();
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA KATEGORI
+        |--------------------------------------------------------------------------
+        */
+
+        $categories = Category::orderBy(
+            'name'
+        )->get();
 
         return view(
             'books.index',
-            compact('books')
+            compact(
+                'books',
+                'categories'
+            )
         );
     }
 
@@ -51,19 +145,19 @@ class BookController extends Controller
 
                 return [
                     $category->id =>
-                        $category->subcategories
-                            ->map(function ($subcategory) {
+                    $category->subcategories
+                        ->map(function ($subcategory) {
 
-                                return [
-                                    'id' =>
-                                        $subcategory->id,
+                            return [
+                                'id' =>
+                                $subcategory->id,
 
-                                    'name' =>
-                                        $subcategory->name,
-                                ];
-                            })
-                            ->values()
-                            ->toArray(),
+                                'name' =>
+                                $subcategory->name,
+                            ];
+                        })
+                        ->values()
+                        ->toArray(),
                 ];
             })
             ->toArray();
@@ -79,6 +173,535 @@ class BookController extends Controller
                 'racks'
             )
         );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ISBN LOOKUP
+    |--------------------------------------------------------------------------
+    |
+    | Scan ISBN
+    |      ↓
+    | Google Books API
+    |      ↓
+    | Tidak ditemukan
+    |      ↓
+    | Open Library
+    |      ↓
+    | Tidak ditemukan
+    |      ↓
+    | ISBN tetap di form
+    |      ↓
+    | Isi data manual
+    |
+    */
+
+    public function isbnLookup(Request $request)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI & NORMALISASI ISBN
+        |--------------------------------------------------------------------------
+        */
+
+        $request->validate([
+            'isbn' => [
+                'required',
+                'string',
+                'regex:/^[0-9Xx -]{10,17}$/',
+            ],
+        ]);
+
+        $isbn = strtoupper(
+            preg_replace('/[^0-9Xx]/', '', $request->isbn)
+        );
+
+        if (!preg_match('/^(?:\d{10}|\d{13})$/', $isbn)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Format ISBN tidak valid.',
+            ], 422);
+        }
+
+        $apiKey = config('services.google_books.key');
+
+        /*
+        |--------------------------------------------------------------------------
+        | HELPER RESPONSE
+        |--------------------------------------------------------------------------
+        */
+
+        $makeResponse = function (
+            ?string $title,
+            ?string $author,
+            ?string $publisher,
+            ?int $publicationYear,
+            ?string $ddc,
+            ?string $edition,
+            ?string $description,
+            ?string $cover,
+            ?string $sourceUrl,
+            ?string $foundIsbn = null
+        ) use ($isbn) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'isbn' => $foundIsbn ?: $isbn,
+                    'title' => $title,
+                    'author' => $author,
+                    'publisher' => $publisher,
+                    'publication_year' => $publicationYear,
+                    'ddc' => $ddc,
+                    'edition' => $edition,
+                    'description' => $description,
+                    'cover' => $cover,
+                    'source_url' => $sourceUrl,
+                ],
+            ]);
+        };
+
+        /*
+        |--------------------------------------------------------------------------
+        | 1. GOOGLE BOOKS
+        |--------------------------------------------------------------------------
+        |
+        | Coba beberapa bentuk pencarian karena ada ISBN yang:
+        | - tidak ditemukan oleh q=isbn:...
+        | - tetapi bisa ditemukan oleh pencarian ISBN biasa.
+        |
+        */
+
+        if ($apiKey) {
+            try {
+                $isbnCandidates = [$isbn];
+
+                if (
+                    strlen($isbn) === 13 &&
+                    (
+                        str_starts_with($isbn, '978') ||
+                        str_starts_with($isbn, '979')
+                    )
+                ) {
+                    $isbn10 = $this->convertIsbn13ToIsbn10($isbn);
+
+                    if ($isbn10) {
+                        $isbnCandidates[] = $isbn10;
+                    }
+                }
+
+                $isbnCandidates = array_values(array_unique($isbnCandidates));
+
+                foreach ($isbnCandidates as $candidate) {
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SEARCH 1: ISBN FIELD
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $queries = [
+                        'isbn:' . $candidate,
+                        $candidate,
+                    ];
+
+                    foreach ($queries as $googleQuery) {
+                        $response = Http::timeout(10)
+                            ->acceptJson()
+                            ->get(
+                                'https://www.googleapis.com/books/v1/volumes',
+                                [
+                                    'q' => $googleQuery,
+                                    'maxResults' => 10,
+                                    'key' => $apiKey,
+                                ]
+                            );
+
+                        if (!$response->successful()) {
+                            \Log::warning(
+                                'Google Books API response error',
+                                [
+                                    'isbn' => $candidate,
+                                    'query' => $googleQuery,
+                                    'status' => $response->status(),
+                                ]
+                            );
+
+                            continue;
+                        }
+
+                        $items = $response->json('items', []);
+
+                        if (empty($items)) {
+                            continue;
+                        }
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | PILIH HASIL YANG ISBN-NYA COCOK
+                        |--------------------------------------------------------------------------
+                        |
+                        | Untuk pencarian biasa, Google Books bisa mengembalikan
+                        | buku yang tidak berkaitan. Jadi kita cek identifier dulu.
+                        |
+                        */
+
+                        $matchedItem = null;
+
+                        foreach ($items as $item) {
+                            $identifiers = collect(
+                                $item['volumeInfo']['industryIdentifiers'] ?? []
+                            )->pluck('identifier')
+                             ->map(fn ($value) => preg_replace('/[^0-9Xx]/', '', strtoupper($value)))
+                             ->all();
+
+                            if (
+                                in_array($candidate, $identifiers, true) ||
+                                in_array($isbn, $identifiers, true)
+                            ) {
+                                $matchedItem = $item;
+                                break;
+                            }
+                        }
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | KALAU SEARCH ISBN FIELD MENEMUKAN HASIL,
+                        | BOLEH GUNAKAN HASIL PERTAMA.
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if (
+                            !$matchedItem &&
+                            str_starts_with($googleQuery, 'isbn:') &&
+                            isset($items[0]['volumeInfo'])
+                        ) {
+                            $matchedItem = $items[0];
+                        }
+
+                        if (!$matchedItem || !isset($matchedItem['volumeInfo'])) {
+                            continue;
+                        }
+
+                        $volume = $matchedItem['volumeInfo'];
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | PENULIS
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $authors = collect($volume['authors'] ?? [])
+                            ->filter()
+                            ->implode(', ');
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | PENERBIT
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $publisher = $volume['publisher'] ?? null;
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | TAHUN TERBIT
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $publicationYear = null;
+
+                        if (!empty($volume['publishedDate'])) {
+                            if (
+                                preg_match(
+                                    '/\b(18|19|20)\d{2}\b/',
+                                    $volume['publishedDate'],
+                                    $matches
+                                )
+                            ) {
+                                $publicationYear = (int) $matches[0];
+                            }
+                        }
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | ISBN HASIL API
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $foundIsbn = $isbn;
+
+                        $identifiers = collect(
+                            $volume['industryIdentifiers'] ?? []
+                        );
+
+                        $isbn13Data = $identifiers->firstWhere('type', 'ISBN_13');
+                        $isbn10Data = $identifiers->firstWhere('type', 'ISBN_10');
+
+                        if ($isbn13Data) {
+                            $foundIsbn = preg_replace(
+                                '/[^0-9Xx]/',
+                                '',
+                                strtoupper($isbn13Data['identifier'])
+                            );
+                        } elseif ($isbn10Data) {
+                            $foundIsbn = preg_replace(
+                                '/[^0-9Xx]/',
+                                '',
+                                strtoupper($isbn10Data['identifier'])
+                            );
+                        }
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | COVER
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $cover = null;
+
+                        if (!empty($volume['imageLinks'])) {
+                            $cover =
+                                $volume['imageLinks']['thumbnail']
+                                ?? $volume['imageLinks']['smallThumbnail']
+                                ?? null;
+
+                            if ($cover) {
+                                $cover = str_replace(
+                                    'http://',
+                                    'https://',
+                                    $cover
+                                );
+                            }
+                        }
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | RETURN GOOGLE BOOKS
+                        |--------------------------------------------------------------------------
+                        */
+
+                        return $makeResponse(
+                            $volume['title'] ?? null,
+                            $authors ?: null,
+                            $publisher,
+                            $publicationYear,
+                            null,
+                            null,
+                            $volume['description'] ?? null,
+                            $cover,
+                            $matchedItem['selfLink'] ?? null,
+                            $foundIsbn
+                        );
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Log::warning(
+                    'Google Books ISBN Lookup Failed',
+                    [
+                        'isbn' => $isbn,
+                        'message' => $e->getMessage(),
+                    ]
+                );
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 2. OPEN LIBRARY
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+            $openLibrary = Http::timeout(10)
+                ->acceptJson()
+                ->withHeaders([
+                    'User-Agent' => 'Pustaka13 Library Management System',
+                ])
+                ->get(
+                    'https://openlibrary.org/api/books',
+                    [
+                        'bibkeys' => 'ISBN:' . $isbn,
+                        'jscmd' => 'data',
+                        'format' => 'json',
+                    ]
+                );
+
+            if ($openLibrary->successful()) {
+                $result = $openLibrary->json('ISBN:' . $isbn);
+
+                if ($result) {
+                    $title = $result['title'] ?? null;
+
+                    $authors = collect($result['authors'] ?? [])
+                        ->pluck('name')
+                        ->filter()
+                        ->implode(', ');
+
+                    $publisher = collect($result['publishers'] ?? [])
+                        ->pluck('name')
+                        ->filter()
+                        ->first();
+
+                    $publicationYear = null;
+
+                    if (!empty($result['publish_date'])) {
+                        if (
+                            preg_match(
+                                '/\b(18|19|20)\d{2}\b/',
+                                $result['publish_date'],
+                                $matches
+                            )
+                        ) {
+                            $publicationYear = (int) $matches[0];
+                        }
+                    }
+
+                    $ddc = collect(
+                        $result['classifications']['dewey_decimal_class'] ?? []
+                    )
+                        ->filter()
+                        ->first();
+
+                    $cover =
+                        $result['cover']['medium']
+                        ?? $result['cover']['large']
+                        ?? $result['cover']['small']
+                        ?? null;
+
+                    return $makeResponse(
+                        $title,
+                        $authors ?: null,
+                        $publisher ?: null,
+                        $publicationYear,
+                        $ddc ?: null,
+                        null,
+                        null,
+                        $cover,
+                        $result['url'] ?? null,
+                        $isbn
+                    );
+                }
+            }
+        } catch (\Throwable $e) {
+            \Log::warning(
+                'Open Library ISBN Lookup Failed',
+                [
+                    'isbn' => $isbn,
+                    'message' => $e->getMessage(),
+                ]
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 3. TIDAK DITEMUKAN
+        |--------------------------------------------------------------------------
+        |
+        | ISBN tetap dikembalikan supaya hasil scan tidak hilang.
+        |
+        */
+
+        return response()->json([
+            'success' => false,
+            'message' =>
+                'Data buku tidak ditemukan otomatis. ISBN sudah terisi, silakan lengkapi data buku secara manual.',
+            'data' => [
+                'isbn' => $isbn,
+            ],
+        ], 404);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONVERT ISBN-13 TO ISBN-10
+    |--------------------------------------------------------------------------
+    */
+
+    private function convertIsbn13ToIsbn10(
+        string $isbn13
+    ): ?string {
+
+        /*
+        |--------------------------------------------------------------------------
+        | ISBN-10 hanya bisa dihitung dari ISBN-13
+        | dengan prefix 978 atau 979.
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            strlen($isbn13) !== 13 ||
+            !in_array(
+                substr($isbn13, 0, 3),
+                ['978', '979'],
+                true
+            )
+        ) {
+
+            return null;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIL 9 DIGIT SETELAH PREFIX
+        |--------------------------------------------------------------------------
+        */
+
+        $digits =
+            substr(
+                $isbn13,
+                3,
+                9
+            );
+
+        if (
+            strlen($digits) !== 9 ||
+            !ctype_digit($digits)
+        ) {
+
+            return null;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG CHECK DIGIT
+        |--------------------------------------------------------------------------
+        */
+
+        $sum = 0;
+
+        for (
+            $i = 0;
+            $i < 9;
+            $i++
+        ) {
+
+            $sum +=
+                ((int) $digits[$i])
+                * (10 - $i);
+        }
+
+        $remainder =
+            11 -
+            ($sum % 11);
+
+        if ($remainder === 10) {
+
+            $checkDigit = 'X';
+
+        } elseif ($remainder === 11) {
+
+            $checkDigit = '0';
+
+        } else {
+
+            $checkDigit =
+                (string) $remainder;
+        }
+
+        return
+            $digits .
+            $checkDigit;
     }
 
 
@@ -190,7 +813,6 @@ class BookController extends Controller
             ],
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | VALIDASI SUBKATEGORI
@@ -210,7 +832,7 @@ class BookController extends Controller
                 )
                 ->exists();
 
-            if (! $validSubcategory) {
+            if (!$validSubcategory) {
 
                 return back()
                     ->withInput()
@@ -220,7 +842,6 @@ class BookController extends Controller
                     ]);
             }
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -241,29 +862,10 @@ class BookController extends Controller
                     );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | SIMPAN BUKU + BOOK COPY
         |--------------------------------------------------------------------------
-        |
-        | Semua proses dibuat dalam satu transaction.
-        |
-        | Contoh:
-        |
-        | stock = 3
-        |
-        | maka:
-        |
-        | books
-        |   stock = 3
-        |   available_stock = 3
-        |
-        | book_copies
-        |   copy 1 = available
-        |   copy 2 = available
-        |   copy 3 = available
-        |
         */
 
         DB::transaction(function () use (
@@ -328,17 +930,56 @@ class BookController extends Controller
                     $request->edition,
             ]);
 
+            /*
+            |--------------------------------------------------------------------------
+            | CARI SHELF BERDASARKAN RAK
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                preg_match(
+                    '/^([A-Za-z]+)(\d+)$/',
+                    $request->rak,
+                    $matches
+                )
+            ) {
+
+                $shelfCode =
+                    strtoupper($matches[1]) .
+                    '-' .
+                    str_pad(
+                        $matches[2],
+                        2,
+                        '0',
+                        STR_PAD_LEFT
+                    );
+
+            } else {
+
+                throw new \Exception(
+                    'Format kode rak tidak valid.'
+                );
+            }
+
+            $shelf =
+                Shelf::where(
+                    'code',
+                    $shelfCode
+                )->first();
+
+            if (!$shelf) {
+
+                throw new \Exception(
+                    'Rak ' .
+                        $request->rak .
+                        ' belum memiliki lokasi shelf.'
+                );
+            }
 
             /*
             |--------------------------------------------------------------------------
-            | BUAT BOOK COPY OTOMATIS
+            | BUAT BOOK COPY
             |--------------------------------------------------------------------------
-            |
-            | Satu stock = satu eksemplar fisik.
-            |
-            | Lokasi belum diisi karena lokasi fisik
-            | harus ditentukan melalui menu Kelola Eksemplar.
-            |
             */
 
             for (
@@ -346,6 +987,99 @@ class BookController extends Controller
                 $i < $request->stock;
                 $i++
             ) {
+
+                $position = null;
+
+                /*
+                |--------------------------------------------------------------------------
+                | CARI SLOT KOSONG
+                |--------------------------------------------------------------------------
+                */
+
+                foreach ([1, 2] as $section) {
+
+                    foreach (
+                        ['front', 'back']
+                        as $side
+                    ) {
+
+                        foreach (
+                            [1, 2, 3]
+                            as $row
+                        ) {
+
+                            foreach (
+                                range(1, 30)
+                                as $column
+                            ) {
+
+                                $exists =
+                                    BookCopy::where(
+                                        'shelf_id',
+                                        $shelf->id
+                                    )
+                                    ->where(
+                                        'section',
+                                        $section
+                                    )
+                                    ->where(
+                                        'side',
+                                        $side
+                                    )
+                                    ->where(
+                                        'row',
+                                        $row
+                                    )
+                                    ->where(
+                                        'column',
+                                        $column
+                                    )
+                                    ->exists();
+
+                                if (!$exists) {
+
+                                    $position = [
+
+                                        'section' =>
+                                            $section,
+
+                                        'side' =>
+                                            $side,
+
+                                        'row' =>
+                                            $row,
+
+                                        'column' =>
+                                            $column,
+                                    ];
+
+                                    break 4;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | RAK PENUH
+                |--------------------------------------------------------------------------
+                */
+
+                if (!$position) {
+
+                    throw new \Exception(
+                        'Rak ' .
+                            $request->rak .
+                            ' sudah penuh.'
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | BUAT COPY
+                |--------------------------------------------------------------------------
+                */
 
                 BookCopy::create([
 
@@ -359,23 +1093,22 @@ class BookController extends Controller
                         'available',
 
                     'shelf_id' =>
-                        null,
+                        $shelf->id,
 
                     'section' =>
-                        1,
+                        $position['section'],
 
                     'side' =>
-                        'front',
+                        $position['side'],
 
                     'row' =>
-                        null,
+                        $position['row'],
 
                     'column' =>
-                        null,
+                        $position['column'],
                 ]);
             }
         });
-
 
         /*
         |--------------------------------------------------------------------------
@@ -522,7 +1255,6 @@ class BookController extends Controller
             ],
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | VALIDASI SUBKATEGORI
@@ -542,7 +1274,7 @@ class BookController extends Controller
                 )
                 ->exists();
 
-            if (! $validSubcategory) {
+            if (!$validSubcategory) {
 
                 return back()
                     ->withInput()
@@ -553,7 +1285,6 @@ class BookController extends Controller
             }
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | HITUNG BUKU YANG SEDANG DIPINJAM
@@ -563,7 +1294,6 @@ class BookController extends Controller
         $borrowed =
             $book->stock -
             $book->available_stock;
-
 
         /*
         |--------------------------------------------------------------------------
@@ -581,7 +1311,6 @@ class BookController extends Controller
                 ]);
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | HITUNG AVAILABLE STOCK
@@ -591,7 +1320,6 @@ class BookController extends Controller
         $availableStock =
             $request->stock -
             $borrowed;
-
 
         /*
         |--------------------------------------------------------------------------
@@ -611,7 +1339,6 @@ class BookController extends Controller
                         'public'
                     );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -692,7 +1419,6 @@ class BookController extends Controller
                     $request->edition,
             ]);
 
-
             /*
             |--------------------------------------------------------------------------
             | JUMLAH BOOK COPY SAAT INI
@@ -704,7 +1430,6 @@ class BookController extends Controller
                     'book_id',
                     $book->id
                 )->count();
-
 
             /*
             |--------------------------------------------------------------------------
@@ -720,7 +1445,6 @@ class BookController extends Controller
                 $difference =
                     $request->stock -
                     $copyCount;
-
 
                 for (
                     $i = 0;
@@ -757,23 +1481,10 @@ class BookController extends Controller
                 }
             }
 
-
             /*
             |--------------------------------------------------------------------------
             | JIKA STOCK BERKURANG
             |--------------------------------------------------------------------------
-            |
-            | Jangan hapus copy yang sedang:
-            |
-            | borrowed
-            | reserved
-            | lost
-            | damaged
-            | maintenance
-            |
-            | Hanya hapus copy AVAILABLE tanpa lokasi
-            | jika memang jumlah copy melebihi stock.
-            |
             */
 
             elseif (
@@ -784,7 +1495,6 @@ class BookController extends Controller
                 $difference =
                     $copyCount -
                     $request->stock;
-
 
                 $copiesToDelete =
                     BookCopy::where(
@@ -802,7 +1512,6 @@ class BookController extends Controller
                     ->take($difference)
                     ->get();
 
-
                 foreach (
                     $copiesToDelete
                     as $copy
@@ -812,7 +1521,6 @@ class BookController extends Controller
                 }
             }
         });
-
 
         /*
         |--------------------------------------------------------------------------
@@ -835,15 +1543,73 @@ class BookController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function destroy(Book $book)
-    {
-        $book->delete();
+    public function destroy(
+        Request $request,
+        Book $book
+    ) {
+
+        $validated = $request->validate([
+
+            'reason' => [
+                'required',
+                'string',
+                'max:500',
+            ],
+
+        ]);
+
+        DB::transaction(function () use (
+            $book,
+            $validated
+        ) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | SIMPAN HISTORI PENARIKAN
+            |--------------------------------------------------------------------------
+            */
+
+            \App\Models\CollectionWithdrawal::create([
+
+                'type' =>
+                    'book',
+
+                'book_id' =>
+                    $book->id,
+
+                'book_copy_id' =>
+                    null,
+
+                'book_title' =>
+                    $book->title,
+
+                'barcode' =>
+                    null,
+
+                'quantity' =>
+                    $book->copies()->count(),
+
+                'reason' =>
+                    $validated['reason'],
+
+                'withdrawn_at' =>
+                    now(),
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | SOFT DELETE BUKU
+            |--------------------------------------------------------------------------
+            */
+
+            $book->delete();
+        });
 
         return redirect()
             ->route('books.index')
             ->with(
                 'success',
-                'Buku berhasil dihapus.'
+                'Buku berhasil ditarik dari koleksi.'
             );
     }
 }

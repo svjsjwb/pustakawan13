@@ -20,7 +20,7 @@ use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\ActivityController;
-
+use App\Http\Controllers\BookLocatorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -151,10 +151,12 @@ Route::middleware(['admin', 'no.back'])
     |--------------------------------------------------------------------------
     */
 
-        Route::resource(
-            'books',
-            BookController::class
-        );
+        Route::get('/books/isbn-lookup', [
+            BookController::class,
+            'isbnLookup'
+        ])->name('books.isbn.lookup');
+
+        Route::resource('books', BookController::class);
 
 
         /*
@@ -279,10 +281,17 @@ Route::middleware(['admin', 'no.back'])
             'destroy'
         ])->name('reservations.destroy');
 
-        Route::get('/reservations/{reservation}/locator', [
-            ReservationController::class,
-            'locator'
-        ])->name('reservations.locator');
+
+        /*
+|--------------------------------------------------------------------------
+| BOOK LOCATOR 3D
+|--------------------------------------------------------------------------
+*/
+
+        Route::get('/book-locator/{reservation}', [
+            BookLocatorController::class,
+            'show'
+        ])->name('book-locator.show');
 
 
         /*
@@ -375,6 +384,10 @@ Route::middleware(['admin', 'no.back'])
     | AKTIVITAS ADMIN
     |--------------------------------------------------------------------------
     */
+        Route::get('/activities', [
+            ActivityController::class,
+            'index'
+        ])->name('activities.index');
 
         Route::post('/activities', [
             ActivityController::class,

@@ -1058,6 +1058,315 @@ input[type="number"] {
 
 
 /* =========================================================
+   MODAL KONFIRMASI PERPANJANGAN
+========================================================= */
+
+.extend-confirm-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    visibility: hidden;
+    opacity: 0;
+
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
+}
+
+
+.extend-confirm-modal.open {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+.extend-confirm-overlay {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(25, 47, 47, 0.58);
+
+    backdrop-filter: blur(5px);
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.extend-confirm-card {
+    position: relative;
+    z-index: 1;
+
+    width: min(100%, 520px);
+
+    background: #ffffff;
+
+    border-radius: 22px;
+
+    padding: 38px 42px 34px;
+
+    text-align: center;
+
+    box-shadow:
+        0 24px 70px rgba(20, 50, 50, 0.25);
+
+    transform:
+        translateY(12px)
+        scale(0.97);
+
+    transition:
+        transform 0.22s ease;
+}
+
+
+.extend-confirm-modal.open
+.extend-confirm-card {
+
+    transform:
+        translateY(0)
+        scale(1);
+}
+
+
+/* =========================================================
+   ICON
+========================================================= */
+
+.extend-confirm-icon {
+
+    width: 76px;
+    height: 76px;
+
+    margin: 0 auto 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e8f5f5;
+
+    color: #287f80;
+}
+
+
+.extend-confirm-icon svg {
+
+    width: 38px;
+    height: 38px;
+}
+
+
+/* =========================================================
+   LABEL
+========================================================= */
+
+.extend-confirm-label {
+
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: #287f80;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 3px;
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.extend-confirm-card h3 {
+
+    margin: 0 0 12px;
+
+    color: #19364f;
+
+    font-size: 28px;
+    font-weight: 800;
+
+    line-height: 1.25;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.extend-confirm-description {
+
+    margin: 0 auto 30px;
+
+    max-width: 390px;
+
+    color: #71828f;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+}
+
+
+.extend-confirm-description strong {
+
+    color: #287f80;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+.extend-confirm-actions {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 12px;
+}
+
+
+.extend-confirm-cancel,
+.extend-confirm-submit {
+
+    min-width: 145px;
+
+    height: 48px;
+
+    padding: 0 22px;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        all 0.2s ease;
+}
+
+
+/* BATAL */
+
+.extend-confirm-cancel {
+
+    background: #ffffff;
+
+    border: 1px solid #d5e1e1;
+
+    color: #60727c;
+}
+
+
+.extend-confirm-cancel:hover {
+
+    background: #f4f8f8;
+
+    border-color: #c4d4d4;
+
+    color: #40545d;
+}
+
+
+/* YA PERPANJANG */
+
+.extend-confirm-submit {
+
+    background: #287f80;
+
+    border: 1px solid #287f80;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 5px 14px rgba(
+            40,
+            127,
+            128,
+            0.18
+        );
+}
+
+
+.extend-confirm-submit:hover {
+
+    background: #236f70;
+
+    border-color: #236f70;
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 7px 18px rgba(
+            40,
+            127,
+            128,
+            0.25
+        );
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .extend-confirm-card {
+
+        padding:
+            30px 24px 26px;
+
+        border-radius: 18px;
+    }
+
+
+    .extend-confirm-card h3 {
+
+        font-size: 23px;
+    }
+
+
+    .extend-confirm-actions {
+
+        flex-direction: column;
+    }
+
+
+    .extend-confirm-cancel,
+    .extend-confirm-submit {
+
+        width: 100%;
+    }
+
+}
+
+/* =========================================================
    MOBILE
 ========================================================= */
 

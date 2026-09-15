@@ -35,9 +35,9 @@ return new class extends Migration
             $table->date('registered_at')->nullable();
 
             $table->enum('status', [
-                'Aktif',
-                'Tidak Aktif'
-            ])->default('Tidak Aktif');
+                'aktif',
+                'nonaktif'
+            ])->default('nonaktif');
 
             $table->timestamps();
         });

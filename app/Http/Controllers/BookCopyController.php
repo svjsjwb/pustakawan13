@@ -6,13 +6,18 @@ use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\LibraryFloor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Models\CollectionWithdrawal;
 
 class BookCopyController extends Controller
 {
-    /**
-     * Menampilkan semua eksemplar dari sebuah buku.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
+
     public function index(Book $book)
     {
         $copies = $book->copies()
@@ -20,16 +25,22 @@ class BookCopyController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('book_copies.index', compact(
-            'book',
-            'copies'
-        ));
+        return view(
+            'book_copies.index',
+            compact(
+                'book',
+                'copies'
+            )
+        );
     }
 
 
-    /**
-     * Form tambah eksemplar.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE
+    |--------------------------------------------------------------------------
+    */
+
     public function create(Book $book)
     {
         $floors = LibraryFloor::with(
@@ -38,223 +49,435 @@ class BookCopyController extends Controller
             ->orderBy('floor_number')
             ->get();
 
-        return view('book_copies.create', compact(
-            'book',
-            'floors'
-        ));
+        return view(
+            'book_copies.create',
+            compact(
+                'book',
+                'floors'
+            )
+        );
     }
 
 
-    /**
-     * Simpan eksemplar baru.
-     */
-    public function store(
-        Request $request,
-        Book $book
-    ) {
-        $validated = $request->validate([
+    /*
+    |--------------------------------------------------------------------------
+    | POSITION KEY
+    |--------------------------------------------------------------------------
+    */
 
-            /*
-            |--------------------------------------------------------------------------
-            | BARCODE
-            |--------------------------------------------------------------------------
-            */
+    private function positionKey(
+        int $section,
+        string $side,
+        int $row,
+        int $column
+    ): string {
 
-            'barcode' => [
-                'nullable',
-                'string',
-                'max:100',
-                'unique:book_copies,barcode',
-            ],
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS
-            |--------------------------------------------------------------------------
-            */
-
-            'status' => [
-                'required',
-
-                Rule::in([
-                    'available',
-                    'reserved',
-                    'borrowed',
-                    'lost',
-                    'damaged',
-                    'maintenance',
-                ]),
-            ],
+        return implode('|', [
+            $section,
+            $side,
+            $row,
+            $column,
+        ]);
+    }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | SHELF
-            |--------------------------------------------------------------------------
-            */
+    /*
+    |--------------------------------------------------------------------------
+    | GENERATE SLOT
+    |--------------------------------------------------------------------------
+    */
 
-            'shelf_id' => [
-                'nullable',
-                'exists:shelves,id',
-            ],
+    private function getAllSlots(): array
+    {
+        $slots = [];
 
+        $slotIndex = 0;
 
-            /*
-            |--------------------------------------------------------------------------
-            | SECTION
-            |--------------------------------------------------------------------------
-            |
-            | 1 = A-01
-            | 2 = A-02
-            |
-            | Tetap menggunakan sistem section lama.
-            |--------------------------------------------------------------------------
-            */
+        foreach ([1, 2] as $section) {
 
-            'section' => [
-                'required',
-                'integer',
-                'in:1,2',
-            ],
+            foreach (['front', 'back'] as $side) {
 
+                foreach ([1, 2, 3] as $row) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | SIDE / MUKA RAK
-            |--------------------------------------------------------------------------
-            */
+                    foreach (range(1, 30) as $column) {
 
-            'side' => [
-                'required',
-                Rule::in([
-                    'front',
-                    'back',
-                ]),
-            ],
+                        $slotIndex++;
 
+                        $slots[] = [
+                            'index' => $slotIndex,
 
-            /*
-            |--------------------------------------------------------------------------
-            | ROW
-            |--------------------------------------------------------------------------
-            |
-            | 3 baris:
-            |
-            | 1 = atas
-            | 2 = tengah
-            | 3 = bawah
-            |--------------------------------------------------------------------------
-            */
+                            'section' => $section,
 
-            'row' => [
-                'nullable',
-                'integer',
-                'min:1',
-                'max:3',
-            ],
+                            'side' => $side,
+
+                            'row' => $row,
+
+                            'column' => $column,
+
+                            'key' => $this->positionKey(
+                                $section,
+                                $side,
+                                $row,
+                                $column
+                            ),
+                        ];
+                    }
+                }
+            }
+        }
+
+        return $slots;
+    }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | COLUMN
-            |--------------------------------------------------------------------------
-            |
-            | Setiap section:
-            |
-            | 30 kolom.
-            |--------------------------------------------------------------------------
-            */
+    /*
+    |--------------------------------------------------------------------------
+    | AUTO POSITION
+    |--------------------------------------------------------------------------
+    */
 
-            'column' => [
-                'nullable',
-                'integer',
-                'min:1',
-                'max:30',
-            ],
+    private function findAutomaticPosition(
+        int $shelfId,
+        int $bookId,
+        ?int $ignoreCopyId = null
+    ): ?array {
 
+        $copiesQuery = BookCopy::query()
+            ->where(
+                'shelf_id',
+                $shelfId
+            )
+            ->whereNotNull('section')
+            ->whereNotNull('side')
+            ->whereNotNull('row')
+            ->whereNotNull('column');
+
+        if ($ignoreCopyId !== null) {
+
+            $copiesQuery->where(
+                'id',
+                '!=',
+                $ignoreCopyId
+            );
+        }
+
+
+        $existingCopies = $copiesQuery->get([
+            'id',
+            'book_id',
+            'section',
+            'side',
+            'row',
+            'column',
         ]);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | CEK POSISI
-        |--------------------------------------------------------------------------
-        |
-        | Satu posisi fisik tidak boleh ditempati
-        | oleh dua BookCopy.
-        |
-        | Identitas posisi:
-        |
-        | shelf_id
-        | section
-        | side
-        | row
-        | column
-        |--------------------------------------------------------------------------
-        */
+        $occupied = [];
 
-        if (
-            !empty($validated['shelf_id']) &&
-            !empty($validated['row']) &&
-            !empty($validated['column'])
-        ) {
+        foreach ($existingCopies as $copy) {
 
-            $positionExists =
-                BookCopy::query()
-                ->where(
-                    'shelf_id',
-                    $validated['shelf_id']
-                )
-                ->where(
-                    'section',
-                    $validated['section']
-                )
-                ->where(
-                    'side',
-                    $validated['side']
-                )
-                ->where(
-                    'row',
-                    $validated['row']
-                )
-                ->where(
-                    'column',
-                    $validated['column']
-                )
-                ->exists();
+            $key = $this->positionKey(
+                (int) $copy->section,
+                $copy->side,
+                (int) $copy->row,
+                (int) $copy->column
+            );
+
+            $occupied[$key] = [
+                'book_id' => (int) $copy->book_id,
+                'index' => null,
+            ];
+        }
 
 
-            if (
-                $positionExists
-            ) {
+        $slots = $this->getAllSlots();
 
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'column' =>
-                        'Posisi rak tersebut sudah ditempati buku lain.',
-                    ]);
+
+        foreach ($slots as $slot) {
+
+            if (isset($occupied[$slot['key']])) {
+
+                $occupied[$slot['key']]['index'] =
+                    $slot['index'];
             }
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN
-        |--------------------------------------------------------------------------
-        */
+        $sameBookIndexes = [];
 
-        $book->copies()->create(
-            $validated
+        foreach ($occupied as $occupiedPosition) {
+
+            if (
+                $occupiedPosition['book_id'] === $bookId
+            ) {
+
+                $sameBookIndexes[] =
+                    $occupiedPosition['index'];
+            }
+        }
+
+
+        $emptySlots = [];
+
+        foreach ($slots as $slot) {
+
+            if (!isset($occupied[$slot['key']])) {
+
+                $emptySlots[] = $slot;
+            }
+        }
+
+
+        if (empty($emptySlots)) {
+
+            return null;
+        }
+
+
+        if (empty($sameBookIndexes)) {
+
+            return $emptySlots[0];
+        }
+
+
+        usort(
+            $emptySlots,
+            function (
+                array $a,
+                array $b
+            ) use (
+                $sameBookIndexes
+            ) {
+
+                $distanceA =
+                    PHP_INT_MAX;
+
+                $distanceB =
+                    PHP_INT_MAX;
+
+
+                foreach (
+                    $sameBookIndexes
+                    as $sameIndex
+                ) {
+
+                    $distanceA = min(
+                        $distanceA,
+                        abs(
+                            $a['index'] -
+                                $sameIndex
+                        )
+                    );
+
+                    $distanceB = min(
+                        $distanceB,
+                        abs(
+                            $b['index'] -
+                                $sameIndex
+                        )
+                    );
+                }
+
+
+                if (
+                    $distanceA ===
+                    $distanceB
+                ) {
+
+                    return
+                        $a['index'] <=>
+                        $b['index'];
+                }
+
+
+                return
+                    $distanceA <=>
+                    $distanceB;
+            }
         );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT
-        |--------------------------------------------------------------------------
-        */
+        return $emptySlots[0];
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SYNC STOCK
+    |--------------------------------------------------------------------------
+    */
+
+    private function syncBookStock(
+        Book $book
+    ): void {
+
+        $stock =
+            $book->copies()->count();
+
+
+        $availableStock =
+            $book->copies()
+            ->where(
+                'status',
+                'available'
+            )
+            ->count();
+
+
+        $book->update([
+
+            'stock' =>
+            $stock,
+
+            'available_stock' =>
+            $availableStock,
+
+        ]);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STORE
+    |--------------------------------------------------------------------------
+    */
+
+    public function store(
+        Request $request,
+        Book $book
+    ) {
+
+        $validated =
+            $request->validate([
+
+                /*
+                |--------------------------------------------------------------------------
+                | BARCODE
+                |--------------------------------------------------------------------------
+                */
+
+                'barcode' => [
+                    'required',
+                    'string',
+                    'max:100',
+
+                    'unique:book_copies,barcode',
+                ],
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | STATUS
+                |--------------------------------------------------------------------------
+                */
+
+                'status' => [
+                    'required',
+
+                    Rule::in([
+                        'available',
+                        'reserved',
+                        'borrowed',
+                        'lost',
+                        'damaged',
+                        'maintenance',
+                    ]),
+                ],
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | CONDITION
+                |--------------------------------------------------------------------------
+                */
+
+                'condition' => [
+                    'required',
+
+                    Rule::in([
+                        'baik',
+                        'rusak',
+                    ]),
+                ],
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RAK
+                |--------------------------------------------------------------------------
+                */
+
+                'shelf_id' => [
+                    'required',
+                    'integer',
+                    'exists:shelves,id',
+                ],
+
+            ]);
+
+
+        $position =
+            $this->findAutomaticPosition(
+                (int) $validated['shelf_id'],
+                (int) $book->id
+            );
+
+
+        if (
+            $position === null
+        ) {
+
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'shelf_id' =>
+                    'Rak yang dipilih sudah penuh. Silakan pilih rak lain.',
+                ]);
+        }
+
+
+        DB::transaction(
+            function () use (
+                $book,
+                $validated,
+                $position
+            ) {
+
+                $book->copies()->create([
+
+                    'barcode' =>
+                    $validated['barcode'],
+
+                    'status' =>
+                    $validated['status'],
+
+                    'condition' =>
+                    $validated['condition'],
+
+                    'shelf_id' =>
+                    $validated['shelf_id'],
+
+                    'section' =>
+                    $position['section'],
+
+                    'side' =>
+                    $position['side'],
+
+                    'row' =>
+                    $position['row'],
+
+                    'column' =>
+                    $position['column'],
+
+                ]);
+
+
+                $this->syncBookStock(
+                    $book
+                );
+            }
+        );
+
 
         return redirect()
             ->route(
@@ -268,18 +491,16 @@ class BookCopyController extends Controller
     }
 
 
-    /**
-     * Form edit lokasi/status eksemplar.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | EDIT
+    |--------------------------------------------------------------------------
+    */
+
     public function edit(
         Book $book,
         BookCopy $copy
     ) {
-        /*
-        |--------------------------------------------------------------------------
-        | PASTIKAN COPY MILIK BUKU
-        |--------------------------------------------------------------------------
-        */
 
         abort_unless(
             $copy->book_id === $book->id,
@@ -287,16 +508,13 @@ class BookCopyController extends Controller
         );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATA LANTAI / ZONA / RAK
-        |--------------------------------------------------------------------------
-        */
-
-        $floors = LibraryFloor::with(
-            'zones.shelves'
-        )
-            ->orderBy('floor_number')
+        $floors =
+            LibraryFloor::with(
+                'zones.shelves'
+            )
+            ->orderBy(
+                'floor_number'
+            )
             ->get();
 
 
@@ -311,19 +529,17 @@ class BookCopyController extends Controller
     }
 
 
-    /**
-     * Update eksemplar.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
+
     public function update(
         Request $request,
         Book $book,
         BookCopy $copy
     ) {
-        /*
-        |--------------------------------------------------------------------------
-        | PASTIKAN COPY MILIK BUKU
-        |--------------------------------------------------------------------------
-        */
 
         abort_unless(
             $copy->book_id === $book->id,
@@ -331,206 +547,165 @@ class BookCopyController extends Controller
         );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI
-        |--------------------------------------------------------------------------
-        */
+        $validated =
+            $request->validate([
 
-        $validated = $request->validate([
+                /*
+                |--------------------------------------------------------------------------
+                | BARCODE
+                |--------------------------------------------------------------------------
+                */
 
-            /*
-            |--------------------------------------------------------------------------
-            | BARCODE
-            |--------------------------------------------------------------------------
-            */
+                'barcode' => [
+                    'required',
+                    'string',
+                    'max:100',
 
-            'barcode' => [
-                'nullable',
-                'string',
-                'max:100',
-
-                Rule::unique(
-                    'book_copies',
-                    'barcode'
-                )->ignore(
-                    $copy->id
-                ),
-            ],
+                    Rule::unique(
+                        'book_copies',
+                        'barcode'
+                    )->ignore(
+                        $copy->id
+                    ),
+                ],
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS
-            |--------------------------------------------------------------------------
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | STATUS
+                |--------------------------------------------------------------------------
+                */
 
-            'status' => [
-                'required',
+                'status' => [
+                    'required',
 
-                Rule::in([
-                    'available',
-                    'reserved',
-                    'borrowed',
-                    'lost',
-                    'damaged',
-                    'maintenance',
-                ]),
-            ],
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | SHELF
-            |--------------------------------------------------------------------------
-            */
-
-            'shelf_id' => [
-                'nullable',
-                'exists:shelves,id',
-            ],
+                    Rule::in([
+                        'available',
+                        'reserved',
+                        'borrowed',
+                        'lost',
+                        'damaged',
+                        'maintenance',
+                    ]),
+                ],
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | SECTION
-            |--------------------------------------------------------------------------
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | CONDITION
+                |--------------------------------------------------------------------------
+                */
 
-            'section' => [
-                'required',
-                'integer',
-                'in:1,2',
-            ],
+                'condition' => [
+                    'required',
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | SIDE
-            |--------------------------------------------------------------------------
-            */
-
-            'side' => [
-                'required',
-                Rule::in([
-                    'front',
-                    'back',
-                ]),
-            ],
+                    Rule::in([
+                        'baik',
+                        'rusak',
+                    ]),
+                ],
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | ROW
-            |--------------------------------------------------------------------------
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | RAK
+                |--------------------------------------------------------------------------
+                */
 
-            'row' => [
-                'nullable',
-                'integer',
-                'min:1',
-                'max:3',
-            ],
+                'shelf_id' => [
+                    'required',
+                    'integer',
+                    'exists:shelves,id',
+                ],
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | COLUMN
-            |--------------------------------------------------------------------------
-            */
-
-            'column' => [
-                'nullable',
-                'integer',
-                'min:1',
-                'max:30',
-            ],
-
-        ]);
+            ]);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | CEK DUPLIKASI POSISI
-        |--------------------------------------------------------------------------
-        |
-        | Copy yang sedang diedit dikecualikan.
-        |--------------------------------------------------------------------------
-        */
+        $oldShelfId =
+            $copy->shelf_id !== null
+            ? (int) $copy->shelf_id
+            : null;
+
+
+        $newShelfId =
+            (int) $validated['shelf_id'];
+
+
+        $updateData = [
+
+            'barcode' =>
+            $validated['barcode'],
+
+            'status' =>
+            $validated['status'],
+
+            'condition' =>
+            $validated['condition'],
+
+            'shelf_id' =>
+            $newShelfId,
+
+        ];
+
 
         if (
-            !empty($validated['shelf_id']) &&
-            !empty($validated['row']) &&
-            !empty($validated['column'])
+            $oldShelfId !==
+            $newShelfId
         ) {
 
-            $positionExists =
-                BookCopy::query()
-
-                ->where(
-                    'shelf_id',
-                    $validated['shelf_id']
-                )
-
-                ->where(
-                    'section',
-                    $validated['section']
-                )
-
-                ->where(
-                    'side',
-                    $validated['side']
-                )
-
-                ->where(
-                    'row',
-                    $validated['row']
-                )
-
-                ->where(
-                    'column',
-                    $validated['column']
-                )
-
-                ->where(
-                    'id',
-                    '!=',
+            $position =
+                $this->findAutomaticPosition(
+                    $newShelfId,
+                    (int) $book->id,
                     $copy->id
-                )
-
-                ->exists();
+                );
 
 
             if (
-                $positionExists
+                $position === null
             ) {
 
                 return back()
                     ->withInput()
                     ->withErrors([
-                        'column' =>
-                        'Posisi rak tersebut sudah ditempati buku lain.',
+                        'shelf_id' =>
+                        'Rak yang dipilih sudah penuh. Silakan pilih rak lain.',
                     ]);
             }
+
+
+            $updateData['section'] =
+                $position['section'];
+
+            $updateData['side'] =
+                $position['side'];
+
+            $updateData['row'] =
+                $position['row'];
+
+            $updateData['column'] =
+                $position['column'];
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE
-        |--------------------------------------------------------------------------
-        */
+        DB::transaction(
+            function () use (
+                $book,
+                $copy,
+                $updateData
+            ) {
 
-        $copy->update(
-            $validated
+                $copy->update(
+                    $updateData
+                );
+
+
+                $this->syncBookStock(
+                    $book
+                );
+            }
         );
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT
-        |--------------------------------------------------------------------------
-        */
 
         return redirect()
             ->route(
@@ -540,6 +715,173 @@ class BookCopyController extends Controller
             ->with(
                 'success',
                 'Eksemplar buku berhasil diperbarui.'
+            );
+    }
+
+
+    /*
+|--------------------------------------------------------------------------
+| DESTROY
+|--------------------------------------------------------------------------
+|
+| Hapus eksemplar dengan alasan.
+|
+*/
+
+    public function destroy(
+        Request $request,
+        Book $book,
+        BookCopy $copy
+    ) {
+
+        /*
+    |--------------------------------------------------------------------------
+    | PASTIKAN COPY MILIK BUKU
+    |--------------------------------------------------------------------------
+    */
+
+        abort_unless(
+            $copy->book_id === $book->id,
+            404
+        );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | VALIDASI ALASAN
+    |--------------------------------------------------------------------------
+    */
+
+        $validated =
+            $request->validate([
+                'reason' => [
+                    'required',
+                    'string',
+                    'max:500',
+                ],
+            ]);
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | JANGAN HAPUS YANG SEDANG DIPINJAM
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            $copy->status === 'borrowed'
+        ) {
+
+            return back()
+                ->withErrors([
+                    'copy' =>
+                    'Eksemplar yang sedang dipinjam tidak dapat dihapus.',
+                ]);
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | JANGAN HAPUS YANG SEDANG DIRESEVASI
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            $copy->status === 'reserved'
+        ) {
+
+            return back()
+                ->withErrors([
+                    'copy' =>
+                    'Eksemplar yang sedang direservasi tidak dapat dihapus.',
+                ]);
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | SIMPAN DATA HISTORI SEBELUM COPY DIHAPUS
+    |--------------------------------------------------------------------------
+    |
+    | book_title dan barcode disimpan sebagai snapshot.
+    |
+    | Jadi meskipun BookCopy sudah dihapus,
+    | laporan tetap mengetahui eksemplar yang pernah ditarik.
+    |
+    */
+
+        DB::transaction(
+            function () use (
+                $book,
+                $copy,
+                $validated
+            ) {
+
+                CollectionWithdrawal::create([
+
+                    'type' =>
+                    'copy',
+
+                    'book_id' =>
+                    $book->id,
+
+                    'book_copy_id' =>
+                    $copy->id,
+
+                    'book_title' =>
+                    $book->title,
+
+                    'barcode' =>
+                    $copy->barcode,
+
+                    'quantity' =>
+                    1,
+
+                    'reason' =>
+                    $validated['reason'],
+
+                    'withdrawn_at' =>
+                    now(),
+
+                ]);
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | HAPUS COPY
+            |--------------------------------------------------------------------------
+            */
+
+                $copy->delete();
+
+
+                /*
+            |--------------------------------------------------------------------------
+            | HITUNG ULANG STOCK
+            |--------------------------------------------------------------------------
+            */
+
+                $this->syncBookStock(
+                    $book
+                );
+            }
+        );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | REDIRECT
+    |--------------------------------------------------------------------------
+    */
+
+        return redirect()
+            ->route(
+                'books.copies.index',
+                $book
+            )
+            ->with(
+                'success',
+                'Eksemplar buku berhasil dihapus dari koleksi.'
             );
     }
 }
