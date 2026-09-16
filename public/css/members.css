@@ -217,6 +217,19 @@
     font-weight: 500;
 }
 
+.alert-success svg {
+    width: 18px !important;
+    height: 18px !important;
+
+    min-width: 18px;
+    min-height: 18px;
+
+    max-width: 18px;
+    max-height: 18px;
+
+    flex-shrink: 0;
+}
+
 .alert-error {
     background: #fef2f2;
 

@@ -129,6 +129,129 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        /*
+         * ========================================================
+         * BUKU TERPOPULER
+         * ========================================================
+         *
+         * Popularitas = jumlah peminjaman + jumlah reservasi valid.
+         * Reservasi ditolak/dibatalkan tidak dihitung.
+         *
+         * Jika total aktivitas sama, peminjaman lebih banyak
+         * menjadi prioritas.
+         */
+
+        $borrowingCounts = collect();
+
+        $allBorrowings =
+            Borrowing::with('details')
+                ->get();
+
+        foreach ($allBorrowings as $borrowing) {
+
+            foreach ($borrowing->details as $detail) {
+
+                $bookId =
+                    $detail->book_id;
+
+                $quantity =
+                    $detail->quantity ?? 1;
+
+                $borrowingCounts[$bookId] =
+                    ($borrowingCounts[$bookId] ?? 0)
+                    + $quantity;
+            }
+        }
+
+
+        $reservationCounts =
+            Reservation::whereNotIn(
+                'status',
+                [
+                    'ditolak',
+                    'dibatalkan',
+                ]
+            )
+            ->selectRaw(
+                'book_id, COUNT(*) as total'
+            )
+            ->groupBy('book_id')
+            ->pluck(
+                'total',
+                'book_id'
+            );
+
+
+        $popularBookIds =
+            $borrowingCounts
+                ->keys()
+                ->merge(
+                    $reservationCounts->keys()
+                )
+                ->unique()
+                ->values();
+
+
+        $popularBooks =
+            Book::whereIn(
+                'id',
+                $popularBookIds
+            )
+            ->get()
+            ->map(function ($book) use (
+                $borrowingCounts,
+                $reservationCounts
+            ) {
+
+                $borrowingTotal =
+                    (int) (
+                        $borrowingCounts[$book->id]
+                        ?? 0
+                    );
+
+                $reservationTotal =
+                    (int) (
+                        $reservationCounts[$book->id]
+                        ?? 0
+                    );
+
+                return [
+                    'book_id' =>
+                        $book->id,
+
+                    'title' =>
+                        $book->title ?? '-',
+
+                    'borrowing_total' =>
+                        $borrowingTotal,
+
+                    'reservation_total' =>
+                        $reservationTotal,
+
+                    'total' =>
+                        $borrowingTotal
+                        +
+                        $reservationTotal,
+                ];
+            })
+            ->sort(function ($a, $b) {
+
+                if ($a['total'] !== $b['total']) {
+                    return $b['total'] <=> $a['total'];
+                }
+
+                if ($a['borrowing_total'] !== $b['borrowing_total']) {
+                    return $b['borrowing_total'] <=> $a['borrowing_total'];
+                }
+
+                return $b['reservation_total'] <=> $a['reservation_total'];
+            })
+            ->take(5)
+            ->values();
+
+
+            
+
 
         /*
          * ========================================================
@@ -378,6 +501,8 @@ class DashboardController extends Controller
                 'max7',
 
                 'reservations',
+                'popularBooks',
+
                 'activities',
                 'allManualActivities'
             )

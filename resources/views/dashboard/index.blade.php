@@ -405,7 +405,7 @@
                             </h2>
 
                             <span>
-                                Berdasarkan jumlah reservasi
+                                Berdasarkan jumlah peminjaman &amp; reservasi
                             </span>
 
                         </div>
@@ -417,29 +417,7 @@
 
                 <div class="popular-list">
 
-                    @php
 
-                        $popularBooks = $reservations
-
-                            ->filter(fn($reservation) => $reservation->book)
-
-                            ->groupBy('book_id')
-
-                            ->map(function ($items) {
-                                return [
-                                    'title' => $items->first()->book->title ?? '-',
-
-                                    'total' => $items->count(),
-                                ];
-                            })
-
-                            ->sortByDesc('total')
-
-                            ->take(5)
-
-                            ->values();
-
-                    @endphp
 
 
                     @forelse($popularBooks as $index => $book)
