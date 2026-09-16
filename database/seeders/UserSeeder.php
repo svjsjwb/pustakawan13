@@ -9,11 +9,11 @@ use App\Models\User;
 class UserSeeder extends Seeder
 {
     /**
-     * Seed akun admin dan user untuk aplikasi perpustakaan.
+     * Seed hanya akun admin perpustakaan.
      */
     public function run(): void
     {
-        // ── ADMIN ──────────────────────────────────────────────
+        // ── ADMIN PERPUSTAKAAN ──────────────────────────────────
         User::updateOrCreate(
             ['email' => 'admin@gmail.com'],
             [
@@ -21,27 +21,6 @@ class UserSeeder extends Seeder
                 'email'    => 'admin@gmail.com',
                 'password' => Hash::make('perpusts'),
                 'role'     => 'admin',
-            ]
-        );
-
-        // ── USER ───────────────────────────────────────────────
-        User::updateOrCreate(
-            ['email' => 'user@perpus.com'],
-            [
-                'name'     => 'Pengguna',
-                'email'    => 'user@perpus.com',
-                'password' => Hash::make('password'),
-                'role'     => 'user',
-            ]
-        );
-
-        \App\Models\Member::updateOrCreate(
-            ['email' => 'user@perpus.com'],
-            [
-                'name'    => 'Pengguna Perpustakaan',
-                'phone'   => '081234567890',
-                'address' => 'Surakarta',
-                'status'  => 'aktif',
             ]
         );
     }
