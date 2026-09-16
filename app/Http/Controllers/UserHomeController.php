@@ -78,8 +78,11 @@ class UserHomeController extends Controller
 
         // Buku populer
         $popularBooks = Book::with('category')
-            ->where('stok', '>', 0)
-            ->orderByDesc('stok')
+            ->where(function ($q) {
+                $q->where('available_stock', '>', 0)
+                  ->orWhere('stock', '>', 0);
+            })
+            ->orderByDesc('available_stock')
             ->take(10)
             ->get();
 

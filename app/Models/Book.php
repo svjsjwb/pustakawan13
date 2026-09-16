@@ -43,42 +43,80 @@ class Book extends Model
 
     public function getTitleAttribute(): ?string
     {
-        return $this->attributes['judul_buku'] ?? null;
+        return $this->attributes['title'] ?? $this->attributes['judul_buku'] ?? null;
     }
 
     public function setTitleAttribute($value): void
     {
+        $this->attributes['title'] = $value;
         $this->attributes['judul_buku'] = $value;
+    }
+
+    public function getJudulBukuAttribute(): ?string
+    {
+        return $this->attributes['judul_buku'] ?? $this->attributes['title'] ?? null;
+    }
+
+    public function setJudulBukuAttribute($value): void
+    {
+        $this->attributes['judul_buku'] = $value;
+        $this->attributes['title'] = $value;
     }
 
     public function getAuthorAttribute(): ?string
     {
-        return $this->attributes['penulis'] ?? null;
+        return $this->attributes['author'] ?? $this->attributes['penulis'] ?? null;
     }
 
     public function setAuthorAttribute($value): void
     {
+        $this->attributes['author'] = $value;
         $this->attributes['penulis'] = $value;
+    }
+
+    public function getPenulisAttribute(): ?string
+    {
+        return $this->attributes['penulis'] ?? $this->attributes['author'] ?? null;
+    }
+
+    public function setPenulisAttribute($value): void
+    {
+        $this->attributes['penulis'] = $value;
+        $this->attributes['author'] = $value;
     }
 
     public function getStockAttribute(): int
     {
-        return (int) ($this->attributes['stok'] ?? 0);
+        return (int) ($this->attributes['stock'] ?? $this->attributes['stok'] ?? 0);
     }
 
     public function setStockAttribute($value): void
     {
-        $this->attributes['stok'] = (int) $value;
+        $this->attributes['stock'] = (int) $value;
+        $this->attributes['stok']  = (int) $value;
     }
 
     public function getAvailableStockAttribute(): int
     {
-        return (int) ($this->attributes['stok'] ?? 0);
+        return (int) ($this->attributes['available_stock'] ?? $this->attributes['stok'] ?? $this->attributes['stock'] ?? 0);
     }
 
     public function setAvailableStockAttribute($value): void
     {
-        $this->attributes['stok'] = (int) $value;
+        $this->attributes['available_stock'] = (int) $value;
+        $this->attributes['stok']            = (int) $value;
+    }
+
+    public function getStokAttribute(): int
+    {
+        return (int) ($this->attributes['stok'] ?? $this->attributes['available_stock'] ?? $this->attributes['stock'] ?? 0);
+    }
+
+    public function setStokAttribute($value): void
+    {
+        $this->attributes['stok']            = (int) $value;
+        $this->attributes['stock']           = (int) $value;
+        $this->attributes['available_stock'] = (int) $value;
     }
 
     /*

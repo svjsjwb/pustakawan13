@@ -17,18 +17,10 @@
 
     <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
 
-    <link
-        rel="stylesheet"
-        href="{{ asset('css/user-theme.css') }}">
-
-    {{-- Anti-flash dark mode initializer --}}
+    {{-- Pastikan admin tidak mewarisi preferensi tema atau density user dari localStorage --}}
     <script>
-        (function() {
-            var theme = localStorage.getItem('lib_theme') || 'light';
-            if (theme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        })();
+        document.documentElement.removeAttribute('data-theme');
+        document.documentElement.removeAttribute('data-density');
     </script>
 
     @stack('styles')
