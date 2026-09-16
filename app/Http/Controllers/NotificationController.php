@@ -2,76 +2,92 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    /**
-     * Tandai semua notifikasi pengguna sebagai telah dibaca
-     */
-    public function markAllRead()
+    public function index(Request $request)
     {
         $user = Auth::user();
-
-        if ($user) {
-            $user->unreadNotifications->markAsRead();
+        if (!$user) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json(['unread_count' => 0, 'notifications' => []]);
+            }
+            return redirect()->route('login');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Semua notifikasi telah ditandai dibaca.',
-        ]);
+        // Jika request dari AJAX/API navbar dropdown
+        if ($request->is('api/*') || $request->expectsJson()) {
+            $query = AppNotification::latest();
+
+            if ($user->isAdmin()) {
+                $query->where('role', 'admin');
+            } else {
+                $query->where('user_id', $user->id)->where('role', 'user');
+            }
+
+            $unreadCount = (clone $query)->where('is_read', false)->count();
+            $notifications = $query->take(15)->get();
+
+            return response()->json([
+                'unread_count' => $unreadCount,
+                'notifications' => $notifications,
+            ]);
+        }
+
+        // Halaman web user notifications
+        $tab = $request->query('tab', 'all');
+        $baseQuery = AppNotification::where('user_id', $user->id)->where('role', 'user');
+
+        $totalCount = (clone $baseQuery)->count();
+        $unreadCount = (clone $baseQuery)->where('is_read', false)->count();
+        $readCount = (clone $baseQuery)->where('is_read', true)->count();
+
+        $query = clone $baseQuery;
+        if ($tab === 'unread') {
+            $query->where('is_read', false);
+        } elseif ($tab === 'read') {
+            $query->where('is_read', true);
+        }
+
+        $notifications = $query->latest()->paginate(15)->withQueryString();
+
+        return view('user.notifications', compact('notifications', 'totalCount', 'unreadCount', 'readCount', 'tab'));
     }
 
-    /**
-     * Tandai satu notifikasi tertentu sebagai telah dibaca
-     */
     public function markAsRead($id)
     {
         $user = Auth::user();
-
-        if ($user) {
-            $notif = $user->notifications()->where('id', $id)->first();
-            if ($notif) {
-                $notif->markAsRead();
-            }
+        if (!$user) {
+            return response()->json(['success' => false], 401);
         }
 
-        return response()->json([
-            'success' => true,
-        ]);
+        $notif = AppNotification::findOrFail($id);
+
+        if ($user->isAdmin() && $notif->role === 'admin') {
+            $notif->update(['is_read' => true]);
+        } elseif ($notif->user_id === $user->id) {
+            $notif->update(['is_read' => true]);
+        }
+
+        return response()->json(['success' => true]);
     }
 
-    /**
-     * Toggle izin notifikasi (Allow / Mute) secara persisten
-     */
-    public function toggleNotification(Request $request)
+    public function markAllAsRead()
     {
         $user = Auth::user();
-
         if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthenticated',
-            ], 401);
+            return response()->json(['success' => false], 401);
         }
 
-        if ($request->has('enabled')) {
-            $user->is_notification_enabled = filter_var($request->enabled, FILTER_VALIDATE_BOOLEAN);
-        } elseif ($request->has('value')) {
-            $user->is_notification_enabled = strtolower($request->value) === 'allow';
+        if ($user->isAdmin()) {
+            AppNotification::where('role', 'admin')->update(['is_read' => true]);
         } else {
-            $user->is_notification_enabled = !$user->is_notification_enabled;
+            AppNotification::where('user_id', $user->id)->where('role', 'user')->update(['is_read' => true]);
         }
 
-        $user->save();
-
-        return response()->json([
-            'success'                 => true,
-            'is_notification_enabled' => (bool) $user->is_notification_enabled,
-            'status_text'             => $user->is_notification_enabled ? 'Allow' : 'Mute',
-            'message'                 => $user->is_notification_enabled ? 'Notifikasi diizinkan.' : 'Notifikasi dinonaktifkan (Mute).',
-        ]);
+        return response()->json(['success' => true]);
     }
 }

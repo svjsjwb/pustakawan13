@@ -10,14 +10,15 @@ class Borrowing extends Model
 {
     protected $fillable = [
         'member_id',
-        'user_id',
-        'reservation_id',
-        'book_id',
         'borrowed_at',
         'due_at',
         'returned_at',
         'status',
-        'is_reminder_sent',
+        'rejection_reason',
+        'extension_status',
+        'extension_requested_due_at',
+        'extension_reason',
+        'extension_admin_notes',
         'seat_number',
     ];
 
@@ -25,6 +26,7 @@ class Borrowing extends Model
         'borrowed_at' => 'date',
         'due_at' => 'date',
         'returned_at' => 'date',
+        'extension_requested_due_at' => 'date',
         'is_reminder_sent' => 'boolean',
     ];
 
@@ -43,40 +45,25 @@ class Borrowing extends Model
         return $this->hasMany(BorrowingDetail::class);
     }
 
-    public function book(): BelongsTo
+    public function getDisplayStatusAttribute(): string
     {
-        return $this->belongsTo(Book::class);
+        return match ($this->status) {
+            'menunggu'     => 'Menunggu Persetujuan',
+            'dipinjam'     => 'Dipinjam',
+            'ditolak'      => 'Ditolak',
+            'dikembalikan' => 'Dikembalikan',
+            'terlambat'    => 'Terlambat',
+            default        => ucfirst($this->status),
+        };
     }
 
-    public function reservation(): BelongsTo
+    public function getDisplayExtensionStatusAttribute(): ?string
     {
-        return $this->belongsTo(Reservation::class);
-    }
-
-    // ─── Alias Atribut Bahasa Indonesia ───────────────
-
-    public function getIdReservasiAttribute(): ?int
-    {
-        return $this->reservation_id ?? $this->reservation?->id;
-    }
-
-    public function getBukuIdAttribute(): ?int
-    {
-        return $this->book_id ?? $this->details->first()?->book_id;
-    }
-
-    public function getTglPinjamAttribute()
-    {
-        return $this->borrowed_at;
-    }
-
-    public function getTglHarusKembaliAttribute()
-    {
-        return $this->due_at;
-    }
-
-    public function getStatusPinjamAttribute(): ?string
-    {
-        return $this->status ? ucfirst($this->status) : null;
+        return match ($this->extension_status) {
+            'menunggu'  => 'Menunggu Persetujuan',
+            'disetujui' => 'Disetujui',
+            'ditolak'   => 'Ditolak',
+            default     => null,
+        };
     }
 }

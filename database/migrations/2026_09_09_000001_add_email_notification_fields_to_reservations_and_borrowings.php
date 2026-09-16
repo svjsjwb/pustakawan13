@@ -9,11 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('reservations', function (Blueprint $table) {
-            $table->text('rejection_reason')->nullable()->after('status');
+            if (!Schema::hasColumn('reservations', 'rejection_reason')) {
+                $table->text('rejection_reason')->nullable()->after('status');
+            }
         });
 
         Schema::table('borrowings', function (Blueprint $table) {
-            $table->boolean('is_reminder_sent')->default(false)->after('status');
+            if (!Schema::hasColumn('borrowings', 'is_reminder_sent')) {
+                $table->boolean('is_reminder_sent')->default(false)->after('status');
+            }
         });
     }
 

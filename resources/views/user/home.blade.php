@@ -1,4 +1,4 @@
-@extends('layouts.user')
+@extends('layouts.app')
 
 @section('title', 'Beranda')
 
@@ -28,11 +28,11 @@
             </h1>
 
             <p>
-                Jelajahi koleksi buku dan temukan bacaan
-                yang cocok untukmu.
+                Jelajahi berbagai koleksi buku pilihan dan temukan bacaan yang sesuai dengan minat serta kebutuhan Anda.
             </p>
 
-            <div class="user-search">
+            <div class="user-search-wrap">
+                <div class="user-search">
 
                 <svg
                     viewBox="0 0 24 24"
@@ -55,11 +55,15 @@
 
                 </svg>
 
-                <input
+                    <input
                     type="text"
                     id="user-book-search"
                     placeholder="Cari judul, penulis, atau kategori..."
                     autocomplete="off">
+
+                </div>
+
+                <div class="user-search-results" id="user-search-results" role="listbox" aria-label="Hasil pencarian buku"></div>
 
             </div>
 
@@ -67,38 +71,200 @@
 
 
         {{-- =================================================
-             HERO BOOK
+             HERO 3D COVERFLOW CAROUSEL
         ================================================== --}}
 
-        @php
-            $heroBook = $popularBooks->first();
-        @endphp
+        @if($popularBooks->isNotEmpty())
 
-        @if($heroBook)
+        <div class="user-hero-coverflow-wrap" id="heroCoverflowWrap">
+            <div class="user-hero-coverflow" id="heroCoverflow">
+                <div class="user-coverflow-stage" id="coverflowStage">
+                    @foreach($popularBooks->take(8) as $index => $book)
+                        <div class="user-coverflow-card"
+                             data-index="{{ $index }}"
+                             data-book-id="{{ $book->id }}"
+                             role="group"
+                             aria-label="Buku {{ $book->title }}"
+                             data-title="{{ $book->title }}"
+                             data-author="{{ $book->author ?? '-' }}"
+                             data-category="{{ $book->category->name ?? '-' }}"
+                             data-publisher="{{ $book->publisher ?? '-' }}"
+                             data-year="{{ $book->publication_year ?? '-' }}"
+                             data-isbn="{{ $book->isbn ?? '-' }}"
+                             data-stock="{{ $book->available_stock ?? 0 }}"
+                             data-description="{{ Str::limit($book->description ?? 'Deskripsi buku belum tersedia.', 150, '...') }}"
+                             data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}">
 
-        <div class="user-hero-book motion-book">
+                            <div class="coverflow-card-inner">
+                                <div class="coverflow-book" aria-hidden="true">
+                                    <div class="coverflow-book-back"></div>
+                                    <div class="coverflow-book-pages"></div>
+                                    <div class="coverflow-book-spine"></div>
 
-            <div class="user-hero-cover">
+                                    <div class="coverflow-book-front">
+                                        <span class="coverflow-card-badge">
+                                            {{ $book->main_category ?? $book->category->name ?? 'Koleksi' }}
+                                        </span>
 
-                @if($heroBook->cover)
+                                        <div class="coverflow-poster">
+                                            @if($book->cover)
+                                                <img src="{{ asset('storage/' . $book->cover) }}" alt="{{ $book->title }}" loading="lazy">
+                                            @else
+                                                <div class="coverflow-fallback-cover">
+                                                    <div class="fallback-spine"></div>
+                                                    <div class="fallback-content">
+                                                        <div class="fallback-emblem">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                            <div class="coverflow-glare"></div>
+                                        </div>
 
-                <img
-                    src="{{ asset('storage/' . $heroBook->cover) }}"
-                    alt="{{ $heroBook->title }}">
+                                        <div class="coverflow-card-info">
+                                            <h4 class="coverflow-title" title="{{ $book->title }}">{{ $book->title }}</h4>
+                                            <p class="coverflow-author">{{ $book->author ?? 'Pustaka' }}</p>
+                                        </div>
 
-                @else
-
-                <div class="user-cover-placeholder">
-                    {{ $heroBook->title }}
+                                        <div class="coverflow-reflection"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-
-                @endif
-
             </div>
 
+            {{-- Controls: Arrows & Pagination Indicator --}}
+            <div class="user-coverflow-controls">
+                <button type="button" class="coverflow-nav-btn prev" id="coverflowPrev" aria-label="Buku sebelumnya" title="Sebelumnya">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <div class="coverflow-pagination" id="coverflowPagination" role="tablist" aria-label="Indikator halaman buku"></div>
+                <button type="button" class="coverflow-nav-btn next" id="coverflowNext" aria-label="Buku selanjutnya" title="Selanjutnya">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
         </div>
 
         @endif
+
+    </section>
+
+
+    {{-- =====================================================
+         4 WIDGET DASHBOARD USER (TERINTEGRASI DENGAN ADMIN)
+    ====================================================== --}}
+    <section class="user-dashboard-widgets" style="margin: 32px 0 40px; padding: 0 24px;">
+
+        <div style="margin-bottom: 18px;">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #287879; text-transform: uppercase;">Aktivitas Terbaru</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+
+            {{-- 1. Peminjaman Aktif --}}
+            <a href="{{ route('user.loans') }}" class="user-dashboard-stat-card" style="text-decoration: none; display: block; background: #ffffff; border: 1px solid #e2eeee; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(27, 42, 58, 0.04);">
+                <div>
+                    <span style="font-size: 11.5px; font-weight: 700; color: #648282; text-transform: uppercase;">Peminjaman Aktif</span>
+                </div>
+                <div style="font-size: 28px; font-weight: 800; color: #1e3d3d; margin: 10px 0 2px;">
+                    {{ $activeLoansCount }}
+                </div>
+                <div style="font-size: 12px; color: #759292;">
+                    {{ $activeLoansCount > 0 ? 'Buku sedang Anda pinjam' : 'Tidak ada buku dipinjam' }}
+                </div>
+            </a>
+
+            {{-- 2. Reservasi Aktif --}}
+            <a href="{{ route('user.reservations') }}" class="user-dashboard-stat-card" style="text-decoration: none; display: block; background: #ffffff; border: 1px solid #e2eeee; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(27, 42, 58, 0.04);">
+                <div>
+                    <span style="font-size: 11.5px; font-weight: 700; color: #648282; text-transform: uppercase;">Reservasi Aktif</span>
+                </div>
+                <div style="font-size: 28px; font-weight: 800; color: #1e3d3d; margin: 10px 0 2px;">
+                    {{ $activeReservesCount }}
+                </div>
+                <div style="font-size: 12px; color: #759292;">
+                    {{ $activeReservesCount > 0 ? 'Reservasi sedang berjalan' : 'Belum ada reservasi' }}
+                </div>
+            </a>
+
+            {{-- 3. Riwayat Peminjaman --}}
+            <a href="{{ route('user.history') }}" class="user-dashboard-stat-card" style="text-decoration: none; display: block; background: #ffffff; border: 1px solid #e2eeee; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(27, 42, 58, 0.04);">
+                <div>
+                    <span style="font-size: 11.5px; font-weight: 700; color: #648282; text-transform: uppercase;">Riwayat Selesai</span>
+                </div>
+                <div style="font-size: 28px; font-weight: 800; color: #1e3d3d; margin: 10px 0 2px;">
+                    {{ $historyCount }}
+                </div>
+                <div style="font-size: 12px; color: #759292;">
+                    Total buku selesai dibaca
+                </div>
+            </a>
+
+            {{-- 4. Status Permintaan Terakhir --}}
+            <div class="user-dashboard-stat-card" style="background: #ffffff; border: 1px solid #e2eeee; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(27, 42, 58, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-size: 11px; font-weight: 700; color: #648282; text-transform: uppercase;">Status Permintaan Terakhir</span>
+                        @if($latestRequest)
+                            @php
+                                $badgeBg = match($latestRequest['status_raw'] ?? '') {
+                                    'menunggu'     => '#fef5e8',
+                                    'dipinjam', 'disetujui' => '#e8f8f0',
+                                    'ditolak'      => '#fdeeed',
+                                    default        => '#f0f4f4',
+                                };
+                                $badgeColor = match($latestRequest['status_raw'] ?? '') {
+                                    'menunggu'     => '#b86200',
+                                    'dipinjam', 'disetujui' => '#0b8247',
+                                    'ditolak'      => '#c22c24',
+                                    default        => '#497171',
+                                };
+                            @endphp
+                            <span style="background: {{ $badgeBg }}; color: {{ $badgeColor }}; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 10px;">
+                                {{ $latestRequest['status'] }}
+                            </span>
+                        @endif
+                    </div>
+
+                    @if($latestRequest)
+                        <div style="font-size: 13px; font-weight: 700; color: #1e3d3d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 4px;">
+                            {{ $latestRequest['title'] }}
+                        </div>
+                        <div style="font-size: 11.5px; color: #759292; margin-top: 2px;">
+                            {{ $latestRequest['type'] }} • {{ $latestRequest['date']?->diffForHumans() }}
+                        </div>
+                        @if(!empty($latestRequest['notes']))
+                            <div style="font-size: 11px; color: #c22c24; background: #fff5f5; padding: 4px 8px; border-radius: 6px; margin-top: 6px;">
+                                Catatan: {{ Str::limit($latestRequest['notes'], 45) }}
+                            </div>
+                        @endif
+                    @else
+                        <div style="font-size: 13px; color: #8ba2a2; font-weight: 500; margin-top: 8px;">
+                            Belum ada aktivitas permintaan.
+                        </div>
+                    @endif
+                </div>
+
+                @if($latestRequest && !empty($latestRequest['link']))
+                    <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #f2f6f6;">
+                        <a href="{{ $latestRequest['link'] }}" style="font-size: 11.5px; font-weight: 600; color: #287879; text-decoration: none;">
+                            Lihat Detail Permintaan →
+                        </a>
+                    </div>
+                @endif
+            </div>
+
+        </div>
 
     </section>
 
@@ -108,14 +274,14 @@
          POPULAR
     ====================================================== --}}
 
-    <section class="user-section">
+    <section class="user-section user-popular-section">
 
         <div class="user-section-header motion-title">
 
             <div>
 
                 <span class="user-section-kicker">
-                    PILIHAN PEMBACA
+                    REKOMENDASI BUKU
                 </span>
 
                 <h2>
@@ -124,220 +290,96 @@
 
             </div>
 
-            <a href="{{ route('catalog') }}">
-                Lihat semua →
-            </a>
-
         </div>
 
 
-        <div class="user-book-row">
+        <div class="user-popular-carousel-wrap">
+
+            <button type="button" class="popular-carousel-nav popular-carousel-prev" id="popularCarouselPrev" aria-label="Buku sebelumnya" title="Sebelumnya">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+
+            <div class="user-book-carousel-viewport" data-book-carousel>
+            <div class="user-book-row user-popular-row" data-book-carousel-track>
 
             @foreach($popularBooks as $book)
 
             <article
-                class="user-book-card motion-book-card"
+                class="user-book-card motion-book-card popular-book-card"
                 style="--motion-delay: {{ $loop->index * 70 }}ms"
                 data-book-card
                 data-title="{{ strtolower($book->title) }}"
                 data-author="{{ strtolower($book->author ?? '') }}"
                 data-category="{{ strtolower($book->category->name ?? '') }}">
 
-                <button
-                    type="button"
-                    class="user-book-cover user-book-open"
-                    data-id="{{ $book->id }}"
-                    data-title="{{ $book->title }}"
-                    data-author="{{ $book->author ?? '-' }}"
-                    data-category="{{ $book->category->name ?? '-' }}"
-                    data-publisher="{{ $book->publisher ?? '-' }}"
-                    data-year="{{ $book->publication_year ?? '-' }}"
-                    data-isbn="{{ $book->isbn ?? '-' }}"
-                    data-stock="{{ $book->available_stock ?? 0 }}"
-                    data-description="{{ $book->description ?? 'Deskripsi buku belum tersedia.' }}"
-                    data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}">
+                <div class="popular-card-inner">
+                    <button
+                        type="button"
+                        class="user-book-cover user-book-open"
 
-                    @if($book->cover)
+                        data-title="{{ $book->title }}"
+                        data-author="{{ $book->author ?? '-' }}"
+                        data-category="{{ $book->category->name ?? '-' }}"
+                        data-publisher="{{ $book->publisher ?? '-' }}"
+                        data-year="{{ $book->publication_year ?? '-' }}"
+                        data-isbn="{{ $book->isbn ?? '-' }}"
+                        data-stock="{{ $book->available_stock ?? 0 }}"
+                        data-description="{{ Str::limit($book->description ?? 'Deskripsi buku belum tersedia.', 150, '...') }}"
+                        data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}">
 
-                    <img
-                        src="{{ asset('storage/' . $book->cover) }}"
-                        alt="{{ $book->title }}">
+                        <span class="user-cover-category">
+                            {{ $book->main_category ?? $book->category->name ?? 'Koleksi' }}
+                        </span>
 
-                    @else
+                        @if($book->cover)
 
-                    <div class="user-cover-placeholder">
-                        {{ $book->title }}
+                        <img
+                            src="{{ asset('storage/' . $book->cover) }}"
+                            alt="{{ $book->title }}">
+
+                        @else
+
+                        <div class="user-cover-placeholder">
+                            <span class="user-cover-placeholder-mark" aria-hidden="true"></span>
+                            <span class="user-cover-placeholder-title">{{ $book->title }}</span>
+                        </div>
+
+                        @endif
+
+                    </button>
+
+
+                    <div class="user-book-info">
+
+                        <span class="user-book-category">
+                            {{ $book->category->name ?? 'Koleksi' }}
+                        </span>
+
+                        <h3>
+                            {{ $book->title }}
+                        </h3>
+
+                        <p>
+                            {{ $book->author ?? 'Penulis tidak diketahui' }}
+                        </p>
+
                     </div>
-
-                    @endif
-
-                </button>
-
-
-                <div class="user-book-info">
-
-                    <span class="user-book-category">
-                        {{ $book->category->name ?? 'Koleksi' }}
-                    </span>
-
-                    <h3>
-                        {{ $book->title }}
-                    </h3>
-
-                    <p>
-                        {{ $book->author ?? 'Penulis tidak diketahui' }}
-                    </p>
-
                 </div>
 
             </article>
 
             @endforeach
 
-        </div>
-
-    </section>
-
-
-
-    {{-- =====================================================
-         LATEST
-    ====================================================== --}}
-
-    <section class="user-section">
-
-        <div class="user-section-header motion-title">
-
-            <div>
-
-                <span class="user-section-kicker">
-                    KOLEKSI TERBARU
-                </span>
-
-                <h2>
-                    Baru Ditambahkan
-                </h2>
-
+            </div>
             </div>
 
-            <a href="{{ route('catalog') }}">
-                Lihat semua →
-            </a>
-
-        </div>
-
-
-        <div class="user-book-row">
-
-            @foreach($latestBooks as $book)
-
-            <article
-                class="user-book-card motion-book-card"
-                style="--motion-delay: {{ $loop->index * 70 }}ms"
-                data-book-card
-                data-title="{{ strtolower($book->title) }}"
-                data-author="{{ strtolower($book->author ?? '') }}"
-                data-category="{{ strtolower($book->category->name ?? '') }}">
-
-                <button
-                    type="button"
-                    class="user-book-cover user-book-open"
-                    data-id="{{ $book->id }}"
-                    data-title="{{ $book->title }}"
-                    data-author="{{ $book->author ?? '-' }}"
-                    data-category="{{ $book->category->name ?? '-' }}"
-                    data-publisher="{{ $book->publisher ?? '-' }}"
-                    data-year="{{ $book->publication_year ?? '-' }}"
-                    data-isbn="{{ $book->isbn ?? '-' }}"
-                    data-stock="{{ $book->available_stock ?? 0 }}"
-                    data-description="{{ $book->description ?? 'Deskripsi buku belum tersedia.' }}"
-                    data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}">
-
-                    @if($book->cover)
-
-                    <img
-                        src="{{ asset('storage/' . $book->cover) }}"
-                        alt="{{ $book->title }}">
-
-                    @else
-
-                    <div class="user-cover-placeholder">
-                        {{ $book->title }}
-                    </div>
-
-                    @endif
-
-                </button>
-
-
-                <div class="user-book-info">
-
-                    <span class="user-book-category">
-                        {{ $book->category->name ?? 'Koleksi' }}
-                    </span>
-
-                    <h3>
-                        {{ $book->title }}
-                    </h3>
-
-                    <p>
-                        {{ $book->author ?? 'Penulis tidak diketahui' }}
-                    </p>
-
-                </div>
-
-            </article>
-
-            @endforeach
-
-        </div>
-
-    </section>
-
-
-
-    {{-- =====================================================
-         CATEGORY
-    ====================================================== --}}
-
-    <section class="user-category-section">
-
-        <div class="user-section-header motion-title">
-
-            <div>
-
-                <span class="user-section-kicker">
-                    JELAJAHI
-                </span>
-
-                <h2>
-                    Temukan Berdasarkan Kategori
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="user-category-grid">
-
-            @foreach($categories as $category)
-
-            <a
-                href="{{ route('catalog') }}"
-                class="user-category-card">
-
-                <span>
-                    {{ $category->name }}
-                </span>
-
-                <strong>
-                    →
-                </strong>
-
-            </a>
-
-            @endforeach
+            <button type="button" class="popular-carousel-nav popular-carousel-next" id="popularCarouselNext" aria-label="Buku selanjutnya" title="Selanjutnya">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
 
         </div>
 
@@ -363,19 +405,6 @@
 
 
     <div class="user-book-modal-content">
-
-        {{-- CLOSE --}}
-
-        <button
-            type="button"
-            class="user-book-modal-close"
-            id="userBookModalClose"
-            aria-label="Tutup">
-
-            ×
-
-        </button>
-
 
         {{-- =================================================
              3D BOOK
@@ -577,52 +606,23 @@
             </div>
 
 
-            <div class="user-book-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="user-book-actions">
 
                 <a
                     href="{{ route('catalog') }}"
-                    class="user-book-catalog-btn">
+                    class="user-book-catalog-btn"
+                    id="userBookCatalogButton">
 
                     Lihat di Katalog →
 
                 </a>
 
-                {{-- Form Buat Reservasi --}}
-                <form action="{{ route('user.reservations.store') }}" method="POST" id="modalReservationForm" style="margin: 0;">
-                    @csrf
-                    <input type="hidden" name="book_id" id="modalReservationBookId" value="">
-                    <button
-                        type="submit"
-                        id="btn-reservasi-modal"
-                        style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: 10px; background: #0f4c4c; color: #ffffff; border: none; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-                        onmouseover="this.style.background='#0a3737'"
-                        onmouseout="this.style.background='#0f4c4c'">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                        Buat Reservasi
-                    </button>
-                </form>
-
-                {{-- Form Tambahkan ke Favorit Saya --}}
-                <form action="{{ route('favorites.store') }}" method="POST" id="modalFavoriteForm" style="margin: 0;">
-                    @csrf
-                    <input type="hidden" name="book_id" id="modalBookId" value="">
-                    <button
-                        type="submit"
-                        id="btn-favorit-modal"
-                        style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: 10px; background: #ffffff; color: #0f4c4c; border: 1.5px solid #0f4c4c; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-                        onmouseover="this.style.background='#f0fdf4'"
-                        onmouseout="this.style.background='#ffffff'">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#0f4c4c" stroke="#0f4c4c" stroke-width="2">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                        </svg>
-                        Tambahkan ke Favorit Saya
-                    </button>
-                </form>
+                <button type="button" class="user-book-home-btn" id="userBookHomeButton">
+                    <span aria-hidden="true">←</span>
+                    <span>Kembali ke Beranda</span>
+                </button>
 
             </div>
-
 
         </div>
 

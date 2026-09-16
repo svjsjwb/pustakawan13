@@ -1,43 +1,28 @@
 <?php
 
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
-use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withSchedule(function (Schedule $schedule): void {
-        $schedule->command('library:send-due-reminders')->dailyAt('08:00');
+    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule): void {
+        $schedule->command('library:send-due-reminders')->dailyAt('07:00');
     })
     ->withMiddleware(function (Middleware $middleware): void {
+        // Alias middleware untuk proteksi role
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'no.back' => \App\Http\Middleware\PreventBackHistory::class,
+            'admin'     => \App\Http\Middleware\AdminMiddleware::class,
+            'role.user' => \App\Http\Middleware\UserMiddleware::class,
         ]);
-
-        // User sudah login → jangan bisa akses /login atau /register
-        $middleware->redirectUsersTo(function (\Illuminate\Http\Request $request) {
-            $user = $request->user();
-
-            if ($user && $user->role === 'admin') {
-                return route('dashboard');
-            }
-
-            return route('user.home');
-        });
-
-        // User belum login → redirect ke halaman login
-        $middleware->redirectGuestsTo(fn() => route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn(Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*'),
         );
-    })
-    ->create();
+    })->create();

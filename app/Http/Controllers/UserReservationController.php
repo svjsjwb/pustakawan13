@@ -2,207 +2,178 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Reservation;
 use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Member;
-use App\Models\Reservation;
+use App\Models\AppNotification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UserReservationController extends Controller
 {
-    // ─── Konstanta Aturan Bisnis ─────────────────────
-
-    const MAX_ACTIVE_RESERVATIONS = 3;
-
-    // ─── Halaman Daftar Reservasi ────────────────────
-
-    /**
-     * Tampilkan halaman "Reservasi Saya".
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user();
+        $user         = Auth::user();
+        $member       = Member::where('email', $user->email)->first();
+        $reservations = collect();
+        $statusCounts = [
+            'semua'        => 0,
+            'menunggu'     => 0,
+            'disetujui'    => 0,
+            'siap_diambil' => 0,
+            'ditolak'      => 0,
+        ];
 
-        if ($user && strtolower((string) $user->role) === 'admin') {
-            return redirect()->route('dashboard');
+        if ($member) {
+            $query = Reservation::with(['book.category', 'bookCopy'])
+                ->where('member_id', $member->id);
+
+            // Filter Pencarian
+            $search = trim((string) $request->input('search', ''));
+            if ($search !== '') {
+                $query->whereHas('book', function ($q) use ($search) {
+                    $q->where('title', 'like', "{$search}%");
+                });
+            }
+
+            // Filter Status
+            if ($status = $request->input('status')) {
+                $query->where('status', $status);
+            }
+
+            $reservations = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
+
+            // Hitungan status untuk tab / badge
+            $allRes = Reservation::where('member_id', $member->id)->get();
+            $statusCounts['semua']        = $allRes->count();
+            $statusCounts['aktif']        = $allRes->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])->count();
+            $statusCounts['menunggu']     = $allRes->where('status', 'menunggu')->count();
+            $statusCounts['disetujui']    = $allRes->where('status', 'disetujui')->count();
+            $statusCounts['siap_diambil'] = $allRes->where('status', 'siap_diambil')->count();
+            $statusCounts['ditolak']      = $allRes->where('status', 'ditolak')->count();
         }
 
-        $reservations = Reservation::with('book')
-            ->where(function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                    ->orWhereHas('member', function ($memberQuery) use ($user) {
-                        $memberQuery->where('user_id', $user->id)
-                            ->orWhere('email', $user->email);
-                    });
-            })
-            ->orderByRaw("FIELD(status, 'menunggu', 'disetujui', 'selesai', 'dibatalkan', 'ditolak')")
-            ->orderBy('created_at', 'desc')
-            ->paginate(8);
-
-        // Ambil daftar buku yang stoknya tersedia untuk modal buat reservasi
-        $availableBooks = Book::where('stok', '>', 0)
-            ->orderBy('judul_buku')
-            ->get();
-
-        return view('user.reservations', compact('reservations', 'availableBooks'));
+        return view('user.reservations', compact('reservations', 'member', 'statusCounts'));
     }
 
-    // ─── Buat Reservasi Baru ─────────────────────────
+    /**
+     * Halaman Detail Reservasi Buku
+     */
+    public function show($id)
+    {
+        $user   = Auth::user();
+        $member = Member::where('email', $user->email)->first();
+
+        if (!$member) {
+            return redirect()->route('user.reservations')->with('error', 'Data anggota tidak ditemukan.');
+        }
+
+        $reservation = Reservation::with(['book.category', 'bookCopy'])
+            ->where('member_id', $member->id)
+            ->findOrFail($id);
+
+        return view('user.reservation-detail', compact('reservation', 'member'));
+    }
 
     /**
-     * Simpan reservasi baru oleh pengguna yang login.
+     * User mengajukan reservasi buku dari katalog
      */
     public function store(Request $request)
     {
-        $user = Auth::user();
-
-        if ($user && strtolower((string) $user->role) === 'admin') {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Hanya pengguna umum (role user) yang dapat membuat reservasi.',
-                ], 403);
-            }
-            return back()->with('reservation_error', 'Akun Administrator tidak dapat membuat reservasi buku online untuk anggota.');
-        }
-
-        $request->validate([
+        $validated = $request->validate([
             'book_id'     => 'required|exists:books,id',
             'reserved_at' => 'nullable|date',
             'seat_number' => 'nullable|string|max:10',
         ]);
 
-        $bookId = (int) $request->book_id;
-        $reservedAt = $request->filled('reserved_at') ? $request->reserved_at : now()->toDateString();
-        $seatNumber = $request->filled('seat_number') ? $request->seat_number : null;
+        $user = Auth::user();
+        $member = Member::firstOrCreate(
+            ['email' => $user->email],
+            [
+                'name'    => $user->name,
+                'phone'   => '-',
+                'address' => '-',
+                'status'  => 'aktif',
+            ]
+        );
 
-        // BR-1: Maks 3 reservasi aktif
-        $activeCount = Reservation::where(function ($query) use ($user) {
-            $query->where('user_id', $user->id)
-                ->orWhereHas('member', function ($memberQuery) use ($user) {
-                    $memberQuery->where('user_id', $user->id)
-                        ->orWhere('email', $user->email);
-                });
-        })
-            ->whereIn('status', ['menunggu', 'disetujui'])
-            ->count();
+        $book = Book::findOrFail($validated['book_id']);
 
-        if ($activeCount >= self::MAX_ACTIVE_RESERVATIONS) {
-            return redirect()->route('user.reservations')->with('reservation_error',
-                'Kamu sudah memiliki ' . self::MAX_ACTIVE_RESERVATIONS . ' reservasi aktif. Selesaikan atau batalkan reservasi yang ada sebelum menambah yang baru.');
-        }
-
-        // BR-4: Tidak boleh reservasi buku yang sudah direservasi (aktif)
-        $alreadyReserved = Reservation::where(function ($query) use ($user) {
-            $query->where('user_id', $user->id)
-                ->orWhereHas('member', function ($memberQuery) use ($user) {
-                    $memberQuery->where('user_id', $user->id)
-                        ->orWhere('email', $user->email);
-                });
-        })
-            ->where('book_id', $bookId)
-            ->whereIn('status', ['menunggu', 'disetujui'])
+        $alreadyReserved = Reservation::where('member_id', $member->id)
+            ->where('book_id', $book->id)
+            ->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])
             ->exists();
 
         if ($alreadyReserved) {
-            return redirect()->route('user.reservations')->with('reservation_error',
-                'Kamu sudah memiliki reservasi aktif untuk buku ini.');
+            return response()->json([
+                'message' => 'Buku ini sudah ada di daftar reservasi Anda.',
+                'already_reserved' => true,
+            ], 409);
         }
 
-        // Hubungkan ke data member: prioritaskan user_id
-        $member = Member::where('user_id', $user->id)->first();
+        if ($book->available_stock < 1) {
+            return back()->with('error', 'Maaf, stok buku ini sedang habis sehingga tidak dapat direservasi.');
+        }
 
-        if (!$member && $user->email) {
-            $member = Member::where('email', $user->email)->first();
-            if ($member && !$member->user_id) {
-                $member->update(['user_id' => $user->id]);
+        $reservedAt = $validated['reserved_at'] ?? now()->toDateString();
+        $createdReservation = null;
+
+        DB::transaction(function () use ($member, $book, $reservedAt, $validated, $user, &$createdReservation) {
+            $lockedBook = Book::lockForUpdate()->findOrFail($book->id);
+
+            $duplicate = Reservation::where('member_id', $member->id)
+                ->where('book_id', $lockedBook->id)
+                ->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])
+                ->exists();
+
+            if ($duplicate) {
+                abort(409, 'Buku ini sudah ada di daftar reservasi Anda.');
             }
-        }
 
-        if (!$member) {
-            $member = Member::create([
-                'user_id'  => $user->id,
-                'name'     => $user->name,
-                'email'    => $user->email,
-                'phone'    => $user->phone ?: '-',
-                'division' => 'Anggota',
-                'status'   => 'Aktif',
-            ]);
-        }
+            $bookCopy = BookCopy::where('book_id', $lockedBook->id)
+                ->where('status', 'available')
+                ->lockForUpdate()
+                ->first();
 
-        // Cari eksemplar buku (BookCopy) yang tersedia jika ada
-        $bookCopy = BookCopy::where('book_id', $bookId)
-            ->whereIn('status', ['available', 'tersedia'])
-            ->first();
+            if ($bookCopy) {
+                $bookCopy->update(['status' => 'reserved']);
+            }
 
-        // Simpan reservasi dengan status 'menunggu' (Pending)
-        $newReservation = null;
-        DB::transaction(function () use ($user, $bookId, $member, $bookCopy, $reservedAt, $seatNumber, &$newReservation) {
-            $newReservation = Reservation::create([
-                'user_id'      => $user->id,
-                'member_id'    => $member?->id,
-                'book_id'      => $bookId,
+                $lockedBook->decrement('stok');
+
+            $createdReservation = Reservation::create([
+                'member_id'    => $member->id,
+                'book_id'      => $lockedBook->id,
                 'book_copy_id' => $bookCopy?->id,
                 'reserved_at'  => $reservedAt,
-                'seat_number'  => $seatNumber,
-                'expires_at'   => null,
+                'expires_at'   => now()->parse($reservedAt)->addDays(3)->toDateString(),
+                'seat_number'  => $validated['seat_number'] ?? null,
                 'status'       => 'menunggu',
             ]);
+
+            // Kirim notifikasi ke Admin
+            AppNotification::notifyAdmin(
+                'reservation_request',
+                'Reservasi Buku Baru',
+                "{$user->name} mengajukan reservasi buku \"{$lockedBook->title}\".",
+                ['reservation_id' => $createdReservation->id, 'book_id' => $lockedBook->id]
+            );
         });
 
-        // Broadcast real-time event untuk Admin
-        if ($newReservation) {
-            $book = Book::find($bookId);
-            \App\Services\RealtimeService::publish('reservation.created', [
-                'id'             => $newReservation->id,
-                'user_id'        => $user->id,
-                'member_id'      => $member?->id,
-                'member_name'    => $member?->name ?? $user->name,
-                'is_online_user' => true,
-                'book_id'        => $bookId,
-                'book_title'     => $book->title ?? $book->judul_buku ?? '-',
-                'reserved_at'    => $reservedAt,
-                'reserved_at_formatted' => \Carbon\Carbon::parse($reservedAt)->format('d/m/Y'),
-                'expires_at'     => null,
-                'status'         => 'menunggu',
-                'status_label'   => 'Menunggu',
-                'seat_number'    => $seatNumber,
+        if ($createdReservation) {
+            NotificationService::reservationSubmitted($createdReservation, $user);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Reservasi buku berhasil diajukan.',
+                'reservation_url' => route('reservations.index'),
             ]);
         }
 
-        // Redirect ke halaman Reservasi Saya dengan notif sukses
-        return redirect()->route('user.reservations')
-            ->with('reservation_success', 'Reservasi berhasil dibuat dengan status Pending! Menunggu persetujuan admin.');
-    }
-
-    // ─── Batalkan Reservasi ─────────────────────────
-
-    /**
-     * Batalkan reservasi milik pengguna (hanya jika status = menunggu).
-     */
-    public function cancel(Reservation $reservation)
-    {
-        // Otorisasi: pastikan reservasi milik user yang login
-        if ($reservation->user_id !== Auth::id()) {
-            abort(403, 'Kamu tidak punya akses ke reservasi ini.');
-        }
-
-        // BR-3: Hanya bisa batalkan saat menunggu
-        if (!$reservation->isCancellable()) {
-            return back()->with('reservation_error',
-                'Reservasi ini sudah tidak dapat dibatalkan karena statusnya "' . $reservation->statusLabel() . '".');
-        }
-
-        $reservation->update(['status' => 'dibatalkan']);
-
-        \App\Services\RealtimeService::publish('reservation.updated', [
-            'id'           => $reservation->id,
-            'status'       => 'dibatalkan',
-            'status_label' => 'Dibatalkan',
-        ]);
-
-        return back()->with('reservation_success', 'Reservasi berhasil dibatalkan.');
+        return redirect()->route('user.reservations')->with('success', 'Reservasi buku berhasil diajukan! Menunggu persetujuan Admin.');
     }
 }

@@ -3,117 +3,146 @@
 namespace App\Http\Controllers;
 
 use App\Models\Borrowing;
-use App\Models\Member;
 use App\Models\Reservation;
-use Carbon\Carbon;
+use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class UserHistoryController extends Controller
 {
-    /**
-     * Tampilkan halaman riwayat transaksi user (Peminjaman & Reservasi)
-     */
     public function index(Request $request)
     {
-        $user = Auth::user();
-        $activeTab = $request->get('tab', 'borrowings');
-        $search = $request->get('search');
-        $statusFilter = $request->get('status');
+        $user   = Auth::user();
+        $member = Member::where('email', $user->email)->first();
 
-        // Cari ID member user yang tersinkronisasi
-        $memberId = Member::where('user_id', $user->id)
-            ->orWhere('email', $user->email)
-            ->value('id');
+        $activities   = collect();
+        $stats = [
+            'total_borrowed'     => 0,
+            'total_reservations' => 0,
+            'active_borrowed'    => 0,
+            'returned_borrowed'  => 0,
+        ];
 
-        // ─── 1. QUERY RIWAYAT PEMINJAMAN ────────────────────────────────
-        $borrowingsQuery = Borrowing::with(['details.book', 'member'])
-            ->where(function ($q) use ($user, $memberId) {
-                if ($memberId) {
-                    $q->where('member_id', $memberId);
+        if ($member) {
+            $search = trim((string) $request->input('search', ''));
+            $month  = $request->input('month', '');
+            $year   = $request->input('year', '');
+
+            // -- Statistik hero (seluruh data, tanpa filter) --
+            $allBorrowings = Borrowing::where('member_id', $member->id)->get();
+            $stats['total_borrowed']     = $allBorrowings->count();
+            $stats['active_borrowed']    = $allBorrowings->where('status', 'dipinjam')->count();
+            $stats['returned_borrowed']  = $allBorrowings->where('status', 'dikembalikan')->count();
+            $stats['total_reservations'] = Reservation::where('member_id', $member->id)->count();
+
+            // -- Ambil semua Borrowing user (semua status) --
+            $borrowingQuery = Borrowing::with(['details.book.category'])
+                ->where('member_id', $member->id);
+
+            if ($month) {
+                $borrowingQuery->whereMonth('created_at', $month);
+            }
+            if ($year) {
+                $borrowingQuery->whereYear('created_at', $year);
+            }
+            if ($search !== '') {
+                $borrowingQuery->whereHas('details.book', fn($q) =>
+                    $q->where('title', 'like', "{$search}%")
+                      ->orWhere('author', 'like', "{$search}%")
+                );
+            }
+
+            $borrowings = $borrowingQuery->get()->map(function ($b) {
+                $detail = $b->details->first();
+                $book   = $detail?->book;
+
+                $statusRaw = strtolower($b->status ?? '');
+                $isReturned = !empty($b->returned_at) || $statusRaw === 'dikembalikan' || $statusRaw === 'selesai';
+                $isOverdue  = !$isReturned && (($b->due_at && now()->gt($b->due_at)) || $statusRaw === 'terlambat');
+
+                if ($isReturned) {
+                    $statusLabel = 'Selesai';
+                    $badgeClass  = 'status-selesai';
+                } elseif ($isOverdue) {
+                    $statusLabel = 'Terlambat';
+                    $badgeClass  = 'status-terlambat';
                 } else {
-                    $q->whereRaw('1 = 0'); // Belum ada riwayat jika member belum terhubung
+                    // Peminjaman otomatis diproses saat user meminjam, tidak boleh 'menunggu'
+                    $statusLabel = 'Dipinjam';
+                    $badgeClass  = 'status-dipinjam';
                 }
+
+                return (object)[
+                    'type'         => 'borrowing',
+                    'id'           => 'b-' . $b->id,
+                    'book'         => $book,
+                    'date'         => $b->created_at,
+                    'date_label'   => $b->borrowed_at
+                                    ? \Carbon\Carbon::parse($b->borrowed_at)->format('d M Y')
+                                    : $b->created_at->format('d M Y'),
+                    'extra'        => $b->returned_at
+                                    ? 'Dikembalikan ' . \Carbon\Carbon::parse($b->returned_at)->format('d M Y')
+                                    : ($b->due_at ? 'Batas: ' . \Carbon\Carbon::parse($b->due_at)->format('d M Y') : '-'),
+                    'status_raw'   => $b->status,
+                    'status_label' => $statusLabel,
+                    'badge_class'  => $badgeClass,
+                ];
             });
 
-        if ($search) {
-            $borrowingsQuery->whereHas('details.book', function ($q) use ($search) {
-                $q->where('judul_buku', 'like', "%{$search}%")
-                  ->orWhere('penulis', 'like', "%{$search}%");
-            });
-        }
+            // -- Ambil semua Reservasi user (semua status) --
+            $reservationQuery = Reservation::with('book.category')
+                ->where('member_id', $member->id);
 
-        if ($statusFilter && $activeTab === 'borrowings') {
-            if ($statusFilter === 'selesai') {
-                $borrowingsQuery->where('status', 'dikembalikan');
-            } elseif ($statusFilter === 'terlambat') {
-                $borrowingsQuery->where(function ($q) {
-                    $q->where('status', 'terlambat')
-                      ->orWhere(function ($sub) {
-                          $sub->whereIn('status', ['dipinjam', 'diperpanjang'])
-                              ->whereDate('due_at', '<', now()->toDateString());
-                      });
-                });
-            } elseif ($statusFilter === 'dipinjam') {
-                $borrowingsQuery->whereIn('status', ['dipinjam', 'diperpanjang'])
-                    ->whereDate('due_at', '>=', now()->toDateString());
+            if ($month) {
+                $reservationQuery->whereMonth('created_at', $month);
             }
-        }
-
-        $borrowings = $borrowingsQuery
-            ->orderBy('borrowed_at', 'desc')
-            ->orderBy('id', 'desc')
-            ->paginate(8, ['*'], 'borrowings_page')
-            ->withQueryString();
-
-        // ─── 2. QUERY RIWAYAT RESERVASI ─────────────────────────────────
-        $reservationsQuery = Reservation::with('book')
-            ->where(function ($q) use ($user, $memberId) {
-                $q->where('user_id', $user->id);
-                if ($memberId) {
-                    $q->orWhere('member_id', $memberId);
-                }
-            });
-
-        if ($search && $activeTab === 'reservations') {
-            $reservationsQuery->whereHas('book', function ($q) use ($search) {
-                $q->where('judul_buku', 'like', "%{$search}%")
-                  ->orWhere('penulis', 'like', "%{$search}%");
-            });
-        }
-
-        if ($statusFilter && $activeTab === 'reservations') {
-            if ($statusFilter === 'pending') {
-                $reservationsQuery->where('status', 'menunggu');
-            } elseif ($statusFilter === 'disetujui') {
-                $reservationsQuery->where('status', 'disetujui');
-            } elseif ($statusFilter === 'dibatalkan') {
-                $reservationsQuery->whereIn('status', ['dibatalkan', 'ditolak']);
-            } elseif ($statusFilter === 'selesai') {
-                $reservationsQuery->where('status', 'selesai');
+            if ($year) {
+                $reservationQuery->whereYear('created_at', $year);
             }
+            if ($search !== '') {
+                $reservationQuery->whereHas('book', fn($q) =>
+                    $q->where('title', 'like', "{$search}%")
+                      ->orWhere('author', 'like', "{$search}%")
+                );
+            }
+
+            $reservations = $reservationQuery->get()->map(function ($r) {
+                $statusRaw = strtolower($r->status ?? '');
+                $statusLabel = match($statusRaw) {
+                    'menunggu'                  => 'Menunggu Persetujuan',
+                    'disetujui', 'siap_diambil' => 'Disetujui',
+                    'ditolak', 'dibatalkan'     => 'Ditolak',
+                    'selesai'                   => 'Selesai',
+                    default                     => ucfirst($r->status),
+                };
+                $badgeClass = match($statusRaw) {
+                    'menunggu'                  => 'status-menunggu',   // oranye/kuning
+                    'disetujui', 'siap_diambil' => 'status-disetujui',  // hijau
+                    'ditolak', 'dibatalkan'     => 'status-ditolak',    // merah
+                    'selesai'                   => 'status-selesai',    // BIRU LANGIT (sky blue)
+                    default                     => 'status-menunggu',
+                };
+                return (object)[
+                    'type'         => 'reservation',
+                    'id'           => 'r-' . $r->id,
+                    'book'         => $r->book,
+                    'date'         => $r->created_at,
+                    'date_label'   => $r->created_at?->format('d M Y') ?? '-',
+                    'extra'        => $r->expires_at
+                                        ? 'Berlaku s/d: ' . \Carbon\Carbon::parse($r->expires_at)->format('d M Y')
+                                        : '-',
+                    'status_raw'   => $r->status,
+                    'status_label' => $statusLabel,
+                    'badge_class'  => $badgeClass,
+                ];
+            });
+
+            // -- Gabungkan dan urutkan berdasarkan tanggal terbaru --
+            $activities = $borrowings->concat($reservations)
+                ->sortByDesc('date')
+                ->values();
         }
 
-        $reservations = $reservationsQuery
-            ->orderBy('reserved_at', 'desc')
-            ->orderBy('id', 'desc')
-            ->paginate(8, ['*'], 'reservations_page')
-            ->withQueryString();
-
-        // Hitung total untuk badge tab
-        $totalBorrowings = Borrowing::where('member_id', $memberId)->count();
-        $totalReservations = Reservation::where('user_id', $user->id)
-            ->when($memberId, fn($q) => $q->orWhere('member_id', $memberId))
-            ->count();
-
-        return view('user.history', compact(
-            'borrowings',
-            'reservations',
-            'activeTab',
-            'search',
-            'statusFilter',
-            'totalBorrowings',
-            'totalReservations'
-        ));
+        return view('user.history', compact('activities', 'member', 'stats'));
     }
 }

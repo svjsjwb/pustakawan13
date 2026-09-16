@@ -195,10 +195,6 @@
 
             </div>
 
-            <div class="stat-wave"></div>
-
-        </div>
-
     </div>
 
 

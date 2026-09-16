@@ -4,233 +4,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Login</title>
-
+    <title>Login – Perpustakaan Tiga Serangkai</title>
+    <meta name="description" content="Login ke sistem perpustakaan Tiga Serangkai.">
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-    <div class="login-page">
+<div class="login-page">
 
-        <div class="login-background"></div>
+    <div class="login-background"></div>
 
-        <div class="login-panel">
+    <div class="login-panel">
 
-            <img
-                src="{{ asset('images/logo-tiga-serangkai.png') }}"
-                alt="Tiga Serangkai"
-                class="login-logo">
+        <div class="login-card">
 
-            <div class="login-card">
+            <h1>WELCOME!!</h1>
+            <p>Selamat menjelajah jendela dunia.</p>
 
-                <h1>WELCOME!!</h1>
+            {{-- Error messages --}}
+            @if ($errors->any())
+                <div class="alert-error">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    {{ $errors->first('email') ?? $errors->first() }}
+                </div>
+            @endif
 
-                <p>Selamat menjelajah jendela dunia.</p>
+            @if (session('error'))
+                <div class="alert-error">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    {{ session('error') }}
+                </div>
+            @endif
 
-                {{-- LOGIN EMAIL / PASSWORD --}}
-                <form method="POST" action="{{ route('login.store') }}">
+            @if (session('success'))
+                <div class="alert-success">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    {{ session('success') }}
+                </div>
+            @endif
 
-                    @csrf
+            <form method="POST" action="{{ route('login.store') }}" id="loginForm">
+                @csrf
 
-                    <div class="form-group">
-                        <label for="email">Username / Email</label>
-
-                        <input
-                            id="email"
-                            type="text"
-                            name="email"
-                            placeholder="Masukkan username atau email"
-                            value="{{ old('email') }}"
-                            required
-                            autocomplete="username">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">Password</label>
-
-                        <div class="password-input">
-
-                            <input
-                                id="password"
-                                type="password"
-                                name="password"
-                                placeholder="Masukkan password"
-                                required
-                                autocomplete="current-password">
-
-                            <button
-                                type="button"
-                                class="password-toggle"
-                                id="passwordToggle"
-                                aria-label="Tampilkan password">
-
-                                <svg
-                                    id="passwordEye"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round">
-
-                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
-                                    <circle cx="12" cy="12" r="3"/>
-
-                                </svg>
-
-                            </button>
-
-                        </div>
-                    </div>
-
-                    <div class="forgot">
-                        <a href="#">
-                            Lupa Password?
-                        </a>
-                    </div>
-
-                    <button
-                        type="submit"
-                        class="login-button">
-
-                        LOGIN
-
-                    </button>
-
-                </form>
-
-
-                {{-- PEMISAH --}}
-                <div class="login-divider">
-                    <span>atau</span>
+                {{-- Username / Email --}}
+                <div class="form-group">
+                    <label for="email">Username / Email</label>
+                    <input
+                        id="email"
+                        type="text"
+                        name="email"
+                        placeholder="Masukkan email atau username"
+                        value="{{ old('email') }}"
+                        required
+                        autocomplete="username">
                 </div>
 
+                {{-- Password --}}
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-input">
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            placeholder="Masukkan password"
+                            required
+                            autocomplete="current-password">
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            id="togglePassword"
+                            aria-label="Tampilkan/sembunyikan password"
+                            onclick="togglePwd()">
+                            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-                {{-- LOGIN GOOGLE --}}
-                <a
-                    href="{{ route('google.redirect') }}"
-                    class="google-login-button">
+                {{-- Lupa password --}}
+                <div class="forgot">
+                    <a href="#">Lupa Password?</a>
+                </div>
 
-                    <span class="google-icon">
+                <button type="submit" class="login-button" id="loginBtn">
+                    LOGIN
+                </button>
 
-                        <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24">
+            </form>
 
-                            <path
-                                fill="#4285F4"
-                                d="M21.35 12.27c0-.72-.06-1.42-.18-2.09H12v3.95h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.25Z"/>
+            {{-- Divider --}}
+            <div class="login-divider"><span>atau</span></div>
 
-                            <path
-                                fill="#34A853"
-                                d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.75 9.75 0 0 0 12 21.75Z"/>
+            {{-- Google Login --}}
+            <a href="{{ route('google.redirect') }}" class="google-login-button" id="googleLoginBtn">
+                <span class="google-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                </span>
+                Login dengan Google
+            </a>
 
-                            <path
-                                fill="#FBBC05"
-                                d="M6.54 13.83a5.86 5.86 0 0 1 0-3.66V7.64H3.3a9.76 9.76 0 0 0 0 8.72l3.24-2.53Z"/>
-
-                            <path
-                                fill="#EA4335"
-                                d="M12 6.14c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.83 3.16 14.63 2.25 12 2.25a9.75 9.75 0 0 0-8.7 5.39l3.24 2.53C7.31 7.86 9.46 6.14 12 6.14Z"/>
-
-                        </svg>
-
-                    </span>
-
-                    <span>
-                        Login dengan Google
-                    </span>
-
-                </a>
-
-
-                {{-- DAFTAR --}}
-                <p class="register-link">
-
-                    Belum punya akun?
-
-                    <a href="{{ route('register') }}">
-                        Daftar sekarang
-                    </a>
-
-                </p>
-
-            </div>
+            {{-- Daftar --}}
+            <p class="register-link">
+                Belum punya akun? <a href="{{ route('register') }}">Daftar sekarang</a>
+            </p>
 
         </div>
 
     </div>
 
+</div>
 
-    {{-- PASSWORD TOGGLE --}}
-    <script>
-
-        document.addEventListener('DOMContentLoaded', function () {
-
-            const passwordInput =
-                document.getElementById('password');
-
-            const passwordToggle =
-                document.getElementById('passwordToggle');
-
-            const passwordEye =
-                document.getElementById('passwordEye');
-
-
-            if (!passwordInput || !passwordToggle) {
-                return;
-            }
-
-
-            passwordToggle.addEventListener('click', function () {
-
-                const isPassword =
-                    passwordInput.type === 'password';
-
-
-                passwordInput.type =
-                    isPassword ? 'text' : 'password';
-
-
-                passwordToggle.setAttribute(
-                    'aria-label',
-                    isPassword
-                        ? 'Sembunyikan password'
-                        : 'Tampilkan password'
-                );
-
-
-                if (isPassword) {
-
-                    // ICON MATA DICORET
-                    passwordEye.innerHTML = `
-                        <path d="M3 3l18 18"/>
-                        <path d="M10.58 10.58a2 2 0 0 0 2.83 2.83"/>
-                        <path d="M9.88 4.24A9.6 9.6 0 0 1 12 4c6.5 0 10 8 10 8a17.4 17.4 0 0 1-3.02 4.11"/>
-                        <path d="M6.61 6.61C3.98 8.38 2 12 2 12s3.5 8 10 8a9.9 9.9 0 0 0 4.5-1.07"/>
-                    `;
-
-                } else {
-
-                    // ICON MATA NORMAL
-                    passwordEye.innerHTML = `
-                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    `;
-
-                }
-
-            });
-
-        });
-
-    </script>
+<script>
+function togglePwd() {
+    var input = document.getElementById('password');
+    var icon  = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+        input.type = 'password';
+        icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+}
+</script>
 
 </body>
-
 </html>

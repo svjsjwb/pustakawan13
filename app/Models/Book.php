@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Model;
 
 class Book extends Model
 {
@@ -18,6 +18,9 @@ class Book extends Model
         'penulis',
         'category_id',
         'subcategory_id',
+        'main_category',
+        'sub_category',
+        'education_level',
         'stok',
         'status',
         'no_iventaris',
@@ -26,11 +29,15 @@ class Book extends Model
         'rak',
         'sku',
         'edition',
+        'title',
+        'author',
+        'stock',
+        'available_stock',
     ];
 
     /*
      * |--------------------------------------------------------------------------
-     * | ACCESSORS (alias kolom lama → baru)
+     * | ACCESSORS & MUTATORS (alias kolom lama <-> baru)
      * |--------------------------------------------------------------------------
      */
 
@@ -39,9 +46,19 @@ class Book extends Model
         return $this->attributes['judul_buku'] ?? null;
     }
 
+    public function setTitleAttribute($value): void
+    {
+        $this->attributes['judul_buku'] = $value;
+    }
+
     public function getAuthorAttribute(): ?string
     {
         return $this->attributes['penulis'] ?? null;
+    }
+
+    public function setAuthorAttribute($value): void
+    {
+        $this->attributes['penulis'] = $value;
     }
 
     public function getStockAttribute(): int
@@ -49,92 +66,55 @@ class Book extends Model
         return (int) ($this->attributes['stok'] ?? 0);
     }
 
+    public function setStockAttribute($value): void
+    {
+        $this->attributes['stok'] = (int) $value;
+    }
+
     public function getAvailableStockAttribute(): int
     {
         return (int) ($this->attributes['stok'] ?? 0);
     }
 
+    public function setAvailableStockAttribute($value): void
+    {
+        $this->attributes['stok'] = (int) $value;
+    }
+
     /*
      * |--------------------------------------------------------------------------
-     * | CATEGORY
+     * | RELATIONSHIPS
      * |--------------------------------------------------------------------------
      */
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(
-            Category::class,
-            'category_id'
-        );
+        return $this->belongsTo(Category::class, 'category_id');
     }
-
-    /*
-     * |--------------------------------------------------------------------------
-     * | SUBCATEGORY
-     * |--------------------------------------------------------------------------
-     */
 
     public function subcategory(): BelongsTo
     {
-        return $this->belongsTo(
-            Subcategory::class,
-            'subcategory_id'
-        );
+        return $this->belongsTo(Subcategory::class, 'subcategory_id');
     }
-
-    /*
-     * |--------------------------------------------------------------------------
-     * | RACK
-     * |--------------------------------------------------------------------------
-     */
 
     public function rack(): BelongsTo
     {
-        return $this->belongsTo(
-            Rack::class,
-            'rak',
-            'code'
-        );
+        return $this->belongsTo(Rack::class, 'rak', 'code');
     }
-
-    /*
-     * |--------------------------------------------------------------------------
-     * | BORROWING DETAILS
-     * |--------------------------------------------------------------------------
-     */
 
     public function borrowingDetails(): HasMany
     {
-        return $this->hasMany(
-            BorrowingDetail::class
-        );
+        return $this->hasMany(BorrowingDetail::class);
     }
-
-    /*
-     * |--------------------------------------------------------------------------
-     * | BOOK COPIES
-     * |--------------------------------------------------------------------------
-     */
 
     public function copies(): HasMany
     {
-        return $this->hasMany(
-            BookCopy::class
-        );
+        return $this->hasMany(BookCopy::class);
     }
-
-    /*
-     * |--------------------------------------------------------------------------
-     * | FAVORITES
-     * |--------------------------------------------------------------------------
-     */
 
     public function favorites(): HasMany
     {
-        return $this->hasMany(
-            UserFavorite::class,
-            'book_id'
-        );
+        return $this->hasMany(UserFavorite::class, 'book_id');
     }
 
     public function isFavoritedBy(?User $user): bool

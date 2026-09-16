@@ -25,8 +25,21 @@
         rel="stylesheet"
         href="{{ asset('css/footer.css') }}">
 
+    <link
+        rel="stylesheet"
+        href="{{ asset('css/user-theme.css') }}">
+
+    {{-- Anti-flash dark mode initializer --}}
+    <script>
+        (function() {
+            var theme = localStorage.getItem('lib_theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
     @stack('styles')
-    @stack('head-scripts')
 
 </head>
 
@@ -55,7 +68,6 @@
     ====================================================== --}}
 
     <script src="{{ asset('js/app.js') }}"></script>
-    <script src="{{ asset('js/realtime.js') }}"></script>
 
 
     {{-- =====================================================

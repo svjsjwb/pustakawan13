@@ -248,11 +248,11 @@ function setCatalogView(v){
   document.getElementById('catalog-list').style.display = v==='list' ? 'block':'none';
 }
 function filteredCatalogBooks(){
-  const q = document.getElementById('cat-search').value.toLowerCase();
+  const q = document.getElementById('cat-search').value.trim().toLowerCase();
   const cat = document.getElementById('cat-filter-kategori').value;
   const status = document.getElementById('cat-filter-status').value;
   return books.filter(b=>{
-    if(q && !(b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q))) return false;
+    if(q && !(b.title.toLowerCase().startsWith(q) || b.author.toLowerCase().startsWith(q))) return false;
     if(cat && b.category!==cat) return false;
     if(status==='tersedia' && b.available<=0) return false;
     if(status==='dipinjam' && b.available>0) return false;
@@ -317,10 +317,10 @@ function showBookDetail(id){
 
 /* ============================= RENDER: BOOKS ADMIN ============================= */
 function filteredAdminBooks(){
-  const q = document.getElementById('books-search').value.toLowerCase();
+  const q = document.getElementById('books-search').value.trim().toLowerCase();
   const cat = document.getElementById('books-filter-kategori').value;
   return books.filter(b=>{
-    if(q && !(b.title.toLowerCase().includes(q)||b.author.toLowerCase().includes(q)||b.isbn.toLowerCase().includes(q))) return false;
+    if(q && !(b.title.toLowerCase().startsWith(q)||b.author.toLowerCase().startsWith(q)||b.isbn.toLowerCase().startsWith(q))) return false;
     if(cat && b.category!==cat) return false;
     return true;
   });
@@ -439,12 +439,12 @@ function setLoanFilter(status, el){
   renderLoans();
 }
 function renderLoans(){
-  const q = document.getElementById('loan-search').value.toLowerCase();
+  const q = document.getElementById('loan-search').value.trim().toLowerCase();
   let list = loans.slice().sort((a,b)=> b.id-a.id);
   if(loanFilter) list = list.filter(l=>loanStatus(l)===loanFilter);
   if(q) list = list.filter(l=>{
     const m=memberById(l.memberId), b=bookById(l.bookId);
-    return m.name.toLowerCase().includes(q) || b.title.toLowerCase().includes(q);
+    return m.name.toLowerCase().startsWith(q) || b.title.toLowerCase().startsWith(q);
   });
   document.getElementById('loans-table-body').innerHTML = list.map(l=>{
     const m = memberById(l.memberId), b = bookById(l.bookId), st = loanStatus(l);
@@ -507,10 +507,10 @@ function renderReservations(){
 
 /* ============================= RENDER: FINES ============================= */
 function renderFines(){
-  const q = (document.getElementById('fines-search').value||'').toLowerCase();
+  const q = (document.getElementById('fines-search').value||'').trim().toLowerCase();
   const filter = document.getElementById('fines-filter').value;
   let rows = loans.map(l=>({l, fine: calcFine(l)})).filter(x=>x.fine>0);
-  if(q) rows = rows.filter(x=> memberById(x.l.memberId).name.toLowerCase().includes(q));
+  if(q) rows = rows.filter(x=> memberById(x.l.memberId).name.toLowerCase().startsWith(q));
   if(filter==='belum') rows = rows.filter(x=>!x.l.finePaid);
   if(filter==='lunas') rows = rows.filter(x=>x.l.finePaid);
 
@@ -547,10 +547,10 @@ function payFine(loanId){
 
 /* ============================= RENDER: MEMBERS ============================= */
 function renderMembers(){
-  const q = document.getElementById('members-search').value.toLowerCase();
+  const q = document.getElementById('members-search').value.trim().toLowerCase();
   const status = document.getElementById('members-filter-status').value;
   let list = members.filter(m=>{
-    if(q && !(m.name.toLowerCase().includes(q)||m.email.toLowerCase().includes(q)||m.no.toLowerCase().includes(q))) return false;
+    if(q && !(m.name.toLowerCase().startsWith(q)||m.email.toLowerCase().startsWith(q)||m.no.toLowerCase().startsWith(q))) return false;
     if(status && m.status!==status) return false;
     return true;
   });
