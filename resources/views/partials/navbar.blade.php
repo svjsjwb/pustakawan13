@@ -39,6 +39,11 @@
                 Manajemen Buku
             </a>
 
+            <a href="{{ route('members.index') }}"
+                class="{{ request()->routeIs('members.*') ? 'active' : '' }}">
+                Anggota
+            </a>
+
             <a href="{{ route('circulation') }}"
                 class="{{ request()->routeIs('circulation') ? 'active' : '' }}">
                 Peminjaman Buku

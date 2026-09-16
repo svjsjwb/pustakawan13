@@ -12,6 +12,7 @@ class MemberSeeder extends Seeder
         $members = [
             [
                 'name'          => 'Ahmad Fauzan',
+                'email'         => 'ahmad@example.com',
                 'division'      => 'Editorial',
                 'phone'         => '081234567801',
                 'address'       => 'Surakarta',
@@ -20,6 +21,7 @@ class MemberSeeder extends Seeder
             ],
             [
                 'name'          => 'Budi Santoso',
+                'email'         => 'budi@example.com',
                 'division'      => 'IT & Digital',
                 'phone'         => '081234567802',
                 'address'       => 'Surakarta',
@@ -28,6 +30,7 @@ class MemberSeeder extends Seeder
             ],
             [
                 'name'          => 'Citra Lestari',
+                'email'         => 'citra@example.com',
                 'division'      => 'Pemasaran',
                 'phone'         => '081234567803',
                 'address'       => 'Surakarta',
@@ -36,6 +39,7 @@ class MemberSeeder extends Seeder
             ],
             [
                 'name'          => 'Dimas Pratama',
+                'email'         => 'dimas@example.com',
                 'division'      => 'Produksi',
                 'phone'         => '081234567804',
                 'address'       => 'Surakarta',
@@ -44,6 +48,7 @@ class MemberSeeder extends Seeder
             ],
             [
                 'name'          => 'Eka Putri',
+                'email'         => 'eka@example.com',
                 'division'      => 'Keuangan',
                 'phone'         => '081234567805',
                 'address'       => 'Surakarta',
@@ -52,6 +57,7 @@ class MemberSeeder extends Seeder
             ],
             [
                 'name'          => 'Fajar Ramadhan',
+                'email'         => 'fajar@example.com',
                 'division'      => 'SDM & Umum',
                 'phone'         => '081234567806',
                 'address'       => 'Surakarta',
@@ -60,6 +66,7 @@ class MemberSeeder extends Seeder
             ],
             [
                 'name'          => 'Gita Maharani',
+                'email'         => 'gita@example.com',
                 'division'      => 'Editorial',
                 'phone'         => '081234567807',
                 'address'       => 'Surakarta',
@@ -68,6 +75,7 @@ class MemberSeeder extends Seeder
             ],
             [
                 'name'          => 'Hendra Wijaya',
+                'email'         => 'hendra@example.com',
                 'division'      => 'Logistik',
                 'phone'         => '081234567808',
                 'address'       => 'Surakarta',
@@ -76,6 +84,7 @@ class MemberSeeder extends Seeder
             ],
             [
                 'name'          => 'Intan Permata',
+                'email'         => 'intan@example.com',
                 'division'      => 'Desain Grafis',
                 'phone'         => '081234567809',
                 'address'       => 'Surakarta',
@@ -84,6 +93,7 @@ class MemberSeeder extends Seeder
             ],
             [
                 'name'          => 'Joko Setiawan',
+                'email'         => 'joko@example.com',
                 'division'      => 'Percetakan',
                 'phone'         => '081234567810',
                 'address'       => 'Surakarta',

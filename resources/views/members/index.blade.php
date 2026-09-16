@@ -6,146 +6,299 @@
     <link rel="stylesheet" href="{{ asset('css/members.css') }}">
 @endpush
 
+
 @section('content')
 
 <div class="member-page">
 
-    <div class="page-header">
-        <div>
-            <h2>Keanggotaan</h2>
-            <p>Kelola data anggota perpustakaan.</p>
+    {{-- =====================================================
+         HERO HEADER
+    ====================================================== --}}
+
+    <section class="member-hero">
+
+        <div class="member-hero-content">
+
+            <div class="member-hero-label">
+                <span class="member-hero-dot"></span>
+                Pusat Perpustakaan
+            </div>
+
+            <h1>
+                Keanggotaan
+            </h1>
+
+            <p>
+                Kelola data anggota perpustakaan.
+            </p>
+
         </div>
 
-        <a href="{{ route('members.create') }}" class="btn-add-top">
+    </section>
+
+
+    {{-- =====================================================
+         TOP ACTION
+    ====================================================== --}}
+
+    <div class="member-top-action">
+
+        <a
+            href="{{ route('members.create') }}"
+            class="btn-add-top"
+        >
             + Tambah Anggota
         </a>
+
     </div>
 
+
+    {{-- =====================================================
+         SUCCESS ALERT
+    ====================================================== --}}
+
     @if(session('success'))
+
         <div class="alert-success">
-            {{ session('success') }}
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+
+                <polyline points="22 4 12 14.01 9 11.01" />
+
+            </svg>
+
+            <span>
+                {{ session('success') }}
+            </span>
+
         </div>
+
     @endif
 
+
+    {{-- =====================================================
+         MEMBER CARD
+    ====================================================== --}}
+
     <div class="member-card">
+
+        {{-- =================================================
+             TOOLBAR
+        ================================================== --}}
 
         <div class="member-toolbar">
 
             <div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <h3 style="margin: 0;">Daftar Anggota</h3>
-                    <span id="liveBadge" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 9999px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulseDot 1.5s infinite;"></span>
-                        Live Auto-Sync
-                    </span>
-                </div>
-                <p>Data anggota yang terdaftar di perpustakaan (sinkron otomatis dari user).</p>
+
+                <h3>
+                    Daftar Anggota
+                </h3>
+
+                <p>
+                    Data anggota yang terdaftar di perpustakaan.
+                </p>
+
             </div>
 
+
+            {{-- SEARCH --}}
+
             <div class="member-search">
+
                 <input
                     type="text"
                     id="memberSearch"
-                    placeholder="Cari nama, divisi, telepon..."
+                    placeholder="Cari anggota..."
                     autocomplete="off"
                 >
+
             </div>
 
         </div>
+
+
+        {{-- =================================================
+             TABLE
+        ================================================== --}}
 
         <div class="table-wrap">
 
             <table id="memberTable">
 
                 <thead>
+
                     <tr>
-                        <th>NO</th>
-                        <th>NAMA</th>
-                        <th>DIVISI</th>
-                        <th>NO. TELEPON</th>
-                        <th>TANGGAL BERGABUNG</th>
-                        <th>STATUS</th>
-                        <th>AKSI</th>
+
+                        <th>
+                            NO
+                        </th>
+
+                        <th>
+                            NAMA
+                        </th>
+
+                        <th>
+                            EMAIL
+                        </th>
+
+                        <th>
+                            DIVISI
+                        </th>
+
+                        <th>
+                            NO. TELEPON
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            AKSI
+                        </th>
+
                     </tr>
+
                 </thead>
 
-                <tbody id="memberTableBody">
-    @forelse($members as $member)
 
-        <tr data-id="{{ $member->id }}">
-            <td>{{ $loop->iteration }}</td>
+                <tbody>
 
-            <td>
-                <strong>{{ $member->name }}</strong>
-                @if($member->email)
-                    <div style="font-size: 11px; color: #64748b;">{{ $member->email }}</div>
-                @endif
-            </td>
+                    @forelse($members as $member)
 
-            <td>
-                {{ $member->division ?: 'Anggota' }}
-            </td>
+                        <tr>
 
-            <td>
-                {{ $member->phone ?: '-' }}
-            </td>
+                            {{-- NO --}}
 
-            <td>
-                {{ $member->created_at ? $member->created_at->translatedFormat('d M Y') : '-' }}
-            </td>
+                            <td>
+                                {{ $loop->iteration }}
+                            </td>
 
-            <td>
-                @if(strtolower($member->status) === 'aktif')
-                    <span class="status-active">
-                        Aktif
-                    </span>
-                @else
-                    <span class="status-inactive">
-                        Nonaktif
-                    </span>
-                @endif
-            </td>
 
-            <td>
-                <div class="action-buttons">
+                            {{-- NAMA --}}
 
-                    <a
-                        href="{{ route('members.edit', $member->id) }}"
-                        class="btn-edit"
-                    >
-                        Edit
-                    </a>
+                            <td>
 
-                    <form
-                        action="{{ route('members.destroy', $member->id) }}"
-                        method="POST"
-                        onsubmit="return confirm('Yakin ingin menghapus anggota ini?')"
-                    >
-                        @csrf
-                        @method('DELETE')
+                                <strong>
+                                    {{ $member->name }}
+                                </strong>
 
-                        <button
-                            type="submit"
-                            class="btn-delete"
-                        >
-                            Hapus
-                        </button>
-                    </form>
+                            </td>
 
-                </div>
-            </td>
-        </tr>
 
-    @empty
+                            {{-- EMAIL --}}
 
-        <tr>
-            <td colspan="7" class="empty-data">
-                Belum ada data anggota.
-            </td>
-        </tr>
+                            <td>
+                                {{ $member->email ?? '-' }}
+                            </td>
 
-    @endforelse
-</tbody>
+
+                            {{-- DIVISI --}}
+
+                            <td>
+                                {{ $member->division ?? '-' }}
+                            </td>
+
+
+                            {{-- TELEPON --}}
+
+                            <td>
+                                {{ $member->phone ?? '-' }}
+                            </td>
+
+
+                            {{-- STATUS --}}
+
+                            <td>
+
+                                @if($member->status === 'aktif')
+
+                                    <span class="status-active">
+                                        Aktif
+                                    </span>
+
+                                @else
+
+                                    <span class="status-inactive">
+                                        Tidak Aktif
+                                    </span>
+
+                                @endif
+
+                            </td>
+
+
+                            {{-- AKSI --}}
+
+                            <td>
+
+                                <div class="action-buttons">
+
+                                    {{-- EDIT --}}
+
+                                    <a
+                                        href="{{ route('members.edit', $member->id) }}"
+                                        class="btn-edit"
+                                        title="Edit Anggota"
+                                    >
+                                        Edit
+                                    </a>
+
+
+                                    {{-- HAPUS --}}
+
+                                    <form
+                                        action="{{ route('members.destroy', $member->id) }}"
+                                        method="POST"
+                                        class="delete-member-form"
+                                    >
+
+                                        @csrf
+
+                                        @method('DELETE')
+
+                                        <button
+                                            type="button"
+                                            class="btn-delete"
+                                            title="Hapus Anggota"
+                                            onclick="openMemberDeleteModal(this)"
+                                        >
+                                            Hapus
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+
+                            <td
+                                colspan="7"
+                                class="empty-data"
+                            >
+                                Belum ada data anggota.
+                            </td>
+
+                        </tr>
+
+                    @endforelse
+
+                </tbody>
 
             </table>
 
@@ -155,113 +308,403 @@
 
 </div>
 
-<style>
-@keyframes pulseDot {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(1.2); }
-    100% { opacity: 1; transform: scale(1); }
-}
-.new-row-highlight {
-    animation: highlightFade 3s ease forwards;
-}
-@keyframes highlightFade {
-    0% { background-color: #fef08a; }
-    100% { background-color: transparent; }
-}
-</style>
+
+{{-- =========================================================
+     MODAL KONFIRMASI HAPUS ANGGOTA
+========================================================= --}}
+
+<div
+    id="memberDeleteModal"
+    class="member-delete-modal-overlay"
+    aria-hidden="true"
+>
+
+    <div
+        class="member-delete-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="memberDeleteModalTitle"
+    >
+
+        {{-- ICON --}}
+
+        <div class="member-delete-modal-icon">
+
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+
+                <polyline points="3 6 5 6 21 6" />
+
+                <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                />
+
+                <path d="M10 11v6" />
+
+                <path d="M14 11v6" />
+
+                <path
+                    d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"
+                />
+
+            </svg>
+
+        </div>
+
+
+        {{-- LABEL --}}
+
+        <div class="member-delete-modal-label">
+            KONFIRMASI
+        </div>
+
+
+        {{-- TITLE --}}
+
+        <h3
+            id="memberDeleteModalTitle"
+            class="member-delete-modal-title"
+        >
+            Hapus Anggota
+        </h3>
+
+
+        {{-- DESCRIPTION --}}
+
+        <p class="member-delete-modal-description">
+
+            Yakin ingin menghapus anggota ini?
+
+            <br>
+
+            Data yang sudah dihapus tidak dapat dikembalikan.
+
+        </p>
+
+
+        {{-- MEMBER INFO --}}
+
+        <div class="member-delete-modal-member">
+
+            <span>
+                ANGGOTA
+            </span>
+
+            <strong id="deleteMemberName">
+                -
+            </strong>
+
+        </div>
+
+
+        {{-- ACTIONS --}}
+
+        <div class="member-delete-modal-actions">
+
+            <button
+                type="button"
+                class="member-delete-modal-cancel"
+                onclick="closeMemberDeleteModal()"
+            >
+                Batal
+            </button>
+
+
+            <button
+                type="button"
+                class="member-delete-modal-confirm"
+                onclick="confirmMemberDelete()"
+            >
+                Ya, Hapus
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{{-- =========================================================
+     JAVASCRIPT
+========================================================= --}}
 
 <script>
+
 document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('memberSearch');
-    const tableBody = document.getElementById('memberTableBody');
-    let lastKnownIds = Array.from(document.querySelectorAll('#memberTableBody tr[data-id]')).map(r => r.dataset.id);
 
-    // Filter pencarian
-    function applySearch() {
-        const keyword = searchInput.value.toLowerCase();
-        document.querySelectorAll('#memberTableBody tr').forEach(function (row) {
-            if (row.classList.contains('empty-data')) return;
-            row.style.display = row.innerText.toLowerCase().includes(keyword) ? '' : 'none';
-        });
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | SEARCH ANGGOTA
+    |--------------------------------------------------------------------------
+    */
 
-    if (searchInput) {
-        searchInput.addEventListener('keyup', applySearch);
-    }
+    const searchInput =
+        document.getElementById('memberSearch');
 
-    // Auto-refresh polling data anggota setiap 8 detik
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+    const table =
+        document.getElementById('memberTable');
 
-    function fetchLatestMembers() {
-        fetch('{{ route("members.json") }}', {
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success || !data.members) return;
 
-            const newIds = data.members.map(m => String(m.id));
-            const hasNew = newIds.some(id => !lastKnownIds.includes(id));
-            const countChanged = newIds.length !== lastKnownIds.length;
+    if (searchInput && table) {
 
-            if (hasNew || countChanged) {
-                renderTable(data.members, lastKnownIds);
-                lastKnownIds = newIds;
-                applySearch();
+        searchInput.addEventListener(
+            'input',
+            function () {
+
+                const keyword =
+                    this.value
+                        .toLowerCase()
+                        .trim();
+
+
+                const rows =
+                    table.querySelectorAll(
+                        'tbody tr'
+                    );
+
+
+                rows.forEach(function (row) {
+
+                    /*
+                    | Jangan sembunyikan
+                    | baris empty state.
+                    */
+
+                    if (
+                        row.querySelector('.empty-data')
+                    ) {
+                        return;
+                    }
+
+
+                    const rowText =
+                        row.innerText
+                            .toLowerCase();
+
+
+                    row.style.display =
+                        rowText.includes(keyword)
+                            ? ''
+                            : 'none';
+
+                });
+
             }
-        })
-        .catch(err => console.debug('Polling members silent error:', err));
+        );
+
     }
 
-    function renderTable(members, previousIds) {
-        if (!members.length) {
-            tableBody.innerHTML = '<tr><td colspan="7" class="empty-data">Belum ada data anggota.</td></tr>';
-            return;
+
+    /*
+    |--------------------------------------------------------------------------
+    | ESC UNTUK TUTUP MODAL
+    |--------------------------------------------------------------------------
+    */
+
+    document.addEventListener(
+        'keydown',
+        function (event) {
+
+            if (event.key === 'Escape') {
+
+                closeMemberDeleteModal();
+
+            }
+
         }
+    );
 
-        let html = '';
-        members.forEach((m, idx) => {
-            const isNew = !previousIds.includes(String(m.id));
-            const highlightClass = isNew ? 'new-row-highlight' : '';
-            const statusClass = m.status.toLowerCase() === 'aktif' ? 'status-active' : 'status-inactive';
 
-            html += `
-            <tr data-id="${m.id}" class="${highlightClass}">
-                <td>${idx + 1}</td>
-                <td>
-                    <strong>${escapeHtml(m.name)}</strong>
-                    ${m.email && m.email !== '-' ? `<div style="font-size: 11px; color: #64748b;">${escapeHtml(m.email)}</div>` : ''}
-                </td>
-                <td>${escapeHtml(m.division)}</td>
-                <td>${escapeHtml(m.phone)}</td>
-                <td>${escapeHtml(m.joined_at)}</td>
-                <td><span class="${statusClass}">${escapeHtml(m.status)}</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="${m.edit_url}" class="btn-edit">Edit</a>
-                        <form action="${m.delete_url}" method="POST" onsubmit="return confirm('Yakin ingin menghapus anggota ini?')">
-                            <input type="hidden" name="_token" value="${csrfToken}">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="btn-delete">Hapus</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>`;
-        });
+    /*
+    |--------------------------------------------------------------------------
+    | KLIK BACKDROP
+    |--------------------------------------------------------------------------
+    */
 
-        tableBody.innerHTML = html;
+    const modal =
+        document.getElementById(
+            'memberDeleteModal'
+        );
+
+
+    if (modal) {
+
+        modal.addEventListener(
+            'click',
+            function (event) {
+
+                if (event.target === this) {
+
+                    closeMemberDeleteModal();
+
+                }
+
+            }
+        );
+
     }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // Polling interval
-    setInterval(fetchLatestMembers, 8000);
 });
+
+
+/*
+|--------------------------------------------------------------------------
+| FORM DELETE TERPILIH
+|--------------------------------------------------------------------------
+*/
+
+let memberDeleteForm = null;
+
+
+/*
+|--------------------------------------------------------------------------
+| BUKA MODAL HAPUS
+|--------------------------------------------------------------------------
+*/
+
+function openMemberDeleteModal(button) {
+
+    memberDeleteForm =
+        button.closest(
+            '.delete-member-form'
+        );
+
+
+    if (!memberDeleteForm) {
+        return;
+    }
+
+
+    const row =
+        button.closest('tr');
+
+
+    /*
+    | Ambil nama anggota
+    */
+
+    const nameElement =
+        row
+            ? row.querySelector(
+                'td:nth-child(2) strong'
+            )
+            : null;
+
+
+    const memberName =
+        nameElement
+            ? nameElement.textContent.trim()
+            : 'Anggota';
+
+
+    /*
+    | Tampilkan nama di modal
+    */
+
+    const nameTarget =
+        document.getElementById(
+            'deleteMemberName'
+        );
+
+
+    if (nameTarget) {
+
+        nameTarget.textContent =
+            memberName;
+
+    }
+
+
+    /*
+    | Buka modal
+    */
+
+    const modal =
+        document.getElementById(
+            'memberDeleteModal'
+        );
+
+
+    if (!modal) {
+        return;
+    }
+
+
+    modal.classList.add('show');
+
+    modal.setAttribute(
+        'aria-hidden',
+        'false'
+    );
+
+
+    document.body.style.overflow =
+        'hidden';
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| TUTUP MODAL
+|--------------------------------------------------------------------------
+*/
+
+function closeMemberDeleteModal() {
+
+    const modal =
+        document.getElementById(
+            'memberDeleteModal'
+        );
+
+
+    if (!modal) {
+        return;
+    }
+
+
+    modal.classList.remove('show');
+
+    modal.setAttribute(
+        'aria-hidden',
+        'true'
+    );
+
+
+    document.body.style.overflow =
+        '';
+
+
+    memberDeleteForm =
+        null;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| KONFIRMASI DELETE
+|--------------------------------------------------------------------------
+*/
+
+function confirmMemberDelete() {
+
+    if (!memberDeleteForm) {
+        return;
+    }
+
+
+    memberDeleteForm.submit();
+
+}
+
 </script>
 
 @endsection

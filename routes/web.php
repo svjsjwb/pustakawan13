@@ -202,8 +202,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('fines');
 
     // ANGGOTA
-    Route::get('/members', [MemberController::class, 'index'])
-        ->name('members');
+    Route::resource('members', MemberController::class);
 
     // KALENDER
     Route::get('/calendar', [CalendarController::class, 'index'])
