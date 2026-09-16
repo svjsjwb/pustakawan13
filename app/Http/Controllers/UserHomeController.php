@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 
 class UserHomeController extends Controller
 {
-    public function index(Request $request)
+    public function index(?Request $request = null)
     {
         $user   = Auth::user();
         $member = Member::where('email', $user?->email)->first();

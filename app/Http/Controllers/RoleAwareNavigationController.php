@@ -9,7 +9,7 @@ class RoleAwareNavigationController extends Controller
 {
     public function dashboard(Request $request)
     {
-        return Auth::user()->isAdmin() ? app(DashboardController::class)->index($request) : app(UserHomeController::class)->index();
+        return Auth::user()->isAdmin() ? app(DashboardController::class)->index($request) : app(UserHomeController::class)->index($request);
     }
 
     public function catalog(Request $request)
