@@ -91,11 +91,13 @@ class UserHomeController extends Controller
             ->values();
 
         // Aktivitas / Pengumuman (dari Pandu — popup announcement)
-        $announcements = Activity::latest()->get();
+        $announcements = \Illuminate\Support\Facades\Schema::hasTable('activities')
+            ? Activity::latest()->get()
+            : collect();
 
         // Aktivitas yang belum dibaca oleh user ini
         $unreadAnnouncements = $announcements->filter(function ($activity) use ($user) {
-            return !$activity->reads()->where('user_id', $user?->id)->exists();
+            return method_exists($activity, 'reads') && !$activity->reads()->where('user_id', $user?->id)->exists();
         })->values();
 
         return view('user.home', compact(

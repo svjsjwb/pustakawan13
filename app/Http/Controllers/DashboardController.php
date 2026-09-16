@@ -186,7 +186,9 @@ class DashboardController extends Controller
         }
 
         // 5. Aktivitas manual (announcement — dari Pandu)
-        $manualActivities = Activity::latest()->get();
+        $manualActivities = \Illuminate\Support\Facades\Schema::hasTable('activities')
+            ? Activity::latest()->get()
+            : collect();
 
         foreach ($manualActivities as $manualActivity) {
             $activities->push([
@@ -215,7 +217,9 @@ class DashboardController extends Controller
          * ========================================================
          */
 
-        $allManualActivities = Activity::latest()->get();
+        $allManualActivities = \Illuminate\Support\Facades\Schema::hasTable('activities')
+            ? Activity::latest()->get()
+            : collect();
 
 
         /*
