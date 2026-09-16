@@ -525,7 +525,7 @@ class ReservationController extends Controller
              * Contoh:
              *
              * dibatalkan
-             *      ↓
+             *      Γåô
              * menunggu
              *
              * Cari BookCopy available baru.

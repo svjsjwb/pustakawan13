@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Borrowing;
@@ -12,9 +13,9 @@ use Illuminate\Http\Request;
 
 class UserHomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user();
+        $user   = Auth::user();
         $member = Member::where('email', $user?->email)->first();
 
         // ── 4 WIDGET DASHBOARD USER ──────────────────────────────
@@ -46,13 +47,13 @@ class UserHomeController extends Controller
             if ($lastBorrow) {
                 $bookTitle = $lastBorrow->details->first()?->book?->title ?? 'Buku';
                 $requests->push([
-                    'type'           => $lastBorrow->extension_status === 'menunggu' ? 'Perpanjangan Peminjaman' : 'Peminjaman Buku',
-                    'title'          => $bookTitle,
-                    'status'         => $lastBorrow->extension_status === 'menunggu' ? 'Menunggu Persetujuan' : $lastBorrow->display_status,
-                    'status_raw'     => $lastBorrow->extension_status === 'menunggu' ? 'menunggu' : $lastBorrow->status,
-                    'date'           => $lastBorrow->created_at,
-                    'notes'          => $lastBorrow->rejection_reason ?? ($lastBorrow->extension_reason ?? null),
-                    'link'           => route('borrowings.index'),
+                    'type'       => $lastBorrow->extension_status === 'menunggu' ? 'Perpanjangan Peminjaman' : 'Peminjaman Buku',
+                    'title'      => $bookTitle,
+                    'status'     => $lastBorrow->extension_status === 'menunggu' ? 'Menunggu Persetujuan' : $lastBorrow->display_status,
+                    'status_raw' => $lastBorrow->extension_status === 'menunggu' ? 'menunggu' : $lastBorrow->status,
+                    'date'       => $lastBorrow->created_at,
+                    'notes'      => $lastBorrow->rejection_reason ?? ($lastBorrow->extension_reason ?? null),
+                    'link'       => route('borrowings.index'),
                 ]);
             }
 
@@ -62,13 +63,13 @@ class UserHomeController extends Controller
                 ->first();
             if ($lastReserve) {
                 $requests->push([
-                    'type'           => 'Reservasi Buku',
-                    'title'          => $lastReserve->book?->title ?? 'Buku',
-                    'status'         => $lastReserve->display_status,
-                    'status_raw'     => $lastReserve->status,
-                    'date'           => $lastReserve->created_at,
-                    'notes'          => $lastReserve->rejection_reason,
-                    'link'           => route('user.reservations.show', $lastReserve->id),
+                    'type'       => 'Reservasi Buku',
+                    'title'      => $lastReserve->book?->title ?? 'Buku',
+                    'status'     => $lastReserve->display_status,
+                    'status_raw' => $lastReserve->status,
+                    'date'       => $lastReserve->created_at,
+                    'notes'      => $lastReserve->rejection_reason,
+                    'link'       => route('user.reservations.show', $lastReserve->id),
                 ]);
             }
 
@@ -84,10 +85,18 @@ class UserHomeController extends Controller
 
         // Kategori
         $categoryOrder = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
-        $categories = Category::whereIn('name', $categoryOrder)
+        $categories    = Category::whereIn('name', $categoryOrder)
             ->get()
             ->sortBy(fn ($category) => array_search($category->name, $categoryOrder, true))
             ->values();
+
+        // Aktivitas / Pengumuman (dari Pandu — popup announcement)
+        $announcements = Activity::latest()->get();
+
+        // Aktivitas yang belum dibaca oleh user ini
+        $unreadAnnouncements = $announcements->filter(function ($activity) use ($user) {
+            return !$activity->reads()->where('user_id', $user?->id)->exists();
+        })->values();
 
         return view('user.home', compact(
             'popularBooks',
@@ -97,7 +106,9 @@ class UserHomeController extends Controller
             'activeLoansCount',
             'activeReservesCount',
             'historyCount',
-            'latestRequest'
+            'latestRequest',
+            'announcements',
+            'unreadAnnouncements'
         ));
     }
 
@@ -115,11 +126,11 @@ class UserHomeController extends Controller
             ->take(8)
             ->get()
             ->map(fn ($book) => [
-                'title' => $book->title,
-                'author' => $book->author ?: 'Penulis tidak diketahui',
+                'title'    => $book->title,
+                'author'   => $book->author ?: 'Penulis tidak diketahui',
                 'category' => $book->category?->name ?: 'Koleksi',
-                'cover' => $book->cover ? asset('storage/' . $book->cover) : null,
-                'url' => route('user.catalog', ['search' => $book->title]),
+                'cover'    => $book->cover ? asset('storage/' . $book->cover) : null,
+                'url'      => route('user.catalog', ['search' => $book->title]),
             ]);
 
         return response()->json(['books' => $books]);

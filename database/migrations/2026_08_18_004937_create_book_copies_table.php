@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('book_copies', function (Blueprint $table) {
+
             $table->id();
 
             /*
@@ -33,7 +34,9 @@ return new class extends Migration
              * Nullable karena pada tahap awal
              * buku lama mungkin belum memiliki barcode.
              */
-            $table->string('barcode')->nullable()->unique();
+            $table->string('barcode')
+                ->nullable()
+                ->unique();
 
             /*
              * Status fisik eksemplar.
@@ -46,6 +49,17 @@ return new class extends Migration
                 'damaged',
                 'maintenance',
             ])->default('available');
+
+            /*
+             * Kondisi fisik eksemplar.
+             *
+             * Baik  = kondisi buku masih baik.
+             * Rusak = buku mengalami kerusakan.
+             */
+            $table->enum('condition', [
+                'baik',
+                'rusak',
+            ])->default('baik');
 
             $table->timestamps();
         });

@@ -15,6 +15,8 @@ return new class extends Migration {
                 $table->string('member_number')->unique();
                 $table->string('name');
 
+                $table->string('division')->nullable();
+
                 $table->string('nis_nip')->nullable();
 
                 $table

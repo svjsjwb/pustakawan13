@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\BorrowingController;
@@ -31,6 +31,8 @@ use App\Http\Controllers\UserAnnouncementController;
 use App\Http\Controllers\UserNotificationController;
 use App\Http\Controllers\UserHelpController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\BookLocatorController;
 
 // ============================================================
 // LANDING
@@ -210,6 +212,21 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // PENGATURAN
     Route::get('/settings', [SettingController::class, 'index'])
         ->name('settings');
+
+    // AKTIVITAS / PENGUMUMAN (dari Pandu — fitur baru)
+    Route::prefix('activities')->name('activities.')->group(function () {
+        Route::get('/', [ActivityController::class, 'index'])->name('index');
+        Route::post('/', [ActivityController::class, 'store'])->name('store');
+        Route::get('/create', [ActivityController::class, 'create'])->name('create');
+        Route::get('/{activity}/edit', [ActivityController::class, 'edit'])->name('edit');
+        Route::put('/{activity}', [ActivityController::class, 'update'])->name('update');
+        Route::delete('/{activity}', [ActivityController::class, 'destroy'])->name('destroy');
+        Route::post('/{activity}/read', [ActivityController::class, 'markAsRead'])->name('markAsRead');
+    });
+
+    // BOOK LOCATOR (dari Pandu — fitur baru)
+    Route::get('/book-locator', [BookLocatorController::class, 'index'])->name('book-locator.index');
+    Route::get('/book-locator/{book}', [BookLocatorController::class, 'show'])->name('book-locator.show');
 });
 
 Route::middleware(['auth', 'role.user'])->group(function () {
@@ -233,9 +250,9 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     Route::get('/user/history', [UserHistoryController::class, 'index'])->name('user.history');
 
     // FAVORIT
-    Route::get('/user/favorites',        [UserFavoriteController::class, 'index'])->name('user.favorites');
-    Route::post('/user/favorites/toggle',[UserFavoriteController::class, 'toggle'])->name('user.favorites.toggle');
-    Route::get('/user/favorites/check',  [UserFavoriteController::class, 'check'])->name('user.favorites.check');
+    Route::get('/user/favorites',         [UserFavoriteController::class, 'index'])->name('user.favorites');
+    Route::post('/user/favorites/toggle', [UserFavoriteController::class, 'toggle'])->name('user.favorites.toggle');
+    Route::get('/user/favorites/check',   [UserFavoriteController::class, 'check'])->name('user.favorites.check');
 
     // RESERVASI
     Route::get('/user/reservations', [UserReservationController::class, 'index'])->name('user.reservations');
@@ -251,10 +268,10 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     Route::post('/user/notifications/dismiss-all', [UserNotificationController::class, 'dismissAll'])->name('user.notifications.dismiss-all');
 
     // PROFIL
-    Route::get('/user/profile',                [UserProfileController::class, 'index'])->name('user.profile');
-    Route::post('/user/profile/update',        [UserProfileController::class, 'update'])->name('user.profile.update');
-    Route::post('/user/profile/password',      [UserProfileController::class, 'changePassword'])->name('user.profile.password');
-    Route::post('/user/profile/preferences',   [UserProfileController::class, 'updatePreferences'])->name('user.profile.preferences');
+    Route::get('/user/profile',              [UserProfileController::class, 'index'])->name('user.profile');
+    Route::post('/user/profile/update',      [UserProfileController::class, 'update'])->name('user.profile.update');
+    Route::post('/user/profile/password',    [UserProfileController::class, 'changePassword'])->name('user.profile.password');
+    Route::post('/user/profile/preferences', [UserProfileController::class, 'updatePreferences'])->name('user.profile.preferences');
 
     // BANTUAN
     Route::get('/user/help', [UserHelpController::class, 'index'])->name('user.help');
@@ -268,4 +285,3 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/api/notifications/read-all',  [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });
-

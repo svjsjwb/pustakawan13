@@ -14,6 +14,7 @@ class Member extends Model
 
     protected $fillable = [
         'user_id',
+        'member_number',
         'name',
         'email',
         'division',
@@ -33,5 +34,10 @@ class Member extends Model
     public function borrowings(): HasMany
     {
         return $this->hasMany(Borrowing::class);
+    }
+
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
     }
 }

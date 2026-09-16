@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\BookCopy;
 use App\Models\Borrowing;
+use App\Models\CollectionWithdrawal;
 use App\Models\Member;
+use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 

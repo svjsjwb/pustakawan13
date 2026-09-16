@@ -1,240 +1,240 @@
-    @extends('layouts.app')
+@extends('layouts.app')
 
-    @section('title', 'Katalog Buku')
+@section('title', 'Katalog Buku')
 
-    @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
-    @endpush
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
+@endpush
 
-    @push('scripts')
-    <script src="{{ asset('js/catalog.js') }}"></script>
-    @endpush
+@push('scripts')
+<script src="{{ asset('js/catalog.js') }}"></script>
+@endpush
 
-    @section('content')
+@section('content')
 
-    <section class="page" id="page-catalog">
+<section class="page" id="page-catalog">
 
-        {{-- =========================
-            HEADER
-        ========================= --}}
+    {{-- =========================
+        HEADER
+    ========================= --}}
 
-        <div class="catalog-header">
+    <div class="catalog-header">
 
-            <div>
+        <div>
 
-                <div class="catalog-count">
-                    {{ $books->total() }} buku terdaftar
-                </div>
-
-                <h1>
-                    Katalog Buku
-                </h1>
-
-                <p>
-                    Telusuri seluruh koleksi perpustakaan berdasarkan judul,
-                    kategori, atau ketersediaan stok.
-                </p>
-
+            <div class="catalog-count">
+                {{ $books->total() }} buku terdaftar
             </div>
+
+            <h1>
+                Katalog Buku
+            </h1>
+
+            <p>
+                Telusuri seluruh koleksi perpustakaan berdasarkan judul,
+                kategori, atau ketersediaan stok.
+            </p>
 
         </div>
 
+    </div>
 
-        {{-- =========================
-            FILTER FORM
-        ========================= --}}
 
-        <form
-            method="GET"
-            action="{{ route('catalog') }}"
-            class="filters"
+    {{-- =========================
+        FILTER FORM
+    ========================= --}}
+
+    <form
+        method="GET"
+        action="{{ route('catalog') }}"
+        class="filters"
+    >
+
+        <input
+            type="text"
+            name="search"
+            value="{{ request('search') }}"
+            placeholder="Cari judul atau pengarang..."
         >
 
-            <input
-                type="text"
-                name="search"
-                value="{{ request('search') }}"
-                placeholder="Cari judul atau pengarang..."
-            >
 
+        <select
+            name="category"
+            onchange="this.form.submit()"
+        >
 
-            <select
-                name="category"
-                onchange="this.form.submit()"
-            >
+            <option value="">
+                Semua Kategori
+            </option>
 
-                <option value="">
-                    Semua Kategori
-                </option>
-
-                @foreach($categories as $category)
-
-                    <option
-                        value="{{ $category->name }}"
-                        {{ request('category') == $category->name ? 'selected' : '' }}
-                    >
-                        {{ $category->name }}
-                    </option>
-
-                @endforeach
-
-            </select>
-
-
-            <select
-                name="status"
-                onchange="this.form.submit()"
-            >
-
-                <option value="">
-                    Semua Status
-                </option>
+            @foreach($categories as $category)
 
                 <option
-                    value="Tersedia"
-                    {{ request('status') == 'Tersedia' ? 'selected' : '' }}
+                    value="{{ $category->name }}"
+                    {{ request('category') == $category->name ? 'selected' : '' }}
                 >
-                    Tersedia
+                    {{ $category->name }}
                 </option>
 
-                <option
-                    value="Dipinjam"
-                    {{ request('status') == 'Dipinjam' ? 'selected' : '' }}
-                >
-                    Sedang Dipinjam
-                </option>
+            @endforeach
 
-            </select>
-
-        </form>
+        </select>
 
 
-        {{-- =========================
-            BOOK GRID
-        ========================= --}}
+        <select
+            name="status"
+            onchange="this.form.submit()"
+        >
 
-        <div class="book-grid">
+            <option value="">
+                Semua Status
+            </option>
 
-            @forelse($books as $book)
+            <option
+                value="Tersedia"
+                {{ request('status') == 'Tersedia' ? 'selected' : '' }}
+            >
+                Tersedia
+            </option>
+
+            <option
+                value="Dipinjam"
+                {{ request('status') == 'Dipinjam' ? 'selected' : '' }}
+            >
+                Sedang Dipinjam
+            </option>
+
+        </select>
+
+    </form>
+
+
+    {{-- =========================
+        BOOK GRID
+    ========================= --}}
+
+    <div class="book-grid">
+
+        @forelse($books as $book)
+
+            <div
+                class="book-card"
+
+                data-title="{{ $book->title }}"
+
+                data-author="{{ $book->author ?? '-' }}"
+
+                data-category="{{ $book->category->name ?? '-' }}"
+
+                data-stock="{{ $book->available_stock ?? 0 }}"
+
+                data-status="{{ $book->available_stock > 0 ? 'Tersedia' : 'Dipinjam' }}"
+
+                data-description="{{ $book->description ?? 'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.' }}"
+
+                data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}"
+
+                data-publisher="{{ $book->publisher ?? '-' }}"
+
+                data-year="{{ $book->publication_year ?? '-' }}"
+
+                data-isbn="{{ $book->isbn ?? '-' }}"
+
+                data-call-number="{{ $book->call_number ?? '-' }}"
+            >
+
+                {{-- =========================
+                    COVER
+                ========================= --}}
 
                 <div
-                    class="book-card"
-
-                    data-title="{{ $book->title }}"
-
-                    data-author="{{ $book->author ?? '-' }}"
-
-                    data-category="{{ $book->category->name ?? '-' }}"
-
-                    data-stock="{{ $book->available_stock ?? 0 }}"
-
-                    data-status="{{ $book->available_stock > 0 ? 'Tersedia' : 'Dipinjam' }}"
-
-                    data-description="{{ $book->description ?? 'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.' }}"
-
-                    data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}"
-
-                    data-publisher="{{ $book->publisher ?? '-' }}"
-
-                    data-year="{{ $book->publication_year ?? '-' }}"
-
-                    data-isbn="{{ $book->isbn ?? '-' }}"
-
-                    data-call-number="{{ $book->call_number ?? '-' }}"
+                    class="book-cover {{ $book->cover ? 'has-image' : '' }}"
                 >
 
-                    {{-- =========================
-                        COVER
-                    ========================= --}}
+                    @if($book->cover)
 
-                    <div
-                        class="book-cover {{ $book->cover ? 'has-image' : '' }}"
-                    >
+                        <img
+                            src="{{ asset('storage/' . $book->cover) }}"
+                            alt="{{ $book->title }}"
+                            class="book-cover-img"
+                        >
 
-                        @if($book->cover)
+                    @endif
 
-                            <img
-                                src="{{ asset('storage/' . $book->cover) }}"
-                                alt="{{ $book->title }}"
-                                class="book-cover-img"
-                            >
+                </div>
+
+
+                {{-- =========================
+                    INFORMATION
+                ========================= --}}
+
+                <div class="book-info">
+
+                    <strong>
+                        {{ $book->title }}
+                    </strong>
+
+                    <span>
+                        {{ $book->author ?? '-' }}
+                    </span>
+
+
+                    <div class="book-meta">
+
+                        <span>
+                            {{ $book->category->name ?? '-' }}
+                        </span>
+
+
+                        @if($book->available_stock > 0)
+
+                            <span class="book-status available">
+                                Tersedia ({{ $book->available_stock }})
+                            </span>
+
+                        @else
+
+                            <span class="book-status borrowed">
+                                Dipinjam
+                            </span>
 
                         @endif
 
                     </div>
 
-
-                    {{-- =========================
-                        INFORMATION
-                    ========================= --}}
-
-                    <div class="book-info">
-
-                        <strong>
-                            {{ $book->title }}
-                        </strong>
-
-                        <span>
-                            {{ $book->author ?? '-' }}
-                        </span>
-
-
-                        <div class="book-meta">
-
-                            <span>
-                                {{ $book->category->name ?? '-' }}
-                            </span>
-
-
-                            @if($book->available_stock > 0)
-
-                                <span class="book-status available">
-                                    Tersedia ({{ $book->available_stock }})
-                                </span>
-
-                            @else
-
-                                <span class="book-status borrowed">
-                                    Dipinjam
-                                </span>
-
-                            @endif
-
-                        </div>
-
-                    </div>
-
                 </div>
-
-            @empty
-
-                <div class="catalog-empty">
-
-                    Belum ada koleksi buku yang sesuai
-                    dengan pencarian atau filter.
-
-                </div>
-
-            @endforelse
-
-        </div>
-
-
-        {{-- =========================
-            PAGINATION
-        ========================= --}}
-
-        @if($books->total() > 0)
-
-            <div class="catalog-pagination">
-
-                {{ $books->links('partials.pagination') }}
 
             </div>
 
-        @endif
+        @empty
 
-    </section>
+            <div class="catalog-empty">
+
+                Belum ada koleksi buku yang sesuai
+                dengan pencarian atau filter.
+
+            </div>
+
+        @endforelse
+
+    </div>
+
+
+    {{-- =========================
+        PAGINATION
+    ========================= --}}
+
+    @if($books->total() > 0)
+
+        <div class="catalog-pagination">
+
+            {{ $books->links('partials.pagination') }}
+
+        </div>
+
+    @endif
+
+</section>
 
 {{-- =========================================================
      BOOK DETAIL MODAL
@@ -257,33 +257,33 @@
             <!-- LEFT -->
             <div class="catalog-modal-cover">
 
-    <div class="book-3d" id="book3D">
+                <div class="book-3d" id="book3D">
 
-        <div class="book-face front" id="bookFront">
+                    <div class="book-face front" id="bookFront">
 
-            <div class="book-top">
-                TIGA SERANGKAI
+                        <div class="book-top">
+                            TIGA SERANGKAI
+                        </div>
+
+                        <div class="book-title" id="modalBookTitle">
+                            Buku Dummy
+                        </div>
+
+                        <div class="book-bottom">
+                            PERPUSTAKAAN
+                        </div>
+
+                    </div>
+
+                    <div class="book-face back"></div>
+
+                    <div class="book-spine"></div>
+
+                    <div class="book-pages"></div>
+
+                </div>
+
             </div>
-
-            <div class="book-title" id="modalBookTitle">
-                Buku Dummy
-            </div>
-
-            <div class="book-bottom">
-                PERPUSTAKAAN
-            </div>
-
-        </div>
-
-        <div class="book-face back"></div>
-
-        <div class="book-spine"></div>
-
-        <div class="book-pages"></div>
-
-    </div>
-
-</div>
 
             <!-- RIGHT -->
             <div class="catalog-modal-info">
@@ -367,4 +367,4 @@
 
 </div>
 
-    @endsection
+@endsection

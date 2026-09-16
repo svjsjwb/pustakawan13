@@ -10,8 +10,8 @@
 
 <div class="page-header">
     <div>
-        <h1>Tambah Karyawan</h1>
-        <p>Tambahkan data karyawan perpustakaan.</p>
+        <h1>Tambah Anggota</h1>
+        <p>Tambahkan data Anggota perpustakaan.</p>
     </div>
 
     <a href="{{ route('members.index') }}" class="btn-back">
@@ -32,8 +32,8 @@
 <div class="member-form-card">
 
     <div class="form-header">
-        <h2>Data Karyawan</h2>
-        <p>Isi informasi karyawan dengan lengkap.</p>
+        <h2>Data Anggota</h2>
+        <p>Isi informasi Anggota dengan lengkap.</p>
     </div>
 
     <form action="{{ route('members.store') }}" method="POST">
@@ -49,57 +49,66 @@
                 id="name"
                 name="name"
                 value="{{ old('name') }}"
-                placeholder="Masukkan nama karyawan"
+                placeholder="Masukkan nama Anggota"
                 required
             >
         </div>
 
+        {{-- EMAIL --}}
+        <div class="form-group">
+            <label for="email">Email</label>
+
+            <input
+                type="email"
+                id="email"
+                name="email"
+                value="{{ old('email') }}"
+                placeholder="Contoh: nama@email.com"
+            >
+        </div>
 
         {{-- DIVISI --}}
-        {{-- DIVISI --}}
-<div class="form-group">
-    <label for="division">Divisi</label>
+        <div class="form-group">
+            <label for="division">Divisi</label>
 
-    <select
-        id="division"
-        name="division"
-        required
-    >
-        <option value="">-- Pilih Divisi --</option>
+            <select
+                id="division"
+                name="division"
+                required
+            >
+                <option value="">-- Pilih Divisi --</option>
 
-        <option value="CEO"
-            {{ old('division') == 'CEO' ? 'selected' : '' }}>
-            CEO
-        </option>
+                <option value="CEO"
+                    {{ old('division') == 'CEO' ? 'selected' : '' }}>
+                    CEO
+                </option>
 
-        <option value="COO"
-            {{ old('division') == 'COO' ? 'selected' : '' }}>
-            COO
-        </option>
+                <option value="COO"
+                    {{ old('division') == 'COO' ? 'selected' : '' }}>
+                    COO
+                </option>
 
-        <option value="CFO"
-            {{ old('division') == 'CFO' ? 'selected' : '' }}>
-            CFO
-        </option>
+                <option value="CFO"
+                    {{ old('division') == 'CFO' ? 'selected' : '' }}>
+                    CFO
+                </option>
 
-        <option value="FINANCE DIRECTOR"
-            {{ old('division') == 'FINANCE DIRECTOR' ? 'selected' : '' }}>
-            FINANCE DIRECTOR
-        </option>
+                <option value="FINANCE DIRECTOR"
+                    {{ old('division') == 'FINANCE DIRECTOR' ? 'selected' : '' }}>
+                    FINANCE DIRECTOR
+                </option>
 
-        <option value="HROD DIRECTOR"
-            {{ old('division') == 'HROD DIRECTOR' ? 'selected' : '' }}>
-            HROD DIRECTOR
-        </option>
+                <option value="HROD DIRECTOR"
+                    {{ old('division') == 'HROD DIRECTOR' ? 'selected' : '' }}>
+                    HROD DIRECTOR
+                </option>
 
-        <option value="PDC"
-            {{ old('division') == 'PDC' ? 'selected' : '' }}>
-            PDC
-        </option>
-
-    </select>
-</div>
-
+                <option value="PDC"
+                    {{ old('division') == 'PDC' ? 'selected' : '' }}>
+                    PDC
+                </option>
+            </select>
+        </div>
 
         {{-- NO TELEPON --}}
         <div class="form-group">
@@ -115,28 +124,9 @@
             >
         </div>
 
-
         {{-- STATUS --}}
-        <div class="form-group">
-            <label for="status">Status</label>
-
-            <select
-                id="status"
-                name="status"
-                required
-            >
-                <option value="Aktif"
-                    {{ old('status', 'Aktif') == 'Aktif' ? 'selected' : '' }}>
-                    Aktif
-                </option>
-
-                <option value="Nonaktif"
-                    {{ old('status') == 'Nonaktif' ? 'selected' : '' }}>
-                    Nonaktif
-                </option>
-            </select>
-        </div>
-
+        {{-- Status tidak diinput manual.
+             Status otomatis berdasarkan aktivitas peminjaman. --}}
 
         {{-- BUTTON --}}
         <div class="form-actions">
@@ -152,7 +142,7 @@
                 type="submit"
                 class="btn-save"
             >
-                Simpan Karyawan
+                Simpan
             </button>
 
         </div>

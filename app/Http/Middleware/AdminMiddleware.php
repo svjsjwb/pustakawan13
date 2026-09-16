@@ -15,12 +15,27 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Jika belum login, redirect ke login
+        /*
+        |--------------------------------------------------------------------------
+        | WAJIB LOGIN
+        |--------------------------------------------------------------------------
+        */
+
         if (!Auth::check()) {
-            return redirect('/login');
+            return redirect('/login')
+                ->withHeaders([
+                    'Cache-Control' => 'private, no-store, no-cache, must-revalidate, max-age=0',
+                    'Pragma'        => 'no-cache',
+                    'Expires'       => '0',
+                ]);
         }
 
-        // Jika sudah login tapi bukan admin, redirect ke halaman user
+        /*
+        |--------------------------------------------------------------------------
+        | WAJIB ADMIN
+        |--------------------------------------------------------------------------
+        */
+
         if (Auth::user()->role !== 'admin') {
             return redirect('/home')->with(
                 'error',
@@ -28,6 +43,18 @@ class AdminMiddleware
             );
         }
 
-        return $next($request);
+        /*
+        |--------------------------------------------------------------------------
+        | LANJUTKAN REQUEST + JANGAN CACHE HALAMAN ADMIN
+        |--------------------------------------------------------------------------
+        */
+
+        $response = $next($request);
+
+        $response->headers->set('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+
+        return $response;
     }
 }
