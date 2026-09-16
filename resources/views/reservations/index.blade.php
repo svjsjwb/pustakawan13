@@ -311,7 +311,7 @@
 
                         @forelse($reservations as $reservation)
 
-                            <tr class="reservation-row">
+                            <tr class="reservation-row" data-res-id="{{ $reservation->id }}" data-status="{{ strtolower($reservation->status) }}">
 
 
                                 {{-- =========================
@@ -651,6 +651,40 @@ document.addEventListener(
             );
 
         }
+
+        // =========================================================
+        // REAL-TIME POLLING FOR NEW RESERVATIONS & STATUS
+        // =========================================================
+        let lastResCount = document.querySelectorAll('#reservationTable tbody tr.reservation-row').length;
+
+        function pollAdminReservations() {
+            fetch("{{ route('reservations.statusFeed') }}")
+                .then(res => res.json())
+                .then(data => {
+                    if (!data || !data.reservations) return;
+
+                    // If a user submitted a new reservation and total count changed, reload to display new rows
+                    if (data.reservations.length !== lastResCount) {
+                        window.location.reload();
+                        return;
+                    }
+
+                    // Update existing rows if any status changed
+                    data.reservations.forEach(item => {
+                        const row = document.querySelector(`tr.reservation-row[data-res-id="${item.id}"]`);
+                        if (row) {
+                            const curStatus = row.getAttribute('data-status');
+                            const newStatus = (item.status || '').toLowerCase();
+                            if (curStatus !== newStatus) {
+                                window.location.reload();
+                            }
+                        }
+                    });
+                })
+                .catch(() => {});
+        }
+
+        setInterval(pollAdminReservations, 6000);
 
     }
 );

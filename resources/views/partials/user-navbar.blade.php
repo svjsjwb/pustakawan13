@@ -451,47 +451,20 @@ function toggleEgMobileNav() {
     }
 }
 
-// ── Init Notifications on Load ───────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    // Fetch dynamic notifications from backend API
+// ── Init Notifications on Load & Periodic Polling (Realtime Sync) ───────────────
+function pollUserNotifications() {
     fetch('/api/notifications')
         .then(r => r.json())
         .then(data => {
-            if (data && Array.isArray(data.notifications) && data.notifications.length > 0) {
+            if (data && Array.isArray(data.notifications)) {
                 renderNotifications(data.notifications, data.unread_count ?? 0);
-            } else {
-                // Realistic SaaS demo notifications for rich preview if DB has 0
-                const realisticSeed = [
-                    {
-                        id: 'demo-1',
-                        type: 'reservation_approved',
-                        title: 'Reservasi Disetujui',
-                        message: 'Pengajuan reservasi buku "Laskar Pelangi" telah disetujui oleh admin.',
-                        is_read: false,
-                        created_at: new Date(Date.now() - 21 * 60 * 1000).toISOString()
-                    },
-                    {
-                        id: 'demo-2',
-                        type: 'reservation_ready',
-                        title: 'Siap Diambil',
-                        message: 'Koleksi buku "Bumi Manusia" siap diambil di meja sirkulasi perpustakaan.',
-                        is_read: false,
-                        created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
-                    },
-                    {
-                        id: 'demo-3',
-                        type: 'reservation_waiting',
-                        title: 'Reservasi Menunggu',
-                        message: 'Permohonan reservasi "Filosofi Teras" sedang menunggu verifikasi petugas.',
-                        is_read: false,
-                        created_at: new Date(Date.now() - 5 * 3600 * 1000).toISOString()
-                    }
-                ];
-                renderNotifications(realisticSeed, 3);
             }
         })
-        .catch(() => {
-            renderNotifications([], 0);
-        });
+        .catch(() => {});
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    pollUserNotifications();
+    setInterval(pollUserNotifications, 6000);
 });
 </script>

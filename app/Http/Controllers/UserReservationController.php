@@ -100,6 +100,11 @@ class UserReservationController extends Controller
             ]
         );
 
+        if (!$member->user_id) {
+            $member->update(['user_id' => $user->id]);
+        }
+        $member->update(['status' => 'aktif']);
+
         $book = Book::findOrFail($validated['book_id']);
 
         $alreadyReserved = Reservation::where('member_id', $member->id)
@@ -142,9 +147,10 @@ class UserReservationController extends Controller
                 $bookCopy->update(['status' => 'reserved']);
             }
 
-                $lockedBook->decrement('stok');
+            $lockedBook->decrement('stok');
 
             $createdReservation = Reservation::create([
+                'user_id'      => $user->id,
                 'member_id'    => $member->id,
                 'book_id'      => $lockedBook->id,
                 'book_copy_id' => $bookCopy?->id,
@@ -175,5 +181,46 @@ class UserReservationController extends Controller
         }
 
         return redirect()->route('user.reservations')->with('success', 'Reservasi buku berhasil diajukan! Menunggu persetujuan Admin.');
+    }
+
+    /**
+     * Endpoint polling status reservasi user untuk pembaruan realtime
+     */
+    public function statusFeed()
+    {
+        $user = Auth::user();
+        $member = Member::where('email', $user->email)->first();
+
+        if (!$member) {
+            return response()->json([
+                'success'      => true,
+                'counts'       => ['aktif' => 0, 'menunggu' => 0, 'siap_diambil' => 0],
+                'reservations' => []
+            ]);
+        }
+
+        $allRes = Reservation::where('member_id', $member->id)->get();
+        $counts = [
+            'aktif'        => $allRes->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])->count(),
+            'menunggu'     => $allRes->where('status', 'menunggu')->count(),
+            'disetujui'    => $allRes->where('status', 'disetujui')->count(),
+            'siap_diambil' => $allRes->where('status', 'siap_diambil')->count(),
+            'ditolak'      => $allRes->where('status', 'ditolak')->count(),
+        ];
+
+        $reservations = $allRes->map(function ($r) {
+            return [
+                'id'               => $r->id,
+                'status'           => strtolower($r->status),
+                'rejection_reason' => $r->rejection_reason,
+                'updated_at'       => $r->updated_at ? $r->updated_at->toISOString() : null,
+            ];
+        });
+
+        return response()->json([
+            'success'      => true,
+            'counts'       => $counts,
+            'reservations' => $reservations,
+        ]);
     }
 }

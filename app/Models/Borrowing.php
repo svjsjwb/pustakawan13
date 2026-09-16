@@ -9,7 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Borrowing extends Model
 {
     protected $fillable = [
+        'user_id',
         'member_id',
+        'reservation_id',
+        'book_id',
         'borrowed_at',
         'due_at',
         'returned_at',
@@ -38,6 +41,11 @@ class Borrowing extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function reservation(): BelongsTo
+    {
+        return $this->belongsTo(Reservation::class);
     }
 
     public function details(): HasMany

@@ -73,14 +73,20 @@ class UserBorrowingController extends Controller
                 'status'  => 'aktif',
             ]
         );
+        if (!$member->user_id) {
+            $member->update(['user_id' => $user->id]);
+        }
+        $member->update(['status' => 'aktif']);
 
         $borrowedAt = now();
         $dueAt = now()->addDays(14);
         $newBorrowing = null;
+        $borrowedBook = null;
 
         try {
-            DB::transaction(function () use ($member, $validated, $borrowedAt, $dueAt, &$newBorrowing) {
+            DB::transaction(function () use ($member, $validated, $borrowedAt, $dueAt, &$newBorrowing, &$borrowedBook, $user) {
                 $book = Book::lockForUpdate()->findOrFail($validated['book_id']);
+                $borrowedBook = $book;
 
                 $copy = BookCopy::where('book_id', $book->id)
                     ->where('status', 'available')
@@ -102,7 +108,8 @@ class UserBorrowingController extends Controller
 
                 $newBorrowing = Borrowing::create([
                     'member_id'   => $member->id,
-                    'user_id'     => Auth::id(),
+                    'user_id'     => $user->id,
+                    'book_id'     => $book->id,
                     'borrowed_at' => $borrowedAt->toDateString(),
                     'due_at'      => $dueAt->toDateString(),
                     'status'      => 'dipinjam',
@@ -121,6 +128,14 @@ class UserBorrowingController extends Controller
 
             if ($newBorrowing) {
                 NotificationService::borrowingSubmitted($newBorrowing, Auth::user());
+
+                // Kirim notifikasi instan ke Admin
+                AppNotification::notifyAdmin(
+                    'borrowing_new',
+                    'Peminjaman Buku Baru',
+                    "{$user->name} meminjam buku \"{$borrowedBook?->title}\".",
+                    ['borrowing_id' => $newBorrowing->id, 'book_id' => $borrowedBook?->id]
+                );
             }
         } catch (\RuntimeException $exception) {
             if ($request->expectsJson()) {
@@ -192,15 +207,13 @@ class UserBorrowingController extends Controller
         $borrowing->load('details.book');
         $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
 
-        // Notifikasi ke Admin — cek preferensi user
-        if ($user->notificationsAllowed('extension')) {
-            AppNotification::notifyAdmin(
-                'extension_request',
-                'Permintaan Perpanjangan Peminjaman',
-                "{$user->name} mengajukan perpanjangan peminjaman buku \"{$bookTitle}\" hingga " . $requestedDue->format('d M Y') . ".",
-                ['borrowing_id' => $borrowing->id]
-            );
-        }
+        // Notifikasi ke Admin
+        AppNotification::notifyAdmin(
+            'extension_request',
+            'Permintaan Perpanjangan Peminjaman',
+            "{$user->name} mengajukan perpanjangan peminjaman buku \"{$bookTitle}\" hingga " . $requestedDue->format('d M Y') . ".",
+            ['borrowing_id' => $borrowing->id]
+        );
 
         return back()->with('success', 'Permintaan perpanjangan berhasil diajukan dan sedang menunggu persetujuan Admin.');
     }

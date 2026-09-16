@@ -178,6 +178,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
         [ReservationController::class, 'locator']
     )->name('reservations.locator');
 
+    Route::get('/reservations-feed', [ReservationController::class, 'statusFeed'])
+        ->name('reservations.statusFeed');
+
     // LAPORAN
     Route::get('/laporan', [ReportController::class, 'index'])
         ->name('reports.index');
@@ -255,6 +258,7 @@ Route::middleware(['auth', 'role.user'])->group(function () {
 
     // RESERVASI
     Route::get('/user/reservations', [UserReservationController::class, 'index'])->name('user.reservations');
+    Route::get('/user/reservations-feed', [UserReservationController::class, 'statusFeed'])->name('user.reservations.statusFeed');
     Route::get('/user/reservations/{reservation}', [UserReservationController::class, 'show'])->name('user.reservations.show');
     Route::post('/user/reservations', [UserReservationController::class, 'store'])->name('user.reservations.store');
 

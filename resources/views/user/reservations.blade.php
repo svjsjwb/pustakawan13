@@ -15,9 +15,9 @@
         <p>Pantau seluruh proses reservasi buku Anda mulai dari pengajuan, persetujuan, hingga buku tersedia dan siap untuk diambil sesuai jadwal yang ditentukan.</p>
     </div>
     <div class="user-page-hero-stats" aria-label="Ringkasan reservasi">
-        <div><span>Total Reservasi Aktif</span><strong>{{ $statusCounts['aktif'] ?? 0 }}</strong><small>reservasi berjalan</small></div>
-        <div><span>Menunggu Persetujuan</span><strong>{{ $statusCounts['menunggu'] ?? 0 }}</strong><small>perlu diproses</small></div>
-        <div><span>Siap Diambil</span><strong>{{ $statusCounts['siap_diambil'] ?? 0 }}</strong><small>buku tersedia</small></div>
+        <div><span>Total Reservasi Aktif</span><strong id="statActiveRes">{{ $statusCounts['aktif'] ?? 0 }}</strong><small>reservasi berjalan</small></div>
+        <div><span>Menunggu Persetujuan</span><strong id="statWaitingRes">{{ $statusCounts['menunggu'] ?? 0 }}</strong><small>perlu diproses</small></div>
+        <div><span>Siap Diambil</span><strong id="statReadyRes">{{ $statusCounts['siap_diambil'] ?? 0 }}</strong><small>buku tersedia</small></div>
     </div>
 </section>
 
@@ -238,7 +238,7 @@
                         default        => ucfirst($res->status),
                     };
                 @endphp
-                <tr>
+                <tr data-res-id="{{ $res->id }}" data-status="{{ $status }}">
                     {{-- 1. BUKU --}}
                     <td>
                         <div style="display: flex; align-items: center; gap: 14px;">
@@ -335,3 +335,84 @@
 @endif
 
 @endsection
+
+@push('scripts')
+<script>
+(function() {
+    function pollUserReservations() {
+        fetch("{{ route('user.reservations.statusFeed') }}")
+            .then(res => res.json())
+            .then(data => {
+                if (!data || !data.reservations) return;
+
+                // Update hero stats if present
+                if (data.counts) {
+                    const elActive = document.getElementById('statActiveRes');
+                    const elWaiting = document.getElementById('statWaitingRes');
+                    const elReady = document.getElementById('statReadyRes');
+                    if (elActive && data.counts.active !== undefined) elActive.textContent = data.counts.active;
+                    if (elWaiting && data.counts.waiting !== undefined) elWaiting.textContent = data.counts.waiting;
+                    if (elReady && data.counts.ready !== undefined) elReady.textContent = data.counts.ready;
+                }
+
+                let needsReload = false;
+
+                // Update rows
+                data.reservations.forEach(item => {
+                    const row = document.querySelector(`tr[data-res-id="${item.id}"]`);
+                    if (row) {
+                        const currentStatus = row.getAttribute('data-status');
+                        const newStatus = (item.status || '').toLowerCase();
+
+                        if (currentStatus !== newStatus) {
+                            row.setAttribute('data-status', newStatus);
+
+                            // Find badge span
+                            const badge = row.querySelector('.status-badge');
+                            if (badge) {
+                                // Clear old status classes
+                                badge.className = `status-badge status-${newStatus}`;
+
+                                const icons = {
+                                    'menunggu': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>',
+                                    'disetujui': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg></span>',
+                                    'siap_diambil': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></span>',
+                                    'ditolak': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>'
+                                };
+
+                                const iconHtml = icons[newStatus] || icons['menunggu'];
+                                const label = item.status_label || (newStatus.charAt(0).toUpperCase() + newStatus.slice(1));
+                                badge.innerHTML = `${iconHtml}<span>${label}</span>`;
+                            }
+
+                            // If rejected and note exists, append/update note
+                            if (newStatus === 'ditolak' && item.rejection_reason) {
+                                let noteEl = row.querySelector('.rejection-note');
+                                if (!noteEl) {
+                                    noteEl = document.createElement('div');
+                                    noteEl.className = 'rejection-note';
+                                    noteEl.style.cssText = 'font-size: 11px; color: #dc2626; margin-top: 4px;';
+                                    badge.parentNode.appendChild(noteEl);
+                                }
+                                noteEl.textContent = 'Ket: ' + (item.rejection_reason.length > 24 ? item.rejection_reason.substring(0, 24) + '...' : item.rejection_reason);
+                                noteEl.title = item.rejection_reason;
+                            }
+                        }
+                    } else {
+                        // A new reservation exists that's not rendered on the current table page
+                        needsReload = true;
+                    }
+                });
+
+                if (needsReload) {
+                    window.location.reload();
+                }
+            })
+            .catch(() => {});
+    }
+
+    // Auto-poll user reservations every 6 seconds
+    setInterval(pollUserReservations, 6000);
+})();
+</script>
+@endpush

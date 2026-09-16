@@ -139,6 +139,11 @@ class CirculationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'reservation_id' => [
+                'nullable',
+                'exists:reservations,id'
+            ],
+
             'member_id' => [
                 'required',
                 'exists:members,id'
@@ -165,42 +170,49 @@ class CirculationController extends Controller
         $createdBorrowing = null;
 
         DB::transaction(function () use ($validated, &$createdBorrowing) {
+            $book = Book::lockForUpdate()->findOrFail($validated['book_id']);
+            $member = Member::findOrFail($validated['member_id']);
 
-            /*
-             * Kunci buku selama proses peminjaman.
-             */
-            $book = Book::lockForUpdate()
-                ->findOrFail($validated['book_id']);
-
-
-            /*
-             * Cari SATU eksemplar fisik yang tersedia.
-             */
-            $bookCopy = BookCopy::where('book_id', $book->id)
-                ->where('status', 'available')
-                ->lockForUpdate()
-                ->first();
-
-
-            /*
-             * Cek BookCopy DAN available_stock
-             * karena sistem lama masih menggunakan available_stock.
-             */
-            if (!$bookCopy || $book->available_stock < 1) {
-                abort(422, 'Buku sedang tidak tersedia.');
+            $reservation = null;
+            if (!empty($validated['reservation_id'])) {
+                $reservation = Reservation::lockForUpdate()->find($validated['reservation_id']);
             }
 
+            // Jika ada reservasi terkait, gunakan bookCopy yang sudah di-reserve
+            $bookCopy = null;
+            if ($reservation && $reservation->book_copy_id) {
+                $bookCopy = BookCopy::lockForUpdate()->find($reservation->book_copy_id);
+            }
+
+            // Jika belum ada copy dari reservasi, cari satu copy available
+            if (!$bookCopy) {
+                $bookCopy = BookCopy::where('book_id', $book->id)
+                    ->where('status', 'available')
+                    ->lockForUpdate()
+                    ->first();
+            }
+
+            if (!$bookCopy) {
+                abort(422, 'Eksemplar buku tidak tersedia.');
+            }
+
+            // Cek ketersediaan jika peminjaman baru (bukan dari reservasi)
+            if (!$reservation && $book->available_stock < 1) {
+                abort(422, 'Buku sedang tidak tersedia.');
+            }
 
             /*
              * Buat transaksi peminjaman.
              */
             $createdBorrowing = Borrowing::create([
-                'member_id'  => $validated['member_id'],
-                'borrowed_at' => $validated['borrowed_at'],
-                'due_at'     => $validated['due_at'],
-                'status'     => 'dipinjam',
+                'user_id'        => $reservation?->user_id ?? $member->user_id,
+                'member_id'      => $validated['member_id'],
+                'reservation_id' => $reservation?->id,
+                'book_id'        => $book->id,
+                'borrowed_at'    => $validated['borrowed_at'],
+                'due_at'         => $validated['due_at'],
+                'status'         => 'dipinjam',
             ]);
-
 
             /*
              * Simpan BookCopy yang benar-benar dipinjam.
@@ -212,25 +224,28 @@ class CirculationController extends Controller
                 'quantity'     => 1,
             ]);
 
-
             /*
-             * Ubah status fisik buku.
+             * Ubah status fisik buku menjadi borrowed.
              */
             $bookCopy->update(['status' => 'borrowed']);
 
-
             /*
-             * Pertahankan sistem stok lama.
+             * Jika peminjaman biasa (bukan dari reservasi), kurangi stok buku.
+             * Jika dari reservasi, stok sudah dikurangi saat reservasi dibuat.
              */
-            $book->decrement('stok');
-
+            if (!$reservation) {
+                $book->decrement('stok');
+            } else {
+                $reservation->update([
+                    'status'       => 'selesai',
+                    'borrowing_id' => $createdBorrowing->id,
+                ]);
+            }
 
             /*
              * Sinkronisasi status member.
              */
-            $this->syncMemberStatus(
-                Member::findOrFail($validated['member_id'])
-            );
+            $this->syncMemberStatus($member);
         });
 
         if ($createdBorrowing) {

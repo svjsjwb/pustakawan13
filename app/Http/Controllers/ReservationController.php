@@ -648,6 +648,23 @@ class ReservationController extends Controller
                 $reason = $request->input('rejection_reason', 'Ditolak oleh Admin');
                 NotificationService::reservationRejected($reservation, null, $reason);
             }
+
+            // Sinkronisasi status member
+            if ($reservation->member) {
+                $hasActiveBorrowing = \App\Models\Borrowing::where('member_id', $reservation->member_id)
+                    ->whereNull('returned_at')
+                    ->exists();
+
+                $hasActiveReservation = Reservation::where('member_id', $reservation->member_id)
+                    ->whereNotIn('status', ['ditolak', 'dibatalkan', 'selesai'])
+                    ->whereNotNull('expires_at')
+                    ->whereDate('expires_at', '>=', now()->toDateString())
+                    ->exists();
+
+                $reservation->member->update([
+                    'status' => ($hasActiveBorrowing || $hasActiveReservation) ? 'aktif' : 'nonaktif',
+                ]);
+            }
         });
 
 
@@ -657,12 +674,50 @@ class ReservationController extends Controller
          * =====================================================
          */
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status reservasi berhasil diperbarui.',
+                'status'  => $reservation->status,
+            ]);
+        }
+
         return redirect()
             ->route('reservations.index')
             ->with(
                 'success',
                 'Status reservasi berhasil diperbarui.'
             );
+    }
+
+
+    /**
+     * Endpoint polling status reservasi untuk Admin (realtime update)
+     */
+    public function statusFeed()
+    {
+        $reservations = Reservation::with(['member', 'book'])
+            ->latest()
+            ->take(50)
+            ->get();
+
+        $data = $reservations->map(function ($r) {
+            return [
+                'id'          => $r->id,
+                'member_name' => $r->member?->name ?? 'Anggota',
+                'book_title'  => $r->book?->title ?? '-',
+                'status'      => strtolower($r->status),
+                'reserved_at' => $r->reserved_at ? $r->reserved_at->format('d/m/Y') : '-',
+                'expires_at'  => $r->expires_at ? $r->expires_at->format('d/m/Y') : '-',
+                'updated_at'  => $r->updated_at ? $r->updated_at->toISOString() : null,
+            ];
+        });
+
+        return response()->json([
+            'success'      => true,
+            'total'        => Reservation::count(),
+            'reservations' => $data,
+        ]);
     }
 
 
