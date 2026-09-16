@@ -6,6 +6,8 @@ use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Member;
 use App\Models\Reservation;
+use App\Models\Borrowing;
+use App\Models\BorrowingDetail;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -408,7 +410,8 @@ class ReservationController extends Controller
 
         DB::transaction(function () use (
             $validated,
-            $reservation
+            $reservation,
+            $request
         ) {
 
             /*
@@ -641,10 +644,98 @@ class ReservationController extends Controller
                     $newStatus === 'ditolak' ? ($request->input('rejection_reason') ?? 'Ditolak oleh Admin') : $reservation->rejection_reason,
             ]);
 
-            // Kirim notifikasi dan email ke user
+            // Kirim notifikasi dan email ke user serta proses pemindahan ke tabel peminjaman buku
             if ($newStatus === 'disetujui') {
+                // Pastikan atau cari BookCopy untuk peminjaman
+                $bookCopy = null;
+                if ($reservation->book_copy_id) {
+                    $bookCopy = BookCopy::lockForUpdate()->find($reservation->book_copy_id);
+                }
+                if (!$bookCopy) {
+                    $bookCopy = BookCopy::where('book_id', $reservation->book_id)
+                        ->whereIn('status', ['available', 'reserved'])
+                        ->lockForUpdate()
+                        ->first();
+                    if ($bookCopy) {
+                        $reservation->update(['book_copy_id' => $bookCopy->id]);
+                    }
+                }
+                if ($bookCopy) {
+                    $bookCopy->update(['status' => 'borrowed']);
+                }
+
+                // Cari atau sinkronkan Member jika belum terhubung
+                $member = null;
+                if ($reservation->member_id) {
+                    $member = Member::find($reservation->member_id);
+                }
+                if (!$member && $reservation->user_id) {
+                    $user = $reservation->user;
+                    if ($user) {
+                        $member = Member::firstOrCreate(
+                            ['email' => $user->email],
+                            [
+                                'name'    => $user->name,
+                                'user_id' => $user->id,
+                                'phone'   => '-',
+                                'address' => '-',
+                                'status'  => 'aktif',
+                            ]
+                        );
+                        $reservation->update(['member_id' => $member->id]);
+                    }
+                }
+                $memberId = $member?->id ?? $reservation->member_id;
+                $userId   = $reservation->user_id ?? $member?->user_id;
+
+                // Default durasi peminjaman 14 hari
+                $borrowedAt = now()->toDateString();
+                $dueAt      = now()->addDays(14)->toDateString();
+
+                // Pindahkan data ke tabel peminjaman buku (borrowings & borrowing_details)
+                $borrowing = Borrowing::where('reservation_id', $reservation->id)->first();
+                if (!$borrowing) {
+                    $borrowing = Borrowing::create([
+                        'user_id'        => $userId,
+                        'member_id'      => $memberId,
+                        'reservation_id' => $reservation->id,
+                        'book_id'        => $reservation->book_id,
+                        'seat_number'    => $reservation->seat_number,
+                        'borrowed_at'    => $borrowedAt,
+                        'due_at'         => $dueAt,
+                        'status'         => 'dipinjam',
+                    ]);
+
+                    BorrowingDetail::create([
+                        'borrowing_id' => $borrowing->id,
+                        'book_id'      => $reservation->book_id,
+                        'book_copy_id' => $bookCopy?->id,
+                        'quantity'     => 1,
+                    ]);
+                } else {
+                    $borrowing->update([
+                        'user_id'     => $userId,
+                        'member_id'   => $memberId,
+                        'book_id'     => $reservation->book_id,
+                        'seat_number' => $reservation->seat_number,
+                        'borrowed_at' => $borrowedAt,
+                        'due_at'      => $dueAt,
+                        'status'      => 'dipinjam',
+                    ]);
+                }
+
+                $reservation->update([
+                    'borrowing_id' => $borrowing->id,
+                ]);
+
                 NotificationService::reservationApproved($reservation);
-            } elseif ($newStatus === 'ditolak') {
+                NotificationService::borrowingApproved($borrowing);
+            } elseif (in_array($newStatus, ['ditolak', 'dibatalkan'])) {
+                $existingBorrowing = Borrowing::where('reservation_id', $reservation->id)->first();
+                if ($existingBorrowing && $existingBorrowing->status === 'dipinjam') {
+                    $existingBorrowing->update(['status' => 'ditolak']);
+                }
+
                 $reason = $request->input('rejection_reason', 'Ditolak oleh Admin');
                 NotificationService::reservationRejected($reservation, null, $reason);
             }

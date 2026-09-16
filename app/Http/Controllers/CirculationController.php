@@ -321,6 +321,15 @@ class CirculationController extends Controller
             ]);
 
             /*
+             * Update status reservasi terkait menjadi selesai jika ada.
+             */
+            if ($borrowing->reservation_id) {
+                Reservation::where('id', $borrowing->reservation_id)
+                    ->whereNotIn('status', ['ditolak', 'dibatalkan'])
+                    ->update(['status' => 'selesai']);
+            }
+
+            /*
              * Sinkronisasi status member.
              */
             $this->syncMemberStatus(
