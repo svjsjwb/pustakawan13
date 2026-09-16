@@ -9,6 +9,7 @@ use App\Models\Rack;
 use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class BookController extends Controller
 {
@@ -42,9 +43,13 @@ class BookController extends Controller
 
     public function create()
     {
+        $categoryOrder = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
+
         $categories = Category::with('subcategories')
-            ->orderBy('name')
-            ->get();
+            ->whereIn('name', $categoryOrder)
+            ->get()
+            ->sortBy(fn ($category) => array_search($category->name, $categoryOrder, true))
+            ->values();
 
         $subcategoryData = $categories
             ->mapWithKeys(function ($category) {
@@ -224,23 +229,45 @@ class BookController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        $category = Category::find($request->category_id);
+        $subcategory = $request->filled('subcategory_id') ? Subcategory::find($request->subcategory_id) : null;
+        $mainCategory = $category?->name;
+        $subCategoryName = $subcategory?->name;
+        $educationLevel = ($mainCategory === 'Pendidikan') ? $subCategoryName : null;
+
         DB::transaction(function () use (
             $request,
-            $cover
+            $cover,
+            $mainCategory,
+            $subCategoryName,
+            $educationLevel
         ) {
             $book = Book::create([
                 'category_id' => $request->category_id,
                 'subcategory_id' => $request->subcategory_id,
+                'main_category' => $mainCategory,
+                'sub_category' => $subCategoryName,
+                'education_level' => $educationLevel,
                 'judul_buku' => $request->title,
+                'title' => $request->title,
                 'penulis' => $request->author,
+                'author' => $request->author,
+                'publisher' => $request->publisher,
+                'publication_year' => $request->publication_year,
+                'isbn' => $request->isbn,
+                'call_number' => $request->call_number,
+                'stock' => $request->stock,
+                'available_stock' => $request->stock,
                 'stok' => $request->stock,
                 'status' => 'Tersedia',
                 'sku' => $request->sku,
                 'no_iventaris' => $request->no_iventaris,
                 'kode_buku' => $request->kode_buku,
-                'ddc' => $request->ddc,
+                'ddc' => $request->ddc ?: $request->call_number,
                 'rak' => $request->rak,
                 'edition' => $request->edition,
+                'description' => $request->description,
+                'cover' => $cover,
             ]);
 
             /*
@@ -280,9 +307,29 @@ class BookController extends Controller
 
     public function edit(Book $book)
     {
+        $categoryOrder = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
+
         $categories = Category::with('subcategories')
-            ->orderBy('name')
-            ->get();
+            ->whereIn('name', $categoryOrder)
+            ->get()
+            ->sortBy(fn ($category) => array_search($category->name, $categoryOrder, true))
+            ->values();
+
+        $subcategoryData = $categories
+            ->mapWithKeys(function ($category) {
+                return [
+                    $category->id => $category->subcategories
+                        ->map(function ($subcategory) {
+                            return [
+                                'id' => $subcategory->id,
+                                'name' => $subcategory->name,
+                            ];
+                        })
+                        ->values()
+                        ->toArray(),
+                ];
+            })
+            ->toArray();
 
         $racks = Rack::orderBy('code')->get();
 
@@ -291,6 +338,7 @@ class BookController extends Controller
             compact(
                 'book',
                 'categories',
+                'subcategoryData',
                 'racks'
             )
         );
@@ -329,6 +377,29 @@ class BookController extends Controller
                 'required',
                 'string',
                 'max:255',
+            ],
+
+            'publisher' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'publication_year' => [
+                'required',
+                'integer',
+            ],
+
+            'isbn' => [
+                'required',
+                'string',
+                Rule::unique('books', 'isbn')->ignore($book->id),
+            ],
+
+            'call_number' => [
+                'required',
+                'string',
+                Rule::unique('books', 'call_number')->ignore($book->id),
             ],
 
             'stock' => [
@@ -417,6 +488,17 @@ class BookController extends Controller
 
         $availableStock = $request->stock - $borrowed;
 
+        $cover = $book->cover;
+        if ($request->hasFile('cover')) {
+            $cover = $request->file('cover')->store('covers', 'public');
+        }
+
+        $category = Category::find($request->category_id);
+        $subcategory = $request->filled('subcategory_id') ? Subcategory::find($request->subcategory_id) : null;
+        $mainCategory = $category?->name;
+        $subCategoryName = $subcategory?->name;
+        $educationLevel = ($mainCategory === 'Pendidikan') ? $subCategoryName : null;
+
         /*
         |--------------------------------------------------------------------------
         | UPDATE BUKU + SINKRONISASI BOOK COPY
@@ -426,20 +508,37 @@ class BookController extends Controller
         DB::transaction(function () use (
             $request,
             $book,
-            $availableStock
+            $availableStock,
+            $cover,
+            $mainCategory,
+            $subCategoryName,
+            $educationLevel
         ) {
             $book->update([
                 'category_id' => $request->category_id,
                 'subcategory_id' => $request->subcategory_id,
+                'main_category' => $mainCategory,
+                'sub_category' => $subCategoryName,
+                'education_level' => $educationLevel,
                 'judul_buku' => $request->title,
+                'title' => $request->title,
                 'penulis' => $request->author,
-                'stok' => $request->stock,
+                'author' => $request->author,
+                'publisher' => $request->publisher,
+                'publication_year' => $request->publication_year,
+                'isbn' => $request->isbn,
+                'call_number' => $request->call_number,
+                'stock' => $request->stock,
+                'available_stock' => $availableStock,
+                'stok' => $availableStock,
                 'status' => $availableStock > 0 ? 'Tersedia' : 'Dipinjam',
                 'no_iventaris' => $request->no_iventaris,
                 'kode_buku' => $request->kode_buku,
-                'ddc' => $request->ddc,
+                'ddc' => $request->ddc ?: $request->call_number,
                 'rak' => $request->rak,
                 'edition' => $request->edition,
+                'description' => $request->description,
+                'cover' => $cover,
             ]);
 
             /*

@@ -99,6 +99,27 @@
                         @enderror
                     </div>
 
+                    {{-- Subkategori --}}
+                    <div class="book-form-group">
+                        <label for="subcategory_id">
+                            Subkategori Buku
+                        </label>
+                        <select id="subcategory_id" name="subcategory_id" class="input @error('subcategory_id') is-invalid @enderror">
+                            <option value="">-- Pilih Subkategori --</option>
+                            @if ($book->category && $book->category->subcategories)
+                                @foreach ($book->category->subcategories as $sub)
+                                    <option value="{{ $sub->id }}"
+                                        {{ old('subcategory_id', $book->subcategory_id) == $sub->id ? 'selected' : '' }}>
+                                        {{ $sub->name }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        @error('subcategory_id')
+                            <span class="form-error">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                     {{-- ISBN --}}
                     <div class="book-form-group">
                         <label for="isbn">
@@ -371,6 +392,27 @@
                                 }
                             };
                             reader.readAsDataURL(file);
+                        }
+                    });
+                }
+
+                const subcategoryData = @json($subcategoryData ?? []);
+                const categorySelect = document.getElementById('category_id');
+                const subcategorySelect = document.getElementById('subcategory_id');
+
+                if (categorySelect && subcategorySelect) {
+                    categorySelect.addEventListener('change', function() {
+                        const catId = this.value;
+                        subcategorySelect.innerHTML = '<option value="">-- Pilih Subkategori --</option>';
+
+                        if (catId && subcategoryData[catId] && subcategoryData[catId].length > 0) {
+                            subcategorySelect.disabled = false;
+                            subcategoryData[catId].forEach(function(sub) {
+                                const opt = document.createElement('option');
+                                opt.value = sub.id;
+                                opt.textContent = sub.name;
+                                subcategorySelect.appendChild(opt);
+                            });
                         }
                     });
                 }

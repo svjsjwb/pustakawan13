@@ -33,6 +33,12 @@ class Book extends Model
         'author',
         'stock',
         'available_stock',
+        'publisher',
+        'publication_year',
+        'isbn',
+        'call_number',
+        'description',
+        'cover',
     ];
 
     /*
@@ -98,7 +104,11 @@ class Book extends Model
 
     public function getAvailableStockAttribute(): int
     {
-        return (int) ($this->attributes['available_stock'] ?? $this->attributes['stok'] ?? $this->attributes['stock'] ?? 0);
+        $avail = (int) ($this->attributes['available_stock'] ?? 0);
+        if ($avail === 0 && isset($this->attributes['stok']) && (int)$this->attributes['stok'] > 0) {
+            return (int) $this->attributes['stok'];
+        }
+        return $avail;
     }
 
     public function setAvailableStockAttribute($value): void
@@ -109,14 +119,20 @@ class Book extends Model
 
     public function getStokAttribute(): int
     {
-        return (int) ($this->attributes['stok'] ?? $this->attributes['available_stock'] ?? $this->attributes['stock'] ?? 0);
+        $stok = (int) ($this->attributes['stok'] ?? 0);
+        if ($stok === 0 && isset($this->attributes['available_stock']) && (int)$this->attributes['available_stock'] > 0) {
+            return (int) $this->attributes['available_stock'];
+        }
+        return $stok;
     }
 
     public function setStokAttribute($value): void
     {
         $this->attributes['stok']            = (int) $value;
-        $this->attributes['stock']           = (int) $value;
         $this->attributes['available_stock'] = (int) $value;
+        if (!isset($this->attributes['stock']) || (int)$this->attributes['stock'] === 0) {
+            $this->attributes['stock'] = (int) $value;
+        }
     }
 
     /*

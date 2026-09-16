@@ -17,15 +17,17 @@ class CatalogController extends Controller
         */
 
         $categoryOrder = [
-            'Buku Pendidikan',
-            'Anak',
+            'Pendidikan',
+            'Anak-Anak',
             'Remaja',
             'Dewasa',
         ];
 
-        $categories = Category::with('subcategories')
-            ->orderBy('name')
-            ->get();
+        $categories = Category::whereIn('name', $categoryOrder)
+            ->with('subcategories')
+            ->get()
+            ->sortBy(fn ($category) => array_search($category->name, $categoryOrder, true))
+            ->values();
 
         /*
         |--------------------------------------------------------------------------

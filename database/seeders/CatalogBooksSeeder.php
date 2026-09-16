@@ -674,12 +674,16 @@ class CatalogBooksSeeder extends Seeder
 
         foreach ($catalog as $item) {
             $data = [
+                'title'           => $item['title'] ?? $item['judul_buku'] ?? 'Judul Buku',
+                'author'          => $item['author'] ?? $item['penulis'] ?? 'Penulis',
                 'judul_buku'      => $item['title'] ?? $item['judul_buku'] ?? 'Judul Buku',
                 'penulis'         => $item['author'] ?? $item['penulis'] ?? 'Penulis',
                 'category_id'     => $item['category_id'] ?? $catPendidikan->id,
                 'main_category'   => $item['main_category'] ?? null,
                 'sub_category'    => $item['sub_category'] ?? null,
                 'education_level' => $item['education_level'] ?? null,
+                'stock'           => $item['stock'] ?? 10,
+                'available_stock' => $item['available_stock'] ?? 10,
                 'stok'            => $item['available_stock'] ?? $item['stock'] ?? 10,
                 'status'          => 'Tersedia',
                 'kode_buku'       => $item['kode_buku'] ?? ('BK-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT)),
@@ -688,6 +692,11 @@ class CatalogBooksSeeder extends Seeder
                 'no_iventaris'    => 'INV/' . date('Y') . '/' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
                 'ddc'             => $item['call_number'] ?? null,
                 'edition'         => 'Cetakan ke-1',
+                'publisher'       => $item['publisher'] ?? 'Pustaka Utama',
+                'publication_year'=> $item['publication_year'] ?? 2022,
+                'isbn'            => $item['isbn'] ?? ('978' . str_pad($index + 1, 10, '0', STR_PAD_LEFT)),
+                'call_number'     => $item['call_number'] ?? null,
+                'description'     => $item['description'] ?? null,
             ];
 
             if (isset($existingBooks[$index])) {
