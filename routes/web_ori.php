@@ -91,12 +91,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('categories', CategoryController::class);
 
     // BUKU
-    // Lookup ISBN tetap dipertahankan dari backend admin lama.
-    Route::get('/books/isbn-lookup', [
-        BookController::class,
-        'isbnLookup'
-    ])->name('books.isbn.lookup');
-
     Route::resource('books', BookController::class);
 
     // Book Copies
@@ -128,11 +122,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 BookCopyController::class,
                 'update'
             ])->name('update');
-
-            Route::delete('/{copy}', [
-                BookCopyController::class,
-                'destroy'
-            ])->name('destroy');
         });
 
     Route::post('/borrowings', [
@@ -234,13 +223,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/{activity}/edit', [ActivityController::class, 'edit'])->name('edit');
         Route::put('/{activity}', [ActivityController::class, 'update'])->name('update');
         Route::delete('/{activity}', [ActivityController::class, 'destroy'])->name('destroy');
-        Route::patch('/{activity}/pin', [ActivityController::class, 'pin'])->name('pin');
         Route::post('/{activity}/read', [ActivityController::class, 'markAsRead'])->name('markAsRead');
     });
 
     // BOOK LOCATOR (dari Pandu — fitur baru)
     Route::get('/book-locator', [BookLocatorController::class, 'index'])->name('book-locator.index');
-    Route::get('/book-locator/{reservation}', [BookLocatorController::class, 'show'])->name('book-locator.show');
+    Route::get('/book-locator/{book}', [BookLocatorController::class, 'show'])->name('book-locator.show');
 });
 
 Route::middleware(['auth', 'role.user'])->group(function () {

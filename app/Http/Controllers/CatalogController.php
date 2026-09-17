@@ -108,8 +108,8 @@ class CatalogController extends Controller
             $search = trim((string) $request->search);
             if ($search !== '') {
                 $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('author', 'like', "%{$search}%");
+                    $q->where('judul_buku', 'like', "%{$search}%")
+                        ->orWhere('penulis', 'like', "%{$search}%");
                 });
             }
         }

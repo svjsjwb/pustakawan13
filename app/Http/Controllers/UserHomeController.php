@@ -78,11 +78,8 @@ class UserHomeController extends Controller
 
         // Buku populer
         $popularBooks = Book::with('category')
-            ->where(function ($q) {
-                $q->where('available_stock', '>', 0)
-                  ->orWhere('stock', '>', 0);
-            })
-            ->orderByDesc('available_stock')
+            ->where('stok', '>', 0)
+            ->orderByDesc('stok')
             ->take(10)
             ->get();
 
@@ -90,7 +87,7 @@ class UserHomeController extends Controller
         $categoryOrder = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
         $categories    = Category::whereIn('name', $categoryOrder)
             ->get()
-            ->sortBy(fn ($category) => array_search($category->name, $categoryOrder, true))
+            ->sortBy(fn($category) => array_search($category->name, $categoryOrder, true))
             ->values();
 
         // Aktivitas / Pengumuman (dari Pandu — popup announcement)
@@ -130,7 +127,7 @@ class UserHomeController extends Controller
             ->orderBy('title')
             ->take(8)
             ->get()
-            ->map(fn ($book) => [
+            ->map(fn($book) => [
                 'title'    => $book->title,
                 'author'   => $book->author ?: 'Penulis tidak diketahui',
                 'category' => $book->category?->name ?: 'Koleksi',

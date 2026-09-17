@@ -13,7 +13,7 @@ class Book extends Model
 
     protected $table = 'books';
 
-        protected $fillable = [
+    protected $fillable = [
         'judul_buku',
         'penulis',
         'category_id',
@@ -29,6 +29,7 @@ class Book extends Model
         'rak',
         'sku',
         'edition',
+        'cover',
     ];
 
     /*

@@ -10,143 +10,96 @@ use App\Models\Borrowing;
 use App\Models\BorrowingDetail;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Shelf;
 use App\Models\LibraryZone;
 
 class ReservationController extends Controller
 {
-    /**
-     * Sinkronisasi status anggota berdasarkan aktivitas aktif.
-     *
-     * Aktif jika memiliki:
-     * - peminjaman yang belum dikembalikan, atau
-     * - reservasi yang masih berlaku.
-     */
-    private function syncMemberStatus(Member $member): void
-    {
-        $hasActiveBorrowing = Borrowing::where('member_id', $member->id)
-            ->whereNull('returned_at')
-            ->exists();
-
-        $hasActiveReservation = Reservation::where('member_id', $member->id)
-            ->whereNotIn('status', [
-                'ditolak',
-                'dibatalkan',
-                'selesai',
-            ])
-            ->where(function ($query) {
-                $query->whereNull('expires_at')
-                    ->orWhereDate('expires_at', '>=', now()->toDateString());
-            })
-            ->exists();
-
-        $member->update([
-            'status' => ($hasActiveBorrowing || $hasActiveReservation)
-                ? 'aktif'
-                : 'nonaktif',
-        ]);
-    }
-
     /*
     |--------------------------------------------------------------------------
     | DAFTAR RESERVASI
     |--------------------------------------------------------------------------
     */
+
     public function index(Request $request)
     {
+        /*
+         * Tanggal yang dipilih untuk denah kursi.
+         */
         $selectedDate = $request->get(
             'reservation_date',
             now()->format('Y-m-d')
         );
+
 
         /*
          * =====================================================
          * ANGGOTA AKTIF
          * =====================================================
          */
+
         $members = Member::where('status', 'aktif')
             ->orderBy('name')
             ->get();
+
 
         /*
          * =====================================================
          * BUKU
          * =====================================================
-         *
-         * Gunakan kolom schema baru: judul_buku.
          */
-        $books = Book::orderBy('judul_buku')->get();
+
+        $books = Book::orderByRaw(
+            "CAST(SUBSTRING_INDEX(title, ' ', -1) AS UNSIGNED)"
+        )->get();
+
 
         /*
          * =====================================================
-         * QUERY RESERVASI + FILTER ADMIN
+         * DAFTAR RESERVASI
          * =====================================================
+         *
+         * bookCopy ikut dimuat karena dibutuhkan
+         * untuk mengetahui lokasi fisik buku.
          */
-        $query = Reservation::with([
+
+        $reservations = Reservation::with([
             'member',
             'book',
             'bookCopy.shelf.zone.floor',
-        ]);
-
-        // Tentukan kolom batas waktu yang tersedia pada schema.
-        $dueColumn = Schema::hasColumn('reservations', 'due_at')
-            ? 'due_at'
-            : (
-                Schema::hasColumn('reservations', 'expires_at')
-                    ? 'expires_at'
-                    : 'reserved_at'
-            );
-
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $startDate = Carbon::parse($request->start_date)->startOfDay();
-            $endDate = Carbon::parse($request->end_date)->endOfDay();
-
-            if ($startDate->gt($endDate)) {
-                [$startDate, $endDate] = [
-                    $endDate->copy()->startOfDay(),
-                    $startDate->copy()->endOfDay(),
-                ];
-            }
-
-            $query->whereBetween('reserved_at', [$startDate, $endDate]);
-        } elseif ($request->filled('start_date')) {
-            $query->whereDate('reserved_at', '>=', $request->start_date);
-        } elseif ($request->filled('end_date')) {
-            $query->whereDate('reserved_at', '<=', $request->end_date);
-        } elseif ($request->filled('year') && $request->filled('month')) {
-            $query->whereYear($dueColumn, $request->year)
-                ->whereMonth($dueColumn, $request->month);
-        } else {
-            $query->where(
-                'reserved_at',
-                '>=',
-                now()->subMonth()->startOfDay()
-            );
-        }
-
-        $reservations = $query
-            ->latest('reserved_at')
+        ])
+            ->latest()
             ->get();
+
 
         /*
          * =====================================================
          * KURSI YANG SUDAH BOOKING
          * =====================================================
+         *
+         * Status menunggu dan disetujui dianggap
+         * sudah melakukan booking.
          */
+
         $bookedSeats = Reservation::whereDate(
             'reserved_at',
             $selectedDate
         )
             ->whereIn('status', [
                 'menunggu',
-                'disetujui',
+                'disetujui'
             ])
             ->whereNotNull('seat_number')
             ->pluck('seat_number')
             ->toArray();
+
+
+        /*
+         * =====================================================
+         * KIRIM KE VIEW
+         * =====================================================
+         */
 
         return view(
             'reservations.index',
@@ -161,13 +114,13 @@ class ReservationController extends Controller
     }
 
 
-
     /*
     |--------------------------------------------------------------------------
     | SIMPAN RESERVASI
     |--------------------------------------------------------------------------
     */
-public function store(Request $request)
+
+    public function store(Request $request)
     {
         /*
          * =====================================================
@@ -369,7 +322,7 @@ public function store(Request $request)
              * =================================================
              */
 
-            $reservation = Reservation::create([
+            Reservation::create([
 
                 'member_id' =>
                     $validated['member_id'],
@@ -393,10 +346,6 @@ public function store(Request $request)
                     'menunggu',
 
             ]);
-
-            $this->syncMemberStatus(
-                Member::findOrFail($validated['member_id'])
-            );
 
 
             /*
@@ -424,7 +373,6 @@ public function store(Request $request)
                 'Reservasi berhasil dibuat.'
             );
     }
-
 
 
     /*
@@ -794,7 +742,19 @@ public function store(Request $request)
 
             // Sinkronisasi status member
             if ($reservation->member) {
-                $this->syncMemberStatus($reservation->member);
+                $hasActiveBorrowing = \App\Models\Borrowing::where('member_id', $reservation->member_id)
+                    ->whereNull('returned_at')
+                    ->exists();
+
+                $hasActiveReservation = Reservation::where('member_id', $reservation->member_id)
+                    ->whereNotIn('status', ['ditolak', 'dibatalkan', 'selesai'])
+                    ->whereNotNull('expires_at')
+                    ->whereDate('expires_at', '>=', now()->toDateString())
+                    ->exists();
+
+                $reservation->member->update([
+                    'status' => ($hasActiveBorrowing || $hasActiveReservation) ? 'aktif' : 'nonaktif',
+                ]);
             }
         });
 

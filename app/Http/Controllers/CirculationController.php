@@ -54,7 +54,7 @@ class CirculationController extends Controller
          * termasuk yang stok tersedia = 0.
          */
         $books = Book::orderByRaw(
-            "CAST(SUBSTRING_INDEX(title, ' ', -1) AS UNSIGNED)"
+            "CAST(SUBSTRING_INDEX(judul_buku, ' ', -1) AS UNSIGNED)"
         )->get();
 
         $reservations = Reservation::with([

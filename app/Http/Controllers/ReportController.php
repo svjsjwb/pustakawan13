@@ -31,6 +31,7 @@ class ReportController extends Controller
                 'tanggal_mulai' => now()->startOfMonth()->format('Y-m-d'),
                 'tanggal_selesai' => now()->endOfMonth()->format('Y-m-d'),
             ],
+
             2 => [
                 'id' => 2,
                 'jenis' => 'Laporan Keterlambatan',
@@ -41,16 +42,18 @@ class ReportController extends Controller
                 'tanggal_mulai' => now()->startOfMonth()->format('Y-m-d'),
                 'tanggal_selesai' => now()->endOfMonth()->format('Y-m-d'),
             ],
+
             3 => [
                 'id' => 3,
-                'jenis' => 'Laporan Koleksi Buku Baru',
+                'jenis' => 'Laporan Koleksi Buku',
                 'kategori' => 'Semua Buku',
-                'status' => 'Tersedia',
+                'status' => 'Semua Kondisi',
                 'anggota' => 'Semua Anggota',
                 'urutan' => 'Terbaru - Terlama',
                 'tanggal_mulai' => now()->startOfMonth()->format('Y-m-d'),
                 'tanggal_selesai' => now()->endOfMonth()->format('Y-m-d'),
             ],
+
             4 => [
                 'id' => 4,
                 'jenis' => 'Laporan Anggota Aktif',
@@ -64,41 +67,93 @@ class ReportController extends Controller
         ];
     }
 
+
+    /**
+     * ============================================================
+     * AMBIL DATA REPORT DARI SESSION
+     * ============================================================
+     */
     private function getReports(Request $request)
     {
         if (!$request->session()->has('reports')) {
-            $request->session()->put('reports', $this->defaultReports());
+            $request->session()->put(
+                'reports',
+                $this->defaultReports()
+            );
         }
 
-        return $request->session()->get('reports', []);
+        return $request->session()->get(
+            'reports',
+            []
+        );
     }
 
+
+    /**
+     * ============================================================
+     * TENTUKAN PERIODE
+     * ============================================================
+     */
     private function getPeriod(Request $request)
     {
         $startDateInput = $request->query('start_date');
         $endDateInput = $request->query('end_date');
 
         if ($startDateInput && $endDateInput) {
+
             try {
-                $startDate = Carbon::createFromFormat('Y-m-d', $startDateInput)->startOfDay();
-                $endDate = Carbon::createFromFormat('Y-m-d', $endDateInput)->endOfDay();
+
+                $startDate = Carbon::createFromFormat(
+                    'Y-m-d',
+                    $startDateInput
+                )->startOfDay();
+
+                $endDate = Carbon::createFromFormat(
+                    'Y-m-d',
+                    $endDateInput
+                )->endOfDay();
+
 
                 if ($startDate->gt($endDate)) {
+
                     $temp = $startDate;
-                    $startDate = $endDate->copy()->startOfDay();
-                    $endDate = $temp->copy()->endOfDay();
+
+                    $startDate =
+                        $endDate
+                        ->copy()
+                        ->startOfDay();
+
+                    $endDate =
+                        $temp
+                        ->copy()
+                        ->endOfDay();
                 }
 
-                $diffDays = $startDate->diffInDays($endDate) + 1;
-                $label = $startDate->locale('id')->translatedFormat('d M Y') . ' - ' . $endDate->locale('id')->translatedFormat('d M Y');
+
+                $diffDays =
+                    $startDate->diffInDays($endDate) + 1;
+
+
+                $label =
+                    $startDate->translatedFormat('d M Y')
+                    . ' - '
+                    . $endDate->translatedFormat('d M Y');
+
 
                 if ($diffDays <= 1) {
+
                     $rangeType = 'day';
-                } elseif ($diffDays <= 14) {
+
+                } elseif ($diffDays <= 7) {
+
                     $rangeType = 'week';
+
                 } else {
+
                     $rangeType = 'month';
+
                 }
+
 
                 return [
                     'type' => $rangeType,
@@ -109,14 +164,30 @@ class ReportController extends Controller
                     'startDateInput' => $startDate->format('Y-m-d'),
                     'endDateInput' => $endDate->format('Y-m-d'),
                 ];
+
             } catch (\Exception $e) {
-                // Fallback jika format error
+                // Gunakan default.
             }
         }
 
-        $startDate = now()->startOfMonth()->startOfDay();
-        $endDate = now()->endOfMonth()->endOfDay();
-        $label = $startDate->locale('id')->translatedFormat('d M Y') . ' - ' . $endDate->locale('id')->translatedFormat('d M Y');
+
+        $startDate =
+            now()
+            ->startOfMonth()
+            ->startOfDay();
+
+
+        $endDate =
+            now()
+            ->endOfMonth()
+            ->endOfDay();
+
+
+        $label =
+            $startDate->translatedFormat('d M Y')
+            . ' - '
+            . $endDate->translatedFormat('d M Y');
+
 
         return [
             'type' => 'month',
@@ -129,271 +200,1994 @@ class ReportController extends Controller
         ];
     }
 
+
+    /**
+     * ============================================================
+     * HALAMAN UTAMA LAPORAN
+     * ============================================================
+     */
     public function index(Request $request)
     {
-        $reports = $this->getReports($request);
-        $period = $this->getPeriod($request);
+        $reports =
+            $this->getReports($request);
 
-        $startDate = $period['start'];
-        $endDate = $period['end'];
-        $periodLabel = $period['label'];
-        $periodType = $period['type'];
-        $selectedDate = $period['selectedDate'];
-        $startDateInput = $period['startDateInput'];
-        $endDateInput = $period['endDateInput'];
-
-        // Badge pojok kanan: Selalu periode 1 bulan kalender penuh bulan ini
-        $monthlyPeriodBadge = now()->locale('id')->startOfMonth()->translatedFormat('d M Y') . ' - ' . now()->locale('id')->endOfMonth()->translatedFormat('d M Y');
 
         /*
-         * 1. DATA PEMINJAMAN
+         * ========================================================
+         * PERIODE
+         * ========================================================
          */
-        $borrowings = Borrowing::with(['member', 'details.book'])
-            ->whereBetween('borrowed_at', [$startDate, $endDate])
+        $period =
+            $this->getPeriod($request);
+
+
+        $startDate =
+            $period['start'];
+
+        $endDate =
+            $period['end'];
+
+        $periodLabel =
+            $period['label'];
+
+        $periodType =
+            $period['type'];
+
+        $selectedDate =
+            $period['selectedDate'];
+
+        $startDateInput =
+            $period['startDateInput'];
+
+        $endDateInput =
+            $period['endDateInput'];
+
+
+        /*
+         * ========================================================
+         * BADGE PERIODE
+         * ========================================================
+         */
+        $reportMonthStart =
+            now()->startOfMonth();
+
+        $reportMonthEnd =
+            now()->endOfMonth();
+
+        $reportMonthLabel =
+            $reportMonthStart->translatedFormat('d M Y')
+            . ' - '
+            . $reportMonthEnd->translatedFormat('d M Y');
+
+
+        /*
+         * ========================================================
+         * PEMINJAMAN
+         * ========================================================
+         */
+        $borrowings =
+            Borrowing::with([
+                'member',
+                'details.book'
+            ])
+            ->whereBetween(
+                'borrowed_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
+            )
             ->latest('borrowed_at')
             ->get();
 
-        $totalBorrowed = $borrowings->count();
-        $totalReturned = $borrowings->where('status', 'dikembalikan')->count();
-        $totalActiveBorrow = $borrowings->where('status', 'dipinjam')->count();
 
-        // Grafik Peminjaman (Data Riil & Normalisasi Bar)
-        [$borrowChartLabels, $borrowChartBarsRaw, $borrowChartBarsNorm] = $this->generateDateChart(
-            Borrowing::query(),
-            'borrowed_at',
-            $startDate,
-            $endDate,
-            $periodType
-        );
+        $borrowedBooks =
+            $borrowings->count();
 
-        /*
-         * 2. DATA KETERLAMBATAN
-         */
-        $lateBorrowingsQuery = Borrowing::where('status', 'dipinjam')
-            ->where('due_at', '<', now())
-            ->whereBetween('due_at', [$startDate, $endDate]);
 
-        $lateBorrowings = (clone $lateBorrowingsQuery)->count();
+        $totalBorrowed =
+            $borrowings->count();
 
-        [$lateChartLabels, $lateChartBarsRaw, $lateChartBarsNorm] = $this->generateDateChart(
-            Borrowing::query()->where('status', 'dipinjam')->where('due_at', '<', now()),
-            'due_at',
-            $startDate,
-            $endDate,
-            $periodType
-        );
 
-        /*
-         * 3. DATA KOLEKSI BUKU (Masuk / Ditambah di rentang waktu tersebut)
-         */
-        $totalBooks = Book::whereBetween('created_at', [$startDate, $endDate])->count();
-
-        [$collectionChartLabels, $collectionChartBarsRaw, $collectionChartBarsNorm] = $this->generateDateChart(
-            Book::query(),
-            'created_at',
-            $startDate,
-            $endDate,
-            $periodType
-        );
-
-        /*
-         * 4. DATA ANGGOTA AKTIF (Terdaftar aktif di rentang waktu tersebut)
-         */
-        $activeMembers = Member::where('status', 'aktif')
-            ->whereBetween('created_at', [$startDate, $endDate])
+        $totalReturned =
+            $borrowings
+            ->where(
+                'status',
+                'dikembalikan'
+            )
             ->count();
 
-        [$memberChartLabels, $memberChartBarsRaw, $memberChartBarsNorm] = $this->generateDateChart(
-            Member::query()->where('status', 'aktif'),
-            'created_at',
-            $startDate,
-            $endDate,
-            $periodType
-        );
+
+        $totalActiveBorrow =
+            $borrowings
+            ->where(
+                'status',
+                'dipinjam'
+            )
+            ->count();
+
+
+        $totalLate =
+            $borrowings
+            ->where(
+                'status',
+                'dipinjam'
+            )
+            ->filter(function ($item) {
+
+                return $item->due_at
+                    && Carbon::parse(
+                        $item->due_at
+                    )->isPast();
+
+            })
+            ->count();
+
+
+        [
+            $borrowChartLabels,
+            $borrowChartBars
+        ] =
+            $this->generateBorrowChart(
+                $startDate,
+                $endDate,
+                $periodType
+            );
+
 
         /*
-         * Format data untuk kebutuhan ekspor PDF / Excel
+         * ========================================================
+         * KETERLAMBATAN
+         * ========================================================
          */
-        $borrowingsExportData = $borrowings->map(function ($item, $index) {
-            $bookTitles = $item->details->map(function ($d) {
-                return ($d->book->title ?? 'Buku') . ($d->quantity > 1 ? ' (' . $d->quantity . 'x)' : '');
-            })->implode(', ');
+        $lateBorrowings =
+            Borrowing::where(
+                'status',
+                'dipinjam'
+            )
+            ->where(
+                'due_at',
+                '<',
+                now()
+            )
+            ->whereBetween(
+                'due_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
+            )
+            ->count();
 
-            $isLate = ($item->status === 'dipinjam' && $item->due_at && Carbon::parse($item->due_at)->isPast());
-            $statusText = $item->status === 'dikembalikan' ? 'Dikembalikan' : ($isLate ? 'Terlambat' : 'Dipinjam');
 
-            return [
-                'no' => $index + 1,
-                'member_name' => $item->member->name ?? ('Anggota #' . $item->member_id),
-                'member_code' => $item->member->member_code ?? '-',
-                'books' => $bookTitles ?: 'Tidak ada rincian',
-                'borrowed_at' => Carbon::parse($item->borrowed_at)->translatedFormat('d M Y'),
-                'due_at' => $item->due_at ? Carbon::parse($item->due_at)->translatedFormat('d M Y') : '-',
-                'returned_at' => $item->returned_at ? Carbon::parse($item->returned_at)->translatedFormat('d M Y') : '-',
-                'status' => $statusText,
-            ];
-        })->values()->toArray();
+        [
+            $lateChartLabels,
+            $lateChartBars
+        ] =
+            $this->generateLateChart(
+                $startDate,
+                $endDate,
+                $periodType
+            );
 
+
+        /*
+         * ========================================================
+         * KOLEKSI
+         * ========================================================
+         *
+         * 1. Buku Ditambahkan
+         * 2. Buku Ditarik
+         * 3. Eksemplar Dihapus
+         * 4. Kondisi Rusak
+         */
+        $collectionReportData =
+            $this->getCollectionReportData(
+                $startDate,
+                $endDate
+            );
+
+
+        /*
+         * ========================================================
+         * RINGKASAN KOLEKSI
+         * ========================================================
+         */
+        $collectionAddedCount =
+            $collectionReportData
+            ->where(
+                'type',
+                'added'
+            )
+            ->count();
+
+        // Kompatibilitas dengan view admin/user hasil merge:
+        // "totalBooks" merepresentasikan buku yang ditambahkan pada periode.
+        $totalBooks = $collectionAddedCount;
+
+
+        $collectionWithdrawnCount =
+            $collectionReportData
+            ->where(
+                'type',
+                'withdrawn'
+            )
+            ->sum('quantity');
+
+
+        $collectionDeletedCopyCount =
+            $collectionReportData
+            ->where(
+                'type',
+                'copy_deleted'
+            )
+            ->count();
+
+
+        $collectionDamagedCount =
+            $collectionReportData
+            ->where(
+                'type',
+                'damaged'
+            )
+            ->count();
+
+
+        $totalCollectionChanges =
+            $collectionReportData->count();
+
+
+        /*
+         * ========================================================
+         * GRAFIK KOLEKSI
+         * ========================================================
+         */
+        [
+            $collectionChartLabels,
+            $collectionChartBars
+        ] =
+            $this->generateCollectionChart(
+                $startDate,
+                $endDate,
+                $periodType
+            );
+
+
+        /*
+         * ========================================================
+         * ANGGOTA AKTIF
+         * ========================================================
+         */
+        $activeMemberIds =
+            $this->getActiveMemberIds(
+                $startDate,
+                $endDate
+            );
+
+
+        $activeMembers =
+            count($activeMemberIds);
+
+
+        [
+            $memberChartLabels,
+            $memberChartBars
+        ] =
+            $this->generateMemberChart(
+                $startDate,
+                $endDate,
+                $periodType
+            );
+
+
+        /*
+         * ========================================================
+         * DATA EXPORT PEMINJAMAN
+         * ========================================================
+         */
+        $borrowingsExportData =
+            $borrowings
+            ->map(function ($item, $index) {
+
+                $bookTitles =
+                    $item->details
+                    ->map(function ($d) {
+
+                        return ($d->book->judul_buku ?? 'Buku')
+                            .
+                            (
+                                $d->quantity > 1
+                                ? ' (' . $d->quantity . 'x)'
+                                : ''
+                            );
+
+                    })
+                    ->implode(', ');
+
+
+                $isLate =
+                    (
+                        $item->status === 'dipinjam'
+                        &&
+                        $item->due_at
+                        &&
+                        Carbon::parse(
+                            $item->due_at
+                        )->isPast()
+                    );
+
+
+                $statusText =
+                    $item->status === 'dikembalikan'
+                    ? 'Dikembalikan'
+                    : (
+                        $isLate
+                        ? 'Terlambat'
+                        : 'Dipinjam'
+                    );
+
+
+                return [
+                    'no' =>
+                        $index + 1,
+
+                    'member_name' =>
+                        $item->member->name
+                        ??
+                        ('Anggota #' . $item->member_id),
+
+                    'member_code' =>
+                        $item->member->member_code
+                        ??
+                        '-',
+
+                    'books' =>
+                        $bookTitles
+                        ?:
+                        'Tidak ada rincian',
+
+                    'borrowed_at' =>
+                        Carbon::parse(
+                            $item->borrowed_at
+                        )->translatedFormat(
+                            'd M Y'
+                        ),
+
+                    'due_at' =>
+                        $item->due_at
+                        ? Carbon::parse(
+                            $item->due_at
+                        )->translatedFormat(
+                            'd M Y'
+                        )
+                        : '-',
+
+                    'returned_at' =>
+                        $item->returned_at
+                        ? Carbon::parse(
+                            $item->returned_at
+                        )->translatedFormat(
+                            'd M Y'
+                        )
+                        : '-',
+
+                    'status' =>
+                        $statusText,
+                ];
+            })
+            ->values()
+            ->toArray();
+
+
+        /*
+         * ========================================================
+         * DATA EXPORT ANGGOTA AKTIF
+         * ========================================================
+         *
+         * Angka anggota aktif dihitung dari gabungan peminjaman
+         * dan reservasi. PDF menggunakan sumber data yang sama.
+         * Satu anggota ditampilkan satu kali.
+         */
+        $activeMembersExportData =
+            Member::query()
+            ->whereIn(
+                'id',
+                $activeMemberIds
+            )
+            ->get()
+            ->map(function ($member, $index) use (
+                $startDate,
+                $endDate
+            ) {
+
+                $borrowing =
+                    Borrowing::with([
+                        'details.book'
+                    ])
+                    ->where(
+                        'member_id',
+                        $member->id
+                    )
+                    ->whereDate(
+                        'borrowed_at',
+                        '<=',
+                        $endDate
+                    )
+                    ->where(function ($query) use (
+                        $startDate
+                    ) {
+                        $query
+                            ->whereNull('returned_at')
+                            ->orWhereDate(
+                                'returned_at',
+                                '>=',
+                                $startDate
+                            );
+                    })
+                    ->latest('borrowed_at')
+                    ->first();
+
+                $reservation =
+                    Reservation::with([
+                        'book'
+                    ])
+                    ->where(
+                        'member_id',
+                        $member->id
+                    )
+                    ->whereNotIn(
+                        'status',
+                        [
+                            'ditolak',
+                            'dibatalkan',
+                        ]
+                    )
+                    ->whereDate(
+                        'reserved_at',
+                        '<=',
+                        $endDate
+                    )
+                    ->where(function ($query) use (
+                        $startDate
+                    ) {
+                        $query
+                            ->whereNull('expires_at')
+                            ->orWhereDate(
+                                'expires_at',
+                                '>=',
+                                $startDate
+                            );
+                    })
+                    ->latest('reserved_at')
+                    ->first();
+
+                $borrowingDate =
+                    $borrowing
+                    ? Carbon::parse(
+                        $borrowing->borrowed_at
+                    )
+                    : null;
+
+                $reservationDate =
+                    $reservation
+                    ? Carbon::parse(
+                        $reservation->reserved_at
+                    )
+                    : null;
+
+                if (
+                    $borrowing &&
+                    (
+                        !$reservationDate ||
+                        $borrowingDate->gte(
+                            $reservationDate
+                        )
+                    )
+                ) {
+                    $bookTitles =
+                        $borrowing->details
+                        ->map(function ($detail) {
+                            return
+                                ($detail->book->judul_buku ?? 'Buku')
+                                .
+                                (
+                                    $detail->quantity > 1
+                                    ? ' (' . $detail->quantity . 'x)'
+                                    : ''
+                                );
+                        })
+                        ->implode(', ');
+
+                    $isLate =
+                        $borrowing->status === 'dipinjam'
+                        &&
+                        $borrowing->due_at
+                        &&
+                        Carbon::parse(
+                            $borrowing->due_at
+                        )->isPast();
+
+                    $statusText =
+                        $borrowing->status === 'dikembalikan'
+                        ? 'Dikembalikan'
+                        : (
+                            $isLate
+                            ? 'Terlambat'
+                            : 'Dipinjam'
+                        );
+
+                    return [
+                        'no' => $index + 1,
+                        'member_name' =>
+                            $member->name
+                            ??
+                            ('Anggota #' . $member->id),
+                        'member_code' =>
+                            $member->member_code ?? '-',
+                        'activity' => 'Peminjaman',
+                        'books' =>
+                            $bookTitles ?: 'Tidak ada rincian',
+                        'date' =>
+                            $borrowingDate->translatedFormat('d M Y'),
+                        'status' => $statusText,
+                    ];
+                }
+
+                if ($reservation) {
+                    return [
+                        'no' => $index + 1,
+                        'member_name' =>
+                            $member->name
+                            ??
+                            ('Anggota #' . $member->id),
+                        'member_code' =>
+                            $member->member_code ?? '-',
+                        'activity' => 'Reservasi',
+                        'books' =>
+                            $reservation->book->judul_buku ?? 'Buku',
+                        'date' =>
+                            $reservationDate->translatedFormat('d M Y'),
+                        'status' =>
+                            ucfirst($reservation->status),
+                    ];
+                }
+
+                return [
+                    'no' => $index + 1,
+                    'member_name' =>
+                        $member->name
+                        ??
+                        ('Anggota #' . $member->id),
+                    'member_code' =>
+                        $member->member_code ?? '-',
+                    'activity' => '-',
+                    'books' => '-',
+                    'date' => '-',
+                    'status' => 'Aktif',
+                ];
+            })
+            ->values()
+            ->toArray();
+
+
+        /*
+         * ========================================================
+         * DATA EXPORT KOLEKSI
+         * ========================================================
+         */
+        $collectionExportData =
+            $collectionReportData
+            ->map(function ($item, $index) {
+
+                return [
+                    'no' =>
+                        $index + 1,
+
+                    'tanggal' =>
+                        $item['date']
+                        ->translatedFormat(
+                            'd M Y'
+                        ),
+
+                    'jenis_perubahan' =>
+                        $item['label'],
+
+                    'judul_buku' =>
+                        $item['book_title'],
+
+                    'eksemplar_jumlah' =>
+                        $item['display_quantity'],
+
+                    'alasan_keterangan' =>
+                        $item['reason'],
+
+                ];
+            })
+            ->values()
+            ->toArray();
+
+
+        /*
+         * ========================================================
+         * KIRIM KE VIEW
+         * ========================================================
+         */
         return view(
             'reports.index',
             compact(
                 'reports',
+
                 'borrowings',
                 'borrowingsExportData',
+                'activeMembersExportData',
+
+                'collectionReportData',
+                'collectionExportData',
+
+                'collectionAddedCount',
+                'totalBooks',
+                'collectionWithdrawnCount',
+                'collectionDeletedCopyCount',
+                'collectionDamagedCount',
+                'totalCollectionChanges',
+
                 'totalBorrowed',
                 'totalReturned',
                 'totalActiveBorrow',
-                'lateBorrowings',
-                'totalBooks',
+                'totalLate',
+
+                'borrowedBooks',
                 'activeMembers',
+                'lateBorrowings',
+
                 'periodLabel',
-                'monthlyPeriodBadge',
                 'periodType',
                 'selectedDate',
                 'startDateInput',
                 'endDateInput',
                 'startDate',
                 'endDate',
+                'reportMonthLabel',
+
                 'borrowChartLabels',
-                'borrowChartBarsRaw',
-                'borrowChartBarsNorm',
+                'borrowChartBars',
+
                 'lateChartLabels',
-                'lateChartBarsRaw',
-                'lateChartBarsNorm',
+                'lateChartBars',
+
                 'collectionChartLabels',
-                'collectionChartBarsRaw',
-                'collectionChartBarsNorm',
+                'collectionChartBars',
+
                 'memberChartLabels',
-                'memberChartBarsRaw',
-                'memberChartBarsNorm'
+                'memberChartBars'
             )
         );
     }
 
+
     /**
-     * Helper membuat data grafik harian / mingguan / bulanan
+     * ============================================================
+     * DATA LAPORAN KOLEKSI
+     * ============================================================
      */
-    private function generateDateChart($query, $column, $startDate, $endDate, $type)
-    {
-        $labels = [];
-        $bars = [];
+    private function getCollectionReportData(
+        $startDate,
+        $endDate
+    ) {
+        $data = collect();
 
-        if ($type === 'day') {
-            $hours = ['00', '04', '08', '12', '16', '20'];
-            foreach ($hours as $hour) {
-                $start = $startDate->copy()->setHour((int) $hour)->startOfHour();
-                $end = $start->copy()->addHours(3)->endOfHour();
 
-                $labels[] = $hour . ':00';
-                $bars[] = (clone $query)->whereBetween($column, [$start, $end])->count();
+        /*
+         * ========================================================
+         * 1. BUKU DITAMBAHKAN
+         * ========================================================
+         *
+         * Hanya buku aktif yang dibuat dalam periode.
+         */
+        $addedBooks =
+            Book::with('copies')
+            ->whereBetween(
+                'created_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
+            )
+            ->orderBy(
+                'created_at',
+                'desc'
+            )
+            ->get();
+
+
+        foreach ($addedBooks as $book) {
+
+            $copyCount =
+                $book->copies->count();
+
+
+            $data->push([
+                'type' => 'added',
+
+                'label' =>
+                    'Buku Ditambahkan',
+
+                'date' =>
+                    $book->created_at,
+
+                'book_title' =>
+                    $book->judul_buku,
+
+                'barcode' =>
+                    null,
+
+                'quantity' =>
+                    $copyCount > 0
+                    ? $copyCount
+                    : 1,
+
+                'display_quantity' =>
+                    $copyCount > 0
+                    ? $copyCount . ' eksemplar'
+                    : '1 buku',
+
+                'reason' =>
+                    'Koleksi baru',
+
+                'sort_date' =>
+                    $book->created_at,
+            ]);
+        }
+
+
+        /*
+         * ========================================================
+         * 2. BUKU DITARIK
+         * ========================================================
+         */
+        $withdrawnBooks =
+            CollectionWithdrawal::query()
+            ->where(
+                'type',
+                'book'
+            )
+            ->whereBetween(
+                'withdrawn_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
+            )
+            ->orderBy(
+                'withdrawn_at',
+                'desc'
+            )
+            ->get();
+
+
+        foreach (
+            $withdrawnBooks
+            as $withdrawal
+        ) {
+
+            $data->push([
+                'type' =>
+                    'withdrawn',
+
+                'label' =>
+                    'Buku Ditarik',
+
+                'date' =>
+                    $withdrawal->withdrawn_at,
+
+                'book_title' =>
+                    $withdrawal->book_title,
+
+                'barcode' =>
+                    null,
+
+                'quantity' =>
+                    $withdrawal->quantity,
+
+                'display_quantity' =>
+                    $withdrawal->quantity
+                    . ' eksemplar',
+
+                'reason' =>
+                    $withdrawal->reason,
+
+                'sort_date' =>
+                    $withdrawal->withdrawn_at,
+            ]);
+        }
+
+
+        /*
+         * ========================================================
+         * 3. EKSEMPLAR DIHAPUS
+         * ========================================================
+         */
+        $deletedCopies =
+            CollectionWithdrawal::query()
+            ->where(
+                'type',
+                'copy'
+            )
+            ->whereBetween(
+                'withdrawn_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
+            )
+            ->orderBy(
+                'withdrawn_at',
+                'desc'
+            )
+            ->get();
+
+
+        foreach (
+            $deletedCopies
+            as $withdrawal
+        ) {
+
+            $data->push([
+                'type' =>
+                    'copy_deleted',
+
+                'label' =>
+                    'Eksemplar Dihapus',
+
+                'date' =>
+                    $withdrawal->withdrawn_at,
+
+                'book_title' =>
+                    $withdrawal->book_title,
+
+                'barcode' =>
+                    $withdrawal->barcode,
+
+                'quantity' =>
+                    1,
+
+                'display_quantity' =>
+                    $withdrawal->barcode
+                    ?? '1 eksemplar',
+
+                'reason' =>
+                    $withdrawal->reason,
+
+                'sort_date' =>
+                    $withdrawal->withdrawn_at,
+            ]);
+        }
+
+
+        /*
+         * ========================================================
+         * 4. KONDISI RUSAK
+         * ========================================================
+         *
+         * Saat ini database hanya menyimpan kondisi terakhir.
+         *
+         * Jadi bagian ini menampilkan eksemplar yang sekarang
+         * mempunyai condition = rusak.
+         *
+         * Bukan histori perubahan kondisi.
+         */
+        $damagedCopies =
+            BookCopy::with([
+                'book'
+            ])
+            ->where(
+                'condition',
+                'rusak'
+            )
+            ->orderBy(
+                'updated_at',
+                'desc'
+            )
+            ->get();
+
+
+        foreach (
+            $damagedCopies
+            as $copy
+        ) {
+
+            $data->push([
+                'type' =>
+                    'damaged',
+
+                'label' =>
+                    'Kondisi Rusak',
+
+                'date' =>
+                    $copy->updated_at
+                    ?? $copy->created_at,
+
+                'book_title' =>
+                    $copy->book->judul_buku
+                    ?? 'Buku',
+
+                'barcode' =>
+                    $copy->barcode,
+
+                'quantity' =>
+                    1,
+
+                'display_quantity' =>
+                    $copy->barcode
+                    ?? '1 eksemplar',
+
+                'reason' =>
+                    'Kondisi fisik rusak',
+
+                'sort_date' =>
+                    $copy->updated_at
+                    ?? $copy->created_at,
+            ]);
+        }
+
+
+        /*
+         * ========================================================
+         * URUTKAN TERBARU
+         * ========================================================
+         */
+        return $data
+            ->sortByDesc(
+                'sort_date'
+            )
+            ->values();
+    }
+
+
+    /**
+     * ============================================================
+     * GRAFIK PEMINJAMAN
+     * ============================================================
+     */
+    private function generateBorrowChart(
+        $startDate,
+        $endDate,
+        $type
+    ) {
+        return $this->generateDateChart(
+            Borrowing::query(),
+            'borrowed_at',
+            $startDate,
+            $endDate,
+            $type,
+            function ($query) {
+                return $query;
             }
-        } elseif ($type === 'week') {
-            $cursor = $startDate->copy();
-            while ($cursor->lte($endDate)) {
-                $dayStart = $cursor->copy()->startOfDay();
-                $dayEnd = $cursor->copy()->endOfDay();
+        );
+    }
 
-                $labels[] = $cursor->locale('id')->translatedFormat('d M');
-                $bars[] = (clone $query)->whereBetween($column, [$dayStart, $dayEnd])->count();
+
+    /**
+     * ============================================================
+     * GRAFIK KETERLAMBATAN
+     * ============================================================
+     */
+    private function generateLateChart(
+        $startDate,
+        $endDate,
+        $type
+    ) {
+        return $this->generateDateChart(
+            Borrowing::query()
+                ->where(
+                    'status',
+                    'dipinjam'
+                )
+                ->where(
+                    'due_at',
+                    '<',
+                    now()
+                ),
+            'due_at',
+            $startDate,
+            $endDate,
+            $type,
+            function ($query) {
+                return $query;
+            }
+        );
+    }
+
+
+    /**
+     * ============================================================
+     * GRAFIK KOLEKSI
+     * ============================================================
+     */
+    private function generateCollectionChart(
+        $startDate,
+        $endDate,
+        $type
+    ) {
+        /*
+         * Grafik koleksi menggunakan jumlah seluruh perubahan
+         * koleksi per bagian periode.
+         */
+        $data =
+            $this->getCollectionReportData(
+                $startDate,
+                $endDate
+            );
+
+
+        /*
+         * ========================================================
+         * HARIAN
+         * ========================================================
+         */
+        if ($type === 'day') {
+
+            $labels = [
+                '00',
+                '04',
+                '08',
+                '12',
+                '16',
+                '20',
+            ];
+
+            $bars = [];
+
+
+            foreach ($labels as $hour) {
+
+                $start =
+                    $startDate
+                    ->copy()
+                    ->setHour(
+                        (int) $hour
+                    )
+                    ->startOfHour();
+
+
+                $end =
+                    $start
+                    ->copy()
+                    ->addHours(3)
+                    ->endOfHour();
+
+
+                $count =
+                    $data
+                    ->filter(function ($item) use (
+                        $start,
+                        $end
+                    ) {
+
+                        return $item['sort_date']
+                            ->between(
+                                $start,
+                                $end
+                            );
+
+                    })
+                    ->count();
+
+
+                $bars[] =
+                    $count;
+            }
+
+
+            return [
+                $labels,
+                $this->normalizeBars($bars)
+            ];
+        }
+
+
+        /*
+         * ========================================================
+         * MINGGUAN
+         * ========================================================
+         */
+        if ($type === 'week') {
+
+            $labels = [];
+
+            $bars = [];
+
+            $cursor =
+                $startDate->copy();
+
+
+            while (
+                $cursor->lte(
+                    $endDate
+                )
+            ) {
+
+                $dayStart =
+                    $cursor
+                    ->copy()
+                    ->startOfDay();
+
+
+                $dayEnd =
+                    $cursor
+                    ->copy()
+                    ->endOfDay();
+
+
+                $labels[] =
+                    $cursor->translatedFormat(
+                        'D'
+                    );
+
+
+                $bars[] =
+                    $data
+                    ->filter(function ($item) use (
+                        $dayStart,
+                        $dayEnd
+                    ) {
+
+                        return $item['sort_date']
+                            ->between(
+                                $dayStart,
+                                $dayEnd
+                            );
+
+                    })
+                    ->count();
+
 
                 $cursor->addDay();
             }
-        } else {
-            $cursor = $startDate->copy();
-            $weekNumber = 1;
 
-            while ($cursor->lte($endDate)) {
-                $weekStart = $cursor->copy()->startOfDay();
-                $weekEnd = $cursor->copy()->addDays(6)->endOfDay();
 
-                if ($weekEnd->gt($endDate)) {
-                    $weekEnd = $endDate->copy();
-                }
-
-                $labels[] = 'M' . $weekNumber;
-                $bars[] = (clone $query)->whereBetween($column, [$weekStart, $weekEnd])->count();
-
-                $cursor = $weekEnd->copy()->addSecond();
-                $weekNumber++;
-            }
+            return [
+                $labels,
+                $this->normalizeBars($bars)
+            ];
         }
 
-        // Hitung normalisasi persen untuk bar kecil di card (agar tidak flat 0%)
-        $max = max($bars) ?: 1;
-        $norm = array_map(function ($val) use ($max) {
-            return $val > 0 ? max(18, round(($val / $max) * 100)) : 8;
-        }, $bars);
 
-        return [$labels, $bars, $norm];
+        /*
+         * ========================================================
+         * BULANAN
+         * ========================================================
+         */
+        $labels = [];
+
+        $bars = [];
+
+        $cursor =
+            $startDate->copy();
+
+        $weekNumber = 1;
+
+
+        while (
+            $cursor->lte(
+                $endDate
+            )
+        ) {
+
+            $weekStart =
+                $cursor
+                ->copy()
+                ->startOfDay();
+
+
+            $weekEnd =
+                $cursor
+                ->copy()
+                ->addDays(6)
+                ->endOfDay();
+
+
+            if (
+                $weekEnd->gt(
+                    $endDate
+                )
+            ) {
+
+                $weekEnd =
+                    $endDate->copy();
+            }
+
+
+            $labels[] =
+                'M' . $weekNumber;
+
+
+            $bars[] =
+                $data
+                ->filter(function ($item) use (
+                    $weekStart,
+                    $weekEnd
+                ) {
+
+                    return $item['sort_date']
+                        ->between(
+                            $weekStart,
+                            $weekEnd
+                        );
+
+                })
+                ->count();
+
+
+            $cursor =
+                $weekEnd
+                ->copy()
+                ->addSecond();
+
+
+            $weekNumber++;
+        }
+
+
+        return [
+            $labels,
+            $this->normalizeBars($bars)
+        ];
     }
 
+
+    /**
+     * ============================================================
+     * MEMBER AKTIF
+     * ============================================================
+     */
+    private function getActiveMemberIds(
+        $startDate,
+        $endDate
+    ) {
+        $borrowingMemberIds =
+            Borrowing::query()
+            ->whereDate(
+                'borrowed_at',
+                '<=',
+                $endDate
+            )
+            ->where(function ($query) use ($startDate) {
+
+                $query
+                    ->whereNull(
+                        'returned_at'
+                    )
+                    ->orWhereDate(
+                        'returned_at',
+                        '>=',
+                        $startDate
+                    );
+            })
+            ->pluck(
+                'member_id'
+            );
+
+
+        $reservationMemberIds =
+            Reservation::query()
+            ->whereNotIn(
+                'status',
+                [
+                    'ditolak',
+                    'dibatalkan',
+                ]
+            )
+            ->whereDate(
+                'reserved_at',
+                '<=',
+                $endDate
+            )
+            ->where(function ($query) use ($startDate) {
+
+                $query
+                    ->whereNull(
+                        'expires_at'
+                    )
+                    ->orWhereDate(
+                        'expires_at',
+                        '>=',
+                        $startDate
+                    );
+            })
+            ->pluck(
+                'member_id'
+            );
+
+
+        return $borrowingMemberIds
+            ->merge(
+                $reservationMemberIds
+            )
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+
+    /**
+     * ============================================================
+     * GRAFIK MEMBER
+     * ============================================================
+     */
+    private function generateMemberChart(
+        $startDate,
+        $endDate,
+        $type
+    ) {
+        if ($type === 'day') {
+
+            $memberIds =
+                $this->getActiveMemberIds(
+                    $startDate,
+                    $endDate
+                );
+
+
+            return [
+                ['Hari'],
+                $this->normalizeBars([
+                    count($memberIds)
+                ])
+            ];
+        }
+
+
+        if ($type === 'week') {
+
+            $labels = [];
+
+            $bars = [];
+
+            $cursor =
+                $startDate->copy();
+
+
+            while (
+                $cursor->lte(
+                    $endDate
+                )
+            ) {
+
+                $dayStart =
+                    $cursor
+                    ->copy()
+                    ->startOfDay();
+
+                $dayEnd =
+                    $cursor
+                    ->copy()
+                    ->endOfDay();
+
+
+                $memberIds =
+                    $this->getActiveMemberIds(
+                        $dayStart,
+                        $dayEnd
+                    );
+
+
+                $labels[] =
+                    $cursor->translatedFormat(
+                        'D'
+                    );
+
+
+                $bars[] =
+                    count($memberIds);
+
+
+                $cursor->addDay();
+            }
+
+
+            return [
+                $labels,
+                $this->normalizeBars($bars)
+            ];
+        }
+
+
+        $labels = [];
+
+        $bars = [];
+
+        $cursor =
+            $startDate->copy();
+
+        $weekNumber = 1;
+
+
+        while (
+            $cursor->lte(
+                $endDate
+            )
+        ) {
+
+            $weekStart =
+                $cursor
+                ->copy()
+                ->startOfDay();
+
+
+            $weekEnd =
+                $cursor
+                ->copy()
+                ->addDays(6)
+                ->endOfDay();
+
+
+            if (
+                $weekEnd->gt(
+                    $endDate
+                )
+            ) {
+
+                $weekEnd =
+                    $endDate->copy();
+            }
+
+
+            $memberIds =
+                $this->getActiveMemberIds(
+                    $weekStart,
+                    $weekEnd
+                );
+
+
+            $labels[] =
+                'M' . $weekNumber;
+
+
+            $bars[] =
+                count($memberIds);
+
+
+            $cursor =
+                $weekEnd
+                ->copy()
+                ->addSecond();
+
+
+            $weekNumber++;
+        }
+
+
+        return [
+            $labels,
+            $this->normalizeBars($bars)
+        ];
+    }
+
+
+    /**
+     * ============================================================
+     * GRAFIK BERDASARKAN PERIODE
+     * ============================================================
+     */
+    private function generateDateChart(
+        $query,
+        $column,
+        $startDate,
+        $endDate,
+        $type,
+        $callback
+    ) {
+        $query =
+            $callback($query);
+
+
+        if ($type === 'day') {
+
+            $labels = [
+                '00',
+                '04',
+                '08',
+                '12',
+                '16',
+                '20',
+            ];
+
+            $bars = [];
+
+
+            foreach ($labels as $hour) {
+
+                $start =
+                    $startDate
+                    ->copy()
+                    ->setHour(
+                        (int) $hour
+                    )
+                    ->startOfHour();
+
+
+                $end =
+                    $start
+                    ->copy()
+                    ->addHours(3)
+                    ->endOfHour();
+
+
+                $bars[] =
+                    (clone $query)
+                    ->whereBetween(
+                        $column,
+                        [
+                            $start,
+                            $end
+                        ]
+                    )
+                    ->count();
+            }
+
+
+            return [
+                $labels,
+                $this->normalizeBars($bars)
+            ];
+        }
+
+
+        if ($type === 'week') {
+
+            $labels = [];
+
+            $bars = [];
+
+            $cursor =
+                $startDate->copy();
+
+
+            while (
+                $cursor->lte(
+                    $endDate
+                )
+            ) {
+
+                $dayStart =
+                    $cursor
+                    ->copy()
+                    ->startOfDay();
+
+
+                $dayEnd =
+                    $cursor
+                    ->copy()
+                    ->endOfDay();
+
+
+                $labels[] =
+                    $cursor->translatedFormat(
+                        'D'
+                    );
+
+
+                $bars[] =
+                    (clone $query)
+                    ->whereBetween(
+                        $column,
+                        [
+                            $dayStart,
+                            $dayEnd
+                        ]
+                    )
+                    ->count();
+
+
+                $cursor->addDay();
+            }
+
+
+            return [
+                $labels,
+                $this->normalizeBars($bars)
+            ];
+        }
+
+
+        $labels = [];
+
+        $bars = [];
+
+        $cursor =
+            $startDate->copy();
+
+        $weekNumber = 1;
+
+
+        while (
+            $cursor->lte(
+                $endDate
+            )
+        ) {
+
+            $weekStart =
+                $cursor
+                ->copy()
+                ->startOfDay();
+
+
+            $weekEnd =
+                $cursor
+                ->copy()
+                ->addDays(6)
+                ->endOfDay();
+
+
+            if (
+                $weekEnd->gt(
+                    $endDate
+                )
+            ) {
+
+                $weekEnd =
+                    $endDate->copy();
+            }
+
+
+            $labels[] =
+                'M' . $weekNumber;
+
+
+            $bars[] =
+                (clone $query)
+                ->whereBetween(
+                    $column,
+                    [
+                        $weekStart,
+                        $weekEnd
+                    ]
+                )
+                ->count();
+
+
+            $cursor =
+                $weekEnd
+                ->copy()
+                ->addSecond();
+
+
+            $weekNumber++;
+        }
+
+
+        return [
+            $labels,
+            $this->normalizeBars($bars)
+        ];
+    }
+
+
+    /**
+     * ============================================================
+     * NORMALISASI GRAFIK
+     * ============================================================
+     */
+    private function normalizeBars(
+        array $values
+    ) {
+        if (empty($values)) {
+            return [];
+        }
+
+
+        $max =
+            max($values);
+
+
+        if ($max <= 0) {
+
+            return array_fill(
+                0,
+                count($values),
+                8
+            );
+        }
+
+
+        return array_map(
+            function ($value) use ($max) {
+
+                return max(
+                    8,
+                    round(
+                        ($value / $max)
+                        * 100
+                    )
+                );
+
+            },
+            $values
+        );
+    }
+
+
+    /**
+     * ============================================================
+     * CREATE REPORT
+     * ============================================================
+     */
     public function create()
     {
-        return view('reports.create');
+        return view(
+            'reports.create'
+        );
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'jenis' => ['required', 'string', 'max:100'],
-            'kategori' => ['required', 'string', 'max:100'],
-            'status' => ['required', 'string', 'max:100'],
-            'anggota' => ['required', 'string', 'max:100'],
-            'urutan' => ['required', 'string', 'max:100'],
-            'tanggal_mulai' => ['required', 'date'],
-            'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
-        ]);
 
-        $reports = $this->getReports($request);
-        $newId = empty($reports) ? 1 : max(array_keys($reports)) + 1;
-        $validated['id'] = $newId;
-        $reports[$newId] = $validated;
-        $request->session()->put('reports', $reports);
+    /**
+     * ============================================================
+     * STORE REPORT
+     * ============================================================
+     */
+    public function store(
+        Request $request
+    ) {
+        $validated =
+            $request->validate(
+                [
+                    'jenis' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
 
-        return redirect()->route('reports.index')->with('success', 'Laporan berhasil ditambahkan.');
+                    'kategori' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
+
+                    'status' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
+
+                    'anggota' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
+
+                    'urutan' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
+
+                    'tanggal_mulai' => [
+                        'required',
+                        'date',
+                    ],
+
+                    'tanggal_selesai' => [
+                        'required',
+                        'date',
+                        'after_or_equal:tanggal_mulai',
+                    ],
+                ]
+            );
+
+
+        $reports =
+            $this->getReports(
+                $request
+            );
+
+
+        $newId =
+            empty($reports)
+            ? 1
+            : max(
+                array_keys($reports)
+            ) + 1;
+
+
+        $validated['id'] =
+            $newId;
+
+
+        $reports[$newId] =
+            $validated;
+
+
+        $request->session()->put(
+            'reports',
+            $reports
+        );
+
+
+        return redirect()
+            ->route(
+                'reports.index'
+            )
+            ->with(
+                'success',
+                'Laporan berhasil ditambahkan.'
+            );
     }
 
-    public function edit(Request $request, $id)
-    {
-        $reports = $this->getReports($request);
-        if (!isset($reports[$id]))
+
+    /**
+     * ============================================================
+     * EDIT REPORT
+     * ============================================================
+     */
+    public function edit(
+        Request $request,
+        $id
+    ) {
+        $reports =
+            $this->getReports(
+                $request
+            );
+
+
+        if (
+            !isset(
+                $reports[$id]
+            )
+        ) {
             abort(404);
-        $report = $reports[$id];
-        return view('reports.edit', compact('report'));
+        }
+
+
+        $report =
+            $reports[$id];
+
+
+        return view(
+            'reports.edit',
+            compact('report')
+        );
     }
 
-    public function update(Request $request, $id)
-    {
-        $reports = $this->getReports($request);
-        if (!isset($reports[$id]))
+
+    /**
+     * ============================================================
+     * UPDATE REPORT
+     * ============================================================
+     */
+    public function update(
+        Request $request,
+        $id
+    ) {
+        $reports =
+            $this->getReports(
+                $request
+            );
+
+
+        if (
+            !isset(
+                $reports[$id]
+            )
+        ) {
             abort(404);
+        }
 
-        $validated = $request->validate([
-            'jenis' => ['required', 'string', 'max:100'],
-            'kategori' => ['required', 'string', 'max:100'],
-            'status' => ['required', 'string', 'max:100'],
-            'anggota' => ['required', 'string', 'max:100'],
-            'urutan' => ['required', 'string', 'max:100'],
-            'tanggal_mulai' => ['required', 'date'],
-            'tanggal_selesai' => ['required', 'date', 'after_or_equal:tanggal_mulai'],
-        ]);
 
-        $validated['id'] = $id;
-        $reports[$id] = $validated;
-        $request->session()->put('reports', $reports);
+        $validated =
+            $request->validate(
+                [
+                    'jenis' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
 
-        return redirect()->route('reports.index')->with('success', 'Laporan berhasil diperbarui.');
+                    'kategori' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
+
+                    'status' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
+
+                    'anggota' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
+
+                    'urutan' => [
+                        'required',
+                        'string',
+                        'max:100',
+                    ],
+
+                    'tanggal_mulai' => [
+                        'required',
+                        'date',
+                    ],
+
+                    'tanggal_selesai' => [
+                        'required',
+                        'date',
+                        'after_or_equal:tanggal_mulai',
+                    ],
+                ]
+            );
+
+
+        $validated['id'] =
+            $id;
+
+
+        $reports[$id] =
+            $validated;
+
+
+        $request->session()->put(
+            'reports',
+            $reports
+        );
+
+
+        return redirect()
+            ->route(
+                'reports.index'
+            )
+            ->with(
+                'success',
+                'Laporan berhasil diperbarui.'
+            );
     }
 
-    public function destroy(Request $request, $id)
-    {
-        $reports = $this->getReports($request);
-        if (!isset($reports[$id]))
+
+    /**
+     * ============================================================
+     * DELETE REPORT
+     * ============================================================
+     */
+    public function destroy(
+        Request $request,
+        $id
+    ) {
+        $reports =
+            $this->getReports(
+                $request
+            );
+
+
+        if (
+            !isset(
+                $reports[$id]
+            )
+        ) {
             abort(404);
+        }
 
-        unset($reports[$id]);
-        $request->session()->put('reports', $reports);
 
-        return redirect()->route('reports.index')->with('success', 'Laporan berhasil dihapus.');
+        unset(
+            $reports[$id]
+        );
+
+
+        $request->session()->put(
+            'reports',
+            $reports
+        );
+
+
+        return redirect()
+            ->route(
+                'reports.index'
+            )
+            ->with(
+                'success',
+                'Laporan berhasil dihapus.'
+            );
     }
 }

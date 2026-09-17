@@ -12,7 +12,7 @@ class CatalogBooksSeeder extends Seeder
     public function run(): void
     {
         $catPendidikan = Category::firstOrCreate(['name' => 'Pendidikan'], ['level' => 1]);
-        $catAnak = Category::firstOrCreate(['name' => 'Anak-Anak'], ['level' => 1]);
+        $catAnak = Category::firstOrCreate(['name' => 'Anak'], ['level' => 1]);
         $catRemaja = Category::firstOrCreate(['name' => 'Remaja'], ['level' => 1]);
         $catDewasa = Category::firstOrCreate(['name' => 'Dewasa'], ['level' => 1]);
 
@@ -674,29 +674,21 @@ class CatalogBooksSeeder extends Seeder
 
         foreach ($catalog as $item) {
             $data = [
-                'title'           => $item['title'] ?? $item['judul_buku'] ?? 'Judul Buku',
-                'author'          => $item['author'] ?? $item['penulis'] ?? 'Penulis',
                 'judul_buku'      => $item['title'] ?? $item['judul_buku'] ?? 'Judul Buku',
+                'sku'             => 'SKU-' . str_pad($index + 1, 5, '0', STR_PAD_LEFT),
                 'penulis'         => $item['author'] ?? $item['penulis'] ?? 'Penulis',
                 'category_id'     => $item['category_id'] ?? $catPendidikan->id,
                 'main_category'   => $item['main_category'] ?? null,
                 'sub_category'    => $item['sub_category'] ?? null,
                 'education_level' => $item['education_level'] ?? null,
-                'stock'           => $item['stock'] ?? 10,
-                'available_stock' => $item['available_stock'] ?? 10,
+                'subcategory_id'  => null,
                 'stok'            => $item['available_stock'] ?? $item['stock'] ?? 10,
                 'status'          => 'Tersedia',
-                'kode_buku'       => $item['kode_buku'] ?? ('BK-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT)),
-                'rak'             => $item['rak'] ?? 'A1',
-                'sku'             => 'SKU-' . str_pad($index + 1, 5, '0', STR_PAD_LEFT),
                 'no_iventaris'    => 'INV/' . date('Y') . '/' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
+                'kode_buku'       => $item['kode_buku'] ?? ('BK-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT)),
                 'ddc'             => $item['call_number'] ?? null,
+                'rak'             => $item['rak'] ?? 'A1',
                 'edition'         => 'Cetakan ke-1',
-                'publisher'       => $item['publisher'] ?? 'Pustaka Utama',
-                'publication_year'=> $item['publication_year'] ?? 2022,
-                'isbn'            => $item['isbn'] ?? ('978' . str_pad($index + 1, 10, '0', STR_PAD_LEFT)),
-                'call_number'     => $item['call_number'] ?? null,
-                'description'     => $item['description'] ?? null,
             ];
 
             if (isset($existingBooks[$index])) {
@@ -715,7 +707,7 @@ class CatalogBooksSeeder extends Seeder
             $mod = $index % 4;
             if ($mod === 0) {
                 $book->update([
-                    'title' => 'Buku Referensi Pembelajaran SD ' . ($index + 1),
+                    'judul_buku' => 'Buku Referensi Pembelajaran SD ' . ($index + 1),
                     'category_id' => $catPendidikan->id,
                     'main_category' => 'Pendidikan',
                     'sub_category' => 'SD',
@@ -723,7 +715,7 @@ class CatalogBooksSeeder extends Seeder
                 ]);
             } elseif ($mod === 1) {
                 $book->update([
-                    'title' => 'Petualangan Sains Anak ' . ($index + 1),
+                    'judul_buku' => 'Petualangan Sains Anak ' . ($index + 1),
                     'category_id' => $catAnak->id,
                     'main_category' => 'Anak-Anak',
                     'sub_category' => 'Non Fiksi',
@@ -731,7 +723,7 @@ class CatalogBooksSeeder extends Seeder
                 ]);
             } elseif ($mod === 2) {
                 $book->update([
-                    'title' => 'Kisah Inspiratif Remaja ' . ($index + 1),
+                    'judul_buku' => 'Kisah Inspiratif Remaja ' . ($index + 1),
                     'category_id' => $catRemaja->id,
                     'main_category' => 'Remaja',
                     'sub_category' => 'Fiksi',
@@ -739,7 +731,7 @@ class CatalogBooksSeeder extends Seeder
                 ]);
             } else {
                 $book->update([
-                    'title' => 'Wawasan Manajemen Modern ' . ($index + 1),
+                    'judul_buku' => 'Wawasan Manajemen Modern ' . ($index + 1),
                     'category_id' => $catDewasa->id,
                     'main_category' => 'Dewasa',
                     'sub_category' => 'Non Fiksi',
