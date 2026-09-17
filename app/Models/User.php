@@ -138,7 +138,7 @@ class User extends Authenticatable
                         'name'     => $user->name,
                         'phone'    => $user->phone ?? '-',
                         'division' => 'Anggota',
-                        'status'   => 'Aktif',
+                        'status'   => 'aktif',
                     ]
                 );
             }
@@ -154,7 +154,7 @@ class User extends Authenticatable
                 'name'     => $this->name,
                 'phone'    => $this->phone ?? '-',
                 'division' => 'Anggota',
-                'status'   => 'Aktif',
+                'status'   => 'aktif',
             ]
         );
     }

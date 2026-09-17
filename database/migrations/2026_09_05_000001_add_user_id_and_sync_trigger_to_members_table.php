@@ -38,7 +38,7 @@ return new class extends Migration
                     'email'      => $u->email,
                     'phone'      => $u->phone ?: '-',
                     'division'   => 'Anggota',
-                    'status'     => 'Aktif',
+                    'status'     => 'nonaktif',
                     'created_at' => $u->created_at ?: now(),
                     'updated_at' => $u->created_at ?: now(),
                 ]);

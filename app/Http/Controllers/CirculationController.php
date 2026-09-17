@@ -9,37 +9,13 @@ use App\Models\Borrowing;
 use App\Models\BorrowingDetail;
 use App\Models\Member;
 use App\Services\NotificationService;
+use App\Services\MemberStatusService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CirculationController extends Controller
 {
-    /**
-     * Sinkronisasi status member berdasarkan aktivitas peminjaman dan reservasi saat ini.
-     * (Fitur dari Pandu)
-     */
-    private function syncMemberStatus(Member $member): void
-    {
-        $hasActiveBorrowing = Borrowing::where('member_id', $member->id)
-            ->whereNull('returned_at')
-            ->exists();
-
-        $hasActiveReservation = Reservation::where('member_id', $member->id)
-            ->whereNotIn('status', [
-                'ditolak',
-                'dibatalkan',
-                'selesai',
-            ])
-            ->exists();
-
-        $member->update([
-            'status' => ($hasActiveBorrowing || $hasActiveReservation)
-                ? 'aktif'
-                : 'nonaktif',
-        ]);
-    }
-
     /**
      * DAFTAR PEMINJAMAN / SIRKULASI BUKU
      */
@@ -245,7 +221,7 @@ class CirculationController extends Controller
             /*
              * Sinkronisasi status member.
              */
-            $this->syncMemberStatus($member);
+            app(MemberStatusService::class)->sync($member);
         });
 
         if ($createdBorrowing) {
@@ -332,7 +308,7 @@ class CirculationController extends Controller
             /*
              * Sinkronisasi status member.
              */
-            $this->syncMemberStatus(
+            app(MemberStatusService::class)->sync(
                 Member::findOrFail($borrowing->member_id)
             );
         });

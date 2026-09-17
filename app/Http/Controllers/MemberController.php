@@ -3,139 +3,41 @@
 namespace App\Http\Controllers;
 
 use App\Models\Member;
-use App\Models\Borrowing;
-use App\Models\Reservation;
+use App\Services\MemberStatusService;
 use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
-    /**
-     * Sinkronisasi status member berdasarkan aktivitas SAAT INI.
-     *
-     * Member AKTIF jika:
-     * - memiliki peminjaman yang belum dikembalikan
-     * ATAU
-     * - memiliki reservasi yang masih berlaku
-     *
-     * Reservasi yang sudah melewati expires_at TIDAK dihitung aktif.
-     */
-    private function syncMemberStatus(Member $member): void
+    private function validationRules(): array
     {
-        /*
-        |--------------------------------------------------------------------------
-        | PEMINJAMAN AKTIF
-        |--------------------------------------------------------------------------
-        |
-        | Selama returned_at masih NULL, peminjaman dianggap aktif.
-        |
-        | Termasuk peminjaman yang sudah terlambat.
-        |
-        */
-
-        $hasActiveBorrowing = Borrowing::where(
-            'member_id',
-            $member->id
-        )
-            ->whereNull('returned_at')
-            ->exists();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESERVASI AKTIF
-        |--------------------------------------------------------------------------
-        |
-        | Reservasi hanya dianggap aktif jika:
-        |
-        | 1. Bukan ditolak
-        | 2. Bukan dibatalkan
-        | 3. Bukan selesai
-        | 4. expires_at masih hari ini atau setelah hari ini
-        |
-        */
-
-        $hasActiveReservation = Reservation::where(
-            'member_id',
-            $member->id
-        )
-            ->whereNotIn('status', [
-                'ditolak',
-                'dibatalkan',
-                'selesai',
-            ])
-            ->whereNotNull('expires_at')
-            ->whereDate(
-                'expires_at',
-                '>=',
-                now()->toDateString()
-            )
-            ->exists();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE STATUS MEMBER
-        |--------------------------------------------------------------------------
-        */
-
-        $member->update([
-            'status' => (
-                $hasActiveBorrowing ||
-                $hasActiveReservation
-            )
-                ? 'aktif'
-                : 'nonaktif',
-        ]);
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'division' => ['required', 'string', 'max:100'],
+            'phone' => ['required', 'string', 'max:20'],
+        ];
     }
 
-
-    /**
-     * Sinkronisasi seluruh member.
-     */
-    private function syncAllMemberStatuses(): void
+    private function validationMessages(): array
     {
-        Member::query()
-            ->get()
-            ->each(function (Member $member) {
-
-                $this->syncMemberStatus(
-                    $member
-                );
-
-            });
+        return [
+            'name.required' => 'Nama karyawan wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'division.required' => 'Divisi wajib dipilih.',
+            'phone.required' => 'Nomor telepon wajib diisi.',
+        ];
     }
-
 
     /**
      * Menampilkan daftar anggota.
      */
     public function index()
     {
-        /*
-        |--------------------------------------------------------------------------
-        | SINKRONISASI STATUS
-        |--------------------------------------------------------------------------
-        */
+        app(MemberStatusService::class)->syncAll();
 
-        $this->syncAllMemberStatuses();
+        $members = Member::orderBy('id')->get();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | AMBIL DATA TERBARU
-        |--------------------------------------------------------------------------
-        */
-
-        $members = Member::orderBy(
-            'id',
-            'asc'
-        )->get();
-
-
-        return view(
-            'members.index',
-            compact('members')
-        );
+        return view('members.index', compact('members'));
     }
 
 
@@ -155,84 +57,10 @@ class MemberController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'email' => [
-                'nullable',
-                'email',
-                'max:255',
-            ],
-
-            'division' => [
-                'required',
-                'string',
-                'max:100',
-            ],
-
-            'phone' => [
-                'required',
-                'string',
-                'max:20',
-            ],
-
-        ], [
-
-            'name.required' =>
-                'Nama karyawan wajib diisi.',
-
-            'email.email' =>
-                'Format email tidak valid.',
-
-            'division.required' =>
-                'Divisi wajib dipilih.',
-
-            'phone.required' =>
-                'Nomor telepon wajib diisi.',
-        ]);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | GENERATE NOMOR ANGGOTA (JIKA KOLOM ADA)
-        |--------------------------------------------------------------------------
-        */
-
-        if (\Illuminate\Support\Facades\Schema::hasColumn('members', 'member_number')) {
-            $lastMember =
-                Member::orderByDesc('id')
-                    ->first();
-
-            if (
-                $lastMember &&
-                $lastMember->member_number
-            ) {
-                $lastNumber =
-                    (int) substr(
-                        $lastMember->member_number,
-                        1
-                    );
-
-                $nextNumber =
-                    $lastNumber + 1;
-            } else {
-                $nextNumber = 1;
-            }
-
-            $validated['member_number'] =
-                'M' .
-                str_pad(
-                    $nextNumber,
-                    3,
-                    '0',
-                    STR_PAD_LEFT
-                );
-        }
+        $validated = $request->validate(
+            $this->validationRules(),
+            $this->validationMessages()
+        );
 
 
         /*
@@ -300,46 +128,10 @@ class MemberController extends Controller
         Request $request,
         Member $member
     ) {
-        $validated = $request->validate([
-
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'email' => [
-                'nullable',
-                'email',
-                'max:255',
-            ],
-
-            'division' => [
-                'required',
-                'string',
-                'max:100',
-            ],
-
-            'phone' => [
-                'required',
-                'string',
-                'max:20',
-            ],
-
-        ], [
-
-            'name.required' =>
-                'Nama karyawan wajib diisi.',
-
-            'email.email' =>
-                'Format email tidak valid.',
-
-            'division.required' =>
-                'Divisi wajib dipilih.',
-
-            'phone.required' =>
-                'Nomor telepon wajib diisi.',
-        ]);
+        $validated = $request->validate(
+            $this->validationRules(),
+            $this->validationMessages()
+        );
 
 
         $member->update(
@@ -353,9 +145,7 @@ class MemberController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $this->syncMemberStatus(
-            $member
-        );
+        app(MemberStatusService::class)->sync($member);
 
 
         return redirect()

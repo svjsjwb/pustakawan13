@@ -311,14 +311,17 @@ class BookCopyController extends Controller
         Book $book
     ): void {
 
-        $stock = $book->copies()->count();
-
-        $availableStock = $book->copies()
-            ->where('status', 'available')
+        $availableStock =
+            $book->copies()
+            ->where(
+                'status',
+                'available'
+            )
             ->count();
 
+
         $book->update([
-            'stok' => $stock,
+            'stok' => $availableStock,
         ]);
     }
 

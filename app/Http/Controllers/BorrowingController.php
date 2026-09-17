@@ -6,75 +6,12 @@ use App\Models\Book;
 use App\Models\Member;
 use App\Models\Borrowing;
 use App\Models\Reservation;
+use App\Services\MemberStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class BorrowingController extends Controller
 {
-    /**
-     * Sinkronisasi status member berdasarkan aktivitas SAAT INI.
-     *
-     * Member AKTIF jika:
-     * - memiliki peminjaman yang belum dikembalikan
-     * ATAU
-     * - memiliki reservasi yang masih berlaku
-     */
-    private function syncMemberStatus(Member $member): void
-    {
-        /*
-        |--------------------------------------------------------------------------
-        | PEMINJAMAN AKTIF
-        |--------------------------------------------------------------------------
-        |
-        | Selama returned_at masih NULL,
-        | peminjaman dianggap masih aktif.
-        | Termasuk peminjaman yang sudah terlambat.
-        |
-        */
-
-        $hasActiveBorrowing = Borrowing::where('member_id', $member->id)
-            ->whereNull('returned_at')
-            ->exists();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESERVASI AKTIF
-        |--------------------------------------------------------------------------
-        |
-        | Reservasi hanya aktif jika:
-        | - status bukan ditolak
-        | - status bukan dibatalkan
-        | - status bukan selesai
-        | - expires_at belum lewat
-        |
-        */
-
-        $hasActiveReservation = Reservation::where('member_id', $member->id)
-            ->whereNotIn('status', [
-                'ditolak',
-                'dibatalkan',
-                'selesai',
-            ])
-            ->whereNotNull('expires_at')
-            ->whereDate('expires_at', '>=', now()->toDateString())
-            ->exists();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE STATUS MEMBER
-        |--------------------------------------------------------------------------
-        */
-
-        $member->update([
-            'status' => ($hasActiveBorrowing || $hasActiveReservation)
-                ? 'aktif'
-                : 'nonaktif',
-        ]);
-    }
-
-
     /*
     |--------------------------------------------------------------------------
     | DAFTAR PEMINJAMAN
@@ -110,7 +47,7 @@ class BorrowingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $$books = Book::orderByRaw(
+        $books = Book::orderByRaw(
             "CAST(SUBSTRING_INDEX(judul_buku, ' ', -1) AS UNSIGNED)"
         )->get();
 
@@ -394,7 +331,7 @@ class BorrowingController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $this->syncMemberStatus(
+            app(MemberStatusService::class)->sync(
                 Member::findOrFail($validated['member_id'])
             );
         });
@@ -458,7 +395,7 @@ class BorrowingController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $this->syncMemberStatus(
+            app(MemberStatusService::class)->sync(
                 Member::findOrFail($borrowing->member_id)
             );
         });
