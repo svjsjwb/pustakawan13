@@ -17,16 +17,17 @@ class CatalogController extends Controller
         */
 
         $categoryOrder = [
-            'Buku Pendidikan',
-            'Anak',
+            'Pendidikan',
+            'Anak-Anak',
             'Remaja',
             'Dewasa',
         ];
 
         $categories = Category::whereIn('name', $categoryOrder)
             ->with('subcategories')
-            ->orderByRaw("CASE name WHEN 'Buku Pendidikan' THEN 1 WHEN 'Anak' THEN 2 WHEN 'Remaja' THEN 3 WHEN 'Dewasa' THEN 4 ELSE 5 END")
-            ->get();
+            ->get()
+            ->sortBy(fn ($category) => array_search($category->name, $categoryOrder, true))
+            ->values();
 
         /*
         |--------------------------------------------------------------------------
@@ -120,12 +121,7 @@ class CatalogController extends Controller
         */
 
         $perPage = (int) $request->input('per_page', 25);
-
-        if (!in_array($perPage, [12, 25, 50, 100], true)) {
-            $perPage = 25;
-        }
-
-        $books = $query->paginate($perPage)->withQueryString();
+        $books   = $query->paginate($perPage)->withQueryString();
 
         return view('catalog.index', compact('books', 'categories'));
     }
