@@ -19,6 +19,10 @@ class Member extends Model
         'division',
         'phone',
         'address',
+        'nis_nip',
+        'gender',
+        'class',
+        'registered_at',
         'status',
     ];
 

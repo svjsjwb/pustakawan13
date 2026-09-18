@@ -3,725 +3,638 @@
 @section('title', 'Sirkulasi')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/circulation.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/circulation.css') }}">
 @endpush
 
 @section('content')
 
-<section class="page" id="page-circulation">
+    <section class="page" id="page-circulation">
 
-    {{-- =====================================================
+        {{-- =====================================================
          ALERT SUCCESS
     ====================================================== --}}
 
-    @if(session('success'))
-
-        <div class="alert-success">
-            {{ session('success') }}
-        </div>
-
-    @endif
+        @if (session('success'))
+            <div class="alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
 
 
-    {{-- =====================================================
+        {{-- =====================================================
          ALERT ERROR
     ====================================================== --}}
 
-    @if(session('error'))
-
-        <div class="alert-error">
-            {{ session('error') }}
-        </div>
-
-    @endif
+        @if (session('error'))
+            <div class="alert-error">
+                {{ session('error') }}
+            </div>
+        @endif
 
 
-    {{-- =====================================================
+        {{-- =====================================================
          VALIDATION ERROR
     ====================================================== --}}
 
-    @if($errors->any())
+        @if ($errors->any())
 
-        <div class="alert-error">
+            <div class="alert-error">
 
-            <ul class="error-list">
+                <ul class="error-list">
 
-                @foreach($errors->all() as $error)
+                    @foreach ($errors->all() as $error)
+                        <li>
+                            {{ $error }}
+                        </li>
+                    @endforeach
 
-                    <li>
-                        {{ $error }}
-                    </li>
+                </ul>
 
-                @endforeach
+            </div>
 
-            </ul>
-
-        </div>
-
-    @endif
+        @endif
 
 
-    {{-- =====================================================
+        {{-- =====================================================
          MAIN TWO COLUMN
     ====================================================== --}}
 
-    <div class="two-col">
+        <div class="two-col">
 
 
-        {{-- =================================================
+            {{-- =================================================
              KIRI - FORM PEMINJAMAN
         ================================================== --}}
 
-        <div class="card form-card">
+            <div class="card form-card">
 
-            <div class="card-pad">
+                <div class="card-pad">
 
-                <h3>
-                    Pinjam Buku
-                </h3>
+                    <h3>
+                        Pinjam Buku
+                    </h3>
 
-                <p class="loan-description">
-                    Pilih anggota, buku, dan tanggal peminjaman.
-                </p>
+                    <p class="loan-description">
+                        Pilih anggota, buku, dan tanggal peminjaman.
+                    </p>
 
 
-                {{-- =================================================
+                    {{-- =================================================
                      FORM PEMINJAMAN
                 ================================================== --}}
 
-                <form
-                    action="{{ route('circulation.store') }}"
-                    method="POST"
-                    id="circulationForm">
+                    <form action="{{ route('circulation.store') }}" method="POST" id="circulationForm">
 
-                    @csrf
+                        @csrf
 
 
-                    {{-- ================================
-                         RESERVASI
-                    ================================= --}}
-
-                    <div class="field">
-
-                        <label for="reservation_id">
-                            Reservasi
-                        </label>
-
-                        <select
-                            name="reservation_id"
-                            id="reservation_id"
-                        >
-
-                            <option value="">
-                                -- Peminjaman Biasa --
-                            </option>
-
-                            @foreach($reservations as $reservation)
-
-                                @if($reservation->bookCopy)
-
-                                    <option
-                                        value="{{ $reservation->id }}"
-                                        @selected(
-                                            old('reservation_id') == $reservation->id
-                                        )
-                                    >
-
-                                        {{ $reservation->member->name }}
-
-                                        —
-
-                                        {{ $reservation->book->title }}
-
-                                        —
-
-                                        {{ $reservation->bookCopy->barcode }}
-
-                                    </option>
-
-                                @endif
-
-                            @endforeach
-
-                        </select>
-
-                    </div>
-
-
-                    {{-- ================================
+                        {{-- ================================
                          ANGGOTA
                     ================================= --}}
 
-                    <div class="field">
+                        <div class="field">
 
-                        <label for="member_id">
-                            Anggota
-                        </label>
+                            <label for="member_id">
+                                Anggota
+                            </label>
 
-                        <select
-                            name="member_id"
-                            id="member_id"
-                            required
-                        >
+                            <select name="member_id" id="member_id" required>
 
-                            <option value="">
-                                -- Pilih Anggota --
-                            </option>
-
-                            @foreach($members as $member)
-
-                                <option
-                                    value="{{ $member->id }}"
-                                    @selected(
-                                        old('member_id') == $member->id
-                                    )
-                                >
-                                    {{ $member->name }}
+                                <option value="">
+                                    -- Pilih Anggota --
                                 </option>
 
-                            @endforeach
+                                @foreach ($members as $member)
+                                    <option value="{{ $member->id }}" @selected(old('member_id') == $member->id)>
+                                        {{ $member->name }}
+                                    </option>
+                                @endforeach
 
-                        </select>
+                            </select>
 
-                    </div>
+                        </div>
 
 
-                    {{-- ================================
+                        {{-- ================================
                          BUKU
                     ================================= --}}
 
-                    <div class="field">
+                        <div class="field">
 
-                        <label for="book_id">
-                            Buku
-                        </label>
+                            <label for="book_id">
+                                Buku
+                            </label>
 
-                        <select
-                            name="book_id"
-                            id="book_id"
-                            required
-                        >
+                            <select name="book_id" id="book_id" required>
 
-                            <option value="">
-                                -- Pilih Buku --
-                            </option>
-
-                            @foreach($books as $book)
-
-                                <option
-                                    value="{{ $book->id }}"
-                                    @selected(
-                                        old('book_id') == $book->id
-                                    )
-                                    @disabled(
-                                        $book->available_stock <= 0
-                                    )
-                                >
-
-                                    {{ $book->title }}
-
-                                    —
-
-                                    @if($book->available_stock > 0)
-
-                                        Stok {{ $book->available_stock }}
-
-                                    @else
-
-                                        STOK HABIS
-
-                                    @endif
-
+                                <option value="">
+                                    -- Pilih Buku --
                                 </option>
 
-                            @endforeach
+                                @foreach ($books as $book)
+                                    <option value="{{ $book->id }}" @selected(old('book_id') == $book->id)
+                                        @disabled($book->available_stock <= 0)>
 
-                        </select>
+                                        {{ $book->title }}
 
-                    </div>
+                                        —
+
+                                        @if ($book->available_stock > 0)
+                                            Stok {{ $book->available_stock }}
+                                        @else
+                                            STOK HABIS
+                                        @endif
+
+                                    </option>
+                                @endforeach
+
+                            </select>
+
+                        </div>
 
 
-                    {{-- ================================
+                        {{-- ================================
                          TANGGAL
                     ================================= --}}
 
-                    <div class="field-row">
+                        <div class="field-row">
 
-                        <div class="field">
+                            <div class="field">
 
-                            <label for="borrowed_at">
-                                Tanggal Pinjam
-                            </label>
+                                <label for="borrowed_at">
+                                    Tanggal Pinjam
+                                </label>
 
-                            <input
-                                type="date"
-                                name="borrowed_at"
-                                id="borrowed_at"
-                                value="{{ old(
-                                    'borrowed_at',
-                                    now()->format('Y-m-d')
-                                ) }}"
-                                required
-                            >
+                                <input type="date" name="borrowed_at" id="borrowed_at"
+                                    value="{{ old('borrowed_at', now()->format('Y-m-d')) }}" required>
 
-                        </div>
+                            </div>
 
 
-                        <div class="field">
+                            <div class="field">
 
-                            <label for="due_at">
-                                Tanggal Pengembalian
-                            </label>
+                                <label for="due_at">
+                                    Tanggal Pengembalian
+                                </label>
 
-                            <input
-                                type="date"
-                                name="due_at"
-                                id="due_at"
-                                value="{{ old(
-                                    'due_at',
-                                    now()->addDays(7)->format('Y-m-d')
-                                ) }}"
-                                required
-                            >
+                                <input type="date" name="due_at" id="due_at"
+                                    value="{{ old('due_at', now()->addDays(7)->format('Y-m-d')) }}" required>
+
+                            </div>
 
                         </div>
+
+
+                        {{-- ================================
+                         SUBMIT
+                    ================================= --}}
+
+                        <button type="submit" class="loan-submit">
+                            Proses Peminjaman
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            {{-- =================================================
+             KANAN - DAFTAR PEMINJAMAN
+        ================================================== --}}
+
+            <div class="card borrowing-card">
+
+
+                {{-- =================================================
+                 HEADER DAFTAR
+            ================================================== --}}
+
+                <div class="borrowing-header">
+
+                    <div>
+
+                        <h3>
+                            Daftar Peminjaman
+                        </h3>
+
+                        <p>
+                            Daftar anggota yang sedang meminjam buku.
+                        </p>
 
                     </div>
 
 
-                    {{-- ================================
-                         SUBMIT
-                    ================================= --}}
+                    {{-- SEARCH --}}
 
-                    <button
-                        type="submit"
-                        class="loan-submit"
-                    >
-                        Proses Peminjaman
-                    </button>
+                    <div class="search-box">
 
-                </form>
+                        <input type="text" id="borrowingSearch" placeholder="Cari peminjaman..." autocomplete="off">
 
-            </div>
-
-        </div>
-
-
-        {{-- =================================================
-             KANAN - DAFTAR PEMINJAMAN
-        ================================================== --}}
-
-        <div class="card borrowing-card">
-
-
-            {{-- =================================================
-                 HEADER DAFTAR
-            ================================================== --}}
-
-            <div class="borrowing-header">
-
-                <div>
-
-                    <h3>
-                        Daftar Peminjaman
-                    </h3>
-
-                    <p>
-                        Daftar anggota yang sedang meminjam buku.
-                    </p>
+                    </div>
 
                 </div>
 
 
-                {{-- SEARCH --}}
-
-                <div class="search-box">
-
-                    <input
-                        type="text"
-                        id="borrowingSearch"
-                        placeholder="Cari peminjaman..."
-                        autocomplete="off"
-                    >
-
-                </div>
-
-            </div>
-
-
-            {{-- =================================================
+                {{-- =================================================
                  TABLE
             ================================================== --}}
 
-            <div class="table-wrap">
+                <div class="table-wrap">
 
-                <table id="borrowingTable">
+                    <table id="borrowingTable">
 
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                ANGGOTA
-                            </th>
-
-                            <th>
-                                BUKU
-                            </th>
-
-                            <th>
-                                PINJAM
-                            </th>
-
-                            <th>
-                                TANGGAL PENGEMBALIAN
-                            </th>
-
-                            <th>
-                                STATUS
-                            </th>
-
-                            <th>
-                                AKSI
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        @forelse($borrowings as $borrowing)
-
-                            @php
-
-                                $isLate =
-                                    $borrowing->status === 'dipinjam'
-                                    &&
-                                    now()->startOfDay()->gt(
-                                        \Carbon\Carbon::parse(
-                                            $borrowing->due_at
-                                        )->startOfDay()
-                                    );
-
-                                $displayStatus =
-                                    $isLate
-                                        ? 'terlambat'
-                                        : $borrowing->status;
-
-                            @endphp
-
-
-                            <tr class="borrowing-row">
-
-
-                                {{-- ANGGOTA --}}
-
-                                <td class="member-cell">
-
-                                    {{ $borrowing->member->name ?? '-' }}
-
-                                </td>
-
-
-                                {{-- BUKU --}}
-
-                                <td class="book-cell">
-
-                                    @forelse($borrowing->details as $detail)
-
-                                        <span>
-                                            {{ $detail->book->title ?? '-' }}
-                                        </span>
-
-                                        @if(!$loop->last)
-                                            <br>
-                                        @endif
-
-                                    @empty
-
-                                        -
-
-                                    @endforelse
-
-                                </td>
-
-
-                                {{-- TANGGAL PINJAM --}}
-
-                                <td>
-
-                                    {{ \Carbon\Carbon::parse(
-                                        $borrowing->borrowed_at
-                                    )->format('d/m/Y') }}
-
-                                </td>
-
-
-                                {{-- TANGGAL PENGEMBALIAN --}}
-
-                                <td>
-
-                                    {{ \Carbon\Carbon::parse(
-                                        $borrowing->due_at
-                                    )->format('d/m/Y') }}
-
-                                </td>
-
-
-                                {{-- STATUS --}}
-
-                                <td>
-
-                                    @if($displayStatus === 'dipinjam')
-
-                                        <span class="status-badge aktif">
-                                            Aktif
-                                        </span>
-
-                                    @elseif($displayStatus === 'terlambat')
-
-                                        <span class="status-badge terlambat">
-                                            Terlambat
-                                        </span>
-
-                                    @else
-
-                                        <span class="status-badge kembali">
-                                            Selesai
-                                        </span>
-
-                                    @endif
-
-                                </td>
-
-
-                                {{-- AKSI --}}
-
-                                <td>
-
-                                    @if($borrowing->status !== 'dikembalikan')
-
-    <div class="action-group">
-
-        {{-- SELESAI --}}
-
-        <form
-            action="{{ route('circulation.return', $borrowing) }}"
-            method="POST"
-        >
-
-            @csrf
-            @method('PATCH')
-
-            <button
-                type="submit"
-                class="btn-success"
-            >
-                Selesai
-            </button>
-
-        </form>
-
-
-        {{-- PERPANJANG --}}
-
-        {{-- PERPANJANG --}}
-
-<button
-    type="button"
-    class="btn-warning extend-btn"
-    data-id="{{ $borrowing->id }}"
->
-    Perpanjang
-</button>
-
-    </div>
-
-@else
-
-    <span class="completed-badge">
-        Selesai
-    </span>
-
-@endif
-
-                                </td>
-
-                            </tr>
-
-
-                        @empty
+                        <thead>
 
                             <tr>
 
-                                <td
-                                    colspan="6"
-                                    class="empty-state"
-                                >
-                                    Belum ada transaksi peminjaman.
-                                </td>
+                                <th>
+                                    ANGGOTA
+                                </th>
+
+                                <th>
+                                    BUKU
+                                </th>
+
+                                <th>
+                                    PINJAM
+                                </th>
+
+                                <th>
+                                    TANGGAL PENGEMBALIAN
+                                </th>
+
+                                <th>
+                                    STATUS
+                                </th>
+
+                                <th>
+                                    AKSI
+                                </th>
 
                             </tr>
 
-                        @endforelse
+                        </thead>
 
-                    </tbody>
 
-                </table>
+                        <tbody>
+
+                            @forelse($borrowings as $borrowing)
+
+                                @php
+
+                                    $isLate =
+                                        $borrowing->status === 'dipinjam' &&
+                                        now()
+                                            ->startOfDay()
+                                            ->gt(\Carbon\Carbon::parse($borrowing->due_at)->startOfDay());
+
+                                    $displayStatus = $isLate ? 'terlambat' : $borrowing->status;
+
+                                @endphp
+
+
+                                <tr class="borrowing-row">
+
+
+                                    {{-- ANGGOTA --}}
+
+                                    <td class="member-cell">
+
+                                        {{ $borrowing->member->name ?? '-' }}
+
+                                    </td>
+
+
+                                    {{-- BUKU --}}
+
+                                    <td class="book-cell">
+
+                                        @forelse($borrowing->details as $detail)
+                                            <span>
+                                                {{ $detail->book->title ?? '-' }}
+                                            </span>
+
+                                            @if (!$loop->last)
+                                                <br>
+                                            @endif
+
+                                        @empty
+
+                                            -
+                                        @endforelse
+
+                                    </td>
+
+
+                                    {{-- TANGGAL PINJAM --}}
+
+                                    <td>
+
+                                        {{ \Carbon\Carbon::parse($borrowing->borrowed_at)->format('d/m/Y') }}
+
+                                    </td>
+
+
+                                    {{-- TANGGAL PENGEMBALIAN --}}
+
+                                    <td>
+
+                                        {{ \Carbon\Carbon::parse($borrowing->due_at)->format('d/m/Y') }}
+
+                                    </td>
+
+
+                                    {{-- STATUS --}}
+
+                                    <td>
+
+                                        @if ($displayStatus === 'dipinjam')
+                                            <span class="status-badge aktif">
+                                                Aktif
+                                            </span>
+                                        @elseif($displayStatus === 'terlambat')
+                                            <span class="status-badge terlambat">
+                                                Terlambat
+                                            </span>
+                                        @else
+                                            <span class="status-badge kembali">
+                                                Selesai
+                                            </span>
+                                        @endif
+
+                                    </td>
+
+
+                                    {{-- AKSI --}}
+
+                                    <td>
+
+                                        @if ($borrowing->status !== 'dikembalikan')
+                                            <div class="action-group">
+
+                                                {{-- SELESAI --}}
+
+                                                <form action="{{ route('circulation.return', $borrowing) }}"
+                                                    method="POST">
+
+                                                    @csrf
+                                                    @method('PATCH')
+
+                                                    <button type="submit" class="btn-success">
+                                                        Selesai
+                                                    </button>
+
+                                                </form>
+
+
+                                                {{-- PERPANJANG --}}
+
+                                                {{-- PERPANJANG --}}
+
+                                                <button type="button" class="btn-warning extend-btn"
+                                                    data-id="{{ $borrowing->id }}">
+                                                    Perpanjang
+                                                </button>
+
+                                            </div>
+                                        @else
+                                            <span class="completed-badge">
+                                                Selesai
+                                            </span>
+                                        @endif
+
+                                    </td>
+
+                                </tr>
+
+
+                            @empty
+
+                                <tr>
+
+                                    <td colspan="6" class="empty-state">
+                                        Belum ada transaksi peminjaman.
+                                    </td>
+
+                                </tr>
+
+                            @endforelse
+
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             </div>
 
         </div>
 
-    </div>
-
-</section>
+    </section>
 
 
-{{-- =========================================================
+    {{-- =========================================================
      JAVASCRIPT
      SEARCH DAFTAR PEMINJAMAN
 ========================================================= --}}
 
-<script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
 
-document.addEventListener('DOMContentLoaded', function () {
+            const searchInput =
+                document.getElementById('borrowingSearch');
 
-    const searchInput =
-        document.getElementById('borrowingSearch');
-
-    const rows =
-        document.querySelectorAll(
-            '#borrowingTable tbody tr.borrowing-row'
-        );
-
-
-    if (searchInput) {
-
-        searchInput.addEventListener(
-            'input',
-            function () {
-
-                const keyword =
-                    this.value
-                        .toLowerCase()
-                        .trim();
+            const rows =
+                document.querySelectorAll(
+                    '#borrowingTable tbody tr.borrowing-row'
+                );
 
 
-                rows.forEach(function (row) {
+            if (searchInput) {
 
-                    const text =
-                        row.textContent
-                            .toLowerCase();
+                searchInput.addEventListener(
+                    'input',
+                    function() {
+
+                        const keyword =
+                            this.value
+                            .toLowerCase()
+                            .trim();
 
 
-                    if (text.includes(keyword)) {
+                        rows.forEach(function(row) {
 
-                        row.style.display = '';
+                            const text =
+                                row.textContent
+                                .toLowerCase();
 
-                    } else {
 
-                        row.style.display = 'none';
+                            if (text.includes(keyword)) {
+
+                                row.style.display = '';
+
+                            } else {
+
+                                row.style.display = 'none';
+
+                            }
+
+                        });
 
                     }
-
-                });
+                );
 
             }
-        );
 
-    }
+        });
+    </script>
 
-});
+    <div id="extendModal" class="extend-modal">
 
-</script>
+        <div class="extend-modal-content">
 
-<div id="extendModal" class="extend-modal">
+            <h4>Perpanjang Peminjaman</h4>
 
-    <div class="extend-modal-content">
+            <div class="extend-info">
 
-        <h4>Perpanjang Peminjaman</h4>
+                <p>
+                    <strong>Buku:</strong>
+                    <span id="extendBookTitle">-</span>
+                </p>
 
-        <form
-            id="extendForm"
-            method="POST"
-        >
-            @csrf
-            @method('PATCH')
-
-            <input
-                type="date"
-                name="due_at"
-                required
-            >
-
-            <div class="extend-actions">
-
-                <button
-                    type="button"
-                    id="closeExtendModal"
-                    class="btn-cancel"
-                >
-                    Batal
-                </button>
-
-                <button
-                    type="submit"
-                    class="btn-warning"
-                >
-                    Simpan
-                </button>
+                <p>
+                    <strong>Pengembalian saat ini:</strong>
+                    <span id="extendCurrentDue">-</span>
+                </p>
 
             </div>
 
-        </form>
+            <form id="extendForm" method="POST">
+
+                @csrf
+                @method('PATCH')
+
+                <div class="field">
+
+                    <label for="extension_days">
+                        Tambah Waktu Baca
+                    </label>
+
+                    <div class="extension-input">
+
+                        <input type="number" name="extension_days" id="extension_days" min="1" max="30"
+                            value="7" required>
+
+                        <span>hari</span>
+
+                    </div>
+
+                    <small>
+                        Maksimal perpanjangan 30 hari.
+                    </small>
+
+                </div>
+
+                <div class="extend-actions">
+
+                    <button type="button" id="closeExtendModal" class="btn-cancel">
+                        Batal
+                    </button>
+
+                    <button type="submit" class="btn-warning">
+                        Simpan
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
 
     </div>
 
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
 
-<script>
+            const modal = document.getElementById('extendModal');
+            const form = document.getElementById('extendForm');
+            const closeBtn = document.getElementById('closeExtendModal');
 
-document.addEventListener('DOMContentLoaded', function () {
+            const bookTitle = document.getElementById('extendBookTitle');
+            const currentDue = document.getElementById('extendCurrentDue');
+            const extensionDays = document.getElementById('extension_days');
 
-    const modal =
-        document.getElementById('extendModal');
 
-    const form =
-        document.getElementById('extendForm');
+            document.querySelectorAll('.extend-btn').forEach(button => {
 
-    const closeBtn =
-        document.getElementById('closeExtendModal');
+                button.addEventListener('click', function() {
 
-    document.querySelectorAll('.extend-btn')
-        .forEach(button => {
+                    const id = this.dataset.id;
 
-            button.addEventListener('click', function () {
+                    const row = this.closest('tr');
 
-                const id =
-                    this.dataset.id;
+                    const bookCell = row.querySelector('.book-cell');
 
-                form.action =
-                    '/circulation/' +
-                    id +
-                    '/extend';
+                    const dueCells = row.querySelectorAll('td');
 
-                modal.classList.add('show');
+                    const bookName =
+                        bookCell ?
+                        bookCell.innerText.trim() :
+                        '-';
+
+                    /*
+                     * Kolom:
+                     * 0 = Anggota
+                     * 1 = Buku
+                     * 2 = Pinjam
+                     * 3 = Tanggal Pengembalian
+                     */
+                    const dueDate =
+                        dueCells[3] ?
+                        dueCells[3].innerText.trim() :
+                        '-';
+
+
+                    bookTitle.textContent = bookName;
+                    currentDue.textContent = dueDate;
+
+                    extensionDays.value = 7;
+
+                    form.action =
+                        '/circulation/' +
+                        id +
+                        '/extend';
+
+                    modal.classList.add('show');
+
+                });
+
+            });
+
+
+            closeBtn.addEventListener('click', function() {
+
+                modal.classList.remove('show');
+
+            });
+
+
+            /*
+             * Klik area luar modal untuk menutup
+             */
+            modal.addEventListener('click', function(event) {
+
+                if (event.target === modal) {
+
+                    modal.classList.remove('show');
+
+                }
 
             });
 
         });
-
-    closeBtn.addEventListener('click', function () {
-
-        modal.classList.remove('show');
-
-    });
-
-});
-
-</script>
+    </script>
 
 @endsection

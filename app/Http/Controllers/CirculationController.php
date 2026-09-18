@@ -21,9 +21,7 @@ class CirculationController extends Controller
      */
     public function index(Request $request)
     {
-        $members = Member::where('status', 'aktif')
-            ->orderBy('name')
-            ->get();
+        $members = Member::orderBy('name')->get();
 
         /*
          * Semua buku tetap ditampilkan,

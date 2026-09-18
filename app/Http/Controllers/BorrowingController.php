@@ -103,7 +103,7 @@ class BorrowingController extends Controller
         */
 
         $borrowedSeats = Borrowing::whereDate('borrowed_at', $selectedDate)
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
             ->whereNotNull('seat_number')
             ->pluck('seat_number')
             ->toArray();
@@ -276,7 +276,7 @@ class BorrowingController extends Controller
 
             $seatAlreadyUsed = Borrowing::whereDate('borrowed_at', $validated['borrowed_at'])
                 ->where('seat_number', $validated['seat_number'])
-                ->where('status', 'dipinjam')
+                ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
                 ->exists();
 
             $seatReserved = Reservation::whereDate('reserved_at', $validated['borrowed_at'])
@@ -422,7 +422,7 @@ class BorrowingController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if ($borrowing->status === 'dipinjam') {
+            if (in_array($borrowing->status, ['dipinjam', 'diperpanjang', 'terlambat'], true)) {
                 foreach ($borrowing->details as $detail) {
                     $book = Book::lockForUpdate()->findOrFail($detail->book_id);
                     $book->increment('stok', $detail->quantity ?? 1);

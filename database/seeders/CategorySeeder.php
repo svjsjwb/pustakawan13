@@ -2,21 +2,28 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
+use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        Category::insert([
-            ['name' => 'Anak-Anak', 'level' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Remaja', 'level' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Dewasa', 'level' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Pendidikan', 'level' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Novel', 'level' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Teknologi', 'level' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Sejarah', 'level' => 1, 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        $categories = [
+            ['name' => 'Buku Pendidikan', 'level' => 1],
+            ['name' => 'Anak', 'level' => 1],
+            ['name' => 'Remaja', 'level' => 1],
+            ['name' => 'Dewasa', 'level' => 1],
+        ];
+
+        foreach ($categories as $category) {
+            Category::updateOrCreate(
+                ['name' => $category['name']],
+                [
+                    'parent_id' => null,
+                    'level' => $category['level'],
+                ]
+            );
+        }
     }
 }

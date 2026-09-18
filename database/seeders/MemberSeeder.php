@@ -16,7 +16,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'Editorial',
                 'phone'         => '081234567801',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
             [
@@ -25,7 +25,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'IT & Digital',
                 'phone'         => '081234567802',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
             [
@@ -34,7 +34,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'Pemasaran',
                 'phone'         => '081234567803',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
             [
@@ -43,7 +43,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'Produksi',
                 'phone'         => '081234567804',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
             [
@@ -52,7 +52,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'Keuangan',
                 'phone'         => '081234567805',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
             [
@@ -61,7 +61,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'SDM & Umum',
                 'phone'         => '081234567806',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
             [
@@ -70,7 +70,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'Editorial',
                 'phone'         => '081234567807',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
             [
@@ -79,7 +79,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'Logistik',
                 'phone'         => '081234567808',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
             [
@@ -88,7 +88,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'Desain Grafis',
                 'phone'         => '081234567809',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
             [
@@ -97,7 +97,7 @@ class MemberSeeder extends Seeder
                 'division'      => 'Percetakan',
                 'phone'         => '081234567810',
                 'address'       => 'Surakarta',
-                'status'        => 'aktif',
+                'status'        => 'nonaktif',
                 'registered_at' => now(),
             ],
         ];

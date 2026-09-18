@@ -11,44 +11,20 @@ class SubcategorySeeder extends Seeder
     public function run(): void
     {
         $data = [
-            'Anak' => [
-                'Cerita Anak',
-                'Komik Anak',
-                'Pendidikan Anak',
-                'Dongeng',
-            ],
-            'Remaja' => [
-                'Novel Remaja',
-                'Komik Remaja',
-                'Pengembangan Diri',
-                'Agama & Moral',
-            ],
-            'Dewasa' => [
-                'Novel Dewasa',
-                'Bisnis & Ekonomi',
-                'Teknologi & Sains',
-                'Sejarah & Budaya',
-            ],
-            'Pendidikan' => [
-                'Tingkat SD/MI',
-                'Tingkat SMP/MTs',
-                'Tingkat SMA/SMK',
-                'Perguruan Tinggi',
-            ],
+            'Buku Pendidikan' => ['SD', 'SMP', 'SMA'],
+            'Anak' => ['Fiksi', 'Non Fiksi'],
+            'Remaja' => ['Fiksi', 'Non Fiksi'],
+            'Dewasa' => ['Fiksi', 'Non Fiksi'],
         ];
 
         foreach ($data as $categoryName => $subcategories) {
-            $category = Category::where('name', $categoryName)->first();
+            $category = Category::where('name', $categoryName)->firstOrFail();
 
-            if ($category) {
-                foreach ($subcategories as $subName) {
-                    Subcategory::updateOrCreate(
-                        [
-                            'category_id' => $category->id,
-                            'name' => $subName,
-                        ]
-                    );
-                }
+            foreach ($subcategories as $name) {
+                Subcategory::updateOrCreate([
+                    'category_id' => $category->id,
+                    'name' => $name,
+                ]);
             }
         }
     }

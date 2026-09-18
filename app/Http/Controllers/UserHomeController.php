@@ -26,7 +26,7 @@ class UserHomeController extends Controller
 
         if ($member) {
             $activeLoansCount = Borrowing::where('member_id', $member->id)
-                ->where('status', 'dipinjam')
+                ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
                 ->count();
 
             $activeReservesCount = Reservation::where('member_id', $member->id)
@@ -123,8 +123,8 @@ class UserHomeController extends Controller
         }
 
         $books = Book::with('category')
-            ->whereRaw('LOWER(title) LIKE ?', [mb_strtolower($keyword) . '%'])
-            ->orderBy('title')
+            ->whereRaw('LOWER(judul_buku) LIKE ?', [mb_strtolower($keyword) . '%'])
+            ->orderBy('judul_buku')
             ->take(8)
             ->get()
             ->map(fn($book) => [

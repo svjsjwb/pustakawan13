@@ -16,6 +16,14 @@ class Book extends Model
         protected $fillable = [
         'judul_buku',
         'penulis',
+        'isbn',
+        'publisher',
+        'publication_year',
+        'edition',
+        'call_number',
+        'ddc',
+        'description',
+        'cover',
         'category_id',
         'subcategory_id',
         'main_category',
@@ -25,10 +33,8 @@ class Book extends Model
         'status',
         'no_iventaris',
         'kode_buku',
-        'ddc',
         'rak',
         'sku',
-        'edition',
     ];
 
     /*
@@ -39,7 +45,7 @@ class Book extends Model
 
     public function getTitleAttribute(): ?string
     {
-        return $this->attributes['title'] ?? $this->attributes['judul_buku'] ?? null;
+        return $this->attributes['judul_buku'] ?? null;
     }
 
     public function setTitleAttribute($value): void
@@ -49,7 +55,7 @@ class Book extends Model
 
     public function getJudulBukuAttribute(): ?string
     {
-        return $this->attributes['judul_buku'] ?? $this->attributes['title'] ?? null;
+        return $this->attributes['judul_buku'] ?? null;
     }
 
     public function setJudulBukuAttribute($value): void
@@ -59,7 +65,7 @@ class Book extends Model
 
     public function getAuthorAttribute(): ?string
     {
-        return $this->attributes['author'] ?? $this->attributes['penulis'] ?? null;
+        return $this->attributes['penulis'] ?? null;
     }
 
     public function setAuthorAttribute($value): void
@@ -69,7 +75,7 @@ class Book extends Model
 
     public function getPenulisAttribute(): ?string
     {
-        return $this->attributes['penulis'] ?? $this->attributes['author'] ?? null;
+        return $this->attributes['penulis'] ?? null;
     }
 
     public function setPenulisAttribute($value): void
@@ -79,7 +85,7 @@ class Book extends Model
 
     public function getStockAttribute(): int
     {
-        return (int) ($this->attributes['stock'] ?? $this->attributes['stok'] ?? 0);
+        return (int) ($this->attributes['stok'] ?? 0);
     }
 
     public function setStockAttribute($value): void
@@ -89,11 +95,7 @@ class Book extends Model
 
     public function getAvailableStockAttribute(): int
     {
-        $avail = (int) ($this->attributes['available_stock'] ?? 0);
-        if ($avail === 0 && isset($this->attributes['stok']) && (int)$this->attributes['stok'] > 0) {
-            return (int) $this->attributes['stok'];
-        }
-        return $avail;
+        return (int) ($this->attributes['stok'] ?? 0);
     }
 
     public function setAvailableStockAttribute($value): void
@@ -103,11 +105,7 @@ class Book extends Model
 
     public function getStokAttribute(): int
     {
-        $stok = (int) ($this->attributes['stok'] ?? 0);
-        if ($stok === 0 && isset($this->attributes['available_stock']) && (int)$this->attributes['available_stock'] > 0) {
-            return (int) $this->attributes['available_stock'];
-        }
-        return $stok;
+        return (int) ($this->attributes['stok'] ?? 0);
     }
 
     public function setStokAttribute($value): void

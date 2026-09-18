@@ -23,6 +23,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'phone',
+        'google_id',
         'theme',
         'layout_density',
         'allow_notifications',
@@ -117,7 +119,28 @@ class User extends Authenticatable
         return $this->hasOne(Member::class, 'email', 'email');
     }
 
+    /**
+     * Notifikasi aplikasi custom.
+     * Dipertahankan dengan nama notifications() agar controller/view lama
+     * tetap kompatibel dengan alur aplikasi yang sudah berjalan.
+     */
     public function notifications()
+    {
+        return $this->hasMany(AppNotification::class);
+    }
+
+    /**
+     * Notifikasi database Laravel pada tabel `notifications`.
+     */
+    public function databaseNotifications()
+    {
+        return $this->morphMany(
+            \Illuminate\Notifications\DatabaseNotification::class,
+            'notifiable'
+        );
+    }
+
+    public function appNotifications()
     {
         return $this->hasMany(AppNotification::class);
     }
@@ -138,7 +161,6 @@ class User extends Authenticatable
                         'name'     => $user->name,
                         'phone'    => $user->phone ?? '-',
                         'division' => 'Anggota',
-                        'status'   => 'aktif',
                     ]
                 );
             }
@@ -154,7 +176,6 @@ class User extends Authenticatable
                 'name'     => $this->name,
                 'phone'    => $this->phone ?? '-',
                 'division' => 'Anggota',
-                'status'   => 'aktif',
             ]
         );
     }

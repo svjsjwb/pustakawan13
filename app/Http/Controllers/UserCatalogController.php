@@ -82,7 +82,7 @@ class UserCatalogController extends Controller
         // ── Search ────────────────────────────────────────────
         $search = trim((string) $request->input('search', ''));
         if ($search !== '') {
-            $query->where('title', 'like', "{$search}%");
+            $query->where('judul_buku', 'like', "{$search}%");
         }
 
         // ── Filter Kategori Hierarkis (Database Riil) ──────────
@@ -129,8 +129,8 @@ class UserCatalogController extends Controller
         // ── Sorting ───────────────────────────────────────────
         $sort = $request->input('sort', 'terbaru');
         match ($sort) {
-            'az'      => $query->orderBy('title', 'asc'),
-            'za'      => $query->orderBy('title', 'desc'),
+            'az'      => $query->orderBy('judul_buku', 'asc'),
+            'za'      => $query->orderBy('judul_buku', 'desc'),
             'terlama' => $query->oldest(),
             default   => $query->latest(),
         };

@@ -47,8 +47,8 @@ class UserHistoryController extends Controller
             }
             if ($search !== '') {
                 $borrowingQuery->whereHas('details.book', fn($q) =>
-                    $q->where('title', 'like', "{$search}%")
-                      ->orWhere('author', 'like', "{$search}%")
+                    $q->where('judul_buku', 'like', "{$search}%")
+                      ->orWhere('penulis', 'like', "{$search}%")
                 );
             }
 
@@ -101,8 +101,8 @@ class UserHistoryController extends Controller
             }
             if ($search !== '') {
                 $reservationQuery->whereHas('book', fn($q) =>
-                    $q->where('title', 'like', "{$search}%")
-                      ->orWhere('author', 'like', "{$search}%")
+                    $q->where('judul_buku', 'like', "{$search}%")
+                      ->orWhere('penulis', 'like', "{$search}%")
                 );
             }
 

@@ -32,7 +32,7 @@ class UserProfileController extends Controller
         if (!$favoriteBook) {
             $favIds = session('user_favorites', []);
             if (!empty($favIds)) {
-                $favoriteBook = \App\Models\Book::whereIn('id', $favIds)->value('title');
+                $favoriteBook = \App\Models\Book::whereIn('id', $favIds)->value('judul_buku');
             }
         }
         $favoriteBook = $favoriteBook ?? 'Laskar Pelangi';

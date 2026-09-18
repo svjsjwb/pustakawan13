@@ -809,10 +809,6 @@
 
                         </div>
 
-                        <small class="form-help">
-                            Scan barcode ISBN pada buku untuk mengisi data buku secara otomatis.
-                        </small>
-
                         @error('isbn')
                             <span class="form-error">
                                 {{ $message }}

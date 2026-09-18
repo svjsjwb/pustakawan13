@@ -35,7 +35,7 @@ class UserReservationController extends Controller
             $search = trim((string) $request->input('search', ''));
             if ($search !== '') {
                 $query->whereHas('book', function ($q) use ($search) {
-                    $q->where('title', 'like', "{$search}%");
+                    $q->where('judul_buku', 'like', "{$search}%");
                 });
             }
 

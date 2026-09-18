@@ -23,6 +23,7 @@ class Borrowing extends Model
         'extension_reason',
         'extension_admin_notes',
         'seat_number',
+        'is_reminder_sent',
     ];
 
     protected $casts = [
@@ -58,6 +59,7 @@ class Borrowing extends Model
         return match ($this->status) {
             'menunggu'     => 'Menunggu Persetujuan',
             'dipinjam'     => 'Dipinjam',
+            'diperpanjang' => 'Diperpanjang',
             'ditolak'      => 'Ditolak',
             'dikembalikan' => 'Dikembalikan',
             'terlambat'    => 'Terlambat',

@@ -9,16 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('borrowings', function (Blueprint $table) {
-            $table->string('seat_number', 2)
-                ->nullable()
-                ->after('due_at');
+            $table->foreignId('reservation_id')->nullable()->constrained('reservations')->nullOnDelete()->after('book_id');
         });
     }
 
     public function down(): void
     {
         Schema::table('borrowings', function (Blueprint $table) {
-            $table->dropColumn('seat_number');
+            $table->dropForeign(['reservation_id']);
+            $table->dropColumn('reservation_id');
         });
     }
 };
