@@ -50,7 +50,7 @@ class BookController extends Controller
         $categories = Category::with('subcategories')
             ->whereIn('name', $categoryOrder)
             ->get()
-            ->sortBy(fn ($category) => array_search($category->name, $categoryOrder, true))
+            ->sortBy(fn($category) => array_search($category->name, $categoryOrder, true))
             ->values();
 
         $subcategoryData = $categories
@@ -87,14 +87,8 @@ class BookController extends Controller
     | STORE
     |--------------------------------------------------------------------------
     */
-public function isbnLookup(Request $request)
+    public function isbnLookup(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI & NORMALISASI ISBN
-        |--------------------------------------------------------------------------
-        */
-
         $request->validate([
             'isbn' => [
                 'required',
@@ -114,331 +108,136 @@ public function isbnLookup(Request $request)
             ], 422);
         }
 
-        $apiKey = config('services.google_books.key');
+        $isbnCandidates = [$isbn];
 
-        /*
-        |--------------------------------------------------------------------------
-        | HELPER RESPONSE
-        |--------------------------------------------------------------------------
-        */
+        if (
+            strlen($isbn) === 13 &&
+            in_array(substr($isbn, 0, 3), ['978', '979'], true)
+        ) {
+            $isbn10 = $this->convertIsbn13ToIsbn10($isbn);
 
-        $makeResponse = function (
-            ?string $title,
-            ?string $author,
-            ?string $publisher,
-            ?int $publicationYear,
-            ?string $ddc,
-            ?string $edition,
-            ?string $description,
-            ?string $cover,
-            ?string $sourceUrl,
-            ?string $foundIsbn = null
-        ) use ($isbn) {
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'isbn' => $foundIsbn ?: $isbn,
-                    'title' => $title,
-                    'author' => $author,
-                    'publisher' => $publisher,
-                    'publication_year' => $publicationYear,
-                    'ddc' => $ddc,
-                    'edition' => $edition,
-                    'description' => $description,
-                    'cover' => $cover,
-                    'source_url' => $sourceUrl,
-                ],
-            ]);
-        };
-
-        /*
-        |--------------------------------------------------------------------------
-        | 1. GOOGLE BOOKS
-        |--------------------------------------------------------------------------
-        |
-        | Coba beberapa bentuk pencarian karena ada ISBN yang:
-        | - tidak ditemukan oleh q=isbn:...
-        | - tetapi bisa ditemukan oleh pencarian ISBN biasa.
-        |
-        */
-
-        if ($apiKey) {
-            try {
-                $isbnCandidates = [$isbn];
-
-                if (
-                    strlen($isbn) === 13 &&
-                    (
-                        str_starts_with($isbn, '978') ||
-                        str_starts_with($isbn, '979')
-                    )
-                ) {
-                    $isbn10 = $this->convertIsbn13ToIsbn10($isbn);
-
-                    if ($isbn10) {
-                        $isbnCandidates[] = $isbn10;
-                    }
-                }
-
-                $isbnCandidates = array_values(array_unique($isbnCandidates));
-
-                foreach ($isbnCandidates as $candidate) {
-                    /*
-                    |--------------------------------------------------------------------------
-                    | SEARCH 1: ISBN FIELD
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $queries = [
-                        'isbn:' . $candidate,
-                        $candidate,
-                    ];
-
-                    foreach ($queries as $googleQuery) {
-                        $response = Http::timeout(10)
-                            ->acceptJson()
-                            ->get(
-                                'https://www.googleapis.com/books/v1/volumes',
-                                [
-                                    'q' => $googleQuery,
-                                    'maxResults' => 10,
-                                    'key' => $apiKey,
-                                ]
-                            );
-
-                        if (!$response->successful()) {
-                            \Log::warning(
-                                'Google Books API response error',
-                                [
-                                    'isbn' => $candidate,
-                                    'query' => $googleQuery,
-                                    'status' => $response->status(),
-                                ]
-                            );
-
-                            continue;
-                        }
-
-                        $items = $response->json('items', []);
-
-                        if (empty($items)) {
-                            continue;
-                        }
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | PILIH HASIL YANG ISBN-NYA COCOK
-                        |--------------------------------------------------------------------------
-                        |
-                        | Untuk pencarian biasa, Google Books bisa mengembalikan
-                        | buku yang tidak berkaitan. Jadi kita cek identifier dulu.
-                        |
-                        */
-
-                        $matchedItem = null;
-
-                        foreach ($items as $item) {
-                            $identifiers = collect(
-                                $item['volumeInfo']['industryIdentifiers'] ?? []
-                            )->pluck('identifier')
-                             ->map(fn ($value) => preg_replace('/[^0-9Xx]/', '', strtoupper($value)))
-                             ->all();
-
-                            if (
-                                in_array($candidate, $identifiers, true) ||
-                                in_array($isbn, $identifiers, true)
-                            ) {
-                                $matchedItem = $item;
-                                break;
-                            }
-                        }
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | KALAU SEARCH ISBN FIELD MENEMUKAN HASIL,
-                        | BOLEH GUNAKAN HASIL PERTAMA.
-                        |--------------------------------------------------------------------------
-                        */
-
-                        if (
-                            !$matchedItem &&
-                            str_starts_with($googleQuery, 'isbn:') &&
-                            isset($items[0]['volumeInfo'])
-                        ) {
-                            $matchedItem = $items[0];
-                        }
-
-                        if (!$matchedItem || !isset($matchedItem['volumeInfo'])) {
-                            continue;
-                        }
-
-                        $volume = $matchedItem['volumeInfo'];
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | PENULIS
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $authors = collect($volume['authors'] ?? [])
-                            ->filter()
-                            ->implode(', ');
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | PENERBIT
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $publisher = $volume['publisher'] ?? null;
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | TAHUN TERBIT
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $publicationYear = null;
-
-                        if (!empty($volume['publishedDate'])) {
-                            if (
-                                preg_match(
-                                    '/\b(18|19|20)\d{2}\b/',
-                                    $volume['publishedDate'],
-                                    $matches
-                                )
-                            ) {
-                                $publicationYear = (int) $matches[0];
-                            }
-                        }
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | ISBN HASIL API
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $foundIsbn = $isbn;
-
-                        $identifiers = collect(
-                            $volume['industryIdentifiers'] ?? []
-                        );
-
-                        $isbn13Data = $identifiers->firstWhere('type', 'ISBN_13');
-                        $isbn10Data = $identifiers->firstWhere('type', 'ISBN_10');
-
-                        if ($isbn13Data) {
-                            $foundIsbn = preg_replace(
-                                '/[^0-9Xx]/',
-                                '',
-                                strtoupper($isbn13Data['identifier'])
-                            );
-                        } elseif ($isbn10Data) {
-                            $foundIsbn = preg_replace(
-                                '/[^0-9Xx]/',
-                                '',
-                                strtoupper($isbn10Data['identifier'])
-                            );
-                        }
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | COVER
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $cover = null;
-
-                        if (!empty($volume['imageLinks'])) {
-                            $cover =
-                                $volume['imageLinks']['thumbnail']
-                                ?? $volume['imageLinks']['smallThumbnail']
-                                ?? null;
-
-                            if ($cover) {
-                                $cover = str_replace(
-                                    'http://',
-                                    'https://',
-                                    $cover
-                                );
-                            }
-                        }
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | RETURN GOOGLE BOOKS
-                        |--------------------------------------------------------------------------
-                        */
-
-                        return $makeResponse(
-                            $volume['title'] ?? null,
-                            $authors ?: null,
-                            $publisher,
-                            $publicationYear,
-                            null,
-                            null,
-                            $volume['description'] ?? null,
-                            $cover,
-                            $matchedItem['selfLink'] ?? null,
-                            $foundIsbn
-                        );
-                    }
-                }
-            } catch (\Throwable $e) {
-                \Log::warning(
-                    'Google Books ISBN Lookup Failed',
-                    [
-                        'isbn' => $isbn,
-                        'message' => $e->getMessage(),
-                    ]
-                );
+            if ($isbn10) {
+                $isbnCandidates[] = $isbn10;
             }
         }
 
+        $isbnCandidates = array_values(
+            array_unique($isbnCandidates)
+        );
+
+        $apiKey = config('services.google_books.key');
+
         /*
-        |--------------------------------------------------------------------------
-        | 2. OPEN LIBRARY
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | GOOGLE BOOKS
+    |--------------------------------------------------------------------------
+    */
 
         try {
-            $openLibrary = Http::timeout(10)
-                ->acceptJson()
-                ->withHeaders([
-                    'User-Agent' => 'Pustaka13 Library Management System',
-                ])
-                ->get(
-                    'https://openlibrary.org/api/books',
-                    [
-                        'bibkeys' => 'ISBN:' . $isbn,
-                        'jscmd' => 'data',
-                        'format' => 'json',
-                    ]
-                );
+            foreach ($isbnCandidates as $candidate) {
 
-            if ($openLibrary->successful()) {
-                $result = $openLibrary->json('ISBN:' . $isbn);
+                $queries = [
+                    'isbn:' . $candidate,
+                    $candidate,
+                ];
 
-                if ($result) {
-                    $title = $result['title'] ?? null;
+                foreach ($queries as $query) {
 
-                    $authors = collect($result['authors'] ?? [])
-                        ->pluck('name')
+                    $params = [
+                        'q' => $query,
+                        'maxResults' => 10,
+                    ];
+
+                    if ($apiKey) {
+                        $params['key'] = $apiKey;
+                    }
+
+                    $response = Http::timeout(8)
+                        ->acceptJson()
+                        ->get(
+                            'https://www.googleapis.com/books/v1/volumes',
+                            $params
+                        );
+
+                    if (!$response->successful()) {
+                        continue;
+                    }
+
+                    $items = $response->json('items', []);
+
+                    if (empty($items)) {
+                        continue;
+                    }
+
+                    /*
+                |--------------------------------------------------------------------------
+                | Cari item yang ISBN-nya benar-benar cocok
+                |--------------------------------------------------------------------------
+                */
+
+                    $matchedItem = null;
+
+                    foreach ($items as $item) {
+
+                        $identifiers = collect(
+                            $item['volumeInfo']['industryIdentifiers'] ?? []
+                        )
+                            ->pluck('identifier')
+                            ->map(function ($value) {
+                                return preg_replace(
+                                    '/[^0-9Xx]/',
+                                    '',
+                                    strtoupper($value)
+                                );
+                            })
+                            ->all();
+
+                        if (
+                            in_array($candidate, $identifiers, true) ||
+                            in_array($isbn, $identifiers, true)
+                        ) {
+                            $matchedItem = $item;
+                            break;
+                        }
+                    }
+
+                    /*
+                |--------------------------------------------------------------------------
+                | Untuk query ISBN spesifik, boleh gunakan hasil pertama
+                |--------------------------------------------------------------------------
+                */
+
+                    if (
+                        !$matchedItem &&
+                        str_starts_with($query, 'isbn:') &&
+                        isset($items[0]['volumeInfo'])
+                    ) {
+                        $matchedItem = $items[0];
+                    }
+
+                    if (
+                        !$matchedItem ||
+                        !isset($matchedItem['volumeInfo'])
+                    ) {
+                        continue;
+                    }
+
+                    $volume = $matchedItem['volumeInfo'];
+
+                    $authors = collect(
+                        $volume['authors'] ?? []
+                    )
                         ->filter()
                         ->implode(', ');
 
-                    $publisher = collect($result['publishers'] ?? [])
-                        ->pluck('name')
-                        ->filter()
-                        ->first();
-
                     $publicationYear = null;
 
-                    if (!empty($result['publish_date'])) {
+                    if (!empty($volume['publishedDate'])) {
+
                         if (
                             preg_match(
                                 '/\b(18|19|20)\d{2}\b/',
-                                $result['publish_date'],
+                                $volume['publishedDate'],
                                 $matches
                             )
                         ) {
@@ -446,35 +245,65 @@ public function isbnLookup(Request $request)
                         }
                     }
 
-                    $ddc = collect(
-                        $result['classifications']['dewey_decimal_class'] ?? []
-                    )
-                        ->filter()
-                        ->first();
+                    $cover = null;
 
-                    $cover =
-                        $result['cover']['medium']
-                        ?? $result['cover']['large']
-                        ?? $result['cover']['small']
-                        ?? null;
+                    if (!empty($volume['imageLinks'])) {
 
-                    return $makeResponse(
-                        $title,
-                        $authors ?: null,
-                        $publisher ?: null,
-                        $publicationYear,
-                        $ddc ?: null,
-                        null,
-                        null,
-                        $cover,
-                        $result['url'] ?? null,
-                        $isbn
-                    );
+                        $cover =
+                            $volume['imageLinks']['thumbnail']
+                            ?? $volume['imageLinks']['smallThumbnail']
+                            ?? null;
+
+                        if ($cover) {
+                            $cover = str_replace(
+                                'http://',
+                                'https://',
+                                $cover
+                            );
+                        }
+                    }
+
+                    return response()->json([
+                        'success' => true,
+
+                        'data' => [
+                            'isbn' => $isbn,
+
+                            'title' =>
+                            $volume['title']
+                                ?? null,
+
+                            'author' =>
+                            $authors ?: null,
+
+                            'publisher' =>
+                            $volume['publisher']
+                                ?? null,
+
+                            'publication_year' =>
+                            $publicationYear,
+
+                            'ddc' => null,
+
+                            'edition' => null,
+
+                            'description' =>
+                            $volume['description']
+                                ?? null,
+
+                            'cover' => $cover,
+
+                            'source_url' =>
+                            $matchedItem['selfLink']
+                                ?? null,
+                        ],
+                    ]);
                 }
             }
         } catch (\Throwable $e) {
+
             \Log::warning(
-                'Open Library ISBN Lookup Failed',
+                'Google Books ISBN Lookup Failed',
                 [
                     'isbn' => $isbn,
                     'message' => $e->getMessage(),
@@ -483,25 +312,29 @@ public function isbnLookup(Request $request)
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | 3. TIDAK DITEMUKAN
-        |--------------------------------------------------------------------------
-        |
-        | ISBN tetap dikembalikan supaya hasil scan tidak hilang.
-        |
-        */
+    |--------------------------------------------------------------------------
+    | GOOGLE BOOKS TIDAK MENEMUKAN DATA
+    |--------------------------------------------------------------------------
+    |
+    | Jangan bikin scanner menunggu Open Library karena dari environment
+    | Laravel kamu endpoint Open Library sedang timeout.
+    |
+    */
 
         return response()->json([
             'success' => false,
+
             'message' =>
-                'Data buku tidak ditemukan otomatis. ISBN sudah terisi, silakan lengkapi data buku secara manual.',
+            'ISBN berhasil dibaca, tetapi metadata buku tidak ditemukan otomatis. ISBN tetap diisi, silakan lengkapi data buku secara manual.',
+
             'data' => [
                 'isbn' => $isbn,
             ],
         ], 404);
     }
 
-private function convertIsbn13ToIsbn10(
+
+    private function convertIsbn13ToIsbn10(
         string $isbn13
     ): ?string {
 
@@ -571,11 +404,9 @@ private function convertIsbn13ToIsbn10(
         if ($remainder === 10) {
 
             $checkDigit = 'X';
-
         } elseif ($remainder === 11) {
 
             $checkDigit = '0';
-
         } else {
 
             $checkDigit =
@@ -729,7 +560,7 @@ private function convertIsbn13ToIsbn10(
         $categories = Category::with('subcategories')
             ->whereIn('name', $categoryOrder)
             ->get()
-            ->sortBy(fn ($category) => array_search($category->name, $categoryOrder, true))
+            ->sortBy(fn($category) => array_search($category->name, $categoryOrder, true))
             ->values();
 
         $subcategoryData = $categories
@@ -982,5 +813,4 @@ private function convertIsbn13ToIsbn10(
             ->route('books.index')
             ->with('success', 'Buku berhasil ditarik dari koleksi.');
     }
-
 }
