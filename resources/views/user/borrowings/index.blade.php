@@ -80,15 +80,6 @@
                     @endforeach
                 </div>
             @endif
-
-            @if($completedBorrowings->isNotEmpty())
-                <section class="loans-completed-section"><div class="loans-section-heading"><div><span class="loans-section-eyebrow">RIWAYAT PEMINJAMAN</span><h2>Riwayat Peminjaman</h2><p>Buku yang sudah dikembalikan dari koleksi Anda.</p></div></div><div class="loans-completed-list">
-                    @foreach($completedBorrowings as $completed)
-                        @php $book = $completed->details->first()?->book; @endphp
-                        <article class="loan-completed-card">@if($book?->cover)<img src="{{ asset('storage/'.$book->cover) }}" class="loan-cover" alt="{{ $book->title }}">@else<div class="loan-cover loan-cover-fallback">{{ strtoupper(substr($book?->title ?? 'B', 0, 1)) }}</div>@endif<div class="loan-book-info"><p class="loan-book-title">{{ $book?->title ?? 'Buku' }}</p><p class="loan-book-author">{{ $book?->author ?? '-' }}</p><span class="loan-category loan-category-completed">Selesai dikembalikan</span></div><div class="loan-completed-progress"><span>Progress pengembalian</span><strong>Sudah dikembalikan</strong><div><i></i></div></div><a href="{{ route('history') }}" class="loans-action-btn">👁 Lihat Detail</a></article>
-                    @endforeach
-                </div></section>
-            @endif
         </main>
 
         <aside class="loans-sidebar"><div class="loans-side-panel"><div class="loans-side-heading"><span>✦</span><h3>Aksi Cepat</h3></div><button type="button" class="loans-side-action loans-side-button" onclick="openQuickBorrowingExtend(event)">↻ <span>Perpanjang Peminjaman</span></button><a href="{{ route('history') }}" class="loans-side-action">◷ <span>Lihat Semua Peminjaman</span></a></div><div class="loans-side-panel loans-important"><div class="loans-side-heading"><span>ⓘ</span><h3>Informasi Penting</h3></div><ul><li>Maksimal peminjaman 5 buku per anggota</li><li>Lama peminjaman 14 hari</li><li>Dapat diperpanjang jika tidak ada antrian</li></ul></div></aside>
