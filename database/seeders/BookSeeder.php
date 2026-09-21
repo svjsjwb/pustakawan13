@@ -428,6 +428,55 @@ class BookSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
+        | BATAS JUMLAH BUKU PER SUBKATEGORI
+        |--------------------------------------------------------------------------
+        |
+        | Total = 170 judul.
+        |
+        | Buku Pendidikan:
+        |   SD         = 20
+        |   SMP        = 20
+        |   SMA        = 20
+        |
+        | Anak:
+        |   Fiksi      = 20
+        |   Non Fiksi  = 20
+        |
+        | Remaja:
+        |   Fiksi      = 20
+        |   Non Fiksi  = 20
+        |
+        | Dewasa:
+        |   Fiksi      = 15
+        |   Non Fiksi  = 15
+        |
+        */
+
+        $bookLimitBySubcategory = [
+            'Buku Pendidikan' => [
+                'SD' => 20,
+                'SMP' => 20,
+                'SMA' => 20,
+            ],
+
+            'Anak' => [
+                'Fiksi' => 20,
+                'Non Fiksi' => 20,
+            ],
+
+            'Remaja' => [
+                'Fiksi' => 20,
+                'Non Fiksi' => 20,
+            ],
+
+            'Dewasa' => [
+                'Fiksi' => 15,
+                'Non Fiksi' => 15,
+            ],
+        ];
+
+        /*
+        |--------------------------------------------------------------------------
         | INSERT / UPDATE BOOKS
         |--------------------------------------------------------------------------
         */
@@ -442,7 +491,9 @@ class BookSeeder extends Seeder
                     ->where('name', $subcategoryName)
                     ->firstOrFail();
 
-                foreach ($books as $book) {
+                $limit = $bookLimitBySubcategory[$categoryName][$subcategoryName] ?? 0;
+
+                foreach (array_slice($books, 0, $limit) as $book) {
                     [$title, $author, $publisher, $year, $callNumber] = $book;
 
                     $isbn = $this->demoIsbn($counter);
@@ -524,7 +575,11 @@ class BookSeeder extends Seeder
         $total = $counter - 1;
 
         $this->command->info(
-            "BookSeeder selesai. Total buku diproses: {$total}"
+            "BookSeeder selesai. Total buku diproses: {$total} judul."
+        );
+
+        $this->command->info(
+            "Target: 170 judul yang mencakup seluruh kategori dan subkategori."
         );
     }
 
