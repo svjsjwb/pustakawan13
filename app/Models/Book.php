@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\Borrowing;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +13,7 @@ class Book extends Model
 
     protected $table = 'books';
 
-        protected $fillable = [
+    protected $fillable = [
         'judul_buku',
         'penulis',
         'isbn',
@@ -137,6 +137,11 @@ class Book extends Model
     public function borrowingDetails(): HasMany
     {
         return $this->hasMany(BorrowingDetail::class);
+    }
+
+    public function borrowings()
+    {
+        return $this->hasMany(Borrowing::class, 'book_id');
     }
 
     public function copies(): HasMany

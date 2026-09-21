@@ -445,66 +445,66 @@
 
 
                 /*
- * =================================================
- * KOLEKSI
- * =================================================
- */
+                 * =================================================
+                 * KOLEKSI
+                 * =================================================
+                 */
 
-elseif (
-    str_contains(
-        $jenis,
-        'Koleksi'
-    )
-) {
+                elseif (
+                    str_contains(
+                        $jenis,
+                        'Koleksi'
+                    )
+                ) {
 
-    $jenis =
-        'Laporan Koleksi Buku Baru';
+                    $jenis =
+                        'Laporan Koleksi Buku Baru';
 
-    $type =
-        'collection';
+                    $type =
+                        'collection';
 
-    $category =
-        'Koleksi';
+                    $category =
+                        'Koleksi';
 
-    $icon =
-        '📚';
+                    $icon =
+                        '📚';
 
-    $valNum =
-        $totalBooks ?? 0;
+                    $valNum =
+                        $totalBooks ?? 0;
 
-    $badge =
-        number_format(
-            $valNum,
-            0,
-            ',',
-            '.'
-        )
-        . ' Buku';
+                    $badge =
+                        number_format(
+                            $valNum,
+                            0,
+                            ',',
+                            '.'
+                        )
+                        . ' Buku';
 
-    $badgeClass =
-        'neutral';
+                    $badgeClass =
+                        'neutral';
 
-    $value =
-        number_format(
-            $valNum,
-            0,
-            ',',
-            '.'
-        );
+                    $value =
+                        number_format(
+                            $valNum,
+                            0,
+                            ',',
+                            '.'
+                        );
 
-    $valueLabel =
-        'total koleksi';
+                    $valueLabel =
+                        'total koleksi';
 
-    $description =
-        'Rekap buku yang tercatat dalam periode laporan yang dipilih.';
+                    $description =
+                        'Rekap buku yang tercatat dalam periode laporan yang dipilih.';
 
-    $bars =
-        $collectionChartBars ?? [];
+                    $bars =
+                        $collectionChartBars ?? [];
 
-    $labels =
-        $collectionChartLabels ?? [];
+                    $labels =
+                        $collectionChartLabels ?? [];
 
-}
+                }
 
 
                 /*
@@ -574,6 +574,8 @@ elseif (
 
                 data-report="{{ $jenis }}"
 
+                data-type="{{ $type }}"
+
                 data-value="{{ $value }}"
 
                 data-value-label="{{ $valueLabel }}"
@@ -606,12 +608,15 @@ elseif (
                         </span>
 
                         <h3>
-    {{
-        str_contains($report['jenis'], 'Koleksi')
-            ? 'Laporan Koleksi Buku Baru'
-            : $report['jenis']
-    }}
-</h3>
+                            {{
+                                str_contains(
+                                    $report['jenis'],
+                                    'Koleksi'
+                                )
+                                    ? 'Laporan Koleksi Buku Baru'
+                                    : $report['jenis']
+                            }}
+                        </h3>
 
                     </div>
 
@@ -693,6 +698,73 @@ elseif (
                 </div>
 
 
+                {{-- =================================================
+                     COLLECTION SUMMARY
+                ================================================== --}}
+
+                @if ($type === 'collection')
+
+                    <div
+                        class="collection-summary"
+                        onclick="event.stopPropagation()"
+                    >
+
+                        <div class="collection-summary-item">
+
+                            <span>
+                                DITAMBAHKAN
+                            </span>
+
+                            <strong>
+                                {{ $collectionAddedCount ?? 0 }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="collection-summary-item">
+
+                            <span>
+                                DITARIK
+                            </span>
+
+                            <strong>
+                                {{ $collectionWithdrawnCount ?? 0 }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="collection-summary-item">
+
+                            <span>
+                                EKSEMPLAR DIHAPUS
+                            </span>
+
+                            <strong>
+                                {{ $collectionDeletedCopyCount ?? 0 }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="collection-summary-item">
+
+                            <span>
+                                RUSAK
+                            </span>
+
+                            <strong>
+                                {{ $collectionDamagedCount ?? 0 }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                @endif
+
+
                 {{-- FOOTER --}}
 
                 <div
@@ -714,34 +786,6 @@ elseif (
                         onclick="event.stopPropagation()"
                     >
 
-                        <a
-                            href="{{ route(
-                                'reports.edit',
-                                $report['id']
-                            ) }}"
-                            class="report-detail-btn"
-                        >
-                            Edit
-                        </a>
-
-
-                        <select
-                            class="report-format-select"
-                            aria-label="Pilih format laporan"
-                            onclick="event.stopPropagation()"
-                        >
-
-                            <option value="pdf">
-                                PDF
-                            </option>
-
-                            <option value="excel">
-                                Excel
-                            </option>
-
-                        </select>
-
-
                         <div
                             class="report-download"
                             onclick="event.stopPropagation()"
@@ -752,7 +796,8 @@ elseif (
                                 class="report-download-btn"
                                 onclick="downloadReport(this)"
                             >
-                                Unduh
+                                ↓
+                                Unduh PDF
                             </button>
 
                         </div>
@@ -1171,6 +1216,7 @@ document.addEventListener(
              * Senin = 0
              * Minggu = 6
              */
+
             let startDay =
                 firstDay.getDay() - 1;
 
@@ -1932,5 +1978,1044 @@ document.addEventListener(
 
 </script>
 
+
+{{-- =========================================================
+     REPORT DATA FOR PDF
+========================================================= --}}
+
+<script
+    id="borrowingsReportData"
+    type="application/json"
+>{!! json_encode($borrowingsExportData ?? []) !!}</script>
+
+
+<script
+    id="activeMembersReportData"
+    type="application/json"
+>{!! json_encode($activeMembersExportData ?? []) !!}</script>
+
+
+<script
+    id="collectionReportData"
+    type="application/json"
+>{!! json_encode($collectionExportData ?? []) !!}</script>
+
+
+{{-- =========================================================
+     PDF DOWNLOAD LIBRARIES
+========================================================= --}}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+{{-- =========================================================
+     PDF DOWNLOAD
+========================================================= --}}
+
+<script>
+
+function downloadReport(button) {
+
+    const card =
+        button.closest(
+            '.report-card'
+        );
+
+
+    if (!card) {
+        return;
+    }
+
+
+    const reportName =
+        card.dataset.report ||
+        'Laporan Perpustakaan';
+
+
+    const reportType =
+        card.dataset.type ||
+        'normal';
+
+
+    const period =
+        card.dataset.period ||
+        'Periode Terpilih';
+
+
+    const statValue =
+        card.dataset.value ||
+        '0';
+
+
+    const statLabel =
+        card.dataset.valueLabel ||
+        'data';
+
+
+    /*
+     * ========================================================
+     * DATA
+     * ========================================================
+     */
+
+    let tableData = [];
+
+
+    if (
+        reportType === 'collection'
+    ) {
+
+        const collectionScript =
+            document.getElementById(
+                'collectionReportData'
+            );
+
+
+        if (collectionScript) {
+
+            try {
+
+                tableData =
+                    JSON.parse(
+                        collectionScript.textContent
+                    );
+
+            } catch (error) {
+
+                console.error(
+                    'Gagal membaca data koleksi:',
+                    error
+                );
+
+                tableData = [];
+
+            }
+
+        }
+
+    }
+
+
+    else if (
+        reportType === 'member'
+    ) {
+
+        const memberScript =
+            document.getElementById(
+                'activeMembersReportData'
+            );
+
+
+        if (memberScript) {
+
+            try {
+
+                tableData =
+                    JSON.parse(
+                        memberScript.textContent
+                    );
+
+            } catch (error) {
+
+                console.error(
+                    'Gagal membaca data anggota aktif:',
+                    error
+                );
+
+                tableData = [];
+
+            }
+
+        }
+
+    }
+
+
+    else {
+
+        const dataScript =
+            document.getElementById(
+                'borrowingsReportData'
+            );
+
+
+        if (dataScript) {
+
+            try {
+
+                tableData =
+                    JSON.parse(
+                        dataScript.textContent
+                    );
+
+            } catch (error) {
+
+                console.error(
+                    'Gagal membaca data laporan:',
+                    error
+                );
+
+                tableData = [];
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * ========================================================
+     * TANGGAL
+     * ========================================================
+     */
+
+    const startInput =
+        document.getElementById(
+            'start_date'
+        );
+
+
+    const endInput =
+        document.getElementById(
+            'end_date'
+        );
+
+
+    const startDate =
+        startInput?.value ||
+        'start';
+
+
+    const endDate =
+        endInput?.value ||
+        'end';
+
+
+    /*
+     * ========================================================
+     * FILE NAME
+     * ========================================================
+     */
+
+    const safeName =
+        reportName.replace(
+            /[^a-zA-Z0-9_-]/g,
+            '_'
+        );
+
+
+    const fileName =
+        `${safeName}_${startDate}_sd_${endDate}.pdf`;
+
+
+    /*
+     * ========================================================
+     * CEK JSPDF
+     * ========================================================
+     */
+
+    if (
+        !window.jspdf ||
+        !window.jspdf.jsPDF
+    ) {
+
+        if (typeof Swal !== 'undefined') {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'PDF Tidak Siap',
+                text: 'Library PDF belum berhasil dimuat. Silakan refresh halaman.',
+                confirmButtonColor: '#287b7b'
+            });
+
+        } else {
+
+            alert(
+                'Library PDF belum berhasil dimuat. Silakan refresh halaman.'
+            );
+
+        }
+
+        return;
+    }
+
+
+    /*
+     * ========================================================
+     * BUAT PDF
+     * ========================================================
+     */
+
+    try {
+
+        const {
+            jsPDF
+        } =
+            window.jspdf;
+
+
+        const doc =
+            new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+
+        /*
+         * ====================================================
+         * HEADER
+         * ====================================================
+         */
+
+        doc.setFillColor(
+            40,
+            123,
+            123
+        );
+
+
+        doc.rect(
+            0,
+            0,
+            210,
+            24,
+            'F'
+        );
+
+
+        doc.setTextColor(
+            255,
+            255,
+            255
+        );
+
+
+        doc.setFont(
+            'helvetica',
+            'bold'
+        );
+
+
+        doc.setFontSize(
+            14
+        );
+
+
+        doc.text(
+            'PERPUSTAKAAN TIGA SERANGKAI',
+            14,
+            11
+        );
+
+
+        doc.setFont(
+            'helvetica',
+            'normal'
+        );
+
+
+        doc.setFontSize(
+            9
+        );
+
+
+        doc.text(
+            'Sistem Informasi Manajemen Laporan Perpustakaan',
+            14,
+            18
+        );
+
+
+        /*
+         * ====================================================
+         * JUDUL
+         * ====================================================
+         */
+
+        doc.setTextColor(
+            23,
+            47,
+            47
+        );
+
+
+        doc.setFont(
+            'helvetica',
+            'bold'
+        );
+
+
+        doc.setFontSize(
+            16
+        );
+
+
+        doc.text(
+            reportName.toUpperCase(),
+            14,
+            35
+        );
+
+
+        /*
+         * ====================================================
+         * PERIODE
+         * ====================================================
+         */
+
+        doc.setFont(
+            'helvetica',
+            'normal'
+        );
+
+
+        doc.setFontSize(
+            10
+        );
+
+
+        doc.setTextColor(
+            80,
+            99,
+            99
+        );
+
+
+        doc.text(
+            `Periode: ${period}`,
+            14,
+            42
+        );
+
+
+        /*
+         * ====================================================
+         * TANGGAL UNDUH
+         * ====================================================
+         */
+
+        const downloadDate =
+            new Date().toLocaleDateString(
+                'id-ID',
+                {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                }
+            );
+
+
+        doc.text(
+            `Tanggal Unduh: ${downloadDate}`,
+            14,
+            47
+        );
+
+
+        /*
+         * ====================================================
+         * SUMMARY
+         * ====================================================
+         */
+
+        doc.setFillColor(
+            243,
+            248,
+            248
+        );
+
+
+        doc.roundedRect(
+            14,
+            52,
+            182,
+            14,
+            3,
+            3,
+            'F'
+        );
+
+
+        doc.setDrawColor(
+            210,
+            230,
+            230
+        );
+
+
+        doc.roundedRect(
+            14,
+            52,
+            182,
+            14,
+            3,
+            3,
+            'S'
+        );
+
+
+        doc.setTextColor(
+            23,
+            47,
+            47
+        );
+
+
+        doc.setFont(
+            'helvetica',
+            'bold'
+        );
+
+
+        doc.setFontSize(
+            12
+        );
+
+
+        doc.text(
+            String(statValue),
+            20,
+            61
+        );
+
+
+        doc.setFont(
+            'helvetica',
+            'normal'
+        );
+
+
+        doc.setFontSize(
+            9
+        );
+
+
+        doc.text(
+            String(statLabel),
+            40,
+            61
+        );
+
+
+        /*
+         * ====================================================
+         * TABEL KOLEKSI
+         * ====================================================
+         */
+
+        if (
+            reportType === 'collection' &&
+            Array.isArray(tableData) &&
+            tableData.length > 0 &&
+            typeof doc.autoTable === 'function'
+        ) {
+
+            const rows =
+                tableData.map(
+                    (row, index) => [
+
+                        index + 1,
+
+                        row.tanggal ?? '-',
+
+                        row.jenis_perubahan ?? '-',
+
+                        row.judul_buku ?? '-',
+
+                        row.eksemplar_jumlah ?? '-',
+
+                        row.alasan_keterangan ?? '-'
+
+                    ]
+                );
+
+
+            doc.autoTable({
+
+                startY: 72,
+
+                head: [[
+
+                    'NO',
+
+                    'TANGGAL',
+
+                    'JENIS PERUBAHAN',
+
+                    'JUDUL BUKU',
+
+                    'EKSEMPLAR / JUMLAH',
+
+                    'ALASAN / KETERANGAN'
+
+                ]],
+
+                body: rows,
+
+                theme: 'grid',
+
+                styles: {
+
+                    fontSize: 7.5,
+
+                    cellPadding: 2.5
+
+                },
+
+                headStyles: {
+
+                    fontStyle: 'bold'
+
+                },
+
+                columnStyles: {
+
+                    0: {
+
+                        cellWidth: 10,
+
+                        halign: 'center'
+
+                    },
+
+                    1: {
+
+                        cellWidth: 25
+
+                    },
+
+                    2: {
+
+                        cellWidth: 32
+
+                    },
+
+                    3: {
+
+                        cellWidth: 42
+
+                    },
+
+                    4: {
+
+                        cellWidth: 30
+
+                    },
+
+                    5: {
+
+                        cellWidth: 43
+
+                    }
+
+                },
+
+                margin: {
+
+                    left: 14,
+
+                    right: 14
+
+                }
+
+            });
+
+        }
+
+
+        /*
+         * ====================================================
+         * TABEL ANGGOTA AKTIF
+         * ====================================================
+         */
+
+        else if (
+
+            reportType === 'member' &&
+
+            Array.isArray(tableData) &&
+
+            tableData.length > 0 &&
+
+            typeof doc.autoTable === 'function'
+
+        ) {
+
+            const rows =
+                tableData.map(
+                    row => [
+
+                        row.no ?? '-',
+
+                        row.member_name ?? '-',
+
+                        row.member_code ?? '-',
+
+                        row.activity ?? '-',
+
+                        row.books ?? '-',
+
+                        row.date ?? '-',
+
+                        row.status ?? '-'
+
+                    ]
+                );
+
+
+            doc.autoTable({
+
+                startY: 72,
+
+                head: [[
+
+                    'NO',
+
+                    'NAMA ANGGOTA',
+
+                    'KODE ANGGOTA',
+
+                    'AKTIVITAS',
+
+                    'BUKU',
+
+                    'TANGGAL',
+
+                    'STATUS'
+
+                ]],
+
+                body: rows,
+
+                theme: 'grid',
+
+                styles: {
+
+                    fontSize: 7.5,
+
+                    cellPadding: 2.5
+
+                },
+
+                headStyles: {
+
+                    fontStyle: 'bold'
+
+                },
+
+                columnStyles: {
+
+                    0: {
+
+                        cellWidth: 10
+
+                    },
+
+                    1: {
+
+                        cellWidth: 34
+
+                    },
+
+                    2: {
+
+                        cellWidth: 25
+
+                    },
+
+                    3: {
+
+                        cellWidth: 25
+
+                    },
+
+                    4: {
+
+                        cellWidth: 42
+
+                    },
+
+                    5: {
+
+                        cellWidth: 22
+
+                    },
+
+                    6: {
+
+                        cellWidth: 24
+
+                    }
+
+                },
+
+                margin: {
+
+                    left: 14,
+
+                    right: 14
+
+                }
+
+            });
+
+        }
+
+
+        /*
+         * ====================================================
+         * TABEL PEMINJAMAN
+         * ====================================================
+         */
+
+        else if (
+
+            Array.isArray(tableData) &&
+
+            tableData.length > 0 &&
+
+            typeof doc.autoTable === 'function'
+
+        ) {
+
+            const firstRow =
+                tableData[0];
+
+
+            const columns =
+                Object.keys(
+                    firstRow
+                );
+
+
+            const headers =
+                columns.map(
+                    column =>
+                        column
+                            .replace(
+                                /_/g,
+                                ' '
+                            )
+                            .toUpperCase()
+                );
+
+
+            const rows =
+                tableData.map(
+                    row =>
+                        columns.map(
+                            column =>
+                                row[column] ?? '-'
+                        )
+                );
+
+
+            doc.autoTable({
+
+                startY: 72,
+
+                head: [
+                    headers
+                ],
+
+                body: rows,
+
+                theme: 'grid',
+
+                styles: {
+
+                    fontSize: 8,
+
+                    cellPadding: 3
+
+                },
+
+                headStyles: {
+
+                    fontStyle: 'bold'
+
+                },
+
+                margin: {
+
+                    left: 14,
+
+                    right: 14
+
+                }
+
+            });
+
+        }
+
+
+        /*
+         * ====================================================
+         * EMPTY
+         * ====================================================
+         */
+
+        else {
+
+            doc.setTextColor(
+                80,
+                99,
+                99
+            );
+
+
+            doc.setFont(
+                'helvetica',
+                'normal'
+            );
+
+
+            doc.setFontSize(
+                10
+            );
+
+
+            doc.text(
+                'Tidak ada data detail untuk periode yang dipilih.',
+                14,
+                78
+            );
+
+        }
+
+
+        /*
+         * ====================================================
+         * FOOTER
+         * ====================================================
+         */
+
+        const pageCount =
+            doc.internal.getNumberOfPages();
+
+
+        for (
+            let page = 1;
+            page <= pageCount;
+            page++
+        ) {
+
+            doc.setPage(
+                page
+            );
+
+
+            const pageHeight =
+                doc.internal
+                    .pageSize
+                    .height;
+
+
+            doc.setFontSize(
+                8
+            );
+
+
+            doc.setTextColor(
+                120,
+                120,
+                120
+            );
+
+
+            doc.text(
+                `Halaman ${page} dari ${pageCount}`,
+                14,
+                pageHeight - 10
+            );
+
+
+            doc.text(
+                'Perpustakaan Tiga Serangkai',
+                196,
+                pageHeight - 10,
+                {
+                    align: 'right'
+                }
+            );
+
+        }
+
+
+        /*
+         * ====================================================
+         * SAVE
+         * ====================================================
+         */
+
+        doc.save(
+            fileName
+        );
+
+
+        if (typeof Swal !== 'undefined') {
+
+            Swal.fire({
+
+                icon: 'success',
+
+                title: 'Unduh Selesai!',
+
+                text: 'Laporan PDF berhasil diunduh.',
+
+                confirmButtonText: 'Tutup',
+
+                confirmButtonColor: '#287b7b',
+
+                timer: 3000,
+
+                timerProgressBar: true
+
+            });
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            'Gagal membuat PDF:',
+            error
+        );
+
+
+        if (typeof Swal !== 'undefined') {
+
+            Swal.fire({
+
+                icon: 'error',
+
+                title: 'Gagal Membuat PDF',
+
+                text: 'Laporan PDF gagal dibuat. Silakan coba lagi.',
+
+                confirmButtonColor: '#287b7b'
+
+            });
+
+        } else {
+
+            alert(
+                'Laporan PDF gagal dibuat. Silakan coba lagi.'
+            );
+
+        }
+
+    }
+
+}
+
+</script>
 
 @endsection

@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Borrowing;
 use App\Models\Reservation;
 use App\Models\Member;
+use App\Services\RecommendationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -83,6 +84,10 @@ class UserHomeController extends Controller
             ->take(10)
             ->get();
 
+        // Rekomendasi buku untuk user
+        $recommendations = app(RecommendationService::class)
+            ->getForUser($user, 8);
+
         // Kategori
         $categoryOrder = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
         $categories    = Category::whereIn('name', $categoryOrder)
@@ -102,6 +107,7 @@ class UserHomeController extends Controller
 
         return view('user.home', compact(
             'popularBooks',
+            'recommendations',
             'categories',
             'user',
             'member',

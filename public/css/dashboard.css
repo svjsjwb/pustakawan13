@@ -37,74 +37,162 @@
 
 
 /* =========================================================
-   HEADER
+   HERO DASHBOARD
 ========================================================= */
 
-.dashboard-header {
+.dashboard-hero {
 
     position: relative;
 
+    width: 100%;
+
+    min-height: 190px;
+
     margin-bottom: 27px;
 
-}
+    padding: 38px 44px;
 
+    display: flex;
 
-.dashboard-welcome {
+    align-items: center;
 
-    margin-bottom: 4px;
+    box-sizing: border-box;
 
-    color: #277b7b;
+    overflow: hidden;
 
-    font-size: 14px;
+    background:
+        linear-gradient(
+            110deg,
+            #eef8f8 0%,
+            #ffffff 65%
+        );
 
-    font-weight: 600;
+    border: 1px solid #d5e7e7;
 
-}
-
-
-.dashboard-welcome span {
-
-    font-size: 15px;
-
-}
-
-
-.dashboard-header span {
-
-    display: block;
-
-    margin-bottom: 2px;
+    border-radius: 16px;
 
 }
 
 
-.dashboard-header h1 {
+/* =========================================================
+   HERO DECORATION
+========================================================= */
 
-    margin: 0;
+.dashboard-hero::after {
 
-    color: #101820;
+    content: "";
 
-    font-size: 31px;
+    position: absolute;
+
+    width: 220px;
+
+    height: 220px;
+
+    right: -70px;
+
+    top: -110px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(40, 123, 123, 0.07);
+
+    pointer-events: none;
+
+}
+
+
+/* =========================================================
+   HERO CONTENT
+========================================================= */
+
+.dashboard-hero-content {
+
+    position: relative;
+
+    z-index: 1;
+
+    max-width: 850px;
+
+}
+
+
+/* =========================================================
+   HERO LABEL
+========================================================= */
+
+.dashboard-hero-label {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 12px;
+
+    color: #287c7c;
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+}
+
+
+.dashboard-hero-dot {
+
+    width: 10px;
+
+    height: 10px;
+
+    flex: 0 0 auto;
+
+    border-radius: 50%;
+
+    background: #287c7c;
+
+}
+
+
+/* =========================================================
+   HERO TITLE
+========================================================= */
+
+.dashboard-hero h1 {
+
+    margin: 0 0 10px;
+
+    color: #071b2c;
+
+    font-size: 38px;
 
     line-height: 1.15;
 
-    font-weight: 750;
+    font-weight: 800;
 
-    letter-spacing: -0.7px;
-
-}
-
-
-.dashboard-header p {
-
-    margin: 6px 0 0;
-
-    color: #697575;
-
-    font-size: 13px;
+    letter-spacing: -0.8px;
 
 }
 
+
+/* =========================================================
+   HERO DESCRIPTION
+========================================================= */
+
+.dashboard-hero p {
+
+    max-width: 850px;
+
+    margin: 0;
+
+    color: #35566b;
+
+    font-size: 16px;
+
+    line-height: 1.65;
+
+}
 
 /* =========================================================
    STATISTICS
@@ -1412,6 +1500,37 @@
 
 @media (max-width: 1000px) {
 
+    .dashboard-hero {
+
+        min-height: auto;
+
+        padding: 30px;
+
+    }
+
+
+    .dashboard-hero h1 {
+
+        font-size: 30px;
+
+    }
+
+
+    .dashboard-hero p {
+
+        font-size: 14px;
+
+        line-height: 1.55;
+
+    }
+
+
+    .dashboard-hero-label {
+
+        font-size: 15px;
+
+    }
+
     .dashboard-stats {
 
         grid-template-columns:
@@ -1533,5 +1652,776 @@
     background: transparent;
     color: inherit;
 }
+
+}
+
+
+/* =====================================================
+   ACTIVITY PANEL ACTIONS
+===================================================== */
+
+.activity-panel-actions {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    margin: 0 auto 10px;
+
+    width: 100%;
+
+    padding: 0 15px;
+
+    box-sizing: border-box;
+}
+
+
+/* Kedua tombol */
+
+.activity-panel-actions .panel-link {
+    margin: 0;
+
+    flex: 0 0 auto;
+}
+
+
+/* =====================================================
+   LIHAT SEMUA AKTIVITAS
+===================================================== */
+
+.activity-see-all {
+    background: #ffffff;
+
+    border: 1px solid #287b7b;
+
+    color: #287b7b;
+
+    box-shadow: none;
+}
+
+
+.activity-see-all:hover {
+    background: #287b7b;
+
+    border-color: #287b7b;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 3px 8px
+        rgba(40, 123, 123, 0.18);
+
+    transform: translateY(-1px);
+}
+
+
+.activity-edit-select:focus {
+
+    outline: none;
+
+    border-color: #287b7b;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(40, 123, 123, 0.12);
+
+}
+
+
+.activity-edit-btn:hover {
+
+    background: #287b7b;
+
+    border-color: #287b7b;
+
+    color: #ffffff;
+
+}
+
+
+/* =========================================================
+   ACTIVITY MODAL
+========================================================= */
+
+.activity-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 9999;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+}
+
+
+.activity-modal.open {
+
+    display: flex;
+
+}
+
+
+.activity-modal-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        rgba(13, 34, 34, 0.45);
+
+}
+
+
+.activity-modal-box {
+
+    position: relative;
+
+    width: 100%;
+
+    max-width: 460px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2ebeb;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 20px 45px
+        rgba(13, 34, 34, 0.25);
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   MODAL HEADER
+========================================================= */
+
+.activity-modal-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 17px 20px 12px;
+
+    border-bottom:
+        1px solid #edf1f1;
+
+}
+
+
+.activity-modal-header h3 {
+
+    margin: 0;
+
+    color: #182828;
+
+    font-size: 15px;
+
+    font-weight: 750;
+
+}
+
+
+.activity-modal-close {
+
+    width: 28px;
+
+    height: 28px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #f2f5f5;
+
+    color: #546262;
+
+    font-size: 18px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+}
+
+
+.activity-modal-close:hover {
+
+    background: #ffe2e2;
+
+    color: #c35d5d;
+
+}
+
+
+/* =========================================================
+   ACTIVITY FORM
+========================================================= */
+
+.activity-modal-box form {
+
+    padding: 16px 18px 18px;
+
+}
+
+
+.activity-form-field {
+
+    margin-bottom: 14px;
+
+}
+
+
+.activity-form-field label {
+
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #344444;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+
+.activity-form-input {
+
+    width: 100%;
+
+    padding: 9px 11px;
+
+    border: 1px solid #d7e2e2;
+
+    border-radius: 8px;
+
+    background: #fbfcfc;
+
+    color: #253333;
+
+    font-size: 12px;
+
+    font-family: inherit;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+
+}
+
+
+.activity-form-input:focus {
+
+    outline: none;
+
+    border-color: #287b7b;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(40, 123, 123, 0.12);
+
+}
+
+
+textarea.activity-form-input {
+
+    resize: vertical;
+
+    min-height: 84px;
+
+}
+
+
+.activity-form-error {
+
+    display: block;
+
+    margin-top: 6px;
+
+    color: #c35d5d;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   MODAL ACTIONS
+========================================================= */
+
+.activity-modal-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 6px;
+
+}
+
+
+.activity-btn-cancel,
+.activity-btn-simpan {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 9px 18px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        border-color 0.15s ease;
+
+}
+
+
+.activity-btn-cancel {
+
+    border: 1px solid #d4dfdf;
+
+    background: #ffffff;
+
+    color: #566464;
+
+}
+
+
+.activity-btn-cancel:hover {
+
+    background: #f2f5f5;
+
+    border-color: #bcd1d1;
+
+}
+
+
+.activity-btn-simpan {
+
+    border: 1px solid #287b7b;
+
+    background: #287b7b;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 3px 8px
+        rgba(40, 123, 123, 0.18);
+
+}
+
+
+.activity-btn-simpan:hover {
+
+    background: #216969;
+
+    border-color: #216969;
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+
+.activity-btn-hapus,
+.activity-btn-pin {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 8px 16px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        border-color 0.15s ease;
+
+}
+
+
+.activity-btn-hapus {
+
+    border: 1px solid #e3b4b4;
+
+    background: #fff5f5;
+
+    color: #c35d5d;
+
+}
+
+
+.activity-btn-hapus:hover {
+
+    background: #ffe2e2;
+
+    border-color: #d99a9a;
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+.activity-btn-pin {
+
+    border: 1px solid #d4c9a8;
+
+    background: #fffaf0;
+
+    color: #a07c1f;
+
+}
+
+
+.activity-btn-pin:hover {
+
+    background: #fff3d6;
+
+    border-color: #cbb98a;
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* =====================================================
+   ACTIVITY MENU - THREE DOT
+===================================================== */
+
+.activity-item {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 9px 0;
+
+    border-bottom: 1px solid #edf1f1;
+
+    transition: transform 0.2s ease;
+}
+
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+
+/* =====================================================
+   MENU WRAPPER
+===================================================== */
+
+.activity-menu-wrapper {
+    position: absolute;
+
+    top: 50%;
+    right: 0;
+
+    transform: translateY(-50%);
+
+    z-index: 30;
+
+    display: flex;
+    align-items: center;
+}
+
+
+/* =====================================================
+   SATU TOMBOL TITIK TIGA
+===================================================== */
+
+.activity-menu-btn {
+    width: 30px;
+    height: 30px;
+
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+    gap: 3px;
+
+    border: 1px solid #dcebea;
+    border-radius: 50%;
+
+    background: #f7fbfb;
+    color: #287f80;
+
+    cursor: pointer;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateX(7px);
+
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease,
+        transform 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.activity-menu-btn span {
+    width: 3px;
+    height: 3px;
+
+    display: block;
+
+    border-radius: 50%;
+
+    background: currentColor;
+}
+
+
+/* =====================================================
+   HOVER
+   Aktivitas geser sedikit ke kiri.
+   Tombol titik tiga muncul di area waktu.
+===================================================== */
+
+.activity-item:has(.activity-menu-wrapper):hover {
+    transform: translateX(-5px);
+}
+
+
+.activity-item:hover .activity-menu-btn,
+.activity-menu-wrapper.menu-open .activity-menu-btn {
+    opacity: 1;
+    visibility: visible;
+
+    transform: translateX(0);
+}
+
+
+.activity-menu-btn:hover {
+    background: #e9f5f4;
+    border-color: #c8e2e0;
+}
+
+
+/* =====================================================
+   DROPDOWN
+===================================================== */
+
+.activity-menu {
+    position: absolute;
+
+    top: calc(100% + 7px);
+    right: 0;
+
+    width: 145px;
+
+    padding: 6px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+
+    box-shadow:
+        0 12px 30px rgba(15, 23, 42, 0.12),
+        0 3px 8px rgba(15, 23, 42, 0.06);
+
+    z-index: 100;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform:
+        translateY(-5px)
+        scale(0.97);
+
+    transform-origin: top right;
+
+    transition:
+        opacity 0.16s ease,
+        visibility 0.16s ease,
+        transform 0.16s ease;
+}
+
+
+.activity-menu-wrapper.menu-open .activity-menu {
+    opacity: 1;
+    visibility: visible;
+
+    transform:
+        translateY(0)
+        scale(1);
+}
+
+
+/* =====================================================
+   MENU ITEM
+===================================================== */
+
+.activity-menu-item {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 9px 10px;
+
+    border: 0;
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+
+.activity-menu-item:hover {
+    background: #f1f8f7;
+    color: #287f80;
+}
+
+
+.activity-menu-icon {
+    width: 19px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    font-size: 14px;
+}
+
+
+.activity-menu-item.danger {
+    color: #dc2626;
+}
+
+
+.activity-menu-item.danger:hover {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+
+/* =====================================================
+   MENU SEDANG TERBUKA
+===================================================== */
+
+.activity-item:has(.activity-menu-wrapper.menu-open) {
+    z-index: 200;
+
+    transform: translateX(-5px);
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 768px) {
+
+    .activity-item:has(.activity-menu-wrapper):hover {
+        transform: none;
+    }
+
+    .activity-menu-btn {
+        opacity: 1;
+        visibility: visible;
+
+        transform: none;
+    }
+
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 768px) {
+
+    .activity-item:has(.activity-menu-wrapper):hover {
+        transform: none;
+    }
+
+    .activity-menu-btn {
+        opacity: 1;
+        visibility: visible;
+
+        transform: none;
+    }
 
 }

@@ -14,12 +14,12 @@ use Illuminate\Support\Facades\DB;
 class UserCatalogController extends Controller
 {
     private array $catalogHierarchy = [
-        'Pendidikan' => [
+        'Buku Pendidikan' => [
             'SD'  => 'SD',
             'SMP' => 'SMP',
             'SMA' => 'SMA',
         ],
-        'Anak-Anak' => [
+        'Anak' => [
             'Fiksi'     => 'Fiksi',
             'Non Fiksi' => 'Non Fiksi',
         ],
@@ -94,14 +94,17 @@ class UserCatalogController extends Controller
         if ($mainCategory) {
             $query->where(function ($q) use ($mainCategory) {
                 $q->where('main_category', $mainCategory)
-                  ->orWhereHas('category', fn($c) => $c->where('name', $mainCategory));
+                    ->orWhereHas('category', function ($c) use ($mainCategory) {
+                        $c->where('name', $mainCategory);
+                    });
             });
         }
 
         if ($subCategory) {
             $query->where(function ($q) use ($subCategory, $mainCategory) {
                 $q->where('sub_category', $subCategory);
-                if ($mainCategory === 'Pendidikan') {
+
+                if ($mainCategory === 'Buku Pendidikan') {
                     $q->orWhere('education_level', $subCategory);
                 }
             });
@@ -146,11 +149,18 @@ class UserCatalogController extends Controller
             return $book;
         });
 
-        // Real counts per main category & subcategory from database
-        $subCounts = Book::select('main_category', 'sub_category', 'education_level')
+        // Real counts per main category & subcategory from database.
+        // Count TIDAK dipengaruhi oleh filter yang sedang aktif.
+
+        $subCounts = Book::select(
+            'main_category',
+            'sub_category',
+            'education_level'
+        )
             ->get()
             ->groupBy(function ($item) {
                 $sub = $item->sub_category ?: $item->education_level;
+
                 return $item->main_category . '::' . $sub;
             })
             ->map->count();
@@ -186,7 +196,7 @@ class UserCatalogController extends Controller
                     ->whereHas('details')
                     ->with('details')
                     ->get()
-                    ->flatMap(fn ($borrowing) => $borrowing->details->pluck('book_id'))
+                    ->flatMap(fn($borrowing) => $borrowing->details->pluck('book_id'))
                     ->unique()
                     ->values()
                     ->all();
