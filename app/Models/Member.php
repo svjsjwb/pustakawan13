@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Member extends Model
+{
+    use HasFactory;
+
+    protected $table = 'members';
+
+    protected $fillable = [
+        'user_id',
+        'name',
+        'email',
+        'division',
+        'phone',
+        'address',
+        'nis_nip',
+        'gender',
+        'class',
+        'registered_at',
+        'status',
+    ];
+
+    /**
+     * Relasi ke Akun Pengguna (User)
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function borrowings(): HasMany
+    {
+        return $this->hasMany(Borrowing::class);
+    }
+
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+}

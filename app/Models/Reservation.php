@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Reservation extends Model
+{
+    protected $fillable = [
+        'user_id',
+        'member_id',
+        'book_id',
+        'book_copy_id',
+        'borrowing_id',
+        'reserved_at',
+        'expires_at',
+        'status',
+        'rejection_reason',
+        'seat_number',
+    ];
+
+    protected $casts = [
+        'reserved_at' => 'date',
+        'expires_at' => 'date',
+    ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function member(): BelongsTo
+    {
+        return $this->belongsTo(Member::class);
+    }
+
+    public function borrowing(): BelongsTo
+    {
+        return $this->belongsTo(Borrowing::class);
+    }
+
+    public function book(): BelongsTo
+    {
+        return $this->belongsTo(Book::class);
+    }
+
+    public function bookCopy(): BelongsTo
+    {
+        return $this->belongsTo(BookCopy::class);
+    }
+
+    public function getDisplayStatusAttribute(): string
+    {
+        return match ($this->status) {
+            'menunggu'   => 'Menunggu Persetujuan',
+            'disetujui'  => 'Disetujui',
+            'ditolak'    => 'Ditolak',
+            'dibatalkan' => 'Dibatalkan',
+            'selesai'    => 'Selesai',
+            default      => ucfirst($this->status),
+        };
+    }
+}

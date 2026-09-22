@@ -1,0 +1,313 @@
+@extends('layouts.app')
+
+@section('title', 'Katalog Buku')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('js/catalog.js') }}"></script>
+@endpush
+
+@section('content')
+
+    <section class="page" id="page-catalog">
+
+        {{-- =========================
+        HEADER
+    ========================= --}}
+
+        <div class="catalog-header">
+
+            <div>
+
+                <div class="catalog-count" id="catalog-count">
+                    {{ $books->total() }} buku terdaftar
+                </div>
+
+                <h1>
+                    Katalog Buku
+                </h1>
+
+                <p>
+                    Telusuri seluruh koleksi perpustakaan berdasarkan judul,
+                    kategori, atau ketersediaan stok.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {{-- =========================
+        FILTER FORM
+    ========================= --}}
+
+        <form method="GET" action="{{ route('catalog') }}" class="filters catalog-filter-form" id="catalog-filter-form">
+
+            <input type="text" name="search" id="catalog-search" value="{{ request('search') }}"
+                placeholder="Cari judul atau pengarang...">
+
+
+            @php
+                $selectedCategoryId = request('category');
+                $selectedCategory = is_numeric($selectedCategoryId)
+                    ? $categories->firstWhere('id', (int) $selectedCategoryId)
+                    : $categories->firstWhere('name', $selectedCategoryId);
+                $selectedSubcategoryId = request('subcategory');
+            @endphp
+
+            <select name="category" id="catalog-category">
+                <option value="">Semua Kategori</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}"
+                        {{ $selectedCategory && $selectedCategory->id == $category->id ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
+                @endforeach
+            </select>
+
+            <select name="subcategory" id="catalog-subcategory" {{ $selectedCategory ? '' : 'disabled' }}>
+                <option value="">
+                    {{ $selectedCategory ? 'Semua Subkategori' : 'Pilih Kategori Dulu' }}
+                </option>
+                @if ($selectedCategory)
+                    @foreach ($selectedCategory->subcategories as $subcategory)
+                        <option value="{{ $subcategory->id }}"
+                            {{ (string) $selectedSubcategoryId === (string) $subcategory->id ? 'selected' : '' }}>
+                            {{ $subcategory->name }}
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+
+            <select name="status" id="catalog-status">
+
+                <option value="">
+                    Semua Status
+                </option>
+
+                <option value="Tersedia" {{ request('status') == 'Tersedia' ? 'selected' : '' }}>
+                    Tersedia
+                </option>
+
+                <option value="Dipinjam" {{ request('status') == 'Dipinjam' ? 'selected' : '' }}>
+                    Sedang Dipinjam
+                </option>
+
+            </select>
+
+        </form>
+
+
+        {{-- =========================
+    CATALOG RESULTS
+========================= --}}
+
+        <div id="catalog-results">
+
+            {{-- =========================
+        BOOK GRID
+    ========================= --}}
+
+            <div class="book-grid" id="catalog-book-grid">
+
+                @forelse($books as $book)
+                    <div class="book-card" data-title="{{ $book->title }}" data-author="{{ $book->author ?? '-' }}"
+                        data-category="{{ $book->category->name ?? '-' }}" data-stock="{{ $book->available_stock ?? 0 }}"
+                        data-status="{{ $book->available_stock > 0 ? 'Tersedia' : 'Dipinjam' }}"
+                        data-description="{{ $book->description ?? 'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.' }}"
+                        data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}"
+                        data-publisher="{{ $book->publisher ?? '-' }}" data-year="{{ $book->publication_year ?? '-' }}"
+                        data-isbn="{{ $book->isbn ?? '-' }}" data-call-number="{{ $book->call_number ?? '-' }}">
+
+                        {{-- COVER --}}
+
+                        <div class="book-cover {{ $book->cover ? 'has-image' : '' }}">
+
+                            @if ($book->cover)
+                                <img src="{{ asset('storage/' . $book->cover) }}" alt="{{ $book->title }}"
+                                    class="book-cover-img">
+                            @endif
+
+                        </div>
+
+
+                        {{-- INFORMATION --}}
+
+                        <div class="book-info">
+
+                            <strong>
+                                {{ $book->title }}
+                            </strong>
+
+                            <span>
+                                {{ $book->author ?? '-' }}
+                            </span>
+
+
+                            <div class="book-meta">
+
+                                <span>
+                                    {{ $book->category->name ?? '-' }}
+                                </span>
+
+
+                                @if ($book->available_stock > 0)
+                                    <span class="book-status available">
+                                        Tersedia ({{ $book->available_stock }})
+                                    </span>
+                                @else
+                                    <span class="book-status borrowed">
+                                        Dipinjam
+                                    </span>
+                                @endif
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                @empty
+
+                    <div class="catalog-empty">
+
+                        Belum ada koleksi buku yang sesuai
+                        dengan pencarian atau filter.
+
+                    </div>
+                @endforelse
+
+            </div>
+
+
+            {{-- =========================
+        PAGINATION
+    ========================= --}}
+
+            @if ($books->total() > 0)
+                <div class="catalog-pagination" id="catalog-pagination">
+
+                    {{ $books->links('partials.pagination') }}
+
+                </div>
+            @endif
+
+        </div>
+
+    </section>
+
+    {{-- =========================================================
+     BOOK DETAIL MODAL
+========================================================= --}}
+
+    <div class="catalog-modal" id="book-modal">
+
+        <div class="catalog-modal-container">
+
+            <button type="button" class="catalog-modal-close" id="modal-close">
+                &times;
+            </button>
+
+            <div class="catalog-modal-body">
+
+                <!-- LEFT -->
+                <div class="catalog-modal-cover">
+
+                    <div class="book-3d" id="book3D">
+
+                        <div class="book-face front" id="bookFront">
+
+                            <div class="book-top">
+                                TIGA SERANGKAI
+                            </div>
+
+                            <div class="book-title" id="modalBookTitle">
+                                Buku Dummy
+                            </div>
+
+                            <div class="book-bottom">
+                                PERPUSTAKAAN
+                            </div>
+
+                        </div>
+
+                        <div class="book-face back"></div>
+
+                        <div class="book-spine"></div>
+
+                        <div class="book-pages"></div>
+
+                    </div>
+
+                </div>
+
+                <!-- RIGHT -->
+                <div class="catalog-modal-info">
+
+                    <div class="catalog-modal-badges">
+
+                        <span class="catalog-modal-category" id="modal-category"></span>
+
+                        <span class="catalog-modal-status" id="modal-status"></span>
+
+                    </div>
+
+                    <h2 id="modal-title"></h2>
+
+                    <div class="catalog-modal-author" id="modal-author"></div>
+
+                    <div class="catalog-modal-description-title">
+                        Sinopsis / Deskripsi
+                    </div>
+
+                    <div class="catalog-modal-description" id="modal-description"></div>
+
+                    <div class="catalog-modal-meta">
+
+                        <div>
+                            <span>Stok Tersedia</span>
+                            <strong id="modal-stock">-</strong>
+                        </div>
+
+                        <div>
+                            <span>Penerbit</span>
+                            <strong id="modal-publisher">-</strong>
+                        </div>
+
+                        <div>
+                            <span>Tahun Terbit</span>
+                            <strong id="modal-year">-</strong>
+                        </div>
+
+                        <div>
+                            <span>No. Panggil</span>
+                            <strong id="modal-call-number">-</strong>
+                        </div>
+
+                        <div>
+                            <span>ISBN</span>
+                            <strong id="modal-isbn">-</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="catalog-modal-actions">
+
+                        <button type="button" class="catalog-modal-button" id="modal-action">
+                            Tutup
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+@endsection

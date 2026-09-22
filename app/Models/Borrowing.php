@@ -1,0 +1,79 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Borrowing extends Model
+{
+    protected $fillable = [
+        'user_id',
+        'member_id',
+        'reservation_id',
+        'book_id',
+        'borrowed_at',
+        'due_at',
+        'returned_at',
+        'status',
+        'rejection_reason',
+        'extension_status',
+        'extension_requested_due_at',
+        'extension_reason',
+        'extension_admin_notes',
+        'seat_number',
+        'is_reminder_sent',
+    ];
+
+    protected $casts = [
+        'borrowed_at' => 'date',
+        'due_at' => 'date',
+        'returned_at' => 'date',
+        'extension_requested_due_at' => 'date',
+        'is_reminder_sent' => 'boolean',
+    ];
+
+    public function member(): BelongsTo
+    {
+        return $this->belongsTo(Member::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function reservation(): BelongsTo
+    {
+        return $this->belongsTo(Reservation::class);
+    }
+
+    public function details(): HasMany
+    {
+        return $this->hasMany(BorrowingDetail::class);
+    }
+
+    public function getDisplayStatusAttribute(): string
+    {
+        return match ($this->status) {
+            'menunggu'     => 'Menunggu Persetujuan',
+            'dipinjam'     => 'Dipinjam',
+            'diperpanjang' => 'Diperpanjang',
+            'ditolak'      => 'Ditolak',
+            'dikembalikan' => 'Dikembalikan',
+            'terlambat'    => 'Terlambat',
+            default        => ucfirst($this->status),
+        };
+    }
+
+    public function getDisplayExtensionStatusAttribute(): ?string
+    {
+        return match ($this->extension_status) {
+            'menunggu'  => 'Menunggu Persetujuan',
+            'disetujui' => 'Disetujui',
+            'ditolak'   => 'Ditolak',
+            default     => null,
+        };
+    }
+}
