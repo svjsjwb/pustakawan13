@@ -350,7 +350,9 @@ class CirculationController extends Controller
 
         $newDue = $borrowing->extension_requested_due_at;
         if (!$newDue) {
-            $newDue = $borrowing->due_at->addDays(7);
+            /** @var Carbon $dueDate */
+            $dueDate = Carbon::parse($borrowing->due_at);
+            $newDue = $dueDate->addDays(7);
         }
 
         $borrowing->update([

@@ -143,10 +143,11 @@ class UserReservationController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if ($bookCopy) {
-                $bookCopy->update(['status' => 'reserved']);
+            if (!$bookCopy || $lockedBook->available_stock < 1) {
+                abort(409, 'Maaf, stok buku ini baru saja habis.');
             }
 
+            $bookCopy->update(['status' => 'reserved']);
             $lockedBook->decrement('stok');
 
             $createdReservation = Reservation::create([

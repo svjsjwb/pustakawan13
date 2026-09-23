@@ -40,7 +40,7 @@ class UserBorrowingController extends Controller
             // Peminjaman aktif (dipinjam)
             $borrowings = Borrowing::with(['details.book.category'])
                 ->where('member_id', $member->id)
-                ->where('status', 'dipinjam')
+                ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
                 ->orderByDesc('created_at')
                 ->get()
                 ->map(function ($b) {
@@ -110,7 +110,7 @@ class UserBorrowingController extends Controller
                 }
 
                 $alreadyBorrowed = Borrowing::where('member_id', $member->id)
-                    ->where('status', 'dipinjam')
+                    ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
                     ->whereHas('details', fn ($query) => $query->where('book_id', $book->id))
                     ->exists();
 
@@ -188,7 +188,7 @@ class UserBorrowingController extends Controller
 
         // Batas perpanjangan: max 14 hari dari jatuh tempo saat ini
         $maxExtensionDays = 14;
-        $currentDue       = $borrowing->due_at; // Carbon instance
+        $currentDue       = \Carbon\Carbon::parse($borrowing->due_at);
         $maxDate          = $currentDue->copy()->addDays($maxExtensionDays);
 
         $validated = $request->validate([
