@@ -4,9 +4,8 @@
 
 .member-page {
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 10px 0 40px;
+    box-sizing: border-box;
+    padding: 0 0 40px;
 }
 
 
@@ -15,37 +14,55 @@
 ========================================================= */
 
 .member-hero {
+    position: relative;
     width: 100%;
+    min-height: 140px;
+
+    margin-bottom: 24px;
+    padding: 28px 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
     box-sizing: border-box;
-
-    padding: 26px 30px;
-
-    margin-bottom: 22px;
+    overflow: hidden;
 
     background:
-        linear-gradient(
-            135deg,
+        linear-gradient(110deg,
             #eef8f7 0%,
             #f5fbfb 55%,
-            #ffffff 100%
-        );
+            #ffffff 100%);
 
     border: 1px solid #d9ebea;
     border-radius: 16px;
 
     box-shadow:
-        0 4px 16px rgba(27, 42, 58, 0.04),
-        0 1px 3px rgba(27, 42, 58, 0.02);
+        0 4px 16px rgba(27, 42, 58, 0.03),
+        0 1px 2px rgba(27, 42, 58, 0.02);
+}
+
+.member-hero::after {
+    content: "";
+    position: absolute;
+    width: 210px;
+    height: 210px;
+    right: -60px;
+    top: -80px;
+    border-radius: 50%;
+    background: rgba(40, 127, 128, 0.06);
+    pointer-events: none;
 }
 
 .member-hero-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    position: relative;
+    z-index: 1;
+    max-width: 750px;
 }
 
 .member-hero-label {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
 
@@ -53,16 +70,16 @@
 
     color: #287f80;
 
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
 
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
 .member-hero-dot {
-    width: 7px;
-    height: 7px;
+    width: 8px;
+    height: 8px;
 
     border-radius: 50%;
 
@@ -70,13 +87,13 @@
 }
 
 .member-hero h1 {
-    margin: 0 0 7px;
+    margin: 0 0 6px;
 
-    color: #19364f;
+    color: #0f2d42;
 
-    font-size: 27px;
-    line-height: 1.25;
-    font-weight: 750;
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 800;
 
     letter-spacing: -0.02em;
 }
@@ -84,22 +101,16 @@
 .member-hero p {
     margin: 0;
 
-    color: #64747b;
+    color: #526b7a;
 
-    font-size: 13.5px;
+    font-size: 14px;
     line-height: 1.5;
 }
 
-
-/* =========================================================
-   TOP ACTION
-========================================================= */
-
-.member-top-action {
-    display: flex;
-    justify-content: flex-end;
-
-    margin-bottom: 18px;
+.member-hero-action {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
 }
 
 .btn-add-top {
@@ -511,75 +522,109 @@
     display: flex;
     align-items: center;
 
-    gap: 7px;
+    gap: 10px;
 
     white-space: nowrap;
 }
 
 .btn-edit,
 .btn-delete {
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
+    box-sizing: border-box;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    min-height: 34px;
-
-    padding: 0 12px;
-
-    box-sizing: border-box;
-
-    border-radius: 8px;
+    border-radius: 10px;
 
     font-family: inherit;
 
-    font-size: 11.5px;
-    font-weight: 700;
+    cursor: pointer;
 
     text-decoration: none;
-
-    cursor: pointer;
 
     transition:
         background-color 0.2s ease,
         border-color 0.2s ease,
         color 0.2s ease,
-        transform 0.15s ease;
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
 }
 
+
+/* =========================================================
+   EDIT
+========================================================= */
+
 .btn-edit {
-    background: #e8f5f5;
+    background: #ffffff;
 
     border: 1px solid #cde8e8;
 
     color: #247f82;
 }
 
+.btn-edit svg {
+    width: 18px;
+    height: 18px;
+
+    display: block;
+
+    flex-shrink: 0;
+}
+
 .btn-edit:hover {
-    background: #d9eeee;
+    background: #e8f5f5;
 
     border-color: #b9dddd;
 
+    color: #247f82;
+
+    box-shadow:
+        0 3px 8px rgba(40, 127, 128, 0.12);
+
     transform: translateY(-1px);
 }
 
+
+/* =========================================================
+   DELETE
+========================================================= */
+
 .btn-delete {
-    background: #fff0f0;
+    background: #ffffff;
 
     border: 1px solid #f5cccc;
 
-    color: #d64545;
+    color: #e84d4d;
+}
+
+.btn-delete svg {
+    width: 22px;
+    height: 22px;
+
+    display: block;
+
+    flex-shrink: 0;
 }
 
 .btn-delete:hover {
-    background: #ffe1e1;
+    background: #fff0f0;
 
     border-color: #efb5b5;
 
-    color: #c94040;
+    color: #d93f3f;
+
+    box-shadow:
+        0 3px 8px rgba(232, 77, 77, 0.10);
 
     transform: translateY(-1px);
 }
-
 
 /* =========================================================
    EMPTY STATE
@@ -1150,9 +1195,21 @@
 @media (max-width: 650px) {
 
     .member-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+
         padding: 21px 20px;
 
         margin-bottom: 18px;
+    }
+
+    .member-hero-action {
+        width: 100%;
+    }
+
+    .member-hero-action .btn-add-top {
+        width: 100%;
     }
 
     .member-hero h1 {
@@ -1161,14 +1218,6 @@
 
     .member-hero p {
         font-size: 13px;
-    }
-
-    .member-top-action {
-        justify-content: stretch;
-    }
-
-    .btn-add-top {
-        width: 100%;
     }
 
     .member-toolbar {

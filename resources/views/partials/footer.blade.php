@@ -7,8 +7,15 @@
             alt="Logo">
 
         <div>
-            <strong>PERPUSTAKAAN</strong>
-            <span>TIGA SERANGKAI</span>
+
+            <strong>
+                PERPUSTAKAAN
+            </strong>
+
+            <span>
+                TIGA SERANGKAI
+            </span>
+
         </div>
 
     </div>
@@ -16,29 +23,51 @@
 
     <div class="footer-column">
 
-        <strong>JAM OPERASIONAL</strong>
+        <strong>
+            JAM OPERASIONAL
+        </strong>
 
         @if(auth()->user()?->role === 'user')
-            <span>Senin - Jumat : 07:30 - 16:30</span>
+
+            <span>
+                Senin - Jumat : 07:30 - 16:30
+            </span>
+
         @else
-            <span>Senin - Jumat: 07.30 - 16.30 WIB</span>
+
+            <span>
+                Senin - Jumat: 07.30 - 16.30 WIB
+            </span>
+
         @endif
-        <span>Sabtu - Minggu : Libur</span>
+
+        <span>
+            Sabtu - Minggu : Libur
+        </span>
 
     </div>
 
 
     <div class="footer-column">
 
-        <strong>ALAMAT</strong>
+        <strong>
+            ALAMAT
+        </strong>
 
         <span>
+
             @if(auth()->user()?->role === 'user')
+
                 Jl. Prof. DR. Supomo No. 23,
+
             @else
+
                 Jl. Prof. DR. Supomo No.23,
+
             @endif
+
             Sriwedari, Kec. Laweyan,
+
         </span>
 
         <span>
@@ -50,10 +79,17 @@
 
     <div class="footer-column">
 
-        <strong>KONTAK</strong>
+        <strong>
+            KONTAK
+        </strong>
 
-        <span>✉ perpustakaan@gmail.com</span>
-        <span>◎ @perpustakaantigaserangkai</span>
+        <span>
+            ✉ perpustakaan@gmail.com
+        </span>
+
+        <span>
+            ◎ @perpustakaantigaserangkai
+        </span>
 
     </div>
 

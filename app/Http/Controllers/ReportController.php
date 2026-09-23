@@ -401,10 +401,6 @@ class ReportController extends Controller
             )
             ->count();
 
-        // Kompatibilitas dengan view admin/user hasil merge:
-        // "totalBooks" merepresentasikan buku yang ditambahkan pada periode.
-        $totalBooks = $collectionAddedCount;
-
 
         $collectionWithdrawnCount =
             $collectionReportData
@@ -541,7 +537,7 @@ class ReportController extends Controller
                         ??
                         '-',
 
-                    'books' =>
+                    'judul_buku' =>
                         $bookTitles
                         ?:
                         'Tidak ada rincian',
@@ -725,7 +721,7 @@ class ReportController extends Controller
                         'member_code' =>
                             $member->member_code ?? '-',
                         'activity' => 'Peminjaman',
-                        'books' =>
+                        'judul_buku' =>
                             $bookTitles ?: 'Tidak ada rincian',
                         'date' =>
                             $borrowingDate->translatedFormat('d M Y'),
@@ -743,7 +739,7 @@ class ReportController extends Controller
                         'member_code' =>
                             $member->member_code ?? '-',
                         'activity' => 'Reservasi',
-                        'books' =>
+                        'judul_buku' =>
                             $reservation->book->judul_buku ?? 'Buku',
                         'date' =>
                             $reservationDate->translatedFormat('d M Y'),
@@ -761,7 +757,7 @@ class ReportController extends Controller
                     'member_code' =>
                         $member->member_code ?? '-',
                     'activity' => '-',
-                    'books' => '-',
+                    'judul_buku' => '-',
                     'date' => '-',
                     'status' => 'Aktif',
                 ];
@@ -825,7 +821,6 @@ class ReportController extends Controller
                 'collectionExportData',
 
                 'collectionAddedCount',
-                'totalBooks',
                 'collectionWithdrawnCount',
                 'collectionDeletedCopyCount',
                 'collectionDamagedCount',
@@ -916,7 +911,7 @@ class ReportController extends Controller
                     $book->created_at,
 
                 'book_title' =>
-                    $book->judul_buku,
+                    $book->title,
 
                 'barcode' =>
                     null,

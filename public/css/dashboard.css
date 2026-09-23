@@ -1,21 +1,4 @@
 /* =========================================================
-   ANTI SELECT / ANTI DRAG DASHBOARD
-========================================================= */
-
-.dashboard-page,
-.dashboard-page * {
-
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    user-select: none !important;
-
-    -webkit-user-drag: none !important;
-    user-drag: none !important;
-
-}
-
-/* =========================================================
    DASHBOARD - MODERN LIBRARY ADMIN
    Topbar & Footer TIDAK DISENTUH
 ========================================================= */
@@ -46,11 +29,11 @@
 
     width: 100%;
 
-    min-height: 190px;
+    min-height: 140px;
 
-    margin-bottom: 27px;
+    margin-bottom: 24px;
 
-    padding: 38px 44px;
+    padding: 28px 36px;
 
     display: flex;
 
@@ -63,13 +46,18 @@
     background:
         linear-gradient(
             110deg,
-            #eef8f8 0%,
-            #ffffff 65%
+            #eef8f7 0%,
+            #f5fbfb 55%,
+            #ffffff 100%
         );
 
-    border: 1px solid #d5e7e7;
+    border: 1px solid #d9ebea;
 
     border-radius: 16px;
+
+    box-shadow:
+        0 4px 16px rgba(27, 42, 58, 0.03),
+        0 1px 2px rgba(27, 42, 58, 0.02);
 
 }
 
@@ -84,18 +72,18 @@
 
     position: absolute;
 
-    width: 220px;
+    width: 210px;
 
-    height: 220px;
+    height: 210px;
 
-    right: -70px;
+    right: -60px;
 
-    top: -110px;
+    top: -80px;
 
     border-radius: 50%;
 
     background:
-        rgba(40, 123, 123, 0.07);
+        rgba(40, 127, 128, 0.06);
 
     pointer-events: none;
 
@@ -123,34 +111,38 @@
 
 .dashboard-hero-label {
 
-    display: flex;
+    display: inline-flex;
 
     align-items: center;
 
-    gap: 9px;
+    gap: 8px;
 
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 
-    color: #287c7c;
+    color: #287f80;
 
-    font-size: 17px;
+    font-size: 12px;
 
     font-weight: 700;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
 
 }
 
 
 .dashboard-hero-dot {
 
-    width: 10px;
+    width: 8px;
 
-    height: 10px;
+    height: 8px;
 
     flex: 0 0 auto;
 
     border-radius: 50%;
 
-    background: #287c7c;
+    background: #287f80;
 
 }
 
@@ -161,17 +153,17 @@
 
 .dashboard-hero h1 {
 
-    margin: 0 0 10px;
+    margin: 0 0 6px;
 
-    color: #071b2c;
+    color: #0f2d42;
 
-    font-size: 38px;
+    font-size: 28px;
 
-    line-height: 1.15;
+    line-height: 1.2;
 
     font-weight: 800;
 
-    letter-spacing: -0.8px;
+    letter-spacing: -0.02em;
 
 }
 
@@ -186,13 +178,14 @@
 
     margin: 0;
 
-    color: #35566b;
+    color: #526b7a;
 
-    font-size: 16px;
+    font-size: 14px;
 
-    line-height: 1.65;
+    line-height: 1.5;
 
 }
+
 
 /* =========================================================
    STATISTICS
@@ -205,9 +198,9 @@
     grid-template-columns:
         repeat(4, minmax(0, 1fr));
 
-    gap: 22px;
+    gap: 20px;
 
-    margin-bottom: 27px;
+    margin-bottom: 24px;
 
 }
 
@@ -220,25 +213,32 @@
 
     position: relative;
 
-    min-height: 126px;
+    min-height: 120px;
 
     overflow: hidden;
 
-    padding: 18px;
+    padding: 20px 22px;
 
     background: #ffffff;
 
-    border: 1px solid #e9eeee;
+    border: 1px solid #e2e8f0;
 
     border-radius: 14px;
 
     box-shadow:
         0 4px 14px
-        rgba(22, 63, 63, 0.07);
+        rgba(22, 63, 63, 0.05);
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
 
     transition:
         transform 0.2s ease,
-        box-shadow 0.2s ease;
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
 
 }
 
@@ -246,15 +246,19 @@
 .stat-card:hover {
 
     transform:
-        translateY(-3px);
+        translateY(-2px);
+
+    border-color: #cde4e4;
 
     box-shadow:
-        0 10px 25px
-        rgba(22, 63, 63, 0.12);
+        0 8px 22px
+        rgba(22, 63, 63, 0.10);
 
 }
 
+
 .stat-card-top {
+
     position: relative;
 
     z-index: 2;
@@ -263,7 +267,8 @@
 
     align-items: center;
 
-    gap: 15px;
+    gap: 16px;
+
 }
 
 
@@ -272,66 +277,94 @@
 ========================================================= */
 
 .stat-icon {
-    flex: 0 0 58px;
 
-    width: 58px;
-    height: 58px;
+    flex: 0 0 52px;
+
+    width: 52px;
+
+    height: 52px;
 
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
-    border-radius: 15px;
+    border-radius: 14px;
+
 }
 
+
 .stat-icon svg {
-    width: 31px;
-    height: 31px;
+
+    width: 26px;
+
+    height: 26px;
+
 }
 
 
 /* BUKU */
 
 .stat-books .stat-icon {
+
     color: #20a86b;
 
-    background: linear-gradient(145deg,
+    background:
+        linear-gradient(
+            145deg,
             #dffaf0,
-            #bff0e1);
+            #bff0e1
+        );
+
 }
 
 
 /* DIPINJAM */
 
 .stat-borrowed .stat-icon {
+
     color: #3975ed;
 
-    background: linear-gradient(145deg,
+    background:
+        linear-gradient(
+            145deg,
             #e1eaff,
-            #c9d8ff);
+            #c9d8ff
+        );
+
 }
 
 
 /* ANGGOTA */
 
 .stat-members .stat-icon {
+
     color: #8c52e8;
 
-    background: linear-gradient(145deg,
+    background:
+        linear-gradient(
+            145deg,
             #f0e5ff,
-            #e2d0ff);
+            #e2d0ff
+        );
+
 }
 
 
 /* TERLAMBAT */
 
 .stat-late .stat-icon {
+
     color: #ee921c;
 
-    background: linear-gradient(145deg,
+    background:
+        linear-gradient(
+            145deg,
             #fff0dc,
-            #ffdfbd);
+            #ffdfbd
+        );
+
 }
 
 
@@ -340,34 +373,50 @@
 ========================================================= */
 
 .stat-content {
+
     min-width: 0;
+
 }
+
 
 .stat-title {
-    margin-bottom: 5px;
 
-    color: #277575;
-
-    font-size: 11px;
-    font-weight: 750;
-    letter-spacing: 0.2px;
-}
-
-.stat-value {
     margin-bottom: 4px;
 
-    color: #152323;
+    color: #526b7a;
 
-    font-size: 29px;
-    line-height: 1;
+    font-size: 11px;
 
-    font-weight: 750;
+    font-weight: 700;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
+
 }
 
-.stat-description {
-    color: #718080;
 
-    font-size: 10px;
+.stat-value {
+
+    margin-bottom: 2px;
+
+    color: #0f2d42;
+
+    font-size: 26px;
+
+    line-height: 1.1;
+
+    font-weight: 800;
+
+}
+
+
+.stat-description {
+
+    color: #64748b;
+
+    font-size: 12px;
+
 }
 
 
@@ -376,33 +425,49 @@
 ========================================================= */
 
 .stat-wave {
+
     position: absolute;
 
     right: -20px;
+
     bottom: -28px;
 
     width: 70%;
+
     height: 62px;
 
     border-radius: 50%;
 
     opacity: 0.75;
+
 }
+
 
 .stat-books .stat-wave {
+
     background: #d9f6ed;
+
 }
+
 
 .stat-borrowed .stat-wave {
+
     background: #dce6ff;
+
 }
+
 
 .stat-members .stat-wave {
+
     background: #ebddff;
+
 }
 
+
 .stat-late .stat-wave {
+
     background: #ffe4cf;
+
 }
 
 
@@ -411,14 +476,18 @@
 ========================================================= */
 
 .dashboard-middle {
+
     display: grid;
 
     grid-template-columns:
-        minmax(0, 1.65fr) minmax(230px, 0.75fr) minmax(230px, 0.75fr);
+        minmax(0, 1.65fr)
+        minmax(230px, 0.75fr)
+        minmax(230px, 0.75fr);
 
     gap: 20px;
 
     margin-bottom: 20px;
+
 }
 
 
@@ -427,6 +496,7 @@
 ========================================================= */
 
 .dashboard-panel {
+
     background: #ffffff;
 
     border: 1px solid #e8eeee;
@@ -434,25 +504,10 @@
     border-radius: 14px;
 
     box-shadow:
-        0 3px 13px rgba(22, 63, 63, 0.055);
+        0 3px 13px
+        rgba(22, 63, 63, 0.055);
 
     box-sizing: border-box;
-}
-/* =========================================================
-   STAT CARD DECORATION
-========================================================= */
-
-.stat-icon {
-
-    width: 56px;
-
-    height: 14px;
-
-    margin: -21px auto 9px;
-
-    background: #a7caca;
-
-    border-radius: 7px;
 
 }
 
@@ -476,21 +531,6 @@
     display: flex;
 
     flex-direction: column;
-
-}
-
-
-/* =========================================================
-   STAT TITLE
-========================================================= */
-
-.stat-title {
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    color: #287070;
 
 }
 
@@ -629,26 +669,31 @@
     background: #e0f3f1;
 
 }
-/* keterangan */
+
 
 /* =========================================================
    BAR CHART
 ========================================================= */
 
 .chart-area {
+
     display: flex;
 
     height: 190px;
 
     padding: 8px 20px 0 12px;
+
 }
 
+
 .chart-y {
+
     width: 25px;
 
     display: flex;
 
     flex-direction: column;
+
     justify-content: space-between;
 
     padding: 7px 0 27px;
@@ -658,17 +703,23 @@
     font-size: 9px;
 
     text-align: right;
+
 }
 
+
 .chart-content {
+
     position: relative;
 
     flex: 1;
 
     min-width: 0;
+
 }
 
+
 .chart-grid {
+
     position: absolute;
 
     inset: 7px 0 28px;
@@ -676,16 +727,23 @@
     display: flex;
 
     flex-direction: column;
+
     justify-content: space-between;
+
 }
 
+
 .chart-grid span {
+
     width: 100%;
 
     border-top: 1px solid #edf1f1;
+
 }
 
+
 .chart-bars {
+
     position: absolute;
 
     inset: 0;
@@ -693,14 +751,18 @@
     display: flex;
 
     align-items: flex-end;
+
     justify-content: space-around;
 
     gap: 12px;
 
     padding: 8px 3px 0;
+
 }
 
+
 .chart-bar-item {
+
     position: relative;
 
     height: 100%;
@@ -710,14 +772,18 @@
     display: flex;
 
     align-items: center;
+
     justify-content: flex-end;
 
     flex-direction: column;
 
     z-index: 2;
+
 }
 
+
 .chart-bar {
+
     width: 42px;
 
     max-width: 80%;
@@ -726,21 +792,32 @@
 
     border-radius: 8px 8px 3px 3px;
 
-    background: linear-gradient(to top,
+    background:
+        linear-gradient(
+            to top,
             #237e7e,
-            #66b9b3);
+            #66b9b3
+        );
 
     box-shadow:
-        0 3px 7px rgba(35, 126, 126, 0.18);
+        0 3px 7px
+        rgba(35, 126, 126, 0.18);
 
     transition:
         height 0.3s ease,
         transform 0.2s ease;
+
 }
 
+
 .chart-bar:hover {
-    transform: scaleY(1.04);
+
+    transform:
+        scaleY(1.04);
+
 }
+
+
 .chart-bar-item span {
 
     margin-top: 7px;
@@ -853,42 +930,55 @@
 
 }
 
+
 .popular-number {
-    width: 23px;
-    height: 23px;
-
+    width: 24px;
+    height: 24px;
     display: flex;
-
     align-items: center;
     justify-content: center;
-
-    flex: 0 0 23px;
-
+    flex: 0 0 24px;
     border-radius: 50%;
-
-    background: #f4f7f7;
-
-    color: #536262;
-
-    font-size: 10px;
+    background: #f1f5f5;
+    color: #486161;
+    font-size: 11px;
     font-weight: 700;
+    line-height: 1;
+    border: 1px solid #d8e5e5;
+    transition: all 0.2s ease;
 }
 
 .popular-item:nth-child(1) .popular-number {
-    background: #fff0bc;
-    color: #bd8211;
+    background: linear-gradient(135deg, #287f80, #1f6465);
+    color: #ffffff;
+    border-color: #287f80;
+    box-shadow: 0 2px 5px rgba(40, 127, 128, 0.3);
 }
 
 .popular-item:nth-child(2) .popular-number {
-    background: #edf0f2;
+    background: #e6f4f3;
+    color: #206768;
+    border-color: #b7e0de;
+    font-weight: 750;
 }
 
 .popular-item:nth-child(3) .popular-number {
-    background: #ffe2cf;
-    color: #c7682e;
+    background: #eef8f7;
+    color: #287f80;
+    border-color: #cde8e6;
+    font-weight: 700;
 }
 
+.popular-item:nth-child(4) .popular-number,
+.popular-item:nth-child(5) .popular-number {
+    background: #f8fafc;
+    color: #64748b;
+    border-color: #e2e8f0;
+}
+
+
 .popular-name {
+
     flex: 1;
 
     min-width: 0;
@@ -900,17 +990,25 @@
     font-size: 10px;
 
     text-overflow: ellipsis;
+
     white-space: nowrap;
+
 }
 
+
 .popular-total {
+
     color: #5d6b6b;
 
     font-size: 9px;
+
     font-weight: 600;
+
 }
 
+
 .empty-small {
+
     padding: 25px 10px;
 
     color: #879393;
@@ -918,7 +1016,10 @@
     font-size: 10px;
 
     text-align: center;
+
 }
+
+
 .dashboard-section h2 {
 
     margin: 0 0 9px;
@@ -927,7 +1028,7 @@
 
 
 /* =========================================================
-   PANEL LINK - COMPACT BUTTON
+   PANEL LINK
 ========================================================= */
 
 .panel-link {
@@ -1006,12 +1107,9 @@
 }
 
 
-/* =========================
-   TABLE
-========================= */
-
-
-/* Tombol di tengah panel */
+/* =========================================================
+   POPULAR BUTTON
+========================================================= */
 
 .popular-panel .panel-link {
 
@@ -1060,9 +1158,9 @@
 
 .activity-item-icon {
 
-    width: 27px;
+    width: 38px;
 
-    height: 27px;
+    height: 38px;
 
     display: flex;
 
@@ -1070,20 +1168,58 @@
 
     justify-content: center;
 
-    flex: 0 0 27px;
+    flex: 0 0 38px;
 
     border-radius: 50%;
 
     background: #e3f5ef;
 
-    color: #20a66d;
+    color: #287f80;
 
-    font-size: 12px;
+    font-size: 15px;
 
-    font-weight: 800;
+    line-height: 1;
+
+    border: none;
 
 }
 
+
+.activity-item-icon svg {
+
+    width: 16px;
+
+    height: 16px;
+
+    stroke: currentColor;
+
+    stroke-width: 2;
+
+    fill: none;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+
+}
+
+
+/* Semua icon aktivitas menggunakan lingkaran pastel yang sama.
+   Warna emoji/icon masing-masing mengikuti jenis aktivitas. */
+.activity-item-icon.icon-member,
+.activity-item-icon.icon-book,
+.activity-item-icon.icon-borrowing,
+.activity-item-icon.icon-reservation,
+.activity-item-icon.icon-manual,
+.activity-item-icon.icon-pinned {
+
+    background: #e3f5ef;
+
+    color: #287f80;
+
+    border-color: transparent;
+
+}
 
 .activity-info {
 
@@ -1093,7 +1229,9 @@
 
 }
 
+
 .activity-info strong {
+
     display: block;
 
     overflow: hidden;
@@ -1103,10 +1241,14 @@
     font-size: 10px;
 
     text-overflow: ellipsis;
+
     white-space: nowrap;
+
 }
 
+
 .activity-info span {
+
     display: block;
 
     margin-top: 2px;
@@ -1118,25 +1260,35 @@
     font-size: 9px;
 
     text-overflow: ellipsis;
+
     white-space: nowrap;
+
 }
 
+
 .activity-item time {
+
     color: #277b7b;
 
     font-size: 9px;
+
     font-weight: 600;
+
     text-transform: capitalize;
+
 }
 
 
 /* =========================================================
-   RESERVATION
+   RESERVATION PANEL
 ========================================================= */
 
 .reservation-panel {
+
     width: 100%;
+
 }
+
 
 /* =========================================================
    DASHBOARD TABLE
@@ -1146,8 +1298,7 @@
 
     width: calc(100% - 24px);
 
-    margin:
-        0 12px 13px;
+    margin: 0 12px 13px;
 
     overflow: hidden;
 
@@ -1247,7 +1398,11 @@
     display: grid;
 
     grid-template-columns:
-        0.7fr 1.1fr 1.6fr 1.5fr 0.9fr;
+        0.7fr
+        1.1fr
+        1.6fr
+        1.5fr
+        0.9fr;
 
     align-items: center;
 
@@ -1420,12 +1575,6 @@
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| STATUS LAMA
-|--------------------------------------------------------------------------
-*/
-
 .dashboard-status.returned {
 
     background: #d9e9d5;
@@ -1468,193 +1617,16 @@
 
 
 /* =========================================================
-   RESPONSIVE
+   AKTIVITAS MANUAL
 ========================================================= */
 
-@media (max-width: 1200px) {
+.activity-panel .panel-link {
 
-    .dashboard-middle {
+    align-self: center;
 
-        grid-template-columns:
-            minmax(0, 1.4fr)
-            minmax(220px, 0.8fr);
-
-    }
-
-
-    .activity-panel {
-
-        grid-column: 2;
-
-    }
-
-
-    .borrowing-panel {
-
-        grid-row: span 2;
-
-    }
+    margin: 0 auto 10px;
 
 }
-
-
-@media (max-width: 1000px) {
-
-    .dashboard-hero {
-
-        min-height: auto;
-
-        padding: 30px;
-
-    }
-
-
-    .dashboard-hero h1 {
-
-        font-size: 30px;
-
-    }
-
-
-    .dashboard-hero p {
-
-        font-size: 14px;
-
-        line-height: 1.55;
-
-    }
-
-
-    .dashboard-hero-label {
-
-        font-size: 15px;
-
-    }
-
-    .dashboard-stats {
-
-        grid-template-columns:
-            repeat(2, 1fr);
-
-        gap: 20px;
-
-    }
-
-
-    .dashboard-middle {
-
-        grid-template-columns:
-            1fr 1fr;
-
-    }
-
-
-    .borrowing-panel {
-
-        grid-column:
-            1 / -1;
-
-        grid-row: auto;
-
-    }
-
-
-    .activity-panel {
-
-        grid-column: auto;
-
-    }
-
-}
-
-
-@media (max-width: 700px) {
-
-    .dashboard-header h1 {
-
-        font-size: 27px;
-
-    }
-
-
-    .dashboard-stats {
-
-        grid-template-columns:
-            1fr;
-
-        gap: 14px;
-
-    }
-
-
-    .dashboard-middle {
-
-        grid-template-columns:
-            1fr;
-
-    }
-
-
-    .borrowing-panel,
-    .popular-panel,
-    .activity-panel {
-
-        grid-column: auto;
-
-    }
-
-
-    .chart-bars {
-
-        gap: 4px;
-
-    }
-
-
-    .chart-bar {
-
-        width: 24px;
-
-    }
-
-
-    .dashboard-table {
-
-        overflow-x: auto;
-
-    }
-
-
-    .dashboard-table-head,
-    .dashboard-table-row {
-
-        min-width: 650px;
-
-    }
-
-
-    .reservation-header {
-
-        align-items: flex-start;
-
-        gap: 12px;
-
-        flex-direction: column;
-
-    }
-
-    .dashboard-page ::selection {
-    background: transparent;
-    color: inherit;
-}
-
-.dashboard-page ::-moz-selection {
-    background: transparent;
-    color: inherit;
-}
-
-}
-
 
 /* =====================================================
    ACTIVITY PANEL ACTIONS
@@ -2407,21 +2379,182 @@ textarea.activity-form-input {
 
 }
 
-/* =====================================================
-   MOBILE
-===================================================== */
+/* =========================================================
+   RESPONSIVE - 1200
+========================================================= */
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
 
-    .activity-item:has(.activity-menu-wrapper):hover {
-        transform: none;
+    .dashboard-middle {
+
+        grid-template-columns:
+            minmax(0, 1.4fr)
+            minmax(220px, 0.8fr);
+
     }
 
-    .activity-menu-btn {
-        opacity: 1;
-        visibility: visible;
 
-        transform: none;
+    .activity-panel {
+
+        grid-column: 2;
+
+    }
+
+
+    .borrowing-panel {
+
+        grid-row: span 2;
+
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE - 1000
+========================================================= */
+
+@media (max-width: 1000px) {
+
+    .dashboard-stats {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+        gap: 20px;
+
+    }
+
+
+    .dashboard-middle {
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+
+    .borrowing-panel {
+
+        grid-column:
+            1 / -1;
+
+        grid-row: auto;
+
+    }
+
+
+    .activity-panel {
+
+        grid-column: auto;
+
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE - 700
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .dashboard-hero {
+
+        min-height: auto;
+
+        padding: 30px;
+
+    }
+
+
+    .dashboard-hero h1 {
+
+        font-size: 30px;
+
+    }
+
+
+    .dashboard-hero p {
+
+        font-size: 14px;
+
+        line-height: 1.55;
+
+    }
+
+
+    .dashboard-hero-label {
+
+        font-size: 15px;
+
+    }
+
+
+    .dashboard-stats {
+
+        grid-template-columns:
+            1fr;
+
+        gap: 14px;
+
+    }
+
+
+    .dashboard-middle {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .borrowing-panel,
+    .popular-panel,
+    .activity-panel {
+
+        grid-column: auto;
+
+    }
+
+
+    .chart-bars {
+
+        gap: 4px;
+
+    }
+
+
+    .chart-bar {
+
+        width: 24px;
+
+    }
+
+
+    .dashboard-table {
+
+        overflow-x: auto;
+
+    }
+
+
+    .dashboard-table-head,
+    .dashboard-table-row {
+
+        min-width: 650px;
+
+    }
+
+
+    .reservation-header {
+
+        align-items: flex-start;
+
+        gap: 12px;
+
+        flex-direction: column;
+
     }
 
 }

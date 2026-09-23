@@ -34,23 +34,16 @@
 
         </div>
 
+        <div class="member-hero-action">
+            <a
+                href="{{ route('members.create') }}"
+                class="btn-add-top"
+            >
+                + Tambah Anggota Baru
+            </a>
+        </div>
+
     </section>
-
-
-    {{-- =====================================================
-         TOP ACTION
-    ====================================================== --}}
-
-    <div class="member-top-action">
-
-        <a
-            href="{{ route('members.create') }}"
-            class="btn-add-top"
-        >
-            + Tambah Anggota
-        </a>
-
-    </div>
 
 
     {{-- =====================================================
@@ -243,41 +236,67 @@
 
                                 <div class="action-buttons">
 
-                                    {{-- EDIT --}}
+    {{-- EDIT --}}
 
-                                    <a
-                                        href="{{ route('members.edit', $member->id) }}"
-                                        class="btn-edit"
-                                        title="Edit Anggota"
-                                    >
-                                        Edit
-                                    </a>
+    <a
+        href="{{ route('members.edit', $member->id) }}"
+        class="btn-edit"
+        title="Edit Anggota"
+        aria-label="Edit Anggota"
+    >
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+        </svg>
+    </a>
 
 
-                                    {{-- HAPUS --}}
+    {{-- HAPUS --}}
 
-                                    <form
-                                        action="{{ route('members.destroy', $member->id) }}"
-                                        method="POST"
-                                        class="delete-member-form"
-                                    >
+    <form
+        action="{{ route('members.destroy', $member->id) }}"
+        method="POST"
+        class="delete-member-form"
+    >
 
-                                        @csrf
+        @csrf
+        @method('DELETE')
 
-                                        @method('DELETE')
+        <button
+            type="button"
+            class="btn-delete"
+            title="Hapus Anggota"
+            aria-label="Hapus Anggota"
+            onclick="openMemberDeleteModal(this)"
+        >
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+            </svg>
+        </button>
 
-                                        <button
-                                            type="button"
-                                            class="btn-delete"
-                                            title="Hapus Anggota"
-                                            onclick="openMemberDeleteModal(this)"
-                                        >
-                                            Hapus
-                                        </button>
+    </form>
 
-                                    </form>
-
-                                </div>
+</div>
 
                             </td>
 

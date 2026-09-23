@@ -4,6 +4,106 @@
 
 #page-reservations {
     width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HERO HEADER
+========================================================= */
+
+.reservation-hero {
+    position: relative;
+    width: 100%;
+    min-height: 140px;
+
+    margin-bottom: 24px;
+    padding: 28px 36px;
+
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            110deg,
+            #eef8f7 0%,
+            #f5fbfb 55%,
+            #ffffff 100%
+        );
+
+    border: 1px solid #d9ebea;
+    border-radius: 16px;
+
+    box-shadow:
+        0 4px 16px rgba(27, 42, 58, 0.03),
+        0 1px 2px rgba(27, 42, 58, 0.02);
+}
+
+.reservation-hero::after {
+    content: "";
+    position: absolute;
+    width: 210px;
+    height: 210px;
+    right: -60px;
+    top: -80px;
+    border-radius: 50%;
+    background: rgba(40, 127, 128, 0.06);
+    pointer-events: none;
+}
+
+.reservation-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 750px;
+}
+
+.reservation-hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 8px;
+
+    color: #287f80;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.reservation-hero-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #287f80;
+}
+
+.reservation-hero h1 {
+    margin: 0 0 6px;
+
+    color: #0f2d42;
+
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 800;
+
+    letter-spacing: -0.02em;
+}
+
+.reservation-hero p {
+    margin: 0;
+
+    color: #526b7a;
+
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 
@@ -62,14 +162,27 @@
 .reservation-form-card {
     background: #fff;
 
-    border: 1px solid #e1e7e7;
+    border: 1px solid #e2e8f0;
 
-    border-radius: 8px;
+    border-radius: 14px;
 
-    padding: 18px;
+    padding: 22px;
 
     box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.04);
+        0 4px 14px rgba(22, 63, 63, 0.04);
+}
+
+.reservation-list-card {
+    background: #fff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 4px 14px rgba(22, 63, 63, 0.04);
 }
 
 .reservation-form-card h3 {

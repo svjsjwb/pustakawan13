@@ -7,21 +7,21 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>
         @yield('title', 'Perpustakaan Tiga Serangkai')
     </title>
+
+    {{-- =====================================================
+         GLOBAL STYLE
+    ====================================================== --}}
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
 
     <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
-
-    {{-- Pastikan admin tidak mewarisi preferensi tema atau density user dari localStorage --}}
-    <script>
-        document.documentElement.removeAttribute('data-theme');
-        document.documentElement.removeAttribute('data-density');
-    </script>
 
     @stack('styles')
 
@@ -30,57 +30,67 @@
 
 <body>
 
-    <div class="app">
+<div class="app">
 
-        @include('partials.navbar')
+    {{-- =====================================================
+         ADMIN NAVBAR
+    ====================================================== --}}
 
-
-        <main class="content">
-
-            @yield('content')
-
-        </main>
-
-
-        @include('partials.footer')
-
-    </div>
+    @include('partials.navbar')
 
 
     {{-- =====================================================
-         GLOBAL JAVASCRIPT
+         MAIN CONTENT
     ====================================================== --}}
 
-    <script src="{{ asset('js/app.js') }}"></script>
+    <main class="content">
+
+        @yield('content')
+
+    </main>
 
 
     {{-- =====================================================
-         PAGE JAVASCRIPT
+         FOOTER
     ====================================================== --}}
 
-    @stack('scripts')
+    @include('partials.footer')
+
+</div>
 
 
-    {{-- =====================================================
-         PROTECTED PAGE
-    ====================================================== --}}
+{{-- =====================================================
+     GLOBAL JAVASCRIPT
+====================================================== --}}
 
-    <script>
+<script src="{{ asset('js/app.js') }}"></script>
 
-        window.addEventListener(
-            'pageshow',
-            function (event) {
 
-                if (event.persisted) {
+{{-- =====================================================
+     PAGE JAVASCRIPT
+====================================================== --}}
 
-                    window.location.reload();
+@stack('scripts')
 
-                }
 
-            }
-        );
+{{-- =====================================================
+     PROTECTED PAGE
+====================================================== --}}
 
-    </script>
+<script>
+
+window.addEventListener('pageshow', function (event) {
+
+    if (event.persisted) {
+
+        window.location.reload();
+
+    }
+
+});
+
+</script>
+
 
 </body>
 

@@ -58,12 +58,11 @@
 
                     <div class="stat-icon">
 
-                        <svg viewBox="0 0 24 24" fill="none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <path d="M4 5.5C4 4.672 4.672 4 5.5 4H19v15H5.5A1.5 1.5 0 0 1 4 17.5v-12Z" stroke="currentColor"
-                                stroke-width="1.8" />
-
-                            <path d="M8 4v15M8 17.5c0 .828-.672 1.5-1.5 1.5H19" stroke="currentColor" stroke-width="1.8" />
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            <path d="M9 7h6M9 11h6"/>
 
                         </svg>
 
@@ -102,13 +101,11 @@
 
                     <div class="stat-icon">
 
-                        <svg viewBox="0 0 24 24" fill="none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <path d="M6 4.5A2.5 2.5 0 0 1 8.5 2H19v17H8.5A2.5 2.5 0 0 0 6 21.5v-17Z" stroke="currentColor"
-                                stroke-width="1.8" />
-
-                            <path d="M6 4.5v14M10 6h5M10 9h5" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" />
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            <path d="M12 6v6l3-2 3 2V6"/>
 
                         </svg>
 
@@ -147,15 +144,12 @@
 
                     <div class="stat-icon">
 
-                        <svg viewBox="0 0 24 24" fill="none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20" stroke="currentColor"
-                                stroke-width="1.8" stroke-linecap="round" />
-
-                            <circle cx="10" cy="7.5" r="3.5" stroke="currentColor" stroke-width="1.8" />
-
-                            <path d="M16 11a3 3 0 1 0 0-6M17 14a4 4 0 0 1 3 4v2" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" />
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
 
                         </svg>
 
@@ -194,11 +188,10 @@
 
                     <div class="stat-icon">
 
-                        <svg viewBox="0 0 24 24" fill="none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.8" />
-
-                            <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            <circle cx="12" cy="12" r="9"/>
+                            <polyline points="12 7 12 12 14.5 14.5"/>
 
                         </svg>
 
@@ -250,14 +243,12 @@
 
                         <div class="panel-icon chart-icon">
 
-                            <svg viewBox="0 0 24 24" fill="none">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                                <path d="M4 19V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-
-                                <path d="M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-
-                                <path d="M7 15l3-4 3 2 5-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                    stroke-linejoin="round" />
+                                <line x1="18" y1="20" x2="18" y2="10"/>
+                                <line x1="12" y1="20" x2="12" y2="4"/>
+                                <line x1="6" y1="20" x2="6" y2="14"/>
+                                <line x1="3" y1="20" x2="21" y2="20"/>
 
                             </svg>
 
@@ -386,12 +377,11 @@
 
                         <div class="panel-icon book-icon">
 
-                            <svg viewBox="0 0 24 24" fill="none">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                                <path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v17H7.5A2.5 2.5 0 0 0 5 21.5v-17Z"
-                                    stroke="currentColor" stroke-width="1.8" />
-
-                                <path d="M5 4.5v14" stroke="currentColor" stroke-width="1.8" />
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                                <polygon points="12 6 13.5 9 17 9.5 14.5 12 15 15.5 12 14 9 15.5 9.5 12 7 9.5 10.5 9 12 6"/>
 
                             </svg>
 
@@ -470,12 +460,9 @@
 
                         <div class="panel-icon activity-icon">
 
-                            <svg viewBox="0 0 24 24" fill="none">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                                <path d="M4 12a8 8 0 1 0 16 0" stroke="currentColor" stroke-width="1.8"
-                                    stroke-linecap="round" />
-
-                                <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
 
                             </svg>
 
@@ -505,15 +492,25 @@
                         <div class="activity-item">
 
                             {{-- ICON --}}
-                            <div class="activity-item-icon">
-
-    @if (($activity['type'] ?? '') === 'manual' && !empty($activity['pinned_at']))
-        📌
-    @else
-        {{ $activity['icon'] }}
-    @endif
-
-</div>
+                            <div class="activity-item-icon icon-{{ ($activity['type'] ?? '') === 'manual' && !empty($activity['pinned_at']) ? 'pinned' : ($activity['type'] ?? 'default') }}">
+                                @if (($activity['type'] ?? '') === 'member')
+                                    👥
+                                @elseif (($activity['type'] ?? '') === 'book')
+                                    📚
+                                @elseif (($activity['type'] ?? '') === 'borrowing')
+                                    📖
+                                @elseif (($activity['type'] ?? '') === 'reservation')
+                                    📅
+                                @elseif (($activity['type'] ?? '') === 'manual')
+                                    @if (!empty($activity['pinned_at']))
+                                        📌
+                                    @else
+                                        📢
+                                    @endif
+                                @else
+                                    •
+                                @endif
+                            </div>
 
 
                             {{-- INFORMASI AKTIVITAS --}}
@@ -653,13 +650,13 @@
 
                     <div class="panel-icon reservation-icon">
 
-                        <svg viewBox="0 0 24 24" fill="none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor"
-                                stroke-width="1.8" />
-
-                            <path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" />
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                            <polyline points="9 16 11 18 15 14"/>
 
                         </svg>
 
@@ -728,17 +725,25 @@
 
 
                         <div>
-                            {{ $reservation->user->name ?? $reservation->member->name ?? '-' }}
+
+                            {{ $reservation->member->name ?? '-' }}
+
                         </div>
 
+
                         <div>
+
                             {{ $reservation->book->title ?? '-' }}
+
                         </div>
 
+
                         <div>
+
                             <span class="activity-label">
                                 Reservasi
                             </span>
+
                         </div>
 
 

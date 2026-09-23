@@ -318,23 +318,85 @@ class CirculationController extends Controller
 
     public function extend(Request $request, Borrowing $borrowing)
     {
+        /*
+     * Peminjaman yang sudah dikembalikan tidak dapat diperpanjang.
+     */
         if ($borrowing->status === 'dikembalikan') {
-            return back()->with('error', 'Peminjaman sudah selesai.');
+            return back()->with(
+                'error',
+                'Peminjaman sudah selesai dan tidak dapat diperpanjang.'
+            );
         }
 
-        $request->validate([
-            'due_at' => [
+        /*
+     * Validasi jumlah hari perpanjangan.
+     */
+        $validated = $request->validate([
+            'extension_days' => [
                 'required',
-                'date',
-                'after:today'
-            ]
+                'integer',
+                'min:1',
+                'max:30',
+            ],
         ]);
 
-        $borrowing->update(['due_at' => $request->due_at]);
+        /*
+     * Pastikan tanggal jatuh tempo tersedia.
+     */
+        if (!$borrowing->due_at) {
+            return back()->with(
+                'error',
+                'Tanggal pengembalian belum tersedia.'
+            );
+        }
+
+        /*
+     * Pastikan extension_days menjadi integer.
+     */
+        $extensionDays = (int) $validated['extension_days'];
+
+        /*
+     * Ambil tanggal jatuh tempo lama.
+     */
+        $currentDueDate = \Carbon\Carbon::parse(
+            $borrowing->due_at
+        );
+
+        /*
+     * Tambahkan hari perpanjangan.
+     */
+        $newDueDate = $currentDueDate
+            ->copy()
+            ->addDays($extensionDays);
+
+        /*
+     * Simpan:
+     *
+     * 1. due_at              -> tanggal baru
+     * 2. status              -> diperpanjang
+     * 3. extension_status    -> disetujui
+     * 4. extension_reason   -> catatan perpanjangan
+     */
+        $borrowing->update([
+            'due_at' => $newDueDate,
+
+            'status' => 'diperpanjang',
+
+            'extension_status' => 'disetujui',
+
+            'extension_reason' =>
+            "Perpanjangan oleh Admin (+{$extensionDays} hari)",
+
+            'extension_admin_notes' =>
+            'Perpanjangan disetujui oleh Admin.',
+        ]);
 
         return redirect()
             ->route('circulation')
-            ->with('success', 'Tanggal pengembalian berhasil diperpanjang.');
+            ->with(
+                'success',
+                "Peminjaman berhasil diperpanjang {$extensionDays} hari."
+            );
     }
 
     /**
