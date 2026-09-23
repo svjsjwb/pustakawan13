@@ -18,6 +18,7 @@ use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Borrowing;
 use App\Models\BorrowingDetail;
+use App\Models\Category;
 use App\Models\Member;
 use App\Models\Reservation;
 use App\Models\User;
@@ -34,6 +35,7 @@ class EmailNotificationSystemTest extends TestCase
     protected Member $member;
     protected Book $book;
     protected BookCopy $copy;
+    protected Category $category;
 
     protected function setUp(): void
     {
@@ -59,10 +61,15 @@ class EmailNotificationSystemTest extends TestCase
             ]
         );
 
+        $this->category = Category::firstOrCreate(
+            ['name' => 'Test Notification Category'],
+            ['level' => 1]
+        );
+
         $this->book = Book::first() ?? Book::create([
             'judul_buku' => 'Test Notification Book',
             'penulis' => 'Test Author',
-            'category_id' => 1,
+            'category_id' => $this->category->id,
             'stok' => 5,
         ]);
 
@@ -101,6 +108,77 @@ class EmailNotificationSystemTest extends TestCase
             'user_id' => $this->user->id,
             'type' => 'borrowing_submitted',
         ]);
+    }
+
+    public function test_user_borrowing_is_automatically_approved_after_validation(): void
+    {
+        $this->actingAs($this->user);
+
+        $response = $this->post(route('user.loans.store'), [
+            'book_id' => $this->book->id,
+        ]);
+
+        $response->assertRedirect(route('borrowings.index'));
+        $borrowing = Borrowing::where('user_id', $this->user->id)->latest('id')->first();
+
+        $this->assertNotNull($borrowing);
+        $this->assertSame('dipinjam', $borrowing->status);
+        $this->assertSame($this->book->stok - 1, $this->book->fresh()->stok);
+        Mail::assertQueued(BorrowingApprovedMail::class, function ($mail) {
+            return $mail->hasTo('testuser@example.com');
+        });
+        Mail::assertNotQueued(BorrowingSubmittedMail::class);
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $this->user->id,
+            'type' => 'borrowing_approved',
+        ]);
+    }
+
+    public function test_sixth_active_book_is_rejected_without_creating_borrowing_or_reducing_stock(): void
+    {
+        $this->actingAs($this->user);
+
+        for ($index = 0; $index < 5; $index++) {
+            $book = Book::create([
+                'judul_buku' => 'Active Limit Book ' . $index,
+                'penulis' => 'Test Author',
+                'category_id' => $this->category->id,
+                'stok' => 1,
+            ]);
+            $copy = BookCopy::create([
+                'book_id' => $book->id,
+                'barcode' => 'LIMIT' . uniqid(),
+                'status' => 'borrowed',
+                'condition' => 'baik',
+            ]);
+            $borrowing = Borrowing::create([
+                'member_id' => $this->member->id,
+                'user_id' => $this->user->id,
+                'book_id' => $book->id,
+                'borrowed_at' => now(),
+                'due_at' => now()->addDays(14),
+                'status' => 'dipinjam',
+            ]);
+            BorrowingDetail::create([
+                'borrowing_id' => $borrowing->id,
+                'book_id' => $book->id,
+                'book_copy_id' => $copy->id,
+                'quantity' => 1,
+            ]);
+        }
+
+        $stockBefore = $this->book->fresh()->stok;
+        $borrowingCountBefore = Borrowing::where('user_id', $this->user->id)->count();
+
+        $response = $this->from('/user/catalog')->post(route('user.loans.store'), [
+            'book_id' => $this->book->id,
+        ]);
+
+        $response->assertRedirect('/user/catalog');
+        $response->assertSessionHas('error', 'Maksimal 5 buku. Silakan kembalikan salah satu buku yang sedang dipinjam sebelum melakukan peminjaman baru.');
+        $this->assertSame($borrowingCountBefore, Borrowing::where('user_id', $this->user->id)->count());
+        $this->assertSame($stockBefore, $this->book->fresh()->stok);
+        Mail::assertNotQueued(BorrowingApprovedMail::class);
     }
 
     public function test_borrowing_approved_triggers_in_app_and_queued_email(): void

@@ -8,6 +8,7 @@ use App\Models\BorrowingDetail;
 use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Member;
+use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -85,6 +86,17 @@ class UserBorrowingController extends Controller
 
         try {
             DB::transaction(function () use ($member, $validated, $borrowedAt, $dueAt, &$newBorrowing, &$borrowedBook, $user) {
+                User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+                $activeBookCount = BorrowingDetail::whereHas('borrowing', function ($query) use ($member) {
+                    $query->where('member_id', $member->id)
+                        ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat']);
+                })->sum('quantity');
+
+                if ($activeBookCount >= 5) {
+                    throw new \RuntimeException('Maksimal 5 buku. Silakan kembalikan salah satu buku yang sedang dipinjam sebelum melakukan peminjaman baru.');
+                }
+
                 $book = Book::lockForUpdate()->findOrFail($validated['book_id']);
                 $borrowedBook = $book;
 
@@ -127,13 +139,12 @@ class UserBorrowingController extends Controller
             });
 
             if ($newBorrowing) {
-                NotificationService::borrowingSubmitted($newBorrowing, Auth::user());
+                NotificationService::borrowingApproved($newBorrowing, $user);
 
-                // Kirim notifikasi instan ke Admin
                 AppNotification::notifyAdmin(
                     'borrowing_new',
-                    'Peminjaman Buku Baru',
-                    "{$user->name} meminjam buku \"{$borrowedBook?->title}\".",
+                    'Peminjaman Buku Otomatis Disetujui',
+                    "{$user->name} meminjam buku \"{$borrowedBook?->title}\" dan memenuhi seluruh validasi.",
                     ['borrowing_id' => $newBorrowing->id, 'book_id' => $borrowedBook?->id]
                 );
             }
@@ -146,12 +157,12 @@ class UserBorrowingController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message'      => 'Buku berhasil dipinjam.',
+                'message'      => 'Peminjaman disetujui. Silakan ambil buku di meja sirkulasi.',
                 'redirect_url' => route('borrowings.index'),
             ]);
         }
 
-        return redirect()->route('borrowings.index')->with('success', 'Buku berhasil dipinjam.');
+        return redirect()->route('borrowings.index')->with('success', 'Peminjaman disetujui. Silakan ambil buku di meja sirkulasi.');
     }
 
     /**
