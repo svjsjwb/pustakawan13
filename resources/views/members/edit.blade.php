@@ -111,17 +111,17 @@
                     </option>
 
                     <option
-                        value="FINANCE DIRECTOR"
-                        {{ old('division', $member->division) == 'FINANCE DIRECTOR' ? 'selected' : '' }}
+                        value="Finance Director"
+                        {{ old('division', $member->division) == 'Finance Director' ? 'selected' : '' }}
                     >
-                        FINANCE DIRECTOR
+                        Finance Director
                     </option>
 
                     <option
-                        value="HROD DIRECTOR"
-                        {{ old('division', $member->division) == 'HROD DIRECTOR' ? 'selected' : '' }}
+                        value="HROD Director"
+                        {{ old('division', $member->division) == 'HROD Director' ? 'selected' : '' }}
                     >
-                        HROD DIRECTOR
+                        HROD Director
                     </option>
 
                     <option

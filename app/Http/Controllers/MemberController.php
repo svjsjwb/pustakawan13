@@ -13,7 +13,7 @@ class MemberController extends Controller
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
-            'division' => ['required', 'string', 'max:100'],
+            'division' => ['required', 'string', 'max:100', 'in:CEO,COO,CFO,Finance Director,HROD Director,PDC'],
             'phone' => ['required', 'string', 'max:20'],
         ];
     }

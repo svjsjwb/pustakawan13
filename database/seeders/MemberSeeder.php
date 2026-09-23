@@ -13,7 +13,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Ahmad Fauzan',
                 'email'         => 'ahmad@example.com',
-                'division'      => 'Editorial',
+                'division'      => 'CEO',
                 'phone'         => '081234567801',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',
@@ -22,7 +22,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Budi Santoso',
                 'email'         => 'budi@example.com',
-                'division'      => 'IT & Digital',
+                'division'      => 'COO',
                 'phone'         => '081234567802',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',
@@ -31,7 +31,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Citra Lestari',
                 'email'         => 'citra@example.com',
-                'division'      => 'Pemasaran',
+                'division'      => 'CFO',
                 'phone'         => '081234567803',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',
@@ -40,7 +40,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Dimas Pratama',
                 'email'         => 'dimas@example.com',
-                'division'      => 'Produksi',
+                'division'      => 'Finance Director',
                 'phone'         => '081234567804',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',
@@ -49,7 +49,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Eka Putri',
                 'email'         => 'eka@example.com',
-                'division'      => 'Keuangan',
+                'division'      => 'HROD Director',
                 'phone'         => '081234567805',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',
@@ -58,7 +58,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Fajar Ramadhan',
                 'email'         => 'fajar@example.com',
-                'division'      => 'SDM & Umum',
+                'division'      => 'PDC',
                 'phone'         => '081234567806',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',
@@ -67,7 +67,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Gita Maharani',
                 'email'         => 'gita@example.com',
-                'division'      => 'Editorial',
+                'division'      => 'CEO',
                 'phone'         => '081234567807',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',
@@ -76,7 +76,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Hendra Wijaya',
                 'email'         => 'hendra@example.com',
-                'division'      => 'Logistik',
+                'division'      => 'COO',
                 'phone'         => '081234567808',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',
@@ -85,7 +85,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Intan Permata',
                 'email'         => 'intan@example.com',
-                'division'      => 'Desain Grafis',
+                'division'      => 'CFO',
                 'phone'         => '081234567809',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',
@@ -94,7 +94,7 @@ class MemberSeeder extends Seeder
             [
                 'name'          => 'Joko Setiawan',
                 'email'         => 'joko@example.com',
-                'division'      => 'Percetakan',
+                'division'      => 'Finance Director',
                 'phone'         => '081234567810',
                 'address'       => 'Surakarta',
                 'status'        => 'nonaktif',

@@ -93,14 +93,14 @@
                     CFO
                 </option>
 
-                <option value="FINANCE DIRECTOR"
-                    {{ old('division') == 'FINANCE DIRECTOR' ? 'selected' : '' }}>
-                    FINANCE DIRECTOR
+                <option value="Finance Director"
+                    {{ old('division') == 'Finance Director' ? 'selected' : '' }}>
+                    Finance Director
                 </option>
 
-                <option value="HROD DIRECTOR"
-                    {{ old('division') == 'HROD DIRECTOR' ? 'selected' : '' }}>
-                    HROD DIRECTOR
+                <option value="HROD Director"
+                    {{ old('division') == 'HROD Director' ? 'selected' : '' }}>
+                    HROD Director
                 </option>
 
                 <option value="PDC"
