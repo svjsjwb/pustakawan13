@@ -467,7 +467,7 @@
     }
 
     function openWrapper_(wrapper) {
-        if (openWrapper && openWrapper !== wrapper) closeAll();
+        closeAll();
         wrapper.classList.add('is-open');
         var trigger = wrapper.querySelector('.pd-trigger');
         if (trigger) { trigger.classList.add('is-open'); trigger.setAttribute('aria-expanded', 'true'); }
@@ -685,28 +685,23 @@ function clearStatusFilter() {
 }
 
 function syncCategoryUiState(mainCat, subCat) {
-    // 1. Remove active state from all subcategory buttons
     document.querySelectorAll('.pd-subcat-btn').forEach(btn => {
         btn.classList.remove('is-selected', 'active-subcat');
     });
 
-    // 2. Remove active state from all category wrappers and reset trigger labels
-    const groups = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
-    groups.forEach(g => {
-        const slug = g.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        const wrapper = document.getElementById('catWrapper_' + slug);
-        const trigger = document.getElementById('catTrigger_' + slug);
-        const label = document.getElementById('catLabel_' + slug);
+    document.querySelectorAll('.pd-category-wrapper[data-category-group]').forEach(wrapper => {
+        const group = wrapper.dataset.categoryGroup || '';
+        const trigger = wrapper.querySelector('.pd-trigger');
+        const label = wrapper.querySelector('.pd-trigger-label');
 
-        if (wrapper) wrapper.classList.remove('has-active-category');
-        if (trigger) trigger.classList.remove('has-value');
-        if (label) label.textContent = g;
+        wrapper.classList.remove('has-active-category');
+        trigger?.classList.remove('has-value');
+        if (label) label.textContent = group;
     });
 
     const allCatWrapper = document.getElementById('wrapperAllCategories');
     const allCatTrigger = document.getElementById('triggerAllCategories');
 
-    // 3. If a subcategory is selected, highlight only that one
     if (mainCat && subCat) {
         if (allCatWrapper) allCatWrapper.classList.remove('has-active-category');
         if (allCatTrigger) allCatTrigger.classList.remove('has-value');
@@ -716,10 +711,10 @@ function syncCategoryUiState(mainCat, subCat) {
             activeBtn.classList.add('is-selected', 'active-subcat');
         }
 
-        const slug = mainCat.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        const activeWrapper = document.getElementById('catWrapper_' + slug);
-        const activeTrigger = document.getElementById('catTrigger_' + slug);
-        const activeLabel = document.getElementById('catLabel_' + slug);
+        const activeWrapper = Array.from(document.querySelectorAll('.pd-category-wrapper[data-category-group]'))
+            .find(wrapper => wrapper.dataset.categoryGroup === mainCat);
+        const activeTrigger = activeWrapper?.querySelector('.pd-trigger');
+        const activeLabel = activeWrapper?.querySelector('.pd-trigger-label');
 
         if (activeWrapper) activeWrapper.classList.add('has-active-category');
         if (activeTrigger) activeTrigger.classList.add('has-value');
