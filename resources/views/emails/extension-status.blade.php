@@ -10,13 +10,23 @@
   $borderColor = $isRejected ? '#ef4444' : '#22c55e';
   $badgeBg     = $isRejected ? '#fee2e2' : '#dcfce7';
   $badgeColor  = $isRejected ? '#991b1b' : '#166534';
-  $icon        = $isRejected ? '?' : '?';
+  $icon        = $isRejected ? '❌' : '✅';
   $statusLabel = $isRejected ? 'Ditolak' : ($status === 'mandiri' ? 'Berhasil (Mandiri)' : 'Disetujui');
 @endphp
 <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);">
-  <div style="background:{{ $headerBg }};padding:32px 28px;text-align:center;">
-    <div style="font-size:24px;font-weight:800;color:#fff;">?? Perpustakaan Tiga Serangkai</div>
-    <div style="color:rgba(255,255,255,.7);font-size:13px;margin-top:4px;">Sistem Informasi Perpustakaan</div>
+  <div style="background:{{ $headerBg }};padding:32px 24px;text-align:center;">
+    <div style="display:inline-block;padding:6px 18px;background:rgba(255,255,255,0.18);border-radius:9999px;color:#ffffff;font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;">
+      📚 Perpustakaan Tiga Serangkai
+    </div>
+    <div style="text-align:center;">
+      @php
+        $logoPath = public_path('images/logo-tiga-serangkai.png');
+        $logoSrc = (isset($message) && is_object($message) && method_exists($message, 'embed') && file_exists($logoPath)) ? $message->embed($logoPath) : asset('images/logo-tiga-serangkai.png');
+      @endphp
+      <div style="display:inline-block;background:#ffffff;padding:10px 18px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        <img src="{{ $logoSrc }}" alt="Logo Tiga Serangkai" style="height:56px;max-width:200px;width:auto;display:block;margin:0 auto;border:0;outline:none;text-decoration:none;">
+      </div>
+    </div>
   </div>
   <div style="padding:32px 28px;">
     <h2 style="margin:0 0 8px;font-size:20px;color:{{ $accentColor }};">{{ $icon }} Perpanjangan Peminjaman {{ $isRejected ? 'Ditolak' : 'Berhasil' }}</h2>
