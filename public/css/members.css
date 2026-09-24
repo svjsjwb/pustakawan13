@@ -1143,6 +1143,39 @@
     border-color: #d93f3f;
 }
 
+.btn-approve,
+.btn-reject {
+    border: none;
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.btn-approve {
+    background: #e8f7ee;
+    color: #248a50;
+}
+
+.btn-approve:hover {
+    background: #d8f0e2;
+}
+
+.btn-reject {
+    background: #fdecec;
+    color: #d94b4b;
+}
+
+.btn-reject:hover {
+    background: #f9dddd;
+}
+
+.status-pending {
+    color: #8a8a8a;
+    font-weight: 600;
+}
 
 /* =========================================================
    RESPONSIVE TABLET

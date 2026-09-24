@@ -143,15 +143,12 @@ class ReportController extends Controller
                 if ($diffDays <= 1) {
 
                     $rangeType = 'day';
-
                 } elseif ($diffDays <= 7) {
 
                     $rangeType = 'week';
-
                 } else {
 
                     $rangeType = 'month';
-
                 }
 
 
@@ -164,7 +161,6 @@ class ReportController extends Controller
                     'startDateInput' => $startDate->format('Y-m-d'),
                     'endDateInput' => $endDate->format('Y-m-d'),
                 ];
-
             } catch (\Exception $e) {
                 // Gunakan default.
             }
@@ -307,38 +303,19 @@ class ReportController extends Controller
             ->count();
 
 
+        /**
+         * ========================================================
+         * TOTAL KETERLAMBATAN
+         * ========================================================
+         */
+        $historicalLateBorrowings =
+            $this->getHistoricalLateBorrowings(
+                $startDate,
+                $endDate
+            );
+
         $totalLate =
-            Borrowing::query()
-            ->whereNotNull('due_at')
-            ->whereBetween(
-                'due_at',
-                [
-                    $startDate,
-                    $endDate
-                ]
-            )
-            ->where(function ($query) {
-
-                $query
-                    ->where(function ($q) {
-                        $q
-                            ->whereNull('returned_at')
-                            ->where(
-                                'due_at',
-                                '<',
-                                now()->startOfDay()
-                            );
-                    })
-                    ->orWhere(function ($q) {
-                        $q
-                            ->whereNotNull('returned_at')
-                            ->whereRaw(
-                                'returned_at >= DATE_ADD(due_at, INTERVAL 1 DAY)'
-                            );
-                    });
-
-            })
-            ->count();
+            $historicalLateBorrowings->count();
 
 
         [
@@ -352,43 +329,13 @@ class ReportController extends Controller
             );
 
 
-        /*
+        /**
          * ========================================================
          * KETERLAMBATAN
          * ========================================================
          */
         $lateBorrowings =
-            Borrowing::query()
-            ->whereNotNull('due_at')
-            ->whereBetween(
-                'due_at',
-                [
-                    $startDate,
-                    $endDate
-                ]
-            )
-            ->where(function ($query) {
-
-                $query
-                    ->where(function ($q) {
-                        $q
-                            ->whereNull('returned_at')
-                            ->where(
-                                'due_at',
-                                '<',
-                                now()->startOfDay()
-                            );
-                    })
-                    ->orWhere(function ($q) {
-                        $q
-                            ->whereNotNull('returned_at')
-                            ->whereRaw(
-                                'returned_at >= DATE_ADD(due_at, INTERVAL 1 DAY)'
-                            );
-                    });
-
-            })
-            ->count();
+            $historicalLateBorrowings->count();
 
 
         [
@@ -527,21 +474,15 @@ class ReportController extends Controller
                                 ? ' (' . $d->quantity . 'x)'
                                 : ''
                             );
-
                     })
                     ->implode(', ');
 
 
+                $lateInfo =
+                    $this->getLateInfo($item);
+
                 $isLate =
-                    (
-                        $item->status === 'dipinjam'
-                        &&
-                        $item->due_at
-                        &&
-                        Carbon::parse(
-                            $item->due_at
-                        )->startOfDay()->addDay()->lte(now())
-                    );
+                    $lateInfo['is_late'];
 
 
                 $statusText =
@@ -550,38 +491,42 @@ class ReportController extends Controller
                     : (
                         $isLate
                         ? 'Terlambat'
-                        : 'Dipinjam'
+                        : (
+                            $item->status === 'diperpanjang'
+                            ? 'Diperpanjang'
+                            : 'Dipinjam'
+                        )
                     );
 
 
                 return [
                     'no' =>
-                        $index + 1,
+                    $index + 1,
 
                     'member_name' =>
-                        $item->member->name
+                    $item->member->name
                         ??
                         ('Anggota #' . $item->member_id),
 
                     'member_code' =>
-                        $item->member->member_code
+                    $item->member->member_code
                         ??
                         '-',
 
                     'judul_buku' =>
-                        $bookTitles
+                    $bookTitles
                         ?:
                         'Tidak ada rincian',
 
                     'borrowed_at' =>
-                        Carbon::parse(
-                            $item->borrowed_at
-                        )->translatedFormat(
-                            'd M Y'
-                        ),
+                    Carbon::parse(
+                        $item->borrowed_at
+                    )->translatedFormat(
+                        'd M Y'
+                    ),
 
                     'due_at' =>
-                        $item->due_at
+                    $item->due_at
                         ? Carbon::parse(
                             $item->due_at
                         )->translatedFormat(
@@ -590,7 +535,7 @@ class ReportController extends Controller
                         : '-',
 
                     'returned_at' =>
-                        $item->returned_at
+                    $item->returned_at
                         ? Carbon::parse(
                             $item->returned_at
                         )->translatedFormat(
@@ -599,7 +544,7 @@ class ReportController extends Controller
                         : '-',
 
                     'status' =>
-                        $statusText,
+                    $statusText,
                 ];
             })
             ->values()
@@ -607,49 +552,21 @@ class ReportController extends Controller
 
 
         /*
-         * ========================================================
-         * DATA EXPORT KETERLAMBATAN
-         * ========================================================
-         *
-         * Hanya peminjaman yang masih dipinjam dan sudah memasuki
-         * 00.00 pada hari setelah tenggat pengembalian.
-         */
+ * ========================================================
+ * DATA EXPORT KETERLAMBATAN
+ * ========================================================
+ *
+ * Menampilkan semua peminjaman yang secara historis
+ * pernah terlambat.
+ *
+ * Termasuk:
+ * - masih dipinjam
+ * - sudah dikembalikan
+ * - pernah diperpanjang
+ * - diperpanjang berkali-kali
+ */
         $lateBorrowingsExportData =
-            Borrowing::with([
-                'member',
-                'details.book'
-            ])
-            ->whereNotNull('due_at')
-            ->whereBetween(
-                'due_at',
-                [
-                    $startDate,
-                    $endDate
-                ]
-            )
-            ->where(function ($query) {
-
-                $query
-                    ->where(function ($q) {
-                        $q
-                            ->whereNull('returned_at')
-                            ->where(
-                                'due_at',
-                                '<',
-                                now()->startOfDay()
-                            );
-                    })
-                    ->orWhere(function ($q) {
-                        $q
-                            ->whereNotNull('returned_at')
-                            ->whereRaw(
-                                'returned_at >= DATE_ADD(due_at, INTERVAL 1 DAY)'
-                            );
-                    });
-
-            })
-            ->latest('due_at')
-            ->get()
+            $historicalLateBorrowings
             ->map(function ($item, $index) {
 
                 $bookTitles =
@@ -663,68 +580,166 @@ class ReportController extends Controller
                                 ? ' (' . $d->quantity . 'x)'
                                 : ''
                             );
-
                     })
                     ->implode(', ');
 
-                $dueDate =
-                    Carbon::parse(
-                        $item->due_at
-                    )->startOfDay();
+                $lateInfo =
+                    $this->getLateInfo($item);
 
-                $lateUntil =
-                    $item->returned_at
-                    ? Carbon::parse(
-                        $item->returned_at
-                    )->startOfDay()
-                    : now()->startOfDay();
-
-                $lateDays =
-                    max(
-                        1,
-                        $dueDate->diffInDays(
-                            $lateUntil
-                        )
+                $extensionHistory =
+                    collect(
+                        $lateInfo['extension_history']
                     );
 
+                /*
+         * ====================================================
+         * TENGGAT AWAL
+         * ====================================================
+         */
+                if ($extensionHistory->isNotEmpty()) {
+
+                    $originalDueDate =
+                        Carbon::parse(
+                            $extensionHistory->first()['old_due_at']
+                        );
+                } else {
+
+                    $originalDueDate =
+                        Carbon::parse(
+                            $item->due_at
+                        );
+                }
+
+                /*
+         * ====================================================
+         * TANGGAL PERPANJANGAN
+         * ====================================================
+         */
+                $extensionDates =
+                    $extensionHistory
+                    ->map(function ($extension) {
+
+                        return Carbon::parse(
+                            $extension['extension_date']
+                                ?? $extension['new_due_at']
+                        )->translatedFormat('d M Y');
+                    })
+                    ->implode('<br>');
+
+                /*
+         * ====================================================
+         * TENGGAT BARU
+         * ====================================================
+         */
+                $newDueDates =
+                    $extensionHistory
+                    ->map(function ($extension) {
+
+                        return Carbon::parse(
+                            $extension['new_due_at']
+                        )->translatedFormat('d M Y');
+                    })
+                    ->implode('<br>');
+
+                /*
+         * ====================================================
+         * STATUS
+         * ====================================================
+         *
+         * Kalau pernah diperpanjang,
+         * histori status tetap Diperpanjang.
+         */
+                if ($extensionHistory->isNotEmpty()) {
+
+                    $statusText =
+                        'Diperpanjang';
+                } else {
+
+                    $statusText =
+                        $item->status === 'dikembalikan'
+                        ? 'Dikembalikan'
+                        : 'Terlambat';
+                }
+
+                /*
+         * ====================================================
+         * KETERANGAN
+         * ====================================================
+         */
+                $keterangan =
+                    'Terlambat '
+                    . $lateInfo['late_days']
+                    . ' hari';
+
                 return [
-                    'no' => $index + 1,
+
+                    'no' =>
+                    $index + 1,
 
                     'member_name' =>
-                        $item->member->name
+                    $item->member->name
                         ??
                         ('Anggota #' . $item->member_id),
 
                     'member_code' =>
-                        $item->member->member_code
+                    $item->member->member_code
                         ??
                         '-',
 
                     'judul_buku' =>
-                        $bookTitles
+                    $bookTitles
                         ?:
                         'Tidak ada rincian',
 
                     'borrowed_at' =>
-                        Carbon::parse(
-                            $item->borrowed_at
-                        )->translatedFormat(
-                            'd M Y'
-                        ),
+                    Carbon::parse(
+                        $item->borrowed_at
+                    )->translatedFormat(
+                        'd M Y'
+                    ),
 
+                    /*
+             * Tenggat Pengembalian = deadline awal.
+             */
                     'due_at' =>
-                        Carbon::parse(
-                            $item->due_at
-                        )->translatedFormat(
+                    $originalDueDate
+                        ->translatedFormat(
                             'd M Y'
                         ),
 
-                    'status' => 'Terlambat',
+                    /*
+             * Status historis.
+             */
+                    'status' =>
+                    $statusText,
+
+                    /*
+             * Bisa berisi beberapa tanggal.
+             */
+                    'extension_date' =>
+                    $extensionDates
+                        ?:
+                        '-',
+
+                    /*
+             * Bisa berisi beberapa deadline baru.
+             */
+                    'new_due_at' =>
+                    $newDueDates
+                        ?:
+                        '-',
+
+                    'returned_at' =>
+                    $item->returned_at
+                        ? Carbon::parse(
+                            $item->returned_at
+                        )->translatedFormat(
+                            'd M Y'
+                        )
+                        : '-',
 
                     'keterangan' =>
-                        'Terlambat ' .
-                        $lateDays .
-                        ' hari',
+                    $keterangan,
                 ];
             })
             ->values()
@@ -839,8 +854,7 @@ class ReportController extends Controller
                     $bookTitles =
                         $borrowing->details
                         ->map(function ($detail) {
-                            return
-                                ($detail->book->judul_buku ?? 'Buku')
+                            return ($detail->book->judul_buku ?? 'Buku')
                                 .
                                 (
                                     $detail->quantity > 1
@@ -871,16 +885,16 @@ class ReportController extends Controller
                     return [
                         'no' => $index + 1,
                         'member_name' =>
-                            $member->name
+                        $member->name
                             ??
                             ('Anggota #' . $member->id),
                         'member_code' =>
-                            $member->member_code ?? '-',
+                        $member->member_code ?? '-',
                         'activity' => 'Peminjaman',
                         'judul_buku' =>
-                            $bookTitles ?: 'Tidak ada rincian',
+                        $bookTitles ?: 'Tidak ada rincian',
                         'date' =>
-                            $borrowingDate->translatedFormat('d M Y'),
+                        $borrowingDate->translatedFormat('d M Y'),
                         'status' => $statusText,
                     ];
                 }
@@ -889,29 +903,29 @@ class ReportController extends Controller
                     return [
                         'no' => $index + 1,
                         'member_name' =>
-                            $member->name
+                        $member->name
                             ??
                             ('Anggota #' . $member->id),
                         'member_code' =>
-                            $member->member_code ?? '-',
+                        $member->member_code ?? '-',
                         'activity' => 'Reservasi',
                         'judul_buku' =>
-                            $reservation->book->judul_buku ?? 'Buku',
+                        $reservation->book->judul_buku ?? 'Buku',
                         'date' =>
-                            $reservationDate->translatedFormat('d M Y'),
+                        $reservationDate->translatedFormat('d M Y'),
                         'status' =>
-                            ucfirst($reservation->status),
+                        ucfirst($reservation->status),
                     ];
                 }
 
                 return [
                     'no' => $index + 1,
                     'member_name' =>
-                        $member->name
+                    $member->name
                         ??
                         ('Anggota #' . $member->id),
                     'member_code' =>
-                        $member->member_code ?? '-',
+                    $member->member_code ?? '-',
                     'activity' => '-',
                     'judul_buku' => '-',
                     'date' => '-',
@@ -933,25 +947,25 @@ class ReportController extends Controller
 
                 return [
                     'no' =>
-                        $index + 1,
+                    $index + 1,
 
                     'tanggal' =>
-                        $item['date']
+                    $item['date']
                         ->translatedFormat(
                             'd M Y'
                         ),
 
                     'jenis_perubahan' =>
-                        $item['label'],
+                    $item['label'],
 
                     'judul_buku' =>
-                        $item['book_title'],
+                    $item['judul_buku'],
 
                     'eksemplar_jumlah' =>
-                        $item['display_quantity'],
+                    $item['display_quantity'],
 
                     'alasan_keterangan' =>
-                        $item['reason'],
+                    $item['reason'],
 
                 ];
             })
@@ -1062,32 +1076,32 @@ class ReportController extends Controller
                 'type' => 'added',
 
                 'label' =>
-                    'Buku Ditambahkan',
+                'Buku Ditambahkan',
 
                 'date' =>
-                    $book->created_at,
+                $book->created_at,
 
-                'book_title' =>
-                    $book->title,
+                'judul_buku' =>
+                $book->judul_buku,
 
                 'barcode' =>
-                    null,
+                null,
 
                 'quantity' =>
-                    $copyCount > 0
+                $copyCount > 0
                     ? $copyCount
                     : 1,
 
                 'display_quantity' =>
-                    $copyCount > 0
+                $copyCount > 0
                     ? $copyCount . ' eksemplar'
                     : '1 buku',
 
                 'reason' =>
-                    'Koleksi baru',
+                'Koleksi baru',
 
                 'sort_date' =>
-                    $book->created_at,
+                $book->created_at,
             ]);
         }
 
@@ -1124,32 +1138,32 @@ class ReportController extends Controller
 
             $data->push([
                 'type' =>
-                    'withdrawn',
+                'withdrawn',
 
                 'label' =>
-                    'Buku Ditarik',
+                'Buku Ditarik',
 
                 'date' =>
-                    $withdrawal->withdrawn_at,
+                $withdrawal->withdrawn_at,
 
-                'book_title' =>
-                    $withdrawal->book_title,
+                'judul_buku' =>
+                $withdrawal->book_title,
 
                 'barcode' =>
-                    null,
+                null,
 
                 'quantity' =>
-                    $withdrawal->quantity,
+                $withdrawal->quantity,
 
                 'display_quantity' =>
-                    $withdrawal->quantity
+                $withdrawal->quantity
                     . ' eksemplar',
 
                 'reason' =>
-                    $withdrawal->reason,
+                $withdrawal->reason,
 
                 'sort_date' =>
-                    $withdrawal->withdrawn_at,
+                $withdrawal->withdrawn_at,
             ]);
         }
 
@@ -1186,32 +1200,32 @@ class ReportController extends Controller
 
             $data->push([
                 'type' =>
-                    'copy_deleted',
+                'copy_deleted',
 
                 'label' =>
-                    'Eksemplar Dihapus',
+                'Eksemplar Dihapus',
 
                 'date' =>
-                    $withdrawal->withdrawn_at,
+                $withdrawal->withdrawn_at,
 
-                'book_title' =>
-                    $withdrawal->book_title,
+                'judul_buku' =>
+                $withdrawal->book_title,
 
                 'barcode' =>
-                    $withdrawal->barcode,
+                $withdrawal->barcode,
 
                 'quantity' =>
-                    1,
+                1,
 
                 'display_quantity' =>
-                    $withdrawal->barcode
+                $withdrawal->barcode
                     ?? '1 eksemplar',
 
                 'reason' =>
-                    $withdrawal->reason,
+                $withdrawal->reason,
 
                 'sort_date' =>
-                    $withdrawal->withdrawn_at,
+                $withdrawal->withdrawn_at,
             ]);
         }
 
@@ -1250,34 +1264,34 @@ class ReportController extends Controller
 
             $data->push([
                 'type' =>
-                    'damaged',
+                'damaged',
 
                 'label' =>
-                    'Kondisi Rusak',
+                'Kondisi Rusak',
 
                 'date' =>
-                    $copy->updated_at
+                $copy->updated_at
                     ?? $copy->created_at,
 
                 'book_title' =>
-                    $copy->book->judul_buku
+                $copy->book->judul_buku
                     ?? 'Buku',
 
                 'barcode' =>
-                    $copy->barcode,
+                $copy->barcode,
 
                 'quantity' =>
-                    1,
+                1,
 
                 'display_quantity' =>
-                    $copy->barcode
+                $copy->barcode
                     ?? '1 eksemplar',
 
                 'reason' =>
-                    'Kondisi fisik rusak',
+                'Kondisi fisik rusak',
 
                 'sort_date' =>
-                    $copy->updated_at
+                $copy->updated_at
                     ?? $copy->created_at,
             ]);
         }
@@ -1292,6 +1306,285 @@ class ReportController extends Controller
             ->sortByDesc(
                 'sort_date'
             )
+            ->values();
+    }
+
+
+    /**
+     * ============================================================
+     * HITUNG RIWAYAT KETERLAMBATAN PEMINJAMAN
+     * ============================================================
+     *
+     * Menghasilkan:
+     *
+     * - apakah pernah terlambat
+     * - tanggal mulai terlambat
+     * - tanggal akhir keterlambatan
+     * - total hari terlambat
+     * - riwayat perpanjangan
+     *
+     * Aturan:
+     *
+     * Peminjaman jatuh tempo tanggal 15
+     * -> belum terlambat sepanjang tanggal 15
+     * -> mulai terlambat 00:00 tanggal 16
+     *
+     * Jika diperpanjang:
+     *
+     * 15 Sep -> 20 Sep
+     *
+     * dan perpanjangan dilakukan 16 Sep,
+     * maka tanggal 16 dihitung sebagai 1 hari terlambat
+     * sebelum deadline baru berlaku.
+     */
+    private function getLateInfo(Borrowing $borrowing)
+    {
+        if (!$borrowing->due_at) {
+            return [
+                'is_late' => false,
+                'late_start' => null,
+                'late_end' => null,
+                'late_days' => 0,
+                'extension_history' => [],
+            ];
+        }
+
+        $history = collect(
+            $borrowing->extension_history ?? []
+        )
+            ->filter(function ($extension) {
+                return !empty($extension['old_due_at'])
+                    && !empty($extension['new_due_at']);
+            })
+            ->values();
+
+        /*
+     * ========================================================
+     * TENTUKAN DEADLINE AWAL
+     * ========================================================
+     */
+        if ($history->isNotEmpty()) {
+            $originalDueDate = Carbon::parse(
+                $history->first()['old_due_at']
+            )->startOfDay();
+        } else {
+            $originalDueDate = Carbon::parse(
+                $borrowing->due_at
+            )->startOfDay();
+        }
+
+        /*
+     * ========================================================
+     * TANGGAL AKHIR PERHITUNGAN
+     * ========================================================
+     *
+     * Jika sudah dikembalikan:
+     * gunakan tanggal pengembalian.
+     *
+     * Jika belum:
+     * gunakan hari ini.
+     */
+        $endDate = $borrowing->returned_at
+            ? Carbon::parse(
+                $borrowing->returned_at
+            )->startOfDay()
+            : now()->startOfDay();
+
+        /*
+     * Jika dikembalikan sebelum / tepat deadline final,
+     * belum tentu pernah terlambat.
+     */
+        $lateDays = 0;
+        $lateStart = null;
+        $lateEnd = null;
+
+        /*
+     * ========================================================
+     * PERHITUNGAN PERIODE
+     * ========================================================
+     */
+
+        $currentDueDate = $originalDueDate;
+
+        foreach ($history as $extension) {
+
+            $extensionDate = Carbon::parse(
+                $extension['extension_date']
+                    ?? $extension['new_due_at']
+            )->startOfDay();
+
+            /*
+         * Keterlambatan dimulai H+1 dari deadline lama.
+         */
+            $lateStartForPeriod = $currentDueDate
+                ->copy()
+                ->addDay();
+
+            /*
+         * Sampai tanggal perpanjangan.
+         *
+         * Kalau extension dilakukan sebelum deadline,
+         * hasilnya 0.
+         */
+            if ($extensionDate->gte($lateStartForPeriod)) {
+
+                $periodEnd = $extensionDate->copy();
+
+                /*
+             * Jangan menghitung melewati tanggal pengembalian.
+             */
+                if ($periodEnd->gt($endDate)) {
+                    $periodEnd = $endDate->copy();
+                }
+
+                if ($lateStartForPeriod->lte($periodEnd)) {
+
+                    $days = $lateStartForPeriod->diffInDays(
+                        $periodEnd
+                    ) + 1;
+
+                    $lateDays += $days;
+
+                    if (!$lateStart) {
+                        $lateStart =
+                            $lateStartForPeriod->copy();
+                    }
+
+                    $lateEnd =
+                        $periodEnd->copy();
+                }
+            }
+
+            /*
+         * Deadline baru menjadi deadline aktif.
+         */
+            $currentDueDate = Carbon::parse(
+                $extension['new_due_at']
+            )->startOfDay();
+
+            /*
+         * Kalau sudah dikembalikan,
+         * tidak perlu menghitung periode berikutnya.
+         */
+            if (
+                $borrowing->returned_at
+                &&
+                $endDate->lt(
+                    $currentDueDate->copy()->addDay()
+                )
+            ) {
+                break;
+            }
+        }
+
+        /*
+     * ========================================================
+     * PERIODE SETELAH DEADLINE TERAKHIR
+     * ========================================================
+     */
+        $finalLateStart = $currentDueDate
+            ->copy()
+            ->addDay();
+
+        if ($endDate->gte($finalLateStart)) {
+
+            $days = $finalLateStart->diffInDays(
+                $endDate
+            ) + 1;
+
+            $lateDays += $days;
+
+            if (!$lateStart) {
+                $lateStart =
+                    $finalLateStart->copy();
+            }
+
+            $lateEnd =
+                $endDate->copy();
+        }
+
+        return [
+            'is_late' =>
+            $lateDays > 0,
+
+            'late_start' =>
+            $lateStart,
+
+            'late_end' =>
+            $lateEnd,
+
+            'late_days' =>
+            $lateDays,
+
+            'extension_history' =>
+            $history->all(),
+        ];
+    }
+
+
+    /**
+     * ============================================================
+     * AMBIL PEMINJAMAN YANG PERNAH TERLAMBAT
+     * ============================================================
+     */
+    private function getHistoricalLateBorrowings(
+        $startDate,
+        $endDate
+    ) {
+        $borrowings = Borrowing::with([
+            'member',
+            'details.book',
+        ])
+            ->whereNotNull('due_at')
+            ->get();
+
+        return $borrowings
+            ->filter(function ($borrowing) use (
+                $startDate,
+                $endDate
+            ) {
+
+                $lateInfo =
+                    $this->getLateInfo($borrowing);
+
+                if (!$lateInfo['is_late']) {
+                    return false;
+                }
+
+                $lateStart =
+                    $lateInfo['late_start'];
+
+                $lateEnd =
+                    $lateInfo['late_end'];
+
+                /*
+             * Riwayat keterlambatan dianggap masuk periode
+             * jika periode keterlambatannya bersinggungan
+             * dengan filter tanggal laporan.
+             */
+                if (
+                    $lateStart
+                    &&
+                    $lateEnd
+                    &&
+                    $lateStart->lte($endDate)
+                    &&
+                    $lateEnd->gte($startDate)
+                ) {
+                    return true;
+                }
+
+                return false;
+            })
+            ->sortByDesc(function ($borrowing) {
+
+                $lateInfo =
+                    $this->getLateInfo($borrowing);
+
+                return $lateInfo['late_start']
+                    ? $lateInfo['late_start']->timestamp
+                    : 0;
+            })
             ->values();
     }
 
@@ -1329,38 +1622,226 @@ class ReportController extends Controller
         $endDate,
         $type
     ) {
-        return $this->generateDateChart(
-            Borrowing::query()
-                ->whereNotNull('due_at')
-                ->where(function ($query) {
+        $lateBorrowings =
+            $this->getHistoricalLateBorrowings(
+                $startDate,
+                $endDate
+            );
 
-                    $query
-                        ->where(function ($q) {
-                            $q
-                                ->whereNull('returned_at')
-                                ->where(
-                                    'due_at',
-                                    '<',
-                                    now()->startOfDay()
-                                );
-                        })
-                        ->orWhere(function ($q) {
-                            $q
-                                ->whereNotNull('returned_at')
-                                ->whereRaw(
-                                    'returned_at >= DATE_ADD(due_at, INTERVAL 1 DAY)'
-                                );
-                        });
+        /*
+     * ========================================================
+     * HARIAN
+     * ========================================================
+     */
+        if ($type === 'day') {
 
-                }),
-            'due_at',
-            $startDate,
-            $endDate,
-            $type,
-            function ($query) {
-                return $query;
+            $labels = [
+                '00',
+                '04',
+                '08',
+                '12',
+                '16',
+                '20',
+            ];
+
+            $bars = [];
+
+            foreach ($labels as $hour) {
+
+                $start =
+                    $startDate
+                    ->copy()
+                    ->setHour((int) $hour)
+                    ->startOfHour();
+
+                $end =
+                    $start
+                    ->copy()
+                    ->addHours(3)
+                    ->endOfHour();
+
+                $count =
+                    $lateBorrowings
+                    ->filter(function ($borrowing) use (
+                        $start,
+                        $end
+                    ) {
+
+                        $lateInfo =
+                            $this->getLateInfo(
+                                $borrowing
+                            );
+
+                        if (!$lateInfo['is_late']) {
+                            return false;
+                        }
+
+                        $lateStart =
+                            $lateInfo['late_start'];
+
+                        return $lateStart
+                            && $lateStart->between(
+                                $start,
+                                $end
+                            );
+                    })
+                    ->count();
+
+                $bars[] =
+                    $count;
             }
-        );
+
+            return [
+                $labels,
+                $this->normalizeBars($bars)
+            ];
+        }
+
+        /*
+     * ========================================================
+     * MINGGUAN
+     * ========================================================
+     */
+        if ($type === 'week') {
+
+            $labels = [];
+
+            $bars = [];
+
+            $cursor =
+                $startDate->copy();
+
+            while (
+                $cursor->lte($endDate)
+            ) {
+
+                $dayStart =
+                    $cursor
+                    ->copy()
+                    ->startOfDay();
+
+                $dayEnd =
+                    $cursor
+                    ->copy()
+                    ->endOfDay();
+
+                $labels[] =
+                    $cursor->translatedFormat('D');
+
+                $bars[] =
+                    $lateBorrowings
+                    ->filter(function ($borrowing) use (
+                        $dayStart,
+                        $dayEnd
+                    ) {
+
+                        $lateInfo =
+                            $this->getLateInfo(
+                                $borrowing
+                            );
+
+                        if (!$lateInfo['is_late']) {
+                            return false;
+                        }
+
+                        $lateStart =
+                            $lateInfo['late_start'];
+
+                        return $lateStart
+                            && $lateStart->between(
+                                $dayStart,
+                                $dayEnd
+                            );
+                    })
+                    ->count();
+
+                $cursor->addDay();
+            }
+
+            return [
+                $labels,
+                $this->normalizeBars($bars)
+            ];
+        }
+
+        /*
+     * ========================================================
+     * BULANAN
+     * ========================================================
+     */
+        $labels = [];
+
+        $bars = [];
+
+        $cursor =
+            $startDate->copy();
+
+        $weekNumber = 1;
+
+        while (
+            $cursor->lte($endDate)
+        ) {
+
+            $weekStart =
+                $cursor
+                ->copy()
+                ->startOfDay();
+
+            $weekEnd =
+                $cursor
+                ->copy()
+                ->addDays(6)
+                ->endOfDay();
+
+            if (
+                $weekEnd->gt($endDate)
+            ) {
+                $weekEnd =
+                    $endDate->copy();
+            }
+
+            $labels[] =
+                'M' . $weekNumber;
+
+            $bars[] =
+                $lateBorrowings
+                ->filter(function ($borrowing) use (
+                    $weekStart,
+                    $weekEnd
+                ) {
+
+                    $lateInfo =
+                        $this->getLateInfo(
+                            $borrowing
+                        );
+
+                    if (!$lateInfo['is_late']) {
+                        return false;
+                    }
+
+                    $lateStart =
+                        $lateInfo['late_start'];
+
+                    return $lateStart
+                        && $lateStart->between(
+                            $weekStart,
+                            $weekEnd
+                        );
+                })
+                ->count();
+
+            $cursor =
+                $weekEnd
+                ->copy()
+                ->addSecond();
+
+            $weekNumber++;
+        }
+
+        return [
+            $labels,
+            $this->normalizeBars($bars)
+        ];
     }
 
 
@@ -1434,7 +1915,6 @@ class ReportController extends Controller
                                 $start,
                                 $end
                             );
-
                     })
                     ->count();
 
@@ -1502,7 +1982,6 @@ class ReportController extends Controller
                                 $dayStart,
                                 $dayEnd
                             );
-
                     })
                     ->count();
 
@@ -1579,7 +2058,6 @@ class ReportController extends Controller
                             $weekStart,
                             $weekEnd
                         );
-
                 })
                 ->count();
 
@@ -2063,10 +2541,9 @@ class ReportController extends Controller
                     8,
                     round(
                         ($value / $max)
-                        * 100
+                            * 100
                     )
                 );
-
             },
             $values
         );

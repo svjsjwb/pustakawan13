@@ -88,7 +88,17 @@ class User extends Authenticatable
      */
     public function isUser(): bool
     {
-        return $this->role === 'user';
+        return $this->role === 'member';
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->role === 'guest';
+    }
+
+    public function isMember(): bool
+    {
+        return $this->role === 'member';
     }
 
     /**
@@ -153,14 +163,15 @@ class User extends Authenticatable
     protected static function booted(): void
     {
         static::saved(function (User $user) {
-            if ($user->role === 'user' && !empty($user->email)) {
+
+            if ($user->role === 'member' && !empty($user->email)) {
+
                 Member::updateOrCreate(
                     ['email' => $user->email],
                     [
-                        'user_id'  => $user->id,
-                        'name'     => $user->name,
-                        'phone'    => $user->phone ?? '-',
-                        'division' => 'Anggota',
+                        'user_id' => $user->id,
+                        'name'    => $user->name,
+                        'phone'   => $user->phone ?? '-',
                     ]
                 );
             }
@@ -175,7 +186,6 @@ class User extends Authenticatable
                 'user_id'  => $this->id,
                 'name'     => $this->name,
                 'phone'    => $this->phone ?? '-',
-                'division' => 'Anggota',
             ]
         );
     }

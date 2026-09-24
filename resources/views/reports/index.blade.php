@@ -10,799 +10,7 @@
 
     <link rel="stylesheet" href="{{ asset('css/report.css') }}">
 
-    <style>
-
-        /* =========================================================
-
-                   FILTER BAR
-
-                ========================================================== */
-
-        .report-filter-box {
-
-            background: #ffffff;
-
-            border-radius: 12px;
-
-            border: 1px solid #d8e5e5;
-
-            padding: 18px 24px;
-
-            margin-bottom: 24px;
-
-            box-shadow: 0 4px 16px rgba(40, 123, 123, 0.05);
-
-            display: flex;
-
-            flex-wrap: wrap;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            gap: 16px;
-
-        }
-
-
-
-
-
-
-
-
-
-        .filter-form-group {
-
-            display: flex;
-
-            align-items: center;
-
-            flex-wrap: wrap;
-
-            gap: 12px;
-
-            flex: 1;
-
-        }
-
-
-
-
-
-
-
-
-
-        /* =========================================================
-
-                   DATE PICKER
-
-                ========================================================== */
-
-        .date-picker-input-wrapper {
-
-            position: relative;
-
-            display: inline-flex;
-
-            align-items: center;
-
-            min-width: 290px;
-
-        }
-
-
-
-
-
-
-
-
-
-        .date-picker-input-wrapper .calendar-icon {
-
-            position: absolute;
-
-            left: 14px;
-
-            font-size: 16px;
-
-            color: #287b7b;
-
-            pointer-events: none;
-
-            z-index: 2;
-
-        }
-
-
-
-
-
-
-
-
-
-        .date-range-flatpickr {
-
-            width: 100%;
-
-            height: 42px;
-
-            padding: 0 16px 0 42px;
-
-            font-size: 13px;
-
-            font-weight: 600;
-
-            color: #172f2f;
-
-            background: #f7fbfb !important;
-
-            border: 1.5px solid #c9dede;
-
-            border-radius: 8px;
-
-            cursor: pointer;
-
-            transition: all 0.2s ease;
-
-        }
-
-
-
-
-
-
-
-
-
-        .date-range-flatpickr:hover,
-
-        .date-range-flatpickr:focus {
-
-            border-color: #287b7b;
-
-            background: #ffffff !important;
-
-            box-shadow:
-
-                0 0 0 3px rgba(40, 123, 123, 0.12);
-
-            outline: none;
-
-        }
-
-
-
-
-
-
-
-
-
-        /* =========================================================
-
-                   BUTTON
-
-                ========================================================== */
-
-        .btn-filter-apply {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 7px;
-
-            height: 42px;
-
-            padding: 0 20px;
-
-            background: #287b7b;
-
-            color: #ffffff;
-
-            font-size: 13px;
-
-            font-weight: 700;
-
-            border: none;
-
-            border-radius: 8px;
-
-            cursor: pointer;
-
-            transition: all 0.2s ease;
-
-            text-decoration: none;
-
-            box-shadow:
-
-                0 4px 12px rgba(40, 123, 123, 0.18);
-
-        }
-
-
-
-
-
-
-
-
-
-        .btn-filter-apply:hover {
-
-            background: #206363;
-
-            transform: translateY(-1px);
-
-            box-shadow:
-
-                0 6px 16px rgba(40, 123, 123, 0.25);
-
-            color: #ffffff;
-
-        }
-
-
-
-
-
-
-
-
-
-        .btn-filter-reset {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 6px;
-
-            height: 42px;
-
-            padding: 0 16px;
-
-            background: #f1f6f6;
-
-            color: #486161;
-
-            font-size: 13px;
-
-            font-weight: 600;
-
-            border: 1px solid #d0e0e0;
-
-            border-radius: 8px;
-
-            cursor: pointer;
-
-            transition: all 0.2s ease;
-
-            text-decoration: none;
-
-        }
-
-
-
-
-
-
-
-
-
-        .btn-filter-reset:hover {
-
-            background: #e3eded;
-
-            color: #172f2f;
-
-            border-color: #bad3d3;
-
-        }
-
-
-
-
-
-
-
-
-
-        /* =========================================================
-
-                   PERIOD
-
-                ========================================================== */
-
-        .filter-period-badge {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 6px;
-
-            background: #eef7f7;
-
-            border: 1px solid #cce5e5;
-
-            color: #206363;
-
-            font-size: 12px;
-
-            font-weight: 700;
-
-            padding: 6px 14px;
-
-            border-radius: 20px;
-
-        }
-
-
-
-
-
-
-
-
-
-        /* =========================================================
-
-                   FLATPICKR
-
-                ========================================================== */
-
-        .flatpickr-calendar {
-
-            border-radius: 12px !important;
-
-            box-shadow:
-
-                0 10px 30px rgba(40, 123, 123, 0.18) !important;
-
-            border: 1px solid #d5e6e6 !important;
-
-            font-family: inherit !important;
-
-        }
-
-
-
-
-
-
-
-
-
-        .flatpickr-day.selected,
-
-        .flatpickr-day.startRange,
-
-        .flatpickr-day.endRange {
-
-            background: #287b7b !important;
-
-            border-color: #287b7b !important;
-
-            color: #ffffff !important;
-
-        }
-
-
-
-
-
-
-
-
-
-        .flatpickr-day.inRange {
-
-            background: #d8eded !important;
-
-            border-color: #d8eded !important;
-
-            color: #174242 !important;
-
-        }
-
-
-
-
-
-
-
-
-
-        /* =========================================================
-
-                   PDF BUTTON
-
-                ========================================================== */
-
-        .report-download-btn {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 7px;
-
-            min-width: 105px;
-
-            height: 38px;
-
-            padding: 0 16px;
-
-            border: none;
-
-            border-radius: 8px;
-
-            background: #287b7b;
-
-            color: #ffffff;
-
-            font-size: 12px;
-
-            font-weight: 700;
-
-            cursor: pointer;
-
-            transition:
-
-                **background** 0.2s ease,
-
-                transform 0.2s ease,
-
-                box-shadow 0.2s ease;
-
-        }
-
-
-
-
-
-
-
-
-
-        .report-download-btn:hover {
-
-            background: #206363;
-
-            transform: translateY(-1px);
-
-            box-shadow:
-
-                0 5px 14px rgba(40, 123, 123, 0.22);
-
-        }
-
-
-
-
-
-
-
-
-
-        .report-download-btn:active {
-
-            transform: translateY(0);
-
-        }
-
-
-
-
-
-
-
-
-
-        /* =========================================================
-
-                   KOLEKSI SUMMARY
-
-                ========================================================== */
-
-        .collection-summary {
-
-            display: grid;
-
-            grid-template-columns:
-
-                repeat(4, minmax(0, 1fr));
-
-            gap: 10px;
-
-            margin-top: 16px;
-
-        }
-
-
-
-
-
-
-
-
-
-        .collection-summary-item {
-
-            padding: 10px 11px;
-
-            background: #f7fbfb;
-
-            border: 1px solid #e0eceb;
-
-            border-radius: 9px;
-
-        }
-
-
-
-
-
-
-
-
-
-        .collection-summary-item span {
-
-            display: block;
-
-            margin-bottom: 4px;
-
-            color: #718091;
-
-            font-size: 9px;
-
-            font-weight: 700;
-
-        }
-
-
-
-
-
-
-
-
-
-        .collection-summary-item strong {
-
-            color: #173b52;
-
-            font-size: 15px;
-
-        }
-
-
-
-
-
-
-
-
-
-        /* =========================================================
-
-                   DETAIL COLLECTION TABLE
-
-                ========================================================== */
-
-        .collection-detail-wrapper {
-
-            margin-top: 22px;
-
-            overflow-x: auto;
-
-            border: 1px solid #e2e8f0;
-
-            border-radius: 10px;
-
-        }
-
-
-
-
-
-
-
-
-
-        .collection-detail-table {
-
-            width: 100%;
-
-            border-collapse: collapse;
-
-            min-width: 700px;
-
-        }
-
-
-
-
-
-
-
-
-
-        .collection-detail-table th {
-
-            padding: 11px 12px;
-
-            background: #f7fbfb;
-
-            border-bottom: 1px solid #e2e8f0;
-
-            color: #52616d;
-
-            font-size: 10px;
-
-            font-weight: 800;
-
-            text-align: left;
-
-            white-space: nowrap;
-
-        }
-
-
-
-
-
-
-
-
-
-        .collection-detail-table td {
-
-            padding: 11px 12px;
-
-            border-bottom: 1px solid #edf1f2;
-
-            color: #52616d;
-
-            font-size: 11px;
-
-            vertical-align: top;
-
-        }
-
-
-
-
-
-
-
-
-
-        .collection-detail-table tr:last-child td {
-
-            border-bottom: none;
-
-        }
-
-
-
-
-
-
-
-
-
-        .collection-type-badge {
-
-            display: inline-flex;
-
-            padding: 4px 8px;
-
-            border-radius: 20px;
-
-            background: #eef7f7;
-
-            color: #287b7b;
-
-            font-size: 9px;
-
-            font-weight: 800;
-
-            white-space: nowrap;
-
-        }
-
-
-
-
-
-
-
-
-
-        .collection-empty {
-
-            padding: 25px !important;
-
-            color: #8a98a3 !important;
-
-            text-align: center;
-
-        }
-
-
-
-
-
-
-
-
-
-        @media (max-width: 800px) {
-
-            .collection-summary {
-
-                grid-template-columns:
-
-                    repeat(2, minmax(0, 1fr));
-
-            }
-
-        }
-
-
-
-
-
-
-
-
-
-        @media (max-width: 520px) {
-
-            .date-picker-input-wrapper {
-
-                width: 100%;
-
-                min-width: 0;
-
-            }
-
-            .filter-form-group {
-
-                width: 100%;
-
-            }
-
-            .btn-filter-apply,
-
-            .btn-filter-reset {
-
-                flex: 1;
-
-            }
-
-            .collection-summary {
-
-                grid-template-columns: 1fr;
-
-            }
-
-        }
-
-    </style>
+    
 
 @endpush
 
@@ -2838,17 +2046,21 @@
 
 
 
+                const isLateReport = reportType === 'late';
+
                 const doc =
 
                     new jsPDF({
 
-                        orientation: 'portrait',
+                        orientation: isLateReport ? 'landscape' : 'portrait',
 
                         unit: 'mm',
 
                         format: 'a4'
 
                     });
+
+                const pageWidth = doc.internal.pageSize.getWidth();
 
 
 
@@ -2892,7 +2104,7 @@
 
                     0,
 
-                    210,
+                    pageWidth,
 
                     24,
 
@@ -3262,7 +2474,7 @@
 
                     52,
 
-                    182,
+                    pageWidth - 28,
 
                     14,
 
@@ -3306,7 +2518,7 @@
 
                     52,
 
-                    182,
+                    pageWidth - 28,
 
                     14,
 
@@ -3750,17 +2962,16 @@
                      * dari object secara otomatis.
                      */
 
-                    const isLateReport =
-                        reportType === 'late';
-
                     const columns = isLateReport
                         ? [
                             'no',
                             'member_name',
                             'judul_buku',
-                            'borrowed_at',
                             'due_at',
                             'status',
+                            'extension_date',
+                            'new_due_at',
+                            'returned_at',
                             'keterangan'
                         ]
                         : [
@@ -3775,11 +2986,13 @@
                     const headers = isLateReport
                         ? [
                             'NO',
-                            'NAMA ANGGOTA',
+                            'NAMA',
                             'JUDUL BUKU',
-                            'TANGGAL PINJAM',
-                            'BATAS PENGEMBALIAN',
+                            'TENGGAT PENGEMBALIAN',
                             'STATUS',
+                            'TGL PERPANJANGAN',
+                            'TENGGAT PENGEMBALIAN BARU',
+                            'TGL PENGEMBALIAN',
                             'KETERANGAN'
                         ]
                         : [
@@ -3805,128 +3018,146 @@
                         'dibatalkan': 'Dibatalkan'
                     };
 
-                    const rows =
-                        tableData.map(
-                            (row, index) => {
+                    const rows = [];
 
-                                return columns.map(
-                                    column => {
+                    tableData.forEach((row, index) => {
+                        if (!isLateReport) {
+                            rows.push(columns.map(column => {
+                                if (column === 'no' && (row[column] === undefined || row[column] === null)) {
+                                    return index + 1;
+                                }
 
-                                        if (
-                                            column === 'no' &&
-                                            (
-                                                row[column] === undefined ||
-                                                row[column] === null
-                                            )
-                                        ) {
-                                            return index + 1;
-                                        }
+                                if (column === 'status') {
+                                    const status = String(row[column] ?? '-').toLowerCase();
+                                    return statusMap[status] ?? row[column] ?? '-';
+                                }
 
-                                        if (
-                                            column === 'status'
-                                        ) {
-                                            const status =
-                                                String(
-                                                    row[column] ?? '-'
-                                                ).toLowerCase();
+                                return row[column] ?? '-';
+                            }));
+                            return;
+                        }
 
-                                            return statusMap[status] ??
-                                                row[column] ??
-                                                '-';
-                                        }
+                        const extensionDates = String(row.extension_date ?? '-')
+                            .split(/<br\s*\/?>(?:\s*)|\n/)
+                            .map(value => value.trim())
+                            .filter(Boolean);
 
-                                        return row[column] ?? '-';
-                                    }
-                                );
-                            }
+                        const newDueDates = String(row.new_due_at ?? '-')
+                            .split(/<br\s*\/?>(?:\s*)|\n/)
+                            .map(value => value.trim())
+                            .filter(Boolean);
+
+                        const extensionCount = Math.max(
+                            extensionDates.length,
+                            newDueDates.length,
+                            1
                         );
+
+                        for (let extensionIndex = 0; extensionIndex < extensionCount; extensionIndex++) {
+                            const isFirstExtensionRow = extensionIndex === 0;
+                            const rowSpan = extensionCount;
+
+                            const baseCell = (content, extra = {}) => ({
+                                content: content ?? '-',
+                                ...(extensionCount > 1 ? { rowSpan } : {}),
+                                ...extra
+                            });
+
+                            rows.push([
+                                isFirstExtensionRow
+                                    ? baseCell(row.no ?? index + 1)
+                                    : '',
+                                isFirstExtensionRow
+                                    ? baseCell(row.member_name ?? '-')
+                                    : '',
+                                isFirstExtensionRow
+                                    ? baseCell(row.judul_buku ?? '-')
+                                    : '',
+                                isFirstExtensionRow
+                                    ? baseCell(row.due_at ?? '-')
+                                    : '',
+                                isFirstExtensionRow
+                                    ? baseCell(
+                                        statusMap[String(row.status ?? '-').toLowerCase()] ?? row.status ?? '-'
+                                    )
+                                    : '',
+                                extensionDates[extensionIndex] ?? '-',
+                                newDueDates[extensionIndex] ?? '-',
+                                isFirstExtensionRow
+                                    ? baseCell(row.returned_at ?? '-')
+                                    : '',
+                                isFirstExtensionRow
+                                    ? baseCell(row.keterangan ?? '-')
+                                    : ''
+                            ]);
+                        }
+                    });
 
                     doc.autoTable({
                         startY: isLateReport ? 71 : 72,
 
-                        head: [
-                            headers
-                        ],
+                        head: isLateReport
+                            ? [
+                                [
+                                    { content: 'NO', rowSpan: 2 },
+                                    { content: 'NAMA', rowSpan: 2 },
+                                    { content: 'JUDUL BUKU', rowSpan: 2 },
+                                    { content: 'TENGGAT PENGEMBALIAN', rowSpan: 2 },
+                                    { content: 'STATUS', rowSpan: 2 },
+                                    { content: 'PERPANJANG', colSpan: 2 },
+                                    { content: 'TGL PENGEMBALIAN', rowSpan: 2 },
+                                    { content: 'KETERANGAN', rowSpan: 2 }
+                                ],
+                                [
+                                    'TGL PERPANJANGAN',
+                                    'TENGGAT PENGEMBALIAN BARU'
+                                ]
+                            ]
+                            : [headers],
 
                         body: rows,
 
                         theme: 'grid',
 
                         styles: {
-                            fontSize: 8,
-                            cellPadding: 3,
+                            fontSize: isLateReport ? 7.5 : 8,
+                            cellPadding: isLateReport ? 2.5 : 3,
                             valign: 'middle',
                             overflow: 'linebreak'
                         },
 
                         headStyles: {
                             fontStyle: 'bold',
-                            halign: 'center'
+                            halign: 'center',
+                            valign: 'middle'
                         },
 
                         columnStyles: isLateReport
                             ? {
-                                0: {
-                                    cellWidth: 12,
-                                    halign: 'center'
-                                },
-
-                                1: {
-                                    cellWidth: 30
-                                },
-
-                                2: {
-                                    cellWidth: 40
-                                },
-
-                                3: {
-                                    cellWidth: 23
-                                },
-
-                                4: {
-                                    cellWidth: 27
-                                },
-
-                                5: {
-                                    cellWidth: 23
-                                },
-
-                                6: {
-                                    cellWidth: 27
-                                }
+                                0: { cellWidth: 10, halign: 'center' },
+                                1: { cellWidth: 32 },
+                                2: { cellWidth: 40 },
+                                3: { cellWidth: 34 },
+                                4: { cellWidth: 28 },
+                                5: { cellWidth: 30 },
+                                6: { cellWidth: 38 },
+                                7: { cellWidth: 30 },
+                                8: { cellWidth: 35 }
                             }
                             : {
-                                0: {
-                                    cellWidth: 10,
-                                    halign: 'center'
-                                },
-
-                                1: {
-                                    cellWidth: 40
-                                },
-
-                                2: {
-                                    cellWidth: 45
-                                },
-
-                                3: {
-                                    cellWidth: 28
-                                },
-
-                                4: {
-                                    cellWidth: 32
-                                },
-
-                                5: {
-                                    cellWidth: 27
-                                }
+                                0: { cellWidth: 10, halign: 'center' },
+                                1: { cellWidth: 40 },
+                                2: { cellWidth: 45 },
+                                3: { cellWidth: 28 },
+                                4: { cellWidth: 32 },
+                                5: { cellWidth: 27 }
                             },
 
-                        tableWidth: isLateReport ? 182 : 'wrap',
+                        tableWidth: isLateReport ? 277 : 'wrap',
 
                         margin: {
-                            left: 14,
-                            right: 14
+                            left: isLateReport ? 10 : 14,
+                            right: isLateReport ? 10 : 14
                         }
                     });
                 }
@@ -4123,7 +3354,7 @@
 
                         'Perpustakaan Tiga Serangkai',
 
-                        196,
+                        pageWidth - 14,
 
                         pageHeight - 10, {
 

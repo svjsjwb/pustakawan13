@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\WelcomeMail;
+use App\Models\Member;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -38,6 +39,12 @@ class RegisterController extends Controller
                 }),
             ],
 
+            'division' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+
             'password' => [
                 'required',
                 'string',
@@ -46,30 +53,69 @@ class RegisterController extends Controller
             ],
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | BUAT USER SEBAGAI GUEST
+        |--------------------------------------------------------------------------
+        */
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => strtolower(trim($validated['email'])),
-            'password' => Hash::make(
-                $validated['password']
-            ),
-            'role' => 'user',
+            'password' => Hash::make($validated['password']),
+            'role' => 'guest',
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | BUAT DATA PENDAFTAR DI MEMBERS
+        |--------------------------------------------------------------------------
+        |
+        | Guest tetap mempunyai data member agar admin bisa melihat
+        | data pendaftar di halaman Keanggotaan.
+        |
+        */
+
+        Member::create([
+            'user_id' => $user->id,
+            'name' => $validated['name'],
+            'email' => $user->email,
+            'division' => $validated['division'],
+            'phone' => null,
+            'address' => null,
+            'nis_nip' => null,
+            'gender' => null,
+            'class' => null,
+            'registered_at' => now()->toDateString(),
+            'status' => 'nonaktif',
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | EMAIL SAMBUTAN
+        |--------------------------------------------------------------------------
+        */
+
         try {
-            Mail::to($user->email)->send(new WelcomeMail($user));
+            Mail::to($user->email)->send(
+                new WelcomeMail($user)
+            );
         } catch (\Throwable $mailException) {
-            Log::warning('Email sambutan register gagal dikirim.', [
-                'user_id' => $user->id,
-                'recipient' => $user->email,
-                'error' => $mailException->getMessage(),
-            ]);
+            Log::warning(
+                'Email sambutan register gagal dikirim.',
+                [
+                    'user_id' => $user->id,
+                    'recipient' => $user->email,
+                    'error' => $mailException->getMessage(),
+                ]
+            );
         }
 
         return redirect()
             ->route('login')
             ->with(
                 'success',
-                'Akun berhasil dibuat. Silakan login.'
+                'Pendaftaran berhasil. Akun Anda sedang menunggu persetujuan Admin.'
             );
     }
 }

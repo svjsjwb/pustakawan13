@@ -358,9 +358,9 @@ class CirculationController extends Controller
         /*
      * Ambil tanggal jatuh tempo lama.
      */
-        $currentDueDate = \Carbon\Carbon::parse(
+        $currentDueDate = Carbon::parse(
             $borrowing->due_at
-        );
+        )->startOfDay();
 
         /*
      * Tambahkan hari perpanjangan.
@@ -370,12 +370,24 @@ class CirculationController extends Controller
             ->addDays($extensionDays);
 
         /*
-     * Simpan:
+     * Ambil riwayat perpanjangan sebelumnya.
      *
-     * 1. due_at              -> tanggal baru
-     * 2. status              -> diperpanjang
-     * 3. extension_status    -> disetujui
-     * 4. extension_reason   -> catatan perpanjangan
+     * Jika belum ada history, gunakan array kosong.
+     */
+        $extensionHistory = $borrowing->extension_history ?? [];
+
+        /*
+     * Tambahkan riwayat perpanjangan baru.
+     */
+        $extensionHistory[] = [
+            'extension_date' => now()->toDateString(),
+            'old_due_at' => $currentDueDate->toDateString(),
+            'new_due_at' => $newDueDate->toDateString(),
+            'extension_days' => $extensionDays,
+        ];
+
+        /*
+     * Simpan perpanjangan.
      */
         $borrowing->update([
             'due_at' => $newDueDate,
@@ -389,6 +401,8 @@ class CirculationController extends Controller
 
             'extension_admin_notes' =>
             'Perpanjangan disetujui oleh Admin.',
+
+            'extension_history' => $extensionHistory,
         ]);
 
         return redirect()
@@ -405,23 +419,82 @@ class CirculationController extends Controller
     public function approveExtension(Borrowing $borrowing)
     {
         if ($borrowing->extension_status !== 'menunggu') {
-            return back()->with('error', 'Tidak ada permintaan perpanjangan yang menunggu persetujuan.');
+            return back()->with(
+                'error',
+                'Tidak ada permintaan perpanjangan yang menunggu persetujuan.'
+            );
         }
 
-        $newDue = $borrowing->extension_requested_due_at;
-        if (!$newDue) {
-            $newDue = $borrowing->due_at->addDays(7);
+        /*
+     * Ambil tanggal jatuh tempo sebelum diperpanjang.
+     */
+        if (!$borrowing->due_at) {
+            return back()->with(
+                'error',
+                'Tanggal pengembalian belum tersedia.'
+            );
         }
 
+        $currentDueDate = Carbon::parse(
+            $borrowing->due_at
+        )->startOfDay();
+
+        /*
+     * Ambil tanggal baru yang diminta member.
+     *
+     * Jika tidak ada, gunakan default +7 hari.
+     */
+        if ($borrowing->extension_requested_due_at) {
+            $newDue = Carbon::parse(
+                $borrowing->extension_requested_due_at
+            )->startOfDay();
+        } else {
+            $newDue = $currentDueDate
+                ->copy()
+                ->addDays(7);
+        }
+
+        /*
+     * Hitung jumlah hari perpanjangan.
+     */
+        $extensionDays = $currentDueDate->diffInDays($newDue);
+
+        /*
+     * Ambil history sebelumnya.
+     */
+        $extensionHistory = $borrowing->extension_history ?? [];
+
+        /*
+     * Tambahkan history perpanjangan baru.
+     */
+        $extensionHistory[] = [
+            'extension_date' => now()->toDateString(),
+            'old_due_at' => $currentDueDate->toDateString(),
+            'new_due_at' => $newDue->toDateString(),
+            'extension_days' => $extensionDays,
+        ];
+
+        /*
+     * Simpan hasil approval.
+     */
         $borrowing->update([
-            'due_at'                 => $newDue,
-            'extension_status'       => 'disetujui',
-            'extension_admin_notes'  => 'Disetujui oleh Admin',
+            'due_at' => $newDue,
+
+            'status' => 'diperpanjang',
+
+            'extension_status' => 'disetujui',
+
+            'extension_admin_notes' => 'Disetujui oleh Admin',
+
+            'extension_history' => $extensionHistory,
         ]);
 
         NotificationService::extensionApproved($borrowing);
 
-        return back()->with('success', 'Perpanjangan peminjaman berhasil disetujui.');
+        return back()->with(
+            'success',
+            'Perpanjangan peminjaman berhasil disetujui.'
+        );
     }
 
     /**

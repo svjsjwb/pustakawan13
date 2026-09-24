@@ -22,6 +22,7 @@ class Borrowing extends Model
         'extension_requested_due_at',
         'extension_reason',
         'extension_admin_notes',
+        'extension_history',
         'seat_number',
         'is_reminder_sent',
     ];
@@ -31,6 +32,7 @@ class Borrowing extends Model
         'due_at' => 'date',
         'returned_at' => 'date',
         'extension_requested_due_at' => 'date',
+        'extension_history' => 'array',
         'is_reminder_sent' => 'boolean',
     ];
 

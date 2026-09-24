@@ -451,7 +451,7 @@
 
 
             {{-- =================================================
-             FORM RESERVASI
+             FORM RESERVASI sementara nonaktif
         ================================================== --}}
 
             <div class="reservation-form-card">
@@ -902,10 +902,10 @@
 
 
                                             {{-- =================================
-                 LOCATOR
+                 3D LOCATOR tidak dilanjut
             ================================== --}}
 
-                                            @if (
+                                            {{-- @if (
                                                 $reservation->book_copy_id &&
                                                     $reservation->bookCopy?->shelf_id &&
                                                     in_array($reservation->status, ['menunggu', 'disetujui']))
@@ -915,7 +915,7 @@
                                                     📍 Temukan Buku
 
                                                 </a>
-                                            @endif
+                                            @endif --}}
 
 
                                             {{-- =================================

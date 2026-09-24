@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use App\Models\Member;
 use App\Services\MemberStatusService;
 use Illuminate\Http\Request;
@@ -35,7 +36,22 @@ class MemberController extends Controller
     {
         app(MemberStatusService::class)->syncAll();
 
-        $members = Member::orderBy('id')->get();
+        $members = Member::with('user')
+            ->orderByRaw("
+        CASE
+            WHEN user_id IS NOT NULL
+                 AND EXISTS (
+                     SELECT 1
+                     FROM users
+                     WHERE users.id = members.user_id
+                     AND users.role = 'guest'
+                 )
+            THEN 0
+            ELSE 1
+        END
+    ")
+            ->orderByDesc('id')
+            ->get();
 
         return view('members.index', compact('members'));
     }
@@ -157,6 +173,68 @@ class MemberController extends Controller
     }
 
 
+    public function approve(Member $member)
+    {
+        if (!$member->user) {
+            return back()->with(
+                'error',
+                'Akun pengguna untuk pendaftaran ini tidak ditemukan.'
+            );
+        }
+
+        DB::transaction(function () use ($member) {
+
+            $member->user->update([
+                'role' => 'member',
+            ]);
+
+            $member->update([
+                'status' => 'nonaktif',
+            ]);
+        });
+
+        return redirect()
+            ->route('members.index')
+            ->with(
+                'success',
+                'Pendaftaran anggota berhasil disetujui.'
+            );
+    }
+
+
+    public function reject(Member $member)
+    {
+        DB::transaction(function () use ($member) {
+
+            /*
+        |--------------------------------------------------------------------------
+        | USER TETAP GUEST
+        |--------------------------------------------------------------------------
+        */
+
+            if ($member->user) {
+                $member->user->update([
+                    'role' => 'guest',
+                ]);
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | HAPUS DATA PENDAFTAR DARI DAFTAR MEMBER
+        |--------------------------------------------------------------------------
+        */
+
+            $member->delete();
+        });
+
+        return redirect()
+            ->route('members.index')
+            ->with(
+                'success',
+                'Pendaftaran anggota ditolak.'
+            );
+    }
+    
     /**
      * Hapus anggota.
      */

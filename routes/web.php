@@ -216,6 +216,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('fines');
 
     // ANGGOTA
+    Route::patch(
+        '/members/{member}/approve',
+        [MemberController::class, 'approve']
+    )->name('members.approve');
+
+    Route::delete(
+        '/members/{member}/reject',
+        [MemberController::class, 'reject']
+    )->name('members.reject');
+
     Route::resource('members', MemberController::class);
 
     // KALENDER

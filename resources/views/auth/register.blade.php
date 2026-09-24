@@ -4,17 +4,13 @@
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
         Daftar | Perpustakaan Tiga Serangkai
     </title>
 
-    <link
-        rel="stylesheet"
-        href="{{ asset('css/register.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/register.css') }}">
 </head>
 
 <body>
@@ -37,10 +33,7 @@
 
                 <div class="intro-content">
 
-                    <img
-                        src="{{ asset('images/logo-tiga-serangkai.png') }}"
-                        alt="Tiga Serangkai"
-                        class="login-logo">
+                    <img src="{{ asset('images/logo-tiga-serangkai.png') }}" alt="Tiga Serangkai" class="login-logo">
 
 
                     <span class="intro-label">
@@ -108,17 +101,15 @@
 
                     @if ($errors->any())
 
-                    <div class="login-alert">
+                        <div class="login-alert">
 
-                        @foreach ($errors->all() as $error)
+                            @foreach ($errors->all() as $error)
+                                <span>
+                                    {{ $error }}
+                                </span>
+                            @endforeach
 
-                        <span>
-                            {{ $error }}
-                        </span>
-
-                        @endforeach
-
-                    </div>
+                        </div>
 
                     @endif
 
@@ -128,10 +119,7 @@
                          REGISTER FORM
                     ================================================== --}}
 
-                    <form
-                        method="POST"
-                        action="{{ route('register.store') }}"
-                        class="login-form">
+                    <form method="POST" action="{{ route('register.store') }}" class="login-form">
 
                         @csrf
 
@@ -150,14 +138,8 @@
 
                             <div class="input-wrapper">
 
-                                <input
-                                    id="name"
-                                    type="text"
-                                    name="name"
-                                    value="{{ old('name') }}"
-                                    placeholder="Masukkan nama lengkap"
-                                    autocomplete="name"
-                                    required>
+                                <input id="name" type="text" name="name" value="{{ old('name') }}"
+                                    placeholder="Masukkan nama lengkap" autocomplete="name" required>
 
                             </div>
 
@@ -178,19 +160,121 @@
 
                             <div class="input-wrapper">
 
-                                <input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    value="{{ old('email') }}"
-                                    placeholder="Masukkan alamat email"
-                                    autocomplete="email"
-                                    required>
+                                <input id="email" type="email" name="email" value="{{ old('email') }}"
+                                    placeholder="Masukkan alamat email" autocomplete="email" required>
 
                             </div>
 
                         </div>
 
+
+                        {{-- =================================================
+     DIVISI
+================================================== --}}
+
+                        <div class="form-group">
+
+                            <label for="division">
+                                Divisi
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <select id="division" name="division" required>
+
+                                    <option value="">
+                                        Pilih divisi
+                                    </option>
+
+                                    <option value="Center Of Excellence"
+                                        {{ old('division') === 'Center Of Excellence' ? 'selected' : '' }}>
+                                        Center Of Excellence
+                                    </option>
+
+                                    <option value="Digital Business"
+                                        {{ old('division') === 'Digital Business' ? 'selected' : '' }}>
+                                        Digital Business
+                                    </option>
+
+                                    <option value="E-Publishing"
+                                        {{ old('division') === 'E-Publishing' ? 'selected' : '' }}>
+                                        E-Publishing
+                                    </option>
+
+                                    <option value="Finance" {{ old('division') === 'Finance' ? 'selected' : '' }}>
+                                        Finance
+                                    </option>
+
+                                    <option value="General Trading"
+                                        {{ old('division') === 'General Trading' ? 'selected' : '' }}>
+                                        General Trading
+                                    </option>
+
+                                    <option value="HR & GA" {{ old('division') === 'HR & GA' ? 'selected' : '' }}>
+                                        HR & GA
+                                    </option>
+
+                                    <option value="HSE" {{ old('division') === 'HSE' ? 'selected' : '' }}>
+                                        HSE
+                                    </option>
+
+                                    <option value="IQA" {{ old('division') === 'IQA' ? 'selected' : '' }}>
+                                        IQA
+                                    </option>
+
+                                    <option value="IT"
+                                        {{ old('division') === 'IT' ? 'selected' : '' }}>
+                                        IT
+                                    </option>
+
+                                    <option value="Marketing"
+                                        {{ old('division') === 'Marketing' ? 'selected' : '' }}>
+                                        Marketing
+                                    </option>
+
+                                    <option value="MTIS Perpuskita dan Tisera"
+                                        {{ old('division') === 'MTIS Perpuskita dan Tisera' ? 'selected' : '' }}>
+                                        MTIS Perpuskita dan Tisera
+                                    </option>
+
+                                    <option value="MTIS Planning and Development"
+                                        {{ old('division') === 'MTIS Planning and Development' ? 'selected' : '' }}>
+                                        MTIS Planning and Development
+                                    </option>
+
+                                    <option value="People Development Center" {{ old('division') === 'People Development Center' ? 'selected' : '' }}>
+                                        People Development Center
+                                    </option>
+
+                                    <option value="Production" {{ old('division') === 'Production' ? 'selected' : '' }}>
+                                        Production
+                                    </option>
+
+                                    <option value="School Book Sales"
+                                        {{ old('division') === 'School Book Sales' ? 'selected' : '' }}>
+                                        School Book Sales
+                                    </option>
+
+                                    <option value="School Book Publishing"
+                                        {{ old('division') === 'School Book Publishing' ? 'selected' : '' }}>
+                                        School Book Publishing
+                                    </option>
+
+                                    <option value="SCM"
+                                        {{ old('division') === 'SCM' ? 'selected' : '' }}>
+                                        SCM
+                                    </option>
+
+                                    <option value="TAX"
+                                        {{ old('division') === 'TAX' ? 'selected' : '' }}>
+                                        TAX
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
 
 
                         {{-- =================================================
@@ -206,20 +290,12 @@
 
                             <div class="input-wrapper password-wrapper">
 
-                                <input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    placeholder="Minimal 8 karakter"
-                                    autocomplete="new-password"
-                                    required>
+                                <input id="password" type="password" name="password" placeholder="Minimal 8 karakter"
+                                    autocomplete="new-password" required>
 
 
                                 {{-- SHOW / HIDE PASSWORD --}}
-                                <button
-                                    type="button"
-                                    id="passwordToggle"
-                                    class="password-toggle"
+                                <button type="button" id="passwordToggle" class="password-toggle"
                                     aria-label="Tampilkan password">
 
                                     👁
@@ -245,20 +321,12 @@
 
                             <div class="input-wrapper password-wrapper">
 
-                                <input
-                                    id="password_confirmation"
-                                    type="password"
-                                    name="password_confirmation"
-                                    placeholder="Ulangi password"
-                                    autocomplete="new-password"
-                                    required>
+                                <input id="password_confirmation" type="password" name="password_confirmation"
+                                    placeholder="Ulangi password" autocomplete="new-password" required>
 
 
                                 {{-- SHOW / HIDE CONFIRM PASSWORD --}}
-                                <button
-                                    type="button"
-                                    id="confirmPasswordToggle"
-                                    class="password-toggle"
+                                <button type="button" id="confirmPasswordToggle" class="password-toggle"
                                     aria-label="Tampilkan password">
 
                                     👁
@@ -275,9 +343,7 @@
                              REGISTER BUTTON
                         ================================================== --}}
 
-                        <button
-                            type="submit"
-                            class="login-button">
+                        <button type="submit" class="login-button">
 
                             <span>
                                 Daftar
@@ -315,9 +381,7 @@
                          GOOGLE
                     ================================================== --}}
 
-                    <a
-                        href="/auth/google"
-                        class="google-button">
+                    <a href="/auth/google" class="google-button">
 
                         <span class="google-icon">
                             G

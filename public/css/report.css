@@ -929,41 +929,6 @@
     margin-left: auto;
 }
 
-.report-download-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    height: 38px;
-    padding: 0 16px;
-    border: none;
-    border-radius: 8px;
-    background: #287f80;
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(40, 127, 128, 0.2);
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    white-space: nowrap;
-}
-
-.report-download-btn:hover {
-    background: #206363;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(40, 127, 128, 0.28);
-}
-
-.report-download-btn:active {
-    transform: translateY(0);
-}
-
-.report-download-icon {
-    width: 15px;
-    height: 15px;
-    flex-shrink: 0;
-}
-
 
 /* =========================================================
    EDIT BUTTON
@@ -1853,28 +1818,8 @@
 
 
 /* =========================================================
-   EDIT BUTTON
-========================================================= */
-
-.report-detail-btn {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    text-decoration: none;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
    CLICKABLE REPORT CARD
 ========================================================= */
-
-.report-card {
-    cursor: pointer;
-}
 
 
 .report-chart-wrapper,
@@ -1899,28 +1844,6 @@
 .report-format-select,
 .report-download-btn {
     cursor: pointer;
-}
-
-
-/* =========================================================
-   MODAL STATE COMPATIBILITY
-   Supports JS using either .active or .show.
-========================================================= */
-
-.report-modal.active,
-.report-modal.show {
-    opacity: 1;
-
-    visibility: visible;
-
-    pointer-events: auto;
-}
-
-
-.report-modal.active .report-modal-content,
-.report-modal.show .report-modal-content {
-    transform:
-        translateY(0) scale(1);
 }
 
 
@@ -2583,3 +2506,796 @@ body.report-modal-open {
     }
 
 }
+
+/* =========================================================
+   INLINE REPORT STYLES MOVED FROM index.blade.php
+   ========================================================= */
+/* =========================================================
+
+                   FILTER BAR
+
+                ========================================================== */
+
+        .report-filter-box {
+
+            background: #ffffff;
+
+            border-radius: 12px;
+
+            border: 1px solid #d8e5e5;
+
+            padding: 18px 24px;
+
+            margin-bottom: 24px;
+
+            box-shadow: 0 4px 16px rgba(40, 123, 123, 0.05);
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 16px;
+
+        }
+
+
+
+
+
+
+
+
+
+        .filter-form-group {
+
+            display: flex;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            gap: 12px;
+
+            flex: 1;
+
+        }
+
+
+
+
+
+
+
+
+
+        /* =========================================================
+
+                   DATE PICKER
+
+                ========================================================== */
+
+        .date-picker-input-wrapper {
+
+            position: relative;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            min-width: 290px;
+
+        }
+
+
+
+
+
+
+
+
+
+        .date-picker-input-wrapper .calendar-icon {
+
+            position: absolute;
+
+            left: 14px;
+
+            font-size: 16px;
+
+            color: #287b7b;
+
+            pointer-events: none;
+
+            z-index: 2;
+
+        }
+
+
+
+
+
+
+
+
+
+        .date-range-flatpickr {
+
+            width: 100%;
+
+            height: 42px;
+
+            padding: 0 16px 0 42px;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            color: #172f2f;
+
+            background: #f7fbfb !important;
+
+            border: 1.5px solid #c9dede;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            transition: all 0.2s ease;
+
+        }
+
+
+
+
+
+
+
+
+
+        .date-range-flatpickr:hover,
+
+        .date-range-flatpickr:focus {
+
+            border-color: #287b7b;
+
+            background: #ffffff !important;
+
+            box-shadow:
+
+                0 0 0 3px rgba(40, 123, 123, 0.12);
+
+            outline: none;
+
+        }
+
+
+
+
+
+
+
+
+
+        /* =========================================================
+
+                   BUTTON
+
+                ========================================================== */
+
+        .btn-filter-apply {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 7px;
+
+            height: 42px;
+
+            padding: 0 20px;
+
+            background: #287b7b;
+
+            color: #ffffff;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            border: none;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            transition: all 0.2s ease;
+
+            text-decoration: none;
+
+            box-shadow:
+
+                0 4px 12px rgba(40, 123, 123, 0.18);
+
+        }
+
+
+
+
+
+
+
+
+
+        .btn-filter-apply:hover {
+
+            background: #206363;
+
+            transform: translateY(-1px);
+
+            box-shadow:
+
+                0 6px 16px rgba(40, 123, 123, 0.25);
+
+            color: #ffffff;
+
+        }
+
+
+
+
+
+
+
+
+
+        .btn-filter-reset {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 6px;
+
+            height: 42px;
+
+            padding: 0 16px;
+
+            background: #f1f6f6;
+
+            color: #486161;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            border: 1px solid #d0e0e0;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            transition: all 0.2s ease;
+
+            text-decoration: none;
+
+        }
+
+
+
+
+
+
+
+
+
+        .btn-filter-reset:hover {
+
+            background: #e3eded;
+
+            color: #172f2f;
+
+            border-color: #bad3d3;
+
+        }
+
+
+
+
+
+
+
+
+
+        /* =========================================================
+
+                   PERIOD
+
+                ========================================================== */
+
+        .filter-period-badge {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            background: #eef7f7;
+
+            border: 1px solid #cce5e5;
+
+            color: #206363;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            padding: 6px 14px;
+
+            border-radius: 20px;
+
+        }
+
+
+
+
+
+
+
+
+
+        /* =========================================================
+
+                   FLATPICKR
+
+                ========================================================== */
+
+        .flatpickr-calendar {
+
+            border-radius: 12px !important;
+
+            box-shadow:
+
+                0 10px 30px rgba(40, 123, 123, 0.18) !important;
+
+            border: 1px solid #d5e6e6 !important;
+
+            font-family: inherit !important;
+
+        }
+
+
+
+
+
+
+
+
+
+        .flatpickr-day.selected,
+
+        .flatpickr-day.startRange,
+
+        .flatpickr-day.endRange {
+
+            background: #287b7b !important;
+
+            border-color: #287b7b !important;
+
+            color: #ffffff !important;
+
+        }
+
+
+
+
+
+
+
+
+
+        .flatpickr-day.inRange {
+
+            background: #d8eded !important;
+
+            border-color: #d8eded !important;
+
+            color: #174242 !important;
+
+        }
+
+
+
+
+
+
+
+
+
+        /* =========================================================
+
+                   PDF BUTTON
+
+                ========================================================== */
+
+        .report-download-btn {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 7px;
+
+            min-width: 105px;
+
+            height: 38px;
+
+            padding: 0 16px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #287b7b;
+
+            color: #ffffff;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+
+                background 0.2s ease,
+
+                transform 0.2s ease,
+
+                box-shadow 0.2s ease;
+
+        }
+
+
+
+
+
+
+
+
+
+        .report-download-btn:hover {
+
+            background: #206363;
+
+            transform: translateY(-1px);
+
+            box-shadow:
+
+                0 5px 14px rgba(40, 123, 123, 0.22);
+
+        }
+
+
+
+
+
+
+
+
+
+        .report-download-btn:active {
+
+            transform: translateY(0);
+
+        }
+
+
+
+
+
+
+
+
+
+        /* =========================================================
+
+                   KOLEKSI SUMMARY
+
+                ========================================================== */
+
+        .collection-summary {
+
+            display: grid;
+
+            grid-template-columns:
+
+                repeat(4, minmax(0, 1fr));
+
+            gap: 10px;
+
+            margin-top: 16px;
+
+        }
+
+
+
+
+
+
+
+
+
+        .collection-summary-item {
+
+            padding: 10px 11px;
+
+            background: #f7fbfb;
+
+            border: 1px solid #e0eceb;
+
+            border-radius: 9px;
+
+        }
+
+
+
+
+
+
+
+
+
+        .collection-summary-item span {
+
+            display: block;
+
+            margin-bottom: 4px;
+
+            color: #718091;
+
+            font-size: 9px;
+
+            font-weight: 700;
+
+        }
+
+
+
+
+
+
+
+
+
+        .collection-summary-item strong {
+
+            color: #173b52;
+
+            font-size: 15px;
+
+        }
+
+
+
+
+
+
+
+
+
+        /* =========================================================
+
+                   DETAIL COLLECTION TABLE
+
+                ========================================================== */
+
+        .collection-detail-wrapper {
+
+            margin-top: 22px;
+
+            overflow-x: auto;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 10px;
+
+        }
+
+
+
+
+
+
+
+
+
+        .collection-detail-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 700px;
+
+        }
+
+
+
+
+
+
+
+
+
+        .collection-detail-table th {
+
+            padding: 11px 12px;
+
+            background: #f7fbfb;
+
+            border-bottom: 1px solid #e2e8f0;
+
+            color: #52616d;
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+            text-align: left;
+
+            white-space: nowrap;
+
+        }
+
+
+
+
+
+
+
+
+
+        .collection-detail-table td {
+
+            padding: 11px 12px;
+
+            border-bottom: 1px solid #edf1f2;
+
+            color: #52616d;
+
+            font-size: 11px;
+
+            vertical-align: top;
+
+        }
+
+
+
+
+
+
+
+
+
+        .collection-detail-table tr:last-child td {
+
+            border-bottom: none;
+
+        }
+
+
+
+
+
+
+
+
+
+        .collection-type-badge {
+
+            display: inline-flex;
+
+            padding: 4px 8px;
+
+            border-radius: 20px;
+
+            background: #eef7f7;
+
+            color: #287b7b;
+
+            font-size: 9px;
+
+            font-weight: 800;
+
+            white-space: nowrap;
+
+        }
+
+
+
+
+
+
+
+
+
+        .collection-empty {
+
+            padding: 25px !important;
+
+            color: #8a98a3 !important;
+
+            text-align: center;
+
+        }
+
+
+
+
+
+
+
+
+
+        @media (max-width: 800px) {
+
+            .collection-summary {
+
+                grid-template-columns:
+
+                    repeat(2, minmax(0, 1fr));
+
+            }
+
+        }
+
+
+
+
+
+
+
+
+
+        @media (max-width: 520px) {
+
+            .date-picker-input-wrapper {
+
+                width: 100%;
+
+                min-width: 0;
+
+            }
+
+            .filter-form-group {
+
+                width: 100%;
+
+            }
+
+            .btn-filter-apply,
+
+            .btn-filter-reset {
+
+                flex: 1;
+
+            }
+
+            .collection-summary {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }

@@ -9,23 +9,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserMiddleware
 {
-    /**
-     * Handle an incoming request.
-     * Hanya mengizinkan user dengan role 'user'.
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        // Jika belum login, redirect ke login
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        // Jika sudah login tapi bukan user biasa, redirect ke admin dashboard
-        if (Auth::user()->role !== 'user') {
-            return redirect('/dashboard')->with(
-                'error',
-                'Anda tidak memiliki akses ke halaman user.'
-            );
+        if (Auth::user()->role !== 'member') {
+            return redirect('/catalog')
+                ->with(
+                    'error',
+                    'Akun Anda belum disetujui sebagai member.'
+                );
         }
 
         return $next($request);

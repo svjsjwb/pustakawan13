@@ -23,6 +23,7 @@ return new class extends Migration
             $table->date('extension_requested_due_at')->nullable();
             $table->text('extension_reason')->nullable();
             $table->text('extension_admin_notes')->nullable();
+            $table->json('extension_history')->nullable();
             $table->boolean('is_reminder_sent')->default(false);
             $table->timestamps();
 

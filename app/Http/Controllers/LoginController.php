@@ -71,7 +71,19 @@ class LoginController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
-        return redirect()->intended(route('user.home'));
+        if ($user->role === 'member') {
+            return redirect()->intended(route('user.home'));
+        }
+
+        if ($user->role === 'guest') {
+            return redirect()->intended(route('catalog'))
+                ->with(
+                    'info',
+                    'Akun Anda masih menunggu persetujuan Admin. Anda belum dapat melakukan reservasi atau peminjaman buku.'
+                );
+        }
+
+        return redirect()->route('login');
     }
 
     /**
