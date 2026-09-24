@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/user-layout.css') }}">
     <link rel="stylesheet" href="{{ asset('css/user-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/premium-dropdown.css') }}">
 
     {{-- Anti-flash dark mode & layout density initializer --}}
     <script>

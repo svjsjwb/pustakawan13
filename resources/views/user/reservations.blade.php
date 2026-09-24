@@ -2,10 +2,6 @@
 @section('title', 'Reservasi Buku – Perpustakaan Digital')
 @section('page-title', 'Reservasi Buku')
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/premium-dropdown.css') }}">
-@endpush
-
 @section('content')
 
 <section class="user-page-hero">

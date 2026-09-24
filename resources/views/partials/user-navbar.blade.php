@@ -2,7 +2,10 @@
     <div class="eg-navbar-inner">
         {{-- Brand Logo Left --}}
         <a href="{{ route('user.home') }}" class="eg-brand">
-            <div class="eg-brand-badge">P</div>
+            <img
+                src="{{ asset('images/logo-tiga-serangkai.png') }}"
+                alt="Logo Tiga Serangkai"
+                class="eg-brand-badge">
             <div class="eg-brand-text">
                 <span class="title">Perpustakaan Tiga Serangkai</span>
             </div>
