@@ -308,17 +308,34 @@ class ReportController extends Controller
 
 
         $totalLate =
-            $borrowings
-            ->where(
-                'status',
-                'dipinjam'
+            Borrowing::query()
+            ->whereNotNull('due_at')
+            ->whereBetween(
+                'due_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
             )
-            ->filter(function ($item) {
+            ->where(function ($query) {
 
-                return $item->due_at
-                    && Carbon::parse(
-                        $item->due_at
-                    )->isPast();
+                $query
+                    ->where(function ($q) {
+                        $q
+                            ->whereNull('returned_at')
+                            ->where(
+                                'due_at',
+                                '<',
+                                now()->startOfDay()
+                            );
+                    })
+                    ->orWhere(function ($q) {
+                        $q
+                            ->whereNotNull('returned_at')
+                            ->whereRaw(
+                                'returned_at >= DATE_ADD(due_at, INTERVAL 1 DAY)'
+                            );
+                    });
 
             })
             ->count();
@@ -341,15 +358,8 @@ class ReportController extends Controller
          * ========================================================
          */
         $lateBorrowings =
-            Borrowing::where(
-                'status',
-                'dipinjam'
-            )
-            ->where(
-                'due_at',
-                '<',
-                now()
-            )
+            Borrowing::query()
+            ->whereNotNull('due_at')
             ->whereBetween(
                 'due_at',
                 [
@@ -357,6 +367,27 @@ class ReportController extends Controller
                     $endDate
                 ]
             )
+            ->where(function ($query) {
+
+                $query
+                    ->where(function ($q) {
+                        $q
+                            ->whereNull('returned_at')
+                            ->where(
+                                'due_at',
+                                '<',
+                                now()->startOfDay()
+                            );
+                    })
+                    ->orWhere(function ($q) {
+                        $q
+                            ->whereNotNull('returned_at')
+                            ->whereRaw(
+                                'returned_at >= DATE_ADD(due_at, INTERVAL 1 DAY)'
+                            );
+                    });
+
+            })
             ->count();
 
 
@@ -509,7 +540,7 @@ class ReportController extends Controller
                         &&
                         Carbon::parse(
                             $item->due_at
-                        )->isPast()
+                        )->startOfDay()->addDay()->lte(now())
                     );
 
 
@@ -569,6 +600,131 @@ class ReportController extends Controller
 
                     'status' =>
                         $statusText,
+                ];
+            })
+            ->values()
+            ->toArray();
+
+
+        /*
+         * ========================================================
+         * DATA EXPORT KETERLAMBATAN
+         * ========================================================
+         *
+         * Hanya peminjaman yang masih dipinjam dan sudah memasuki
+         * 00.00 pada hari setelah tenggat pengembalian.
+         */
+        $lateBorrowingsExportData =
+            Borrowing::with([
+                'member',
+                'details.book'
+            ])
+            ->whereNotNull('due_at')
+            ->whereBetween(
+                'due_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
+            )
+            ->where(function ($query) {
+
+                $query
+                    ->where(function ($q) {
+                        $q
+                            ->whereNull('returned_at')
+                            ->where(
+                                'due_at',
+                                '<',
+                                now()->startOfDay()
+                            );
+                    })
+                    ->orWhere(function ($q) {
+                        $q
+                            ->whereNotNull('returned_at')
+                            ->whereRaw(
+                                'returned_at >= DATE_ADD(due_at, INTERVAL 1 DAY)'
+                            );
+                    });
+
+            })
+            ->latest('due_at')
+            ->get()
+            ->map(function ($item, $index) {
+
+                $bookTitles =
+                    $item->details
+                    ->map(function ($d) {
+
+                        return ($d->book->judul_buku ?? 'Buku')
+                            .
+                            (
+                                $d->quantity > 1
+                                ? ' (' . $d->quantity . 'x)'
+                                : ''
+                            );
+
+                    })
+                    ->implode(', ');
+
+                $dueDate =
+                    Carbon::parse(
+                        $item->due_at
+                    )->startOfDay();
+
+                $lateUntil =
+                    $item->returned_at
+                    ? Carbon::parse(
+                        $item->returned_at
+                    )->startOfDay()
+                    : now()->startOfDay();
+
+                $lateDays =
+                    max(
+                        1,
+                        $dueDate->diffInDays(
+                            $lateUntil
+                        )
+                    );
+
+                return [
+                    'no' => $index + 1,
+
+                    'member_name' =>
+                        $item->member->name
+                        ??
+                        ('Anggota #' . $item->member_id),
+
+                    'member_code' =>
+                        $item->member->member_code
+                        ??
+                        '-',
+
+                    'judul_buku' =>
+                        $bookTitles
+                        ?:
+                        'Tidak ada rincian',
+
+                    'borrowed_at' =>
+                        Carbon::parse(
+                            $item->borrowed_at
+                        )->translatedFormat(
+                            'd M Y'
+                        ),
+
+                    'due_at' =>
+                        Carbon::parse(
+                            $item->due_at
+                        )->translatedFormat(
+                            'd M Y'
+                        ),
+
+                    'status' => 'Terlambat',
+
+                    'keterangan' =>
+                        'Terlambat ' .
+                        $lateDays .
+                        ' hari',
                 ];
             })
             ->values()
@@ -701,7 +857,7 @@ class ReportController extends Controller
                         &&
                         Carbon::parse(
                             $borrowing->due_at
-                        )->isPast();
+                        )->startOfDay()->addDay()->lte(now());
 
                     $statusText =
                         $borrowing->status === 'dikembalikan'
@@ -815,6 +971,7 @@ class ReportController extends Controller
 
                 'borrowings',
                 'borrowingsExportData',
+                'lateBorrowingsExportData',
                 'activeMembersExportData',
 
                 'collectionReportData',
@@ -1174,15 +1331,28 @@ class ReportController extends Controller
     ) {
         return $this->generateDateChart(
             Borrowing::query()
-                ->where(
-                    'status',
-                    'dipinjam'
-                )
-                ->where(
-                    'due_at',
-                    '<',
-                    now()
-                ),
+                ->whereNotNull('due_at')
+                ->where(function ($query) {
+
+                    $query
+                        ->where(function ($q) {
+                            $q
+                                ->whereNull('returned_at')
+                                ->where(
+                                    'due_at',
+                                    '<',
+                                    now()->startOfDay()
+                                );
+                        })
+                        ->orWhere(function ($q) {
+                            $q
+                                ->whereNotNull('returned_at')
+                                ->whereRaw(
+                                    'returned_at >= DATE_ADD(due_at, INTERVAL 1 DAY)'
+                                );
+                        });
+
+                }),
             'due_at',
             $startDate,
             $endDate,

@@ -1950,6 +1950,24 @@
 
     {{-- =============================================================
 
+     DATA KETERLAMBATAN
+
+    ============================================================= --}}
+
+    <script
+
+        id="lateBorrowingsReportData"
+
+        type="application/json"
+
+    >
+
+{!! json_encode($lateBorrowingsExportData ?? []) !!}
+
+</script>
+
+    {{-- =============================================================
+
      DATA ANGGOTA AKTIF
 
      ============================================================= --}}
@@ -2545,6 +2563,48 @@
                         console.error(
 
                             'Gagal membaca data anggota aktif:',
+
+                            error
+
+                        );
+
+                        tableData = [];
+
+                    }
+
+                }
+
+            } else if (
+
+                reportType === 'late'
+
+            ) {
+
+                const dataScript =
+
+                    document.getElementById(
+
+                        'lateBorrowingsReportData'
+
+                    );
+
+                if (dataScript) {
+
+                    try {
+
+                        tableData =
+
+                            JSON.parse(
+
+                                dataScript.textContent
+
+                            );
+
+                    } catch (error) {
+
+                        console.error(
+
+                            'Gagal membaca data keterlambatan:',
 
                             error
 
@@ -3690,23 +3750,46 @@
                      * dari object secara otomatis.
                      */
 
-                    const columns = [
-                        'no',
-                        'member_name',
-                        'judul_buku',
-                        'borrowed_at',
-                        'due_at',
-                        'status'
-                    ];
+                    const isLateReport =
+                        reportType === 'late';
 
-                    const headers = [
-                        'NO',
-                        'NAMA ANGGOTA',
-                        'JUDUL BUKU',
-                        'TANGGAL PINJAM',
-                        'BATAS PENGEMBALIAN',
-                        'STATUS'
-                    ];
+                    const columns = isLateReport
+                        ? [
+                            'no',
+                            'member_name',
+                            'judul_buku',
+                            'borrowed_at',
+                            'due_at',
+                            'status',
+                            'keterangan'
+                        ]
+                        : [
+                            'no',
+                            'member_name',
+                            'judul_buku',
+                            'borrowed_at',
+                            'due_at',
+                            'status'
+                        ];
+
+                    const headers = isLateReport
+                        ? [
+                            'NO',
+                            'NAMA ANGGOTA',
+                            'JUDUL BUKU',
+                            'TANGGAL PINJAM',
+                            'BATAS PENGEMBALIAN',
+                            'STATUS',
+                            'KETERANGAN'
+                        ]
+                        : [
+                            'NO',
+                            'NAMA ANGGOTA',
+                            'JUDUL BUKU',
+                            'TANGGAL PINJAM',
+                            'BATAS PENGEMBALIAN',
+                            'STATUS'
+                        ];
 
                     const statusMap = {
                         'dipinjam': 'Sedang Dipinjam',
@@ -3759,7 +3842,7 @@
                         );
 
                     doc.autoTable({
-                        startY: 72,
+                        startY: isLateReport ? 71 : 72,
 
                         head: [
                             headers
@@ -3770,8 +3853,8 @@
                         theme: 'grid',
 
                         styles: {
-                            fontSize: 7.5,
-                            cellPadding: 2.5,
+                            fontSize: 8,
+                            cellPadding: 3,
                             valign: 'middle',
                             overflow: 'linebreak'
                         },
@@ -3781,32 +3864,65 @@
                             halign: 'center'
                         },
 
-                        columnStyles: {
-                            0: {
-                                cellWidth: 10,
-                                halign: 'center'
-                            },
+                        columnStyles: isLateReport
+                            ? {
+                                0: {
+                                    cellWidth: 12,
+                                    halign: 'center'
+                                },
 
-                            1: {
-                                cellWidth: 40
-                            },
+                                1: {
+                                    cellWidth: 30
+                                },
 
-                            2: {
-                                cellWidth: 45
-                            },
+                                2: {
+                                    cellWidth: 40
+                                },
 
-                            3: {
-                                cellWidth: 28
-                            },
+                                3: {
+                                    cellWidth: 23
+                                },
 
-                            4: {
-                                cellWidth: 32
-                            },
+                                4: {
+                                    cellWidth: 27
+                                },
 
-                            5: {
-                                cellWidth: 27
+                                5: {
+                                    cellWidth: 23
+                                },
+
+                                6: {
+                                    cellWidth: 27
+                                }
                             }
-                        },
+                            : {
+                                0: {
+                                    cellWidth: 10,
+                                    halign: 'center'
+                                },
+
+                                1: {
+                                    cellWidth: 40
+                                },
+
+                                2: {
+                                    cellWidth: 45
+                                },
+
+                                3: {
+                                    cellWidth: 28
+                                },
+
+                                4: {
+                                    cellWidth: 32
+                                },
+
+                                5: {
+                                    cellWidth: 27
+                                }
+                            },
+
+                        tableWidth: isLateReport ? 182 : 'wrap',
 
                         margin: {
                             left: 14,
