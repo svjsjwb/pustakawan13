@@ -254,13 +254,44 @@
 
                                             <a href="{{ route('members.edit', $member->id) }}" class="btn-edit"
                                                 title="Edit Anggota" aria-label="Edit Anggota">
-                                                <!-- SVG EDIT LO YANG SEKARANG TETAP -->
+                                                <svg viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                    aria-hidden="true">
+                                                    <path d="M12 20h9" />
+                                                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                                                </svg>
                                             </a>
 
 
                                             {{-- HAPUS --}}
 
-                                            <!-- FORM DELETE LO YANG SEKARANG TETAP -->
+                                            <form action="{{ route('members.destroy', $member->id) }}"
+                                                method="POST"
+                                                class="delete-member-form">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button type="button"
+                                                    class="btn-delete"
+                                                    title="Hapus Anggota"
+                                                    aria-label="Hapus Anggota"
+                                                    onclick="openMemberDeleteModal(this)">
+                                                    <svg viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                        aria-hidden="true">
+                                                        <polyline points="3 6 5 6 21 6" />
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                        <path d="M10 11v6" />
+                                                        <path d="M14 11v6" />
+                                                        <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                                                    </svg>
+                                                </button>
+
+                                            </form>
+
                                         @endif
 
                                     </div>

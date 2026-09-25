@@ -1308,3 +1308,11 @@
     }
 
 }
+
+/* ACTION ICON VISIBILITY FIX */
+.action-buttons .btn-edit svg,
+.action-buttons .btn-delete svg { display:block; flex-shrink:0; }
+.action-buttons .btn-edit svg { width:18px; height:18px; }
+.action-buttons .btn-delete svg { width:22px; height:22px; }
+.action-buttons .btn-edit,
+.action-buttons .btn-delete { line-height:0; }
