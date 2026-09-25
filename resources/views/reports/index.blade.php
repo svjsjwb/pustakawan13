@@ -3,15 +3,11 @@
 @section('title', 'Laporan Perpustakaan')
 
 @push('styles')
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
 
     <link rel="stylesheet" href="{{ asset('css/report.css') }}">
-
-    
-
 @endpush
 
 
@@ -97,13 +93,11 @@
     ========================================================== --}}
 
         @if (session('success'))
-
             <div class="report-success">
 
                 {{ session('success') }}
 
             </div>
-
         @endif
 
 
@@ -141,7 +135,6 @@
 
 
                     <input type="text" id="date_range_picker" class="date-range-flatpickr"
-
                         placeholder="Pilih rentang tanggal..." readonly>
 
                 </div>
@@ -155,7 +148,6 @@
 
 
                 <input type="hidden" name="start_date" id="start_date"
-
                     value="{{ $startDateInput ?? $startDate->format('Y-m-d') }}">
 
 
@@ -167,7 +159,6 @@
 
 
                 <input type="hidden" name="end_date" id="end_date"
-
                     value="{{ $endDateInput ?? $endDate->format('Y-m-d') }}">
 
 
@@ -181,7 +172,6 @@
                 <button type="submit" class="btn-filter-apply">
 
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
-
                         stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
 
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -203,7 +193,6 @@
                 <a href="{{ route('reports.index') }}" class="btn-filter-reset">
 
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
-
                         stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 
                         <polyline points="1 4 1 10 7 10"></polyline>
@@ -302,12 +291,11 @@
 
                     /*
 
-                                         * PEMINJAMAN
+                                                             * PEMINJAMAN
 
                      */
 
                     if (str_contains($jenis, 'Peminjaman')) {
-
                         $type = 'borrow';
 
                         $category = 'Sirkulasi';
@@ -329,19 +317,14 @@
                         $bars = $borrowChartBars ?? [];
 
                         $labels = $borrowChartLabels ?? [];
-
                     }
-
                     /*
 
-                                         * KETERLAMBATAN
+                                                             * KETERLAMBATAN
 
                      */ elseif (
-
                         str_contains($jenis, 'Keterlambatan')
-
                     ) {
-
                         $type = 'late';
 
                         $category = 'Monitoring';
@@ -363,15 +346,14 @@
                         $bars = $lateChartBars ?? [];
 
                         $labels = $lateChartLabels ?? [];
-
                     }
-
                     /*
 
-                                         * KOLEKSI
+                                                             * KOLEKSI
 
-                     */ elseif (str_contains($jenis, 'Koleksi')) {
-
+                     */ elseif (
+                        str_contains($jenis, 'Koleksi')
+                    ) {
                         $type = 'collection';
 
                         $category = 'Koleksi';
@@ -393,15 +375,12 @@
                         $bars = $collectionChartBars ?? [];
 
                         $labels = $collectionChartLabels ?? [];
-
                     }
-
                     /*
 
-                                         * ANGGOTA
+                                                             * ANGGOTA
 
                      */ else {
-
                         $type = 'member';
 
                         $category = 'Keanggotaan';
@@ -423,7 +402,6 @@
                         $bars = $memberChartBars ?? [];
 
                         $labels = $memberChartLabels ?? [];
-
                     }
 
                 @endphp
@@ -443,11 +421,8 @@
             ====================================================== --}}
 
                 <article class="report-card" onclick="openReportDetail(this)" data-report="{{ $report['jenis'] }}"
-
                     data-type="{{ $type }}" data-value="{{ $value }}" data-value-label="{{ $valueLabel }}"
-
                     data-period="{{ $periodLabel }}" data-labels="{{ implode('|', $labels) }}"
-
                     data-bars="{{ implode('|', $bars) }}">
 
                     {{-- TOP --}}
@@ -579,7 +554,6 @@
                             <div class="chart-bars">
 
                                 @foreach ($bars as $index => $bar)
-
                                     <div class="chart-column {{ $index === count($bars) - 1 ? 'active' : '' }}">
 
                                         <div class="chart-bar" style="height: {{ $bar }}%;"></div>
@@ -599,7 +573,6 @@
                                         </span>
 
                                     </div>
-
                                 @endforeach
 
                             </div>
@@ -619,7 +592,6 @@
                     {{-- KOLEKSI SUMMARY --}}
 
                     @if ($type === 'collection')
-
                         <div class="collection-summary" onclick="event.stopPropagation()">
 
                             <div class="collection-summary-item">
@@ -711,7 +683,6 @@
                             </div>
 
                         </div>
-
                     @endif
 
 
@@ -956,8 +927,7 @@
 
                             @forelse ($collectionExportData ?? []
 
-                                    as $item)
-
+                                        as $item)
                                 <tr>
 
                                     <td>
@@ -1039,7 +1009,6 @@
                                     </td>
 
                                 </tr>
-
                             @endforelse
 
                         </tbody>
@@ -1241,7 +1210,6 @@
 
 
 @push('scripts')
-
     {{-- FLATPICKR --}}
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -1295,16 +1263,15 @@
 
 
     <script>
-
         /*
 
-                |--------------------------------------------------------------------------
+                    |--------------------------------------------------------------------------
 
-                | DATE PICKER
+                    | DATE PICKER
 
-                |--------------------------------------------------------------------------
+                    |--------------------------------------------------------------------------
 
-                */
+                    */
 
         document.addEventListener(
 
@@ -2817,7 +2784,6 @@
                  * ====================================================
 
                  */
-
                 else if (
 
 
@@ -2944,7 +2910,7 @@
 
                 }
 
-                                /*
+                /*
                  * ====================================================
                  * TABEL PEMINJAMAN & KETERLAMBATAN
                  * ====================================================
@@ -2962,8 +2928,8 @@
                      * dari object secara otomatis.
                      */
 
-                    const columns = isLateReport
-                        ? [
+                    const columns = isLateReport ?
+                        [
                             'no',
                             'member_name',
                             'judul_buku',
@@ -2973,8 +2939,8 @@
                             'new_due_at',
                             'returned_at',
                             'keterangan'
-                        ]
-                        : [
+                        ] :
+                        [
                             'no',
                             'member_name',
                             'judul_buku',
@@ -2983,8 +2949,8 @@
                             'status'
                         ];
 
-                    const headers = isLateReport
-                        ? [
+                    const headers = isLateReport ?
+                        [
                             'NO',
                             'NAMA',
                             'JUDUL BUKU',
@@ -2994,8 +2960,8 @@
                             'TENGGAT PENGEMBALIAN BARU',
                             'TGL PENGEMBALIAN',
                             'KETERANGAN'
-                        ]
-                        : [
+                        ] :
+                        [
                             'NO',
                             'NAMA ANGGOTA',
                             'JUDUL BUKU',
@@ -3023,7 +2989,8 @@
                     tableData.forEach((row, index) => {
                         if (!isLateReport) {
                             rows.push(columns.map(column => {
-                                if (column === 'no' && (row[column] === undefined || row[column] === null)) {
+                                if (column === 'no' && (row[column] === undefined || row[column] ===
+                                        null)) {
                                     return index + 1;
                                 }
 
@@ -3053,67 +3020,100 @@
                             1
                         );
 
-                        for (let extensionIndex = 0; extensionIndex < extensionCount; extensionIndex++) {
+                        for (
+                            let extensionIndex = 0; extensionIndex < extensionCount; extensionIndex++
+                        ) {
                             const isFirstExtensionRow = extensionIndex === 0;
                             const rowSpan = extensionCount;
 
                             const baseCell = (content, extra = {}) => ({
                                 content: content ?? '-',
-                                ...(extensionCount > 1 ? { rowSpan } : {}),
+                                ...(extensionCount > 1 ? {
+                                    rowSpan
+                                } : {}),
                                 ...extra
                             });
 
-                            rows.push([
-                                isFirstExtensionRow
-                                    ? baseCell(row.no ?? index + 1)
-                                    : '',
-                                isFirstExtensionRow
-                                    ? baseCell(row.member_name ?? '-')
-                                    : '',
-                                isFirstExtensionRow
-                                    ? baseCell(row.judul_buku ?? '-')
-                                    : '',
-                                isFirstExtensionRow
-                                    ? baseCell(row.due_at ?? '-')
-                                    : '',
-                                isFirstExtensionRow
-                                    ? baseCell(
-                                        statusMap[String(row.status ?? '-').toLowerCase()] ?? row.status ?? '-'
-                                    )
-                                    : '',
-                                extensionDates[extensionIndex] ?? '-',
-                                newDueDates[extensionIndex] ?? '-',
-                                isFirstExtensionRow
-                                    ? baseCell(row.returned_at ?? '-')
-                                    : '',
-                                isFirstExtensionRow
-                                    ? baseCell(row.keterangan ?? '-')
-                                    : ''
-                            ]);
+                            const extensionCell = extensionDates[extensionIndex] ?? '-';
+                            const newDueCell = newDueDates[extensionIndex] ?? '-';
+
+                            if (isFirstExtensionRow) {
+                                // BARIS PERTAMA:
+                                // Semua kolom ditampilkan.
+                                rows.push([
+                                    baseCell(row.no ?? index + 1),
+                                    baseCell(row.member_name ?? '-'),
+                                    baseCell(row.judul_buku ?? '-'),
+                                    baseCell(row.due_at ?? '-'),
+
+                                    baseCell(
+                                        statusMap[
+                                            String(row.status ?? '-').toLowerCase()
+                                        ] ?? row.status ?? '-'
+                                    ),
+
+                                    extensionCell,
+                                    newDueCell,
+
+                                    baseCell(row.returned_at ?? '-'),
+                                    baseCell(row.keterangan ?? '-')
+                                ]);
+                            } else {
+                                // BARIS PERPANJANGAN BERIKUTNYA:
+                                // Kolom yang sudah rowSpan TIDAK dibuat lagi.
+                                // Hanya kolom PERPANJANG yang diisi.
+                                rows.push([
+                                    extensionCell,
+                                    newDueCell
+                                ]);
+                            }
                         }
                     });
 
                     doc.autoTable({
                         startY: isLateReport ? 71 : 72,
 
-                        head: isLateReport
-                            ? [
-                                [
-                                    { content: 'NO', rowSpan: 2 },
-                                    { content: 'NAMA', rowSpan: 2 },
-                                    { content: 'JUDUL BUKU', rowSpan: 2 },
-                                    { content: 'TENGGAT PENGEMBALIAN', rowSpan: 2 },
-                                    { content: 'STATUS', rowSpan: 2 },
-                                    { content: 'PERPANJANG', colSpan: 2 },
-                                    { content: 'TGL PENGEMBALIAN', rowSpan: 2 },
-                                    { content: 'KETERANGAN', rowSpan: 2 }
+                        head: isLateReport ?
+                            [
+                                [{
+                                        content: 'NO',
+                                        rowSpan: 2
+                                    },
+                                    {
+                                        content: 'NAMA',
+                                        rowSpan: 2
+                                    },
+                                    {
+                                        content: 'JUDUL BUKU',
+                                        rowSpan: 2
+                                    },
+                                    {
+                                        content: 'TENGGAT PENGEMBALIAN',
+                                        rowSpan: 2
+                                    },
+                                    {
+                                        content: 'STATUS',
+                                        rowSpan: 2
+                                    },
+                                    {
+                                        content: 'PERPANJANG',
+                                        colSpan: 2
+                                    },
+                                    {
+                                        content: 'TGL PENGEMBALIAN',
+                                        rowSpan: 2
+                                    },
+                                    {
+                                        content: 'KETERANGAN',
+                                        rowSpan: 2
+                                    }
                                 ],
                                 [
                                     'TGL PERPANJANGAN',
                                     'TENGGAT PENGEMBALIAN BARU'
                                 ]
-                            ]
-                            : [headers],
+                            ] :
+                            [headers],
 
                         body: rows,
 
@@ -3132,25 +3132,57 @@
                             valign: 'middle'
                         },
 
-                        columnStyles: isLateReport
-                            ? {
-                                0: { cellWidth: 10, halign: 'center' },
-                                1: { cellWidth: 32 },
-                                2: { cellWidth: 40 },
-                                3: { cellWidth: 34 },
-                                4: { cellWidth: 28 },
-                                5: { cellWidth: 30 },
-                                6: { cellWidth: 38 },
-                                7: { cellWidth: 30 },
-                                8: { cellWidth: 35 }
-                            }
-                            : {
-                                0: { cellWidth: 10, halign: 'center' },
-                                1: { cellWidth: 40 },
-                                2: { cellWidth: 45 },
-                                3: { cellWidth: 28 },
-                                4: { cellWidth: 32 },
-                                5: { cellWidth: 27 }
+                        columnStyles: isLateReport ?
+                            {
+                                0: {
+                                    cellWidth: 10,
+                                    halign: 'center'
+                                },
+                                1: {
+                                    cellWidth: 32
+                                },
+                                2: {
+                                    cellWidth: 40
+                                },
+                                3: {
+                                    cellWidth: 34
+                                },
+                                4: {
+                                    cellWidth: 28
+                                },
+                                5: {
+                                    cellWidth: 30
+                                },
+                                6: {
+                                    cellWidth: 38
+                                },
+                                7: {
+                                    cellWidth: 30
+                                },
+                                8: {
+                                    cellWidth: 35
+                                }
+                            } :
+                            {
+                                0: {
+                                    cellWidth: 10,
+                                    halign: 'center'
+                                },
+                                1: {
+                                    cellWidth: 40
+                                },
+                                2: {
+                                    cellWidth: 45
+                                },
+                                3: {
+                                    cellWidth: 28
+                                },
+                                4: {
+                                    cellWidth: 32
+                                },
+                                5: {
+                                    cellWidth: 27
+                                }
                             },
 
                         tableWidth: isLateReport ? 277 : 'wrap',
@@ -3162,16 +3194,15 @@
                     });
                 }
 
-/*
+                /*
 
-                 * ====================================================
+                                 * ====================================================
 
-                 * EMPTY
+                                 * EMPTY
 
-                 * ====================================================
+                                 * ====================================================
 
-                 */
-
+                                 */
                 else {
 
                     doc.setTextColor(
@@ -3767,7 +3798,5 @@
             }
 
         );
-
     </script>
-
 @endpush

@@ -1562,7 +1562,7 @@
 
     box-sizing: border-box;
 
-    padding: 0 0 50px;
+    padding: 0;
 }
 
 
@@ -2622,20 +2622,22 @@
 
 /* =========================================================
    PAGINATION MANAJEMEN BUKU
+   SAMA SEPERTI KATALOG / ACTIVITIES
 ========================================================= */
 
 .books-pagination {
     width: 100%;
-    min-height: 82px;
+    min-height: 0;
 
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
 
-    gap: 18px;
+    gap: 10px;
 
     margin-top: 20px;
-    padding: 14px 24px;
+    padding: 18px 24px 20px;
 
     box-sizing: border-box;
 
@@ -2648,171 +2650,160 @@
         0 2px 8px rgba(27, 42, 58, 0.04);
 }
 
-.books-pagination-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    flex-shrink: 0;
-}
-
-.books-pagination-label {
-    color: #19364f;
-
-    font-size: 13px;
-    font-weight: 500;
-
-    white-space: nowrap;
-}
-
-.books-per-page-form {
-    margin: 0;
-    padding: 0;
-}
-
-.books-per-page {
-    width: 58px;
-    height: 34px;
-
-    padding: 0 9px;
-
-    box-sizing: border-box;
-
-    border: 1px solid #bfcbd5;
-    border-radius: 5px;
-
-    background: #ffffff;
-
-    color: #19364f;
-
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-
-    outline: none;
-
-    cursor: pointer;
-}
-
-.books-per-page:focus {
-    border-color: #287f80;
-
-    box-shadow:
-        0 0 0 3px rgba(40, 127, 128, 0.10);
-}
-
-.books-pagination-center {
-    color: #64747b;
-
-    font-size: 13px;
-    font-weight: 500;
-
-    white-space: nowrap;
-
-    text-align: center;
-}
-
-.books-pagination-center strong {
-    color: #19364f;
-    font-weight: 700;
-}
-
 .books-pagination-links {
+    width: 100%;
+
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
 
-    gap: 8px;
+    flex-wrap: wrap;
 
-    flex-shrink: 0;
+    gap: 6px;
 }
 
 .books-page-btn {
-    min-width: 42px;
-    height: 42px;
+    min-width: 38px;
+    height: 38px;
 
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    padding: 0 12px;
+    padding: 0 11px;
 
     box-sizing: border-box;
 
-    border: 1px solid #dfe7ed;
-    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
 
     background: #ffffff;
+    color: #1e293b;
 
-    color: #19364f;
-
-    font-size: 13px;
+    font-family: inherit;
+    font-size: 12px;
     font-weight: 600;
 
     text-decoration: none;
-
+    cursor: pointer;
     white-space: nowrap;
 
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03);
+
     transition:
-        background-color 0.2s ease,
         border-color 0.2s ease,
         color 0.2s ease,
+        background 0.2s ease,
         box-shadow 0.2s ease,
         transform 0.15s ease;
 }
 
 .books-page-btn:hover {
-    background: #f5fafa;
-
-    border-color: #b8d4d4;
-
-    color: #287f80;
-
+    border-color: #287c7c;
+    color: #287c7c;
+    background: #e6f0ef;
     transform: translateY(-1px);
 }
 
 .books-page-btn.active {
-    background: #176a6a;
-
-    border-color: #176a6a;
-
+    background: #1a5c5a;
+    border-color: #1a5c5a;
     color: #ffffff;
+    font-weight: 700;
 
     box-shadow:
-        0 3px 8px rgba(23, 106, 106, 0.18);
+        0 2px 6px rgba(26, 92, 90, 0.20);
 }
 
 .books-page-btn.active:hover {
-    background: #176a6a;
-    border-color: #176a6a;
+    background: #1a5c5a;
+    border-color: #1a5c5a;
     color: #ffffff;
 }
 
 .books-page-btn.disabled {
-    color: #b4c0c8;
-
     background: #ffffff;
+    border-color: #e2e8f0;
+    color: #cbd5e1;
 
-    border-color: #e3e9ee;
-
-    cursor: default;
-
+    cursor: not-allowed;
     pointer-events: none;
+
+    box-shadow: none;
+    transform: none;
 }
 
-.books-page-dots {
-    min-width: 20px;
+.books-pagination-info {
+    width: 100%;
 
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    margin: 0;
+    padding: 0;
 
-    color: #64747b;
+    color: #64748b;
 
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
+
+    line-height: 1.4;
+    text-align: center;
+
+    white-space: nowrap;
 }
 
+.books-pagination-info strong {
+    color: #12403e;
+    font-weight: 700;
+}
+
+@media (max-width: 700px) {
+
+    .books-pagination {
+        padding: 16px 14px 18px;
+        gap: 9px;
+    }
+
+    .books-pagination-links {
+        gap: 5px;
+    }
+
+    .books-page-btn {
+        min-width: 34px;
+        height: 34px;
+        padding: 0 9px;
+        font-size: 11px;
+    }
+
+    .books-pagination-info {
+        font-size: 12px;
+        white-space: normal;
+    }
+
+}
+
+@media (max-width: 450px) {
+
+    .books-pagination {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .books-pagination-links {
+        gap: 4px;
+    }
+
+    .books-page-btn {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 7px;
+        font-size: 10px;
+    }
+
+    .books-pagination-info {
+        font-size: 11px;
+    }
+
+}
 
 /* =========================================================
    MANAJEMEN BUKU - HERO
@@ -3353,23 +3344,6 @@
         flex-wrap: wrap;
         justify-content: center;
     }
-
-    .books-pagination-left {
-        margin-right: auto;
-    }
-
-    .books-pagination-center {
-        order: 3;
-        width: 100%;
-    }
-
-    .books-pagination-links {
-        margin-left: auto;
-    }
-
-}
-
-
 @media (max-width: 650px) {
 
     .books-pagination {
@@ -3381,23 +3355,4 @@
 
         padding: 16px;
     }
-
-    .books-pagination-left {
-        justify-content: center;
-
-        margin-right: 0;
-    }
-
-    .books-pagination-center {
-        order: initial;
-    }
-
-    .books-pagination-links {
-        margin-left: 0;
-
-        justify-content: center;
-
-        flex-wrap: wrap;
-    }
-
-}
+}}

@@ -1349,6 +1349,10 @@ class ReportController extends Controller
             ];
         }
 
+        /*
+     * Ambil hanya history yang memiliki
+     * deadline lama dan deadline baru.
+     */
         $history = collect(
             $borrowing->extension_history ?? []
         )
@@ -1356,18 +1360,24 @@ class ReportController extends Controller
                 return !empty($extension['old_due_at'])
                     && !empty($extension['new_due_at']);
             })
+            ->sortBy(function ($extension) {
+                return $extension['extension_date']
+                    ?? $extension['new_due_at'];
+            })
             ->values();
 
         /*
      * ========================================================
-     * TENTUKAN DEADLINE AWAL
+     * DEADLINE AWAL
      * ========================================================
      */
         if ($history->isNotEmpty()) {
+
             $originalDueDate = Carbon::parse(
                 $history->first()['old_due_at']
             )->startOfDay();
         } else {
+
             $originalDueDate = Carbon::parse(
                 $borrowing->due_at
             )->startOfDay();
@@ -1375,14 +1385,14 @@ class ReportController extends Controller
 
         /*
      * ========================================================
-     * TANGGAL AKHIR PERHITUNGAN
+     * TANGGAL AKHIR
      * ========================================================
      *
-     * Jika sudah dikembalikan:
-     * gunakan tanggal pengembalian.
+     * Sudah kembali:
+     *   gunakan tanggal pengembalian.
      *
-     * Jika belum:
-     * gunakan hari ini.
+     * Belum kembali:
+     *   gunakan hari ini.
      */
         $endDate = $borrowing->returned_at
             ? Carbon::parse(
@@ -1390,22 +1400,20 @@ class ReportController extends Controller
             )->startOfDay()
             : now()->startOfDay();
 
-        /*
-     * Jika dikembalikan sebelum / tepat deadline final,
-     * belum tentu pernah terlambat.
-     */
         $lateDays = 0;
         $lateStart = null;
         $lateEnd = null;
 
         /*
-     * ========================================================
-     * PERHITUNGAN PERIODE
-     * ========================================================
+     * Deadline aktif dimulai dari deadline awal.
      */
-
         $currentDueDate = $originalDueDate;
 
+        /*
+     * ========================================================
+     * HITUNG SETIAP PERIODE SEBELUM PERPANJANGAN
+     * ========================================================
+     */
         foreach ($history as $extension) {
 
             $extensionDate = Carbon::parse(
@@ -1416,55 +1424,60 @@ class ReportController extends Controller
             /*
          * Keterlambatan dimulai H+1 dari deadline lama.
          */
-            $lateStartForPeriod = $currentDueDate
+            $latePeriodStart = $currentDueDate
                 ->copy()
                 ->addDay();
 
             /*
-         * Sampai tanggal perpanjangan.
+         * Kalau perpanjangan dilakukan setelah deadline,
+         * tanggal perpanjangan tetap dihitung sebagai
+         * hari terlambat.
          *
-         * Kalau extension dilakukan sebelum deadline,
-         * hasilnya 0.
+         * Contoh:
+         *
+         * Deadline : 27 Sep
+         * Extend  : 28 Sep
+         *
+         * 28 Sep = 1 hari terlambat.
          */
-            if ($extensionDate->gte($lateStartForPeriod)) {
+            if ($extensionDate->gte($latePeriodStart)) {
 
                 $periodEnd = $extensionDate->copy();
 
                 /*
-             * Jangan menghitung melewati tanggal pengembalian.
+             * Jangan menghitung melewati tanggal kembali.
              */
                 if ($periodEnd->gt($endDate)) {
                     $periodEnd = $endDate->copy();
                 }
 
-                if ($lateStartForPeriod->lte($periodEnd)) {
+                if ($latePeriodStart->lte($periodEnd)) {
 
-                    $days = $lateStartForPeriod->diffInDays(
+                    $days = $latePeriodStart->diffInDays(
                         $periodEnd
                     ) + 1;
 
                     $lateDays += $days;
 
                     if (!$lateStart) {
-                        $lateStart =
-                            $lateStartForPeriod->copy();
+                        $lateStart = $latePeriodStart->copy();
                     }
 
-                    $lateEnd =
-                        $periodEnd->copy();
+                    $lateEnd = $periodEnd->copy();
                 }
             }
 
             /*
-         * Deadline baru menjadi deadline aktif.
+         * Setelah extension disetujui,
+         * deadline baru menjadi deadline aktif.
          */
             $currentDueDate = Carbon::parse(
                 $extension['new_due_at']
             )->startOfDay();
 
             /*
-         * Kalau sudah dikembalikan,
-         * tidak perlu menghitung periode berikutnya.
+         * Kalau sudah dikembalikan sebelum
+         * periode berikutnya dimulai, berhenti.
          */
             if (
                 $borrowing->returned_at
@@ -1479,7 +1492,7 @@ class ReportController extends Controller
 
         /*
      * ========================================================
-     * PERIODE SETELAH DEADLINE TERAKHIR
+     * HITUNG KETERLAMBATAN SETELAH EXTENSION TERAKHIR
      * ========================================================
      */
         $finalLateStart = $currentDueDate
@@ -1495,29 +1508,26 @@ class ReportController extends Controller
             $lateDays += $days;
 
             if (!$lateStart) {
-                $lateStart =
-                    $finalLateStart->copy();
+                $lateStart = $finalLateStart->copy();
             }
 
-            $lateEnd =
-                $endDate->copy();
+            $lateEnd = $endDate->copy();
         }
 
         return [
-            'is_late' =>
-            $lateDays > 0,
+            'is_late' => $lateDays > 0,
 
-            'late_start' =>
-            $lateStart,
+            'late_start' => $lateStart,
 
-            'late_end' =>
-            $lateEnd,
+            'late_end' => $lateEnd,
 
-            'late_days' =>
-            $lateDays,
+            'late_days' => $lateDays,
 
-            'extension_history' =>
-            $history->all(),
+            /*
+         * Ini penting supaya PDF bisa membaca
+         * semua tanggal perpanjangan.
+         */
+            'extension_history' => $history->all(),
         ];
     }
 

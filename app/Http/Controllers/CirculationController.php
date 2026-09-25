@@ -363,24 +363,29 @@ class CirculationController extends Controller
         )->startOfDay();
 
         /*
-     * Tambahkan hari perpanjangan.
-     */
-        $newDueDate = $currentDueDate
-            ->copy()
-            ->addDays($extensionDays);
+ * Tanggal saat perpanjangan dilakukan.
+ */
+        $extensionDate = now()->startOfDay();
 
-        /*
-     * Ambil riwayat perpanjangan sebelumnya.
-     *
-     * Jika belum ada history, gunakan array kosong.
-     */
+        if ($extensionDate->gt($currentDueDate)) {
+
+            $newDueDate = $extensionDate
+                ->copy()
+                ->addDays($extensionDays);
+        } else {
+
+            $newDueDate = $currentDueDate
+                ->copy()
+                ->addDays($extensionDays);
+        }
+
         $extensionHistory = $borrowing->extension_history ?? [];
 
         /*
      * Tambahkan riwayat perpanjangan baru.
      */
         $extensionHistory[] = [
-            'extension_date' => now()->toDateString(),
+            'extension_date' => $extensionDate->toDateString(),
             'old_due_at' => $currentDueDate->toDateString(),
             'new_due_at' => $newDueDate->toDateString(),
             'extension_days' => $extensionDays,
@@ -439,25 +444,38 @@ class CirculationController extends Controller
             $borrowing->due_at
         )->startOfDay();
 
-        /*
-     * Ambil tanggal baru yang diminta member.
-     *
-     * Jika tidak ada, gunakan default +7 hari.
-     */
+        $extensionDate = now()->startOfDay();
+
         if ($borrowing->extension_requested_due_at) {
-            $newDue = Carbon::parse(
+
+            $requestedDueDate = Carbon::parse(
                 $borrowing->extension_requested_due_at
             )->startOfDay();
+
+            $extensionDays = $currentDueDate->diffInDays(
+                $requestedDueDate
+            );
+
+            $extensionDays = max(
+                1,
+                $extensionDays
+            );
         } else {
-            $newDue = $currentDueDate
-                ->copy()
-                ->addDays(7);
+
+            $extensionDays = 7;
         }
 
-        /*
-     * Hitung jumlah hari perpanjangan.
-     */
-        $extensionDays = $currentDueDate->diffInDays($newDue);
+        if ($extensionDate->gt($currentDueDate)) {
+
+            $newDue = $extensionDate
+                ->copy()
+                ->addDays($extensionDays);
+        } else {
+
+            $newDue = $currentDueDate
+                ->copy()
+                ->addDays($extensionDays);
+        }
 
         /*
      * Ambil history sebelumnya.
@@ -468,7 +486,7 @@ class CirculationController extends Controller
      * Tambahkan history perpanjangan baru.
      */
         $extensionHistory[] = [
-            'extension_date' => now()->toDateString(),
+            'extension_date' => $extensionDate->toDateString(),
             'old_due_at' => $currentDueDate->toDateString(),
             'new_due_at' => $newDue->toDateString(),
             'extension_days' => $extensionDays,
