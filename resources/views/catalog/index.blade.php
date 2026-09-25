@@ -3,579 +3,304 @@
 @section('title', 'Katalog Buku')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/catalog.css') }}">
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/catalog.js') }}"></script>
+    <script src="{{ asset('js/catalog.js') }}"></script>
 @endpush
 
 @section('content')
 
-<section class="page" id="page-catalog">
+    <section class="page" id="page-catalog">
 
-    {{-- =========================
-         HEADER
+        {{-- =========================
+        HEADER
     ========================= --}}
 
-    <div class="catalog-header">
+        <div class="catalog-header">
 
-        <div>
+            <div>
 
-            <div class="catalog-count">
-                {{ $books->total() }} buku terdaftar
+                <div class="catalog-count" id="catalog-count">
+                    {{ $books->total() }} buku terdaftar
+                </div>
+
+                <h1>
+                    Katalog Buku
+                </h1>
+
+                <p>
+                    Telusuri seluruh koleksi perpustakaan berdasarkan judul,
+                    kategori, atau ketersediaan stok.
+                </p>
+
             </div>
-
-            <h1>
-                Katalog Buku
-            </h1>
-
-            <p>
-                Telusuri seluruh koleksi perpustakaan berdasarkan judul,
-                kategori, atau ketersediaan stok.
-            </p>
 
         </div>
 
-    </div>
 
-
-    {{-- =========================
-         FILTER FORM
+        {{-- =========================
+        FILTER FORM
     ========================= --}}
 
-    <form
-        method="GET"
-        action="{{ route('catalog') }}"
-        class="filters"
-        id="catalog-filter-form">
+        <form method="GET" action="{{ route('catalog') }}" class="filters catalog-filter-form" id="catalog-filter-form">
 
-        {{-- SEARCH --}}
-        <input
-            type="text"
-            name="search"
-            value="{{ request('search') }}"
-            placeholder="Cari judul atau pengarang...">
+            <input type="text" name="search" id="catalog-search" value="{{ request('search') }}"
+                placeholder="Cari judul atau pengarang...">
+
+
+            @php
+                $selectedCategoryId = request('category');
+                $selectedCategory = is_numeric($selectedCategoryId)
+                    ? $categories->firstWhere('id', (int) $selectedCategoryId)
+                    : $categories->firstWhere('name', $selectedCategoryId);
+                $selectedSubcategoryId = request('subcategory');
+            @endphp
+
+            <select name="category" id="catalog-category">
+                <option value="">Semua Kategori</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}"
+                        {{ $selectedCategory && $selectedCategory->id == $category->id ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
+                @endforeach
+            </select>
+
+            <select name="subcategory" id="catalog-subcategory" {{ $selectedCategory ? '' : 'disabled' }}>
+                <option value="">
+                    {{ $selectedCategory ? 'Semua Subkategori' : 'Pilih Kategori Dulu' }}
+                </option>
+                @if ($selectedCategory)
+                    @foreach ($selectedCategory->subcategories as $subcategory)
+                        <option value="{{ $subcategory->id }}"
+                            {{ (string) $selectedSubcategoryId === (string) $subcategory->id ? 'selected' : '' }}>
+                            {{ $subcategory->name }}
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+
+            <select name="status" id="catalog-status">
+
+                <option value="">
+                    Semua Status
+                </option>
+
+                <option value="Tersedia" {{ request('status') == 'Tersedia' ? 'selected' : '' }}>
+                    Tersedia
+                </option>
+
+                <option value="Dipinjam" {{ request('status') == 'Dipinjam' ? 'selected' : '' }}>
+                    Sedang Dipinjam
+                </option>
+
+            </select>
+
+        </form>
 
 
         {{-- =========================
-         CATEGORY DROPDOWN
+    CATALOG RESULTS
+========================= --}}
+
+        <div id="catalog-results">
+
+            {{-- =========================
+        BOOK GRID
     ========================= --}}
 
-        @php
-        $selectedCategoryId = request('category');
-        $selectedSubcategoryId = request('subcategory');
+            <div class="book-grid" id="catalog-book-grid">
 
-        $selectedCategory = $categories->firstWhere(
-        'id',
-        $selectedCategoryId
-        );
+                @forelse($books as $book)
+                    <div class="book-card" data-title="{{ $book->title }}" data-author="{{ $book->author ?? '-' }}"
+                        data-category="{{ $book->category->name ?? '-' }}" data-stock="{{ $book->available_stock ?? 0 }}"
+                        data-status="{{ $book->available_stock > 0 ? 'Tersedia' : 'Dipinjam' }}"
+                        data-description="{{ $book->description ?? 'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.' }}"
+                        data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}"
+                        data-publisher="{{ $book->publisher ?? '-' }}" data-year="{{ $book->publication_year ?? '-' }}"
+                        data-isbn="{{ $book->isbn ?? '-' }}" data-call-number="{{ $book->call_number ?? '-' }}">
 
-        $selectedSubcategory = null;
+                        {{-- COVER --}}
 
-        if ($selectedCategory && $selectedSubcategoryId) {
-        $selectedSubcategory = $selectedCategory->subcategories
-        ->firstWhere('id', $selectedSubcategoryId);
-        }
-        @endphp
+                        <div class="book-cover {{ $book->cover ? 'has-image' : '' }}">
 
+                            @if ($book->cover)
+                                <img src="{{ asset('storage/' . $book->cover) }}" alt="{{ $book->title }}"
+                                    class="book-cover-img">
+                            @endif
 
-        <div class="catalog-category-dropdown">
-
-            {{-- TOMBOL UTAMA --}}
-            <button
-                type="button"
-                class="catalog-category-trigger">
-
-                <span>
-                    @if($selectedSubcategory)
-                    {{ $selectedSubcategory->name }}
-                    @elseif($selectedCategory)
-                    {{ $selectedCategory->name }}
-                    @else
-                    Semua Kategori
-                    @endif
-                </span>
-
-                <span class="catalog-category-arrow">
-                    ⌄
-                </span>
-
-            </button>
+                        </div>
 
 
-            {{-- MENU KATEGORI --}}
-            <div class="catalog-category-menu">
+                        {{-- INFORMATION --}}
 
-                {{-- SEMUA KATEGORI --}}
-                <a
-                    href="{{ route('catalog', array_filter([
-                    'search' => request('search'),
-                    'status' => request('status'),
-                    'per_page' => request('per_page'),
-                ])) }}"
-                    class="catalog-category-option
-                    {{ !$selectedCategoryId && !$selectedSubcategoryId ? 'active' : '' }}">
+                        <div class="book-info">
 
-                    Semua Kategori
+                            <strong>
+                                {{ $book->title }}
+                            </strong>
 
-                </a>
+                            <span>
+                                {{ $book->author ?? '-' }}
+                            </span>
 
 
-                {{-- KATEGORI --}}
-                @foreach($categories as $category)
+                            <div class="book-meta">
 
-                <div class="catalog-category-item">
-
-                    <a
-                        href="{{ route('catalog', array_filter([
-                            'search' => request('search'),
-                            'category' => $category->id,
-                            'status' => request('status'),
-                            'per_page' => request('per_page'),
-                        ])) }}"
-                        class="catalog-category-option
-                            {{ (string) $selectedCategoryId === (string) $category->id && !$selectedSubcategoryId ? 'active' : '' }}">
-
-                        <span>
-                            {{ $category->name }}
-                        </span>
-
-                        @if($category->subcategories->count())
-                        <span class="catalog-category-arrow">
-                            ›
-                        </span>
-                        @endif
-
-                    </a>
+                                <span>
+                                    {{ $book->category->name ?? '-' }}
+                                </span>
 
 
-                    {{-- SUBKATEGORI --}}
-                    @if($category->subcategories->count())
+                                @if ($book->available_stock > 0)
+                                    <span class="book-status available">
+                                        Tersedia ({{ $book->available_stock }})
+                                    </span>
+                                @else
+                                    <span class="book-status borrowed">
+                                        Dipinjam
+                                    </span>
+                                @endif
 
-                    <div class="catalog-subcategory-menu">
+                            </div>
 
-                        {{-- SEMUA DALAM KATEGORI --}}
-                        <a
-                            href="{{ route('catalog', array_filter([
-                                    'search' => request('search'),
-                                    'category' => $category->id,
-                                    'status' => request('status'),
-                                    'per_page' => request('per_page'),
-                                ])) }}"
-                            class="catalog-subcategory-option
-                                    {{ (string) $selectedCategoryId === (string) $category->id && !$selectedSubcategoryId ? 'active' : '' }}">
-
-                            Semua {{ $category->name }}
-
-                        </a>
-
-
-                        {{-- SUBKATEGORI --}}
-                        @foreach($category->subcategories as $subcategory)
-
-                        <a
-                            href="{{ route('catalog', array_filter([
-                                        'search' => request('search'),
-                                        'category' => $category->id,
-                                        'subcategory' => $subcategory->id,
-                                        'status' => request('status'),
-                                        'per_page' => request('per_page'),
-                                    ])) }}"
-                            class="catalog-subcategory-option
-                                        {{ (string) $selectedSubcategoryId === (string) $subcategory->id ? 'active' : '' }}">
-
-                            └─ {{ $subcategory->name }}
-
-                        </a>
-
-                        @endforeach
+                        </div>
 
                     </div>
 
-                    @endif
+                @empty
 
-                </div>
+                    <div class="catalog-empty">
 
-                @endforeach
+                        Belum ada koleksi buku yang sesuai
+                        dengan pencarian atau filter.
 
-            </div>
-
-        </div>
-
-
-        {{-- =========================
-         STATUS
-    ========================= --}}
-
-        <select
-            name="status"
-            onchange="this.form.submit()">
-
-            <option value="">
-                Semua Status
-            </option>
-
-            <option
-                value="Tersedia"
-                {{ request('status') === 'Tersedia' ? 'selected' : '' }}>
-                Tersedia
-            </option>
-
-            <option
-                value="Dipinjam"
-                {{ request('status') === 'Dipinjam' ? 'selected' : '' }}>
-                Sedang Dipinjam
-            </option>
-
-        </select>
-
-    </form>
-
-
-    {{-- =========================
-         BOOK GRID
-    ========================= --}}
-
-    <div class="book-grid">
-
-        @forelse($books as $book)
-
-        <div
-            class="book-card"
-
-            data-title="{{ $book->title }}"
-
-            data-author="{{ $book->author ?? '-' }}"
-
-            data-category="{{ $book->category->name ?? '-' }}"
-
-            data-stock="{{ $book->available_stock ?? 0 }}"
-
-            data-status="{{ $book->available_stock > 0 ? 'Tersedia' : 'Dipinjam' }}"
-
-            data-description="{{ $book->description ?? 'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.' }}"
-
-            data-cover="{{ $book->cover ? asset('storage/' . $book->cover) : '' }}"
-
-            data-publisher="{{ $book->publisher ?? '-' }}"
-
-            data-year="{{ $book->publication_year ?? '-' }}"
-
-            data-isbn="{{ $book->isbn ?? '-' }}"
-
-            data-call-number="{{ $book->call_number ?? '-' }}">
-
-            {{-- =========================
-                     COVER
-                ========================= --}}
-
-            <div
-                class="book-cover {{ $book->cover ? 'has-image' : '' }}">
-
-                @if($book->cover)
-
-                <img
-                    src="{{ asset('storage/' . $book->cover) }}"
-                    alt="{{ $book->title }}"
-                    class="book-cover-img">
-
-                @endif
+                    </div>
+                @endforelse
 
             </div>
 
 
             {{-- =========================
-                     INFORMATION
-                ========================= --}}
-
-            <div class="book-info">
-
-                <strong>
-                    {{ $book->title }}
-                </strong>
-
-                <span>
-                    {{ $book->author ?? '-' }}
-                </span>
-
-
-                <div class="book-meta">
-
-                    <span>
-                        {{ $book->category->name ?? '-' }}
-                    </span>
-
-
-                    @if($book->available_stock > 0)
-
-                    <span class="book-status available">
-                        Tersedia ({{ $book->available_stock }})
-                    </span>
-
-                    @else
-
-                    <span class="book-status borrowed">
-                        Dipinjam
-                    </span>
-
-                    @endif
-
-                </div>
-
-            </div>
-
-        </div>
-
-        @empty
-
-        <div class="catalog-empty">
-
-            Belum ada koleksi buku yang sesuai
-            dengan pencarian atau filter.
-
-        </div>
-
-        @endforelse
-
-    </div>
-
-
-    {{-- =========================
-         PAGINATION
+        PAGINATION
     ========================= --}}
 
-    @if($books->total() > 0)
+            @if ($books->total() > 0)
+                <div class="catalog-pagination" id="catalog-pagination">
 
-    <div class="catalog-pagination">
+                    {{ $books->links('partials.pagination') }}
 
-        {{ $books->links('partials.pagination') }}
+                </div>
+            @endif
 
-    </div>
+        </div>
 
-    @endif
+    </section>
 
-</section>
-
-
-{{-- =========================================================
+    {{-- =========================================================
      BOOK DETAIL MODAL
 ========================================================= --}}
 
-<div
-    class="catalog-modal"
-    id="book-modal">
+    <div class="catalog-modal" id="book-modal">
 
-    <div class="catalog-modal-container">
+        <div class="catalog-modal-container">
 
+            <button type="button" class="catalog-modal-close" id="modal-close">
+                &times;
+            </button>
 
-        {{-- =========================
-             CLOSE BUTTON
-        ========================= --}}
+            <div class="catalog-modal-body">
 
-        <button
-            type="button"
-            class="catalog-modal-close"
-            id="modal-close"
-            aria-label="Tutup">
-            &times;
-        </button>
+                <!-- LEFT -->
+                <div class="catalog-modal-cover">
 
+                    <div class="book-3d" id="book3D">
 
-        <div class="catalog-modal-body">
+                        <div class="book-face front" id="bookFront">
 
+                            <div class="book-top">
+                                TIGA SERANGKAI
+                            </div>
 
-            {{-- =========================
-                 MODAL COVER
-            ========================= --}}
+                            <div class="book-title" id="modalBookTitle">
+                                Buku Dummy
+                            </div>
 
-            <div class="catalog-modal-cover">
+                            <div class="book-bottom">
+                                PERPUSTAKAAN
+                            </div>
 
-                {{-- COVER DEFAULT --}}
+                        </div>
 
-                <div
-                    class="catalog-modal-book"
-                    id="modal-book-box">
+                        <div class="book-face back"></div>
 
-                    <div class="catalog-modal-brand">
-                        TIGA SERANGKAI
-                    </div>
+                        <div class="book-spine"></div>
 
-
-                    <div
-                        class="catalog-modal-book-title"
-                        id="modal-cover-title">
-                    </div>
-
-
-                    <div class="catalog-modal-book-footer">
-                        PERPUSTAKAAN
-                    </div>
-
-                </div>
-
-
-                {{-- COVER IMAGE --}}
-
-                <img
-                    id="modal-cover-image"
-                    src="#"
-                    alt="Cover Buku"
-                    style="
-                        display: none;
-                        width: 170px;
-                        height: 235px;
-                        object-fit: cover;
-                        border-radius: 10px;
-                        box-shadow:
-                            -6px 12px 25px
-                            rgba(0,0,0,0.20);
-                    ">
-
-            </div>
-
-
-            {{-- =========================
-                 MODAL INFORMATION
-            ========================= --}}
-
-            <div class="catalog-modal-info">
-
-
-                {{-- BADGES --}}
-
-                <div class="catalog-modal-badges">
-
-                    <span
-                        class="catalog-modal-category"
-                        id="modal-category">
-                    </span>
-
-
-                    <span
-                        class="catalog-modal-status"
-                        id="modal-status">
-                    </span>
-
-                </div>
-
-
-                {{-- TITLE --}}
-
-                <h2 id="modal-title">
-                </h2>
-
-
-                {{-- AUTHOR --}}
-
-                <div
-                    class="catalog-modal-author"
-                    id="modal-author">
-                </div>
-
-
-                {{-- DESCRIPTION --}}
-
-                <div class="catalog-modal-description-title">
-
-                    Sinopsis / Deskripsi
-
-                </div>
-
-
-                <div
-                    class="catalog-modal-description"
-                    id="modal-description">
-                    Informasi buku belum tersedia.
-                </div>
-
-
-                {{-- =========================
-                     BOOK META
-                ========================= --}}
-
-                <div class="catalog-modal-meta">
-
-
-                    <div>
-
-                        <span>
-                            Stok Tersedia
-                        </span>
-
-                        <strong id="modal-stock">
-                            -
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            Penerbit
-                        </span>
-
-                        <strong id="modal-publisher">
-                            -
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            Tahun Terbit
-                        </span>
-
-                        <strong id="modal-year">
-                            -
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            No. Panggil
-                        </span>
-
-                        <strong id="modal-call-number">
-                            -
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            ISBN
-                        </span>
-
-                        <strong id="modal-isbn">
-                            -
-                        </strong>
+                        <div class="book-pages"></div>
 
                     </div>
 
                 </div>
 
+                <!-- RIGHT -->
+                <div class="catalog-modal-info">
 
-                {{-- =========================
-                     ACTION
-                ========================= --}}
+                    <div class="catalog-modal-badges">
 
-                <div class="catalog-modal-actions">
+                        <span class="catalog-modal-category" id="modal-category"></span>
 
-                    <button
-                        type="button"
-                        class="catalog-modal-button"
-                        id="modal-action">
-                        Tutup
-                    </button>
+                        <span class="catalog-modal-status" id="modal-status"></span>
+
+                    </div>
+
+                    <h2 id="modal-title"></h2>
+
+                    <div class="catalog-modal-author" id="modal-author"></div>
+
+                    <div class="catalog-modal-description-title">
+                        Sinopsis / Deskripsi
+                    </div>
+
+                    <div class="catalog-modal-description" id="modal-description"></div>
+
+                    <div class="catalog-modal-meta">
+
+                        <div>
+                            <span>Stok Tersedia</span>
+                            <strong id="modal-stock">-</strong>
+                        </div>
+
+                        <div>
+                            <span>Penerbit</span>
+                            <strong id="modal-publisher">-</strong>
+                        </div>
+
+                        <div>
+                            <span>Tahun Terbit</span>
+                            <strong id="modal-year">-</strong>
+                        </div>
+
+                        <div>
+                            <span>No. Panggil</span>
+                            <strong id="modal-call-number">-</strong>
+                        </div>
+
+                        <div>
+                            <span>ISBN</span>
+                            <strong id="modal-isbn">-</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="catalog-modal-actions">
+
+                        <button type="button" class="catalog-modal-button" id="modal-action">
+                            Tutup
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -584,8 +309,5 @@
         </div>
 
     </div>
-
-</div>
-
 
 @endsection

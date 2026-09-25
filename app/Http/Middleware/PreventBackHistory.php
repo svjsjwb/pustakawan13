@@ -8,6 +8,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PreventBackHistory
 {
+    /**
+     * Handle an incoming request.
+     */
     public function handle(
         Request $request,
         Closure $next
@@ -15,9 +18,15 @@ class PreventBackHistory
 
         $response = $next($request);
 
+        /*
+        |--------------------------------------------------------------------------
+        | JANGAN SIMPAN HALAMAN PROTECTED DI BROWSER CACHE
+        |--------------------------------------------------------------------------
+        */
+
         $response->headers->set(
             'Cache-Control',
-            'no-store, no-cache, must-revalidate, max-age=0'
+            'private, no-store, no-cache, must-revalidate, max-age=0'
         );
 
         $response->headers->set(
@@ -28,6 +37,22 @@ class PreventBackHistory
         $response->headers->set(
             'Expires',
             '0'
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SECURITY HEADERS
+        |--------------------------------------------------------------------------
+        */
+
+        $response->headers->set(
+            'X-Frame-Options',
+            'SAMEORIGIN'
+        );
+
+        $response->headers->set(
+            'X-Content-Type-Options',
+            'nosniff'
         );
 
         return $response;

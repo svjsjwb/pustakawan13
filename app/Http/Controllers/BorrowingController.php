@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\Member;
 use App\Models\Borrowing;
 use App\Models\Reservation;
+use App\Services\MemberStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -23,9 +24,6 @@ class BorrowingController extends Controller
         |--------------------------------------------------------------------------
         | TANGGAL YANG DIPILIH
         |--------------------------------------------------------------------------
-        |
-        | Digunakan untuk melihat kursi yang sudah digunakan.
-        |
         */
 
         $selectedDate = $request->get(
@@ -36,13 +34,11 @@ class BorrowingController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | ANGGOTA AKTIF
+        | ANGGOTA
         |--------------------------------------------------------------------------
         */
 
-        $members = Member::where('status', 'aktif')
-            ->orderBy('name')
-            ->get();
+        $members = Member::orderBy('name')->get();
 
 
         /*
@@ -52,7 +48,7 @@ class BorrowingController extends Controller
         */
 
         $books = Book::orderByRaw(
-            "CAST(SUBSTRING_INDEX(title, ' ', -1) AS UNSIGNED)"
+            "CAST(SUBSTRING_INDEX(judul_buku, ' ', -1) AS UNSIGNED)"
         )->get();
 
 
@@ -61,59 +57,34 @@ class BorrowingController extends Controller
         | DATA PEMINJAMAN
         |--------------------------------------------------------------------------
         |
-        | PENTING:
-        |
-        | Data transaksi yang ditampilkan dibatasi berdasarkan
-        | TANGGAL PENGEMBALIAN (due_at).
-        |
-        | Transaksi yang due_at-nya lebih dari 1 bulan yang lalu
-        | tidak ditampilkan pada tabel utama.
-        |
-        | DATA TIDAK DIHAPUS DARI DATABASE.
-        |
-        | Contoh:
-        |
-        | Jika sekarang 26 Agustus 2026:
-        |
-        | due_at >= 26 Juli 2026
-        |     -> ditampilkan
-        |
-        | due_at < 26 Juli 2026
-        |     -> tidak ditampilkan
-        |
-        | borrowed_at TIDAK digunakan sebagai batas filter.
+        | Filter berdasarkan bulan/tahun jika ada parameter,
+        | jika tidak, tampilkan 1 bulan terakhir.
         |
         */
 
-        $oneMonthAgo = now()
-            ->subMonth()
-            ->startOfDay();
+        $oneMonthAgo = now()->subMonth()->startOfDay();
 
         $query = Borrowing::with([
             'member',
             'details.book'
-        ])
-            ->select([
-                'id',
-                'member_id',
-                'borrowed_at',
-                'due_at',
-                'returned_at',
-                'status',
-                'seat_number',
-                'created_at',
-                'updated_at',
-            ]);
+        ])->select([
+            'id',
+            'member_id',
+            'borrowed_at',
+            'due_at',
+            'returned_at',
+            'status',
+            'seat_number',
+            'created_at',
+            'updated_at',
+        ]);
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER 1 BULAN BERDASARKAN DUE_AT
+        | FILTER BERDASARKAN DUE_AT (dari Pandu — fitur baru)
         |--------------------------------------------------------------------------
-        |
-        | Transaksi lintas bulan (borrowed_at di akhir bulan dan due_at di bulan berikutnya)
-        | tetap tampil karena filter mengacu pada due_at, bukan borrowed_at.
-        |
         */
+
         if ($request->filled('month') && $request->filled('year')) {
             $query
                 ->whereYear('due_at', $request->year)
@@ -129,25 +100,10 @@ class BorrowingController extends Controller
         |--------------------------------------------------------------------------
         | KURSI YANG SUDAH DIGUNAKAN
         |--------------------------------------------------------------------------
-        |
-        | Kursi dianggap terpakai jika:
-        |
-        | 1. Ada peminjaman aktif
-        | 2. Ada reservasi yang disetujui
-        |
-        | BAGIAN INI TETAP MENGGUNAKAN borrowed_at
-        | karena berhubungan dengan tanggal penggunaan kursi.
-        |
         */
 
-        $borrowedSeats = Borrowing::whereDate(
-            'borrowed_at',
-            $selectedDate
-        )
-            ->where(
-                'status',
-                'dipinjam'
-            )
+        $borrowedSeats = Borrowing::whereDate('borrowed_at', $selectedDate)
+            ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
             ->whereNotNull('seat_number')
             ->pluck('seat_number')
             ->toArray();
@@ -159,14 +115,8 @@ class BorrowingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $reservedSeats = Reservation::whereDate(
-            'reserved_at',
-            $selectedDate
-        )
-            ->whereIn('status', [
-                'menunggu',
-                'disetujui'
-            ])
+        $reservedSeats = Reservation::whereDate('reserved_at', $selectedDate)
+            ->whereIn('status', ['menunggu', 'disetujui'])
             ->whereNotNull('seat_number')
             ->pluck('seat_number')
             ->toArray();
@@ -174,23 +124,20 @@ class BorrowingController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | GABUNGKAN KURSI PEMINJAMAN DAN RESERVASI
+        | GABUNGKAN KURSI
         |--------------------------------------------------------------------------
         */
 
         $bookedSeats = array_values(
             array_unique(
-                array_merge(
-                    $borrowedSeats,
-                    $reservedSeats
-                )
+                array_merge($borrowedSeats, $reservedSeats)
             )
         );
 
 
         /*
         |--------------------------------------------------------------------------
-        | KIRIM KE VIEW
+        | VIEW
         |--------------------------------------------------------------------------
         */
 
@@ -257,57 +204,38 @@ class BorrowingController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $seatAlreadyUsed = Borrowing::whereDate(
-            'borrowed_at',
-            $validated['borrowed_at']
-        )
-            ->where(
-                'seat_number',
-                $validated['seat_number']
-            )
-            ->where(
-                'status',
-                'dipinjam'
-            )
+        $seatAlreadyUsed = Borrowing::whereDate('borrowed_at', $validated['borrowed_at'])
+            ->where('seat_number', $validated['seat_number'])
+            ->where('status', 'dipinjam')
             ->exists();
 
 
         /*
         |--------------------------------------------------------------------------
-        | CEK KURSI DARI RESERVASI
+        | CEK KURSI RESERVASI
         |--------------------------------------------------------------------------
         */
 
-        $seatReserved = Reservation::whereDate(
-            'reserved_at',
-            $validated['borrowed_at']
-        )
-            ->where(
-                'seat_number',
-                $validated['seat_number']
-            )
-            ->whereIn('status', [
-                'menunggu',
-                'disetujui'
-            ])
+        $seatReserved = Reservation::whereDate('reserved_at', $validated['borrowed_at'])
+            ->where('seat_number', $validated['seat_number'])
+            ->whereIn('status', ['menunggu', 'disetujui'])
             ->exists();
 
 
         /*
         |--------------------------------------------------------------------------
-        | JIKA KURSI SUDAH DIGUNAKAN
+        | JIKA KURSI TERPAKAI
         |--------------------------------------------------------------------------
         */
 
         if ($seatAlreadyUsed || $seatReserved) {
-
             return back()
                 ->withInput()
                 ->with(
                     'error',
                     'Kursi ' .
-                    $validated['seat_number'] .
-                    ' sudah digunakan atau dipesan pada tanggal tersebut.'
+                        $validated['seat_number'] .
+                        ' sudah digunakan atau dipesan pada tanggal tersebut.'
                 );
         }
 
@@ -326,10 +254,7 @@ class BorrowingController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $book = Book::lockForUpdate()
-                ->findOrFail(
-                    $validated['book_id']
-                );
+            $book = Book::lockForUpdate()->findOrFail($validated['book_id']);
 
 
             /*
@@ -339,66 +264,28 @@ class BorrowingController extends Controller
             */
 
             if ($book->available_stock < 1) {
-
-                abort(
-                    422,
-                    'Buku sedang tidak tersedia.'
-                );
+                abort(422, 'Buku sedang tidak tersedia.');
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | CEK KURSI LAGI
+            | CEK KURSI LAGI (dalam transaction)
             |--------------------------------------------------------------------------
-            |
-            | Dilakukan di dalam transaction
-            | untuk mengurangi kemungkinan
-            | dua pengguna memilih kursi yang sama.
-            |
             */
 
-            $seatAlreadyUsed = Borrowing::whereDate(
-                'borrowed_at',
-                $validated['borrowed_at']
-            )
-                ->where(
-                    'seat_number',
-                    $validated['seat_number']
-                )
-                ->where(
-                    'status',
-                    'dipinjam'
-                )
+            $seatAlreadyUsed = Borrowing::whereDate('borrowed_at', $validated['borrowed_at'])
+                ->where('seat_number', $validated['seat_number'])
+                ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
                 ->exists();
 
-
-            $seatReserved = Reservation::whereDate(
-                'reserved_at',
-                $validated['borrowed_at']
-            )
-                ->where(
-                    'seat_number',
-                    $validated['seat_number']
-                )
-                ->whereIn('status', [
-                    'menunggu',
-                    'disetujui'
-                ])
+            $seatReserved = Reservation::whereDate('reserved_at', $validated['borrowed_at'])
+                ->where('seat_number', $validated['seat_number'])
+                ->whereIn('status', ['menunggu', 'disetujui'])
                 ->exists();
 
-
-            if (
-                $seatAlreadyUsed ||
-                $seatReserved
-            ) {
-
-                abort(
-                    422,
-                    'Kursi ' .
-                    $validated['seat_number'] .
-                    ' baru saja digunakan atau dipesan.'
-                );
+            if ($seatAlreadyUsed || $seatReserved) {
+                abort(422, 'Kursi ' . $validated['seat_number'] . ' baru saja digunakan atau dipesan.');
             }
 
 
@@ -409,22 +296,11 @@ class BorrowingController extends Controller
             */
 
             $borrowing = Borrowing::create([
-
-                'member_id' =>
-                    $validated['member_id'],
-
-                'borrowed_at' =>
-                    $validated['borrowed_at'],
-
-                'due_at' =>
-                    $validated['due_at'],
-
-                'seat_number' =>
-                    $validated['seat_number'],
-
-                'status' =>
-                    'dipinjam',
-
+                'member_id'   => $validated['member_id'],
+                'borrowed_at' => $validated['borrowed_at'],
+                'due_at'      => $validated['due_at'],
+                'seat_number' => $validated['seat_number'],
+                'status'      => 'dipinjam',
             ]);
 
 
@@ -432,19 +308,11 @@ class BorrowingController extends Controller
             |--------------------------------------------------------------------------
             | DETAIL BUKU
             |--------------------------------------------------------------------------
-            |
-            | Sesuaikan dengan struktur tabel borrowing_details
-            | milik project.
-            |
             */
 
             $borrowing->details()->create([
-
-                'book_id' =>
-                    $validated['book_id'],
-
+                'book_id'  => $validated['book_id'],
                 'quantity' => 1,
-
             ]);
 
 
@@ -454,24 +322,23 @@ class BorrowingController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $book->decrement(
-                'available_stock'
+            $book->decrement('stok');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | MEMBER MENJADI AKTIF
+            |--------------------------------------------------------------------------
+            */
+
+            app(MemberStatusService::class)->sync(
+                Member::findOrFail($validated['member_id'])
             );
         });
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT
-        |--------------------------------------------------------------------------
-        */
-
         return redirect()
             ->route('borrowings.index')
-            ->with(
-                'success',
-                'Peminjaman buku berhasil dibuat.'
-            );
+            ->with('success', 'Peminjaman buku berhasil dibuat.');
     }
 
 
@@ -481,87 +348,61 @@ class BorrowingController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function returnBook(
-        Borrowing $borrowing
-    ) {
-
-        DB::transaction(function () use (
-            $borrowing
-        ) {
+    public function returnBook(Borrowing $borrowing)
+    {
+        DB::transaction(function () use ($borrowing) {
 
             /*
             |--------------------------------------------------------------------------
             | JANGAN PROSES ULANG
             |--------------------------------------------------------------------------
-            |
-            | Peminjaman yang sudah dikembalikan
-            | tidak boleh diproses lagi.
-            |
             */
 
             if ($borrowing->status === 'dikembalikan') {
-
-                abort(
-                    422,
-                    'Buku sudah dikembalikan.'
-                );
+                abort(422, 'Buku sudah dikembalikan.');
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | AMBIL SEMUA DETAIL BUKU
+            | KEMBALIKAN STOK
             |--------------------------------------------------------------------------
             */
 
             $details = $borrowing->details;
 
-
             foreach ($details as $detail) {
-
-                $book = Book::lockForUpdate()
-                    ->findOrFail(
-                        $detail->book_id
-                    );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | KEMBALIKAN STOK
-                |--------------------------------------------------------------------------
-                */
-
-                $book->increment(
-                    'available_stock',
-                    $detail->quantity ?? 1
-                );
+                $book = Book::lockForUpdate()->findOrFail($detail->book_id);
+                $book->increment('stok', $detail->quantity ?? 1);
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | UPDATE STATUS
+            | UPDATE PEMINJAMAN
             |--------------------------------------------------------------------------
             */
 
             $borrowing->update([
-                'status' => 'dikembalikan'
+                'status'      => 'dikembalikan',
+                'returned_at' => now()->toDateString(),
             ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SINKRONISASI MEMBER
+            |--------------------------------------------------------------------------
+            */
+
+            app(MemberStatusService::class)->sync(
+                Member::findOrFail($borrowing->member_id)
+            );
         });
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT
-        |--------------------------------------------------------------------------
-        */
 
         return redirect()
             ->route('borrowings.index')
-            ->with(
-                'success',
-                'Buku berhasil dikembalikan.'
-            );
+            ->with('success', 'Buku berhasil dikembalikan.');
     }
 
 
@@ -571,68 +412,47 @@ class BorrowingController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function destroy(
-        Borrowing $borrowing
-    ) {
-
-        DB::transaction(function () use (
-            $borrowing
-        ) {
+    public function destroy(Borrowing $borrowing)
+    {
+        DB::transaction(function () use ($borrowing) {
 
             /*
             |--------------------------------------------------------------------------
-            | JIKA MASIH DIPINJAM
+            | KEMBALIKAN STOK JIKA MASIH DIPINJAM
             |--------------------------------------------------------------------------
-            |
-            | Kembalikan stok terlebih dahulu.
-            |
             */
 
-            if ($borrowing->status === 'dipinjam') {
-
-                foreach (
-                    $borrowing->details
-                    as $detail
-                ) {
-
-                    $book = Book::lockForUpdate()
-                        ->findOrFail(
-                            $detail->book_id
-                        );
-
-
-                    $book->increment(
-                        'available_stock',
-                        $detail->quantity ?? 1
-                    );
+            if (in_array($borrowing->status, ['dipinjam', 'diperpanjang', 'terlambat'], true)) {
+                foreach ($borrowing->details as $detail) {
+                    $book = Book::lockForUpdate()->findOrFail($detail->book_id);
+                    $book->increment('stok', $detail->quantity ?? 1);
                 }
             }
 
+            $memberId = $borrowing->member_id;
 
             /*
             |--------------------------------------------------------------------------
-            | HAPUS DETAIL
+            | HAPUS DETAIL & PEMINJAMAN
             |--------------------------------------------------------------------------
             */
 
             $borrowing->details()->delete();
-
+            $borrowing->delete();
 
             /*
             |--------------------------------------------------------------------------
-            | HAPUS PEMINJAMAN
+            | SINKRONISASI MEMBER
             |--------------------------------------------------------------------------
             */
 
-            $borrowing->delete();
+            $this->syncMemberStatus(
+                Member::findOrFail($memberId)
+            );
         });
-
 
         return redirect()
             ->route('borrowings.index')
-            ->with(
-                'success',
-                'Data peminjaman berhasil dihapus.'
-            );
+            ->with('success', 'Data peminjaman berhasil dihapus.');
     }
 }

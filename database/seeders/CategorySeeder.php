@@ -2,69 +2,28 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Category;
-use App\Models\Subcategory;
+use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
     public function run(): void
     {
         $categories = [
-
-            'Anak' => [
-                'Novel',
-                'Cerpen',
-                'Komik',
-                'Dongeng',
-            ],
-
-            'Remaja' => [
-                'Novel',
-                'Cerpen',
-                'Komik',
-                'Agama',
-            ],
-
-            'Dewasa' => [
-                'Novel',
-                'Cerpen',
-                'Agama',
-                'Sejarah',
-                'Teknologi',
-            ],
-
-            'Buku Pendidikan' => [
-                'SD/MI',
-                'SMP/MTs',
-                'SMA/MA/SMK',
-            ],
-
+            ['name' => 'Buku Pendidikan', 'level' => 1],
+            ['name' => 'Anak', 'level' => 1],
+            ['name' => 'Remaja', 'level' => 1],
+            ['name' => 'Dewasa', 'level' => 1],
         ];
 
-
-        foreach ($categories as $categoryName => $subcategories) {
-
-            $category = Category::updateOrCreate(
+        foreach ($categories as $category) {
+            Category::updateOrCreate(
+                ['name' => $category['name']],
                 [
-                    'name' => $categoryName,
-                ],
-                [
-                    'description' => 'Kategori buku ' . $categoryName,
+                    'parent_id' => null,
+                    'level' => $category['level'],
                 ]
             );
-
-
-            foreach ($subcategories as $subcategoryName) {
-
-                Subcategory::updateOrCreate(
-                    [
-                        'category_id' => $category->id,
-                        'name' => $subcategoryName,
-                    ]
-                );
-
-            }
         }
     }
 }

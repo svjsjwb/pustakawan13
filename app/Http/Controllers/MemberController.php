@@ -3,120 +3,174 @@
 namespace App\Http\Controllers;
 
 use App\Models\Member;
+use App\Services\MemberStatusService;
 use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
+    private function validationRules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'division' => ['required', 'string', 'max:100'],
+            'phone' => ['required', 'string', 'max:20'],
+        ];
+    }
+
+    private function validationMessages(): array
+    {
+        return [
+            'name.required' => 'Nama karyawan wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'division.required' => 'Divisi wajib dipilih.',
+            'phone.required' => 'Nomor telepon wajib diisi.',
+        ];
+    }
+
     /**
-     * Menampilkan daftar karyawan
+     * Menampilkan daftar anggota.
      */
     public function index()
     {
-        $members = Member::orderBy('id', 'asc')->get();
+        app(MemberStatusService::class)->syncAll();
+
+        $members = Member::orderBy('id')->get();
 
         return view('members.index', compact('members'));
     }
 
 
     /**
-     * Form tambah karyawan
+     * Form tambah anggota.
      */
     public function create()
     {
-        return view('members.create');
+        return view(
+            'members.create'
+        );
     }
 
 
     /**
-     * Menyimpan karyawan baru
+     * Menyimpan anggota baru.
      */
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'name' => [
-            'required',
-            'string',
-            'max:255',
-        ],
-
-        'division' => [
-            'required',
-            'string',
-            'max:100',
-        ],
-
-        'phone' => [
-            'required',
-            'string',
-            'max:20',
-        ],
-
-        'status' => [
-            'required',
-            'in:Aktif,Nonaktif',
-        ],
-    ], [
-        'name.required' => 'Nama karyawan wajib diisi.',
-        'division.required' => 'Divisi wajib dipilih.',
-        'phone.required' => 'Nomor telepon wajib diisi.',
-        'status.required' => 'Status wajib dipilih.',
-    ]);
-
-    Member::create($validated);
-
-    return redirect()
-        ->route('members.index')
-        ->with('success', 'Karyawan berhasil ditambahkan.');
-}
-
-
-    /**
-     * Menampilkan detail karyawan
-     */
-    public function show(Member $member)
+    public function store(Request $request)
     {
-        return view('members.show', compact('member'));
-    }
+        $validated = $request->validate(
+            $this->validationRules(),
+            $this->validationMessages()
+        );
 
 
-    /**
-     * Form edit karyawan
-     */
-    public function edit(Member $member)
-    {
-        return view('members.edit', compact('member'));
-    }
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS AWAL
+        |--------------------------------------------------------------------------
+        */
+
+        $validated['status'] =
+            'nonaktif';
 
 
-    /**
-     * Update data karyawan
-     */
-    public function update(Request $request, Member $member)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'division' => 'required|string|max:100',
-        'phone' => 'required|string|max:20',
-        'status' => 'required|in:Aktif,Nonaktif',
-    ]);
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN
+        |--------------------------------------------------------------------------
+        */
 
-    $member->update($validated);
+        Member::create(
+            $validated
+        );
 
-    return redirect()
-        ->route('members.index')
-        ->with('success', 'Data karyawan berhasil diperbarui.');
-}
-
-
-    /**
-     * Hapus karyawan
-     */
-    public function destroy(Member $member)
-    {
-        $member->delete();
 
         return redirect()
             ->route('members.index')
-            ->with('success', 'Karyawan berhasil dihapus.');
+            ->with(
+                'success',
+                'Karyawan berhasil ditambahkan.'
+            );
+    }
+
+
+    /**
+     * Menampilkan detail anggota.
+     */
+    public function show(
+        Member $member
+    ) {
+        return view(
+            'members.show',
+            compact('member')
+        );
+    }
+
+
+    /**
+     * Form edit anggota.
+     */
+    public function edit(
+        Member $member
+    ) {
+        return view(
+            'members.edit',
+            compact('member')
+        );
+    }
+
+
+    /**
+     * Update data anggota.
+     *
+     * Status TIDAK berasal dari form.
+     */
+    public function update(
+        Request $request,
+        Member $member
+    ) {
+        $validated = $request->validate(
+            $this->validationRules(),
+            $this->validationMessages()
+        );
+
+
+        $member->update(
+            $validated
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SINKRONISASI STATUS
+        |--------------------------------------------------------------------------
+        */
+
+        app(MemberStatusService::class)->sync($member);
+
+
+        return redirect()
+            ->route('members.index')
+            ->with(
+                'success',
+                'Data karyawan berhasil diperbarui.'
+            );
+    }
+
+
+    /**
+     * Hapus anggota.
+     */
+    public function destroy(
+        Member $member
+    ) {
+        $member->delete();
+
+
+        return redirect()
+            ->route('members.index')
+            ->with(
+                'success',
+                'Karyawan berhasil dihapus.'
+            );
     }
 }

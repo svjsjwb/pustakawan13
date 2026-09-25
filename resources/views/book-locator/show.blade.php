@@ -6,9 +6,19 @@
 <link rel="stylesheet" href="{{ asset('css/book-locator.css') }}">
 @endpush
 
+@push('head-scripts')
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+}
+</script>
+@endpush
+
 @push('scripts')
 <script src="{{ asset('js/book-locator.js') }}"></script>
-@vite('resources/js/book-locator-3d.js')
+<script type="module" src="{{ asset('js/book-locator-3d.js') }}"></script>
 @endpush
 
 @section('content')
@@ -106,7 +116,7 @@ return [
         <div class="locator-info">
 
             <h2>
-                {{ $reservation->book->title }}
+                {{ $reservation->book->title ?? $reservation->book->judul_buku ?? 'Buku' }}
             </h2>
 
 
@@ -431,18 +441,18 @@ return [
                                             @if($copy)
 
                                                 data-copy-id="{{ $copy->id }}"
-                                                data-title="{{ $copy->book->title }}"
+                                                data-title="{{ $copy->book->title ?? $copy->book->judul_buku ?? 'Buku' }}"
                                                 data-barcode="{{ $copy->barcode }}"
                                                 data-status="{{ $copy->status }}"
                                                 data-shelf="{{ $leftShelf->code }}"
                                                 data-row="{{ $row }}"
                                                 data-column="{{ $column }}"
                                                 data-copy-number="{{ (int) substr($copy->barcode, -3) }}"
-                                                data-copy-total="{{ $copy->book->stock }}"
+                                                data-copy-total="{{ $copy->book->stock ?? $copy->book->stok ?? 1 }}"
 
                                             @endif
 
-                                            title="{{ $copy?->book?->title ?? 'Slot kosong' }}"
+                                            title="{{ $copy?->book?->title ?? $copy?->book?->judul_buku ?? 'Slot kosong' }}"
                                         >
 
                                             @if($copy)
@@ -564,18 +574,18 @@ return [
                                                 @if($copy)
 
                                                     data-copy-id="{{ $copy->id }}"
-                                                    data-title="{{ $copy->book->title }}"
+                                                    data-title="{{ $copy->book->title ?? $copy->book->judul_buku ?? 'Buku' }}"
                                                     data-barcode="{{ $copy->barcode }}"
                                                     data-status="{{ $copy->status }}"
                                                     data-shelf="{{ $rightShelf->code }}"
                                                     data-row="{{ $row }}"
                                                     data-column="{{ $column }}"
                                                     data-copy-number="{{ (int) substr($copy->barcode, -3) }}"
-                                                    data-copy-total="{{ $copy->book->stock }}"
+                                                    data-copy-total="{{ $copy->book->stock ?? $copy->book->stok ?? 1 }}"
 
                                                 @endif
 
-                                                title="{{ $copy?->book?->title ?? 'Slot kosong' }}"
+                                                title="{{ $copy?->book?->title ?? $copy?->book?->judul_buku ?? 'Slot kosong' }}"
                                             >
 
                                                 @if($copy)

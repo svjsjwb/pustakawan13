@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WelcomeMail;
+use App\Models\Member;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 
@@ -14,7 +19,9 @@ class GoogleAuthController extends Controller
      */
     public function redirect()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with(['prompt' => 'select_account'])
+            ->redirect();
     }
 
     /**
@@ -22,74 +29,85 @@ class GoogleAuthController extends Controller
      */
     public function callback()
     {
+        $createdViaGoogle = false;
+
         try {
             $googleUser = Socialite::driver('google')->user();
-        } catch (InvalidStateException $e) {
-
-            // Callback lama / state sudah pernah digunakan.
-            return redirect()
-                ->route('login')
-                ->with('error', 'Sesi login Google sudah kedaluwarsa. Silakan login dengan Google lagi.');
+        } catch (\Throwable $e) {
+            try {
+                $googleUser = Socialite::driver('google')->stateless()->user();
+            } catch (\Throwable $ex) {
+                return redirect()
+                    ->route('login')
+                    ->with(
+                        'error',
+                        'Sesi login Google sudah kedaluwarsa. Silakan login dengan Google lagi.'
+                    );
+            }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Cari berdasarkan Google ID
-        |--------------------------------------------------------------------------
-        */
+        $googleId = (string) $googleUser->getId();
+        $googleEmail = strtolower(trim((string) $googleUser->getEmail()));
+        $googleName = $googleUser->getName()
+            ?: $googleUser->getNickname()
+            ?: 'User';
 
-        $user = User::where(
-            'google_id',
-            $googleUser->getId()
-        )->first();
+        if ($googleId === '' || $googleEmail === '') {
+            return redirect()
+                ->route('login')
+                ->with('error', 'Akun Google tidak menyediakan identitas email yang valid.');
+        }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Kalau belum ditemukan, cari berdasarkan email
-        |--------------------------------------------------------------------------
-        */
+        $user = DB::transaction(function () use (
+            $googleId,
+            $googleEmail,
+            $googleName,
+            &$createdViaGoogle
+        ) {
+            $user = User::where('google_id', $googleId)->first();
 
-        if (!$user) {
-
-            $user = User::where(
-                'email',
-                $googleUser->getEmail()
-            )->first();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Email sudah ada → hubungkan akun dengan Google
-            |--------------------------------------------------------------------------
-            */
-
-            if ($user) {
-
-                $user->update([
-                    'google_id' => $googleUser->getId(),
-                ]);
-
+            if (!$user) {
+                $user = User::whereRaw('LOWER(email) = ?', [$googleEmail])->first();
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | User benar-benar baru
-            |--------------------------------------------------------------------------
-            */
-
-            else {
-
-                $user = User::create([
-                    'name' => $googleUser->getName()
-                        ?: $googleUser->getNickname()
-                        ?: 'User',
-
-                    'email' => $googleUser->getEmail(),
-
-                    'google_id' => $googleUser->getId(),
-
+            if (!$user) {
+                $createdViaGoogle = true;
+                return User::create([
+                    'name' => $googleName,
+                    'email' => $googleEmail,
+                    'google_id' => $googleId,
                     'password' => null,
-
                     'role' => 'user',
+                ]);
+            }
+
+            $user->forceFill([
+                'name' => $googleName,
+                'email' => $googleEmail,
+                'google_id' => $googleId,
+            ])->save();
+
+            Member::where(function ($query) use ($user, $googleEmail) {
+                $query->where('user_id', $user->id)
+                    ->orWhere('email', $user->email)
+                    ->orWhere('email', $googleEmail);
+            })->update([
+                'user_id' => $user->id,
+                'name' => $googleName,
+                'email' => $googleEmail,
+            ]);
+
+            return $user->fresh();
+        });
+
+        if ($createdViaGoogle && $user->email) {
+            try {
+                Mail::to($user->email)->send(new WelcomeMail($user));
+            } catch (\Throwable $mailException) {
+                Log::warning('Email sambutan Google gagal dikirim.', [
+                    'user_id' => $user->id,
+                    'recipient' => $user->email,
+                    'error' => $mailException->getMessage(),
                 ]);
             }
         }
@@ -111,9 +129,19 @@ class GoogleAuthController extends Controller
         */
 
         if ($user->role === 'admin') {
-            return redirect()->route('dashboard');
+            return redirect()
+                ->route('dashboard')
+                ->with(
+                    'success',
+                    'Selamat datang di Dashboard Admin.'
+                );
         }
 
-        return redirect()->route('user.home');
+        return redirect()
+            ->route('user.home')
+            ->with(
+                'success',
+                'Login berhasil.'
+            );
     }
 }

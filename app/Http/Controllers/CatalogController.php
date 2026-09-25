@@ -10,27 +10,44 @@ class CatalogController extends Controller
 {
     public function index(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | KATEGORI + SUBKATEGORI
-        |--------------------------------------------------------------------------
-        */
+        $categoryOrder = [
+            'Buku Pendidikan',
+            'Anak',
+            'Remaja',
+            'Dewasa',
+        ];
 
-        $categories = Category::with('subcategories')
-            ->orderBy('name')
+        $categories = Category::whereIn('name', $categoryOrder)
+            ->with('subcategories')
+            ->orderByRaw("
+                CASE name
+                    WHEN 'Buku Pendidikan' THEN 1
+                    WHEN 'Anak' THEN 2
+                    WHEN 'Remaja' THEN 3
+                    WHEN 'Dewasa' THEN 4
+                    ELSE 5
+                END
+            ")
             ->get();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | QUERY BUKU
-        |--------------------------------------------------------------------------
-        */
-
         $query = Book::with([
-            'category',
-            'subcategory',
-        ])->latest();
+                'category',
+                'subcategory'
+            ])
+            ->withCount([
+                'copies as available_copies_count' => function ($q) {
+                    $q->where('status', 'available');
+                },
+
+                'copies as borrowed_copies_count' => function ($q) {
+                    $q->where('status', 'borrowed');
+                },
+
+                'copies as reserved_copies_count' => function ($q) {
+                    $q->where('status', 'reserved');
+                },
+            ])
+            ->latest();
 
 
         /*
@@ -39,12 +56,35 @@ class CatalogController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('category')) {
+        if (
+            $request->filled('category') &&
+            $request->category !== 'Semua' &&
+            $request->category !== 'Semua Kategori'
+        ) {
 
-            $query->where(
-                'category_id',
-                $request->category
-            );
+            if (is_numeric($request->category)) {
+
+                $query->where(
+                    'category_id',
+                    $request->category
+                );
+
+            } else {
+
+                $query->whereHas(
+                    'category',
+                    function ($q) use ($request) {
+
+                        $q->where(
+                            'name',
+                            $request->category
+                        );
+
+                    }
+                );
+
+            }
+
         }
 
 
@@ -60,6 +100,7 @@ class CatalogController extends Controller
                 'subcategory_id',
                 $request->subcategory
             );
+
         }
 
 
@@ -69,54 +110,150 @@ class CatalogController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('status')) {
+        if (
+            $request->filled('status') &&
+            $request->status !== 'Semua Status'
+        ) {
 
-            if ($request->status === 'Tersedia') {
-
-                $query->where(
-                    'available_stock',
-                    '>',
-                    0
-                );
-            }
-
-            elseif (
-                $request->status === 'Dipinjam'
+            if (
+                $request->status ===
+                'Tersedia'
             ) {
 
-                $query->where(
-                    'available_stock',
-                    '<=',
-                    0
+                $query->whereHas(
+                    'copies',
+                    function ($q) {
+
+                        $q->where(
+                            'status',
+                            'available'
+                        );
+
+                    }
                 );
+
+            } elseif (
+                $request->status === 'Dipinjam' ||
+                $request->status === 'Sedang Dipinjam'
+            ) {
+
+                $query->whereHas(
+                    'copies',
+                    function ($q) {
+
+                        $q->whereIn(
+                            'status',
+                            [
+                                'borrowed',
+                                'reserved'
+                            ]
+                        );
+
+                    }
+                );
+
             }
+
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | SEARCH
+        | LIVE SEARCH
+        |--------------------------------------------------------------------------
+        |
+        | Search:
+        | - Judul
+        | - Penulis
+        | - ISBN
+        | - SKU
+        | - Nomor inventaris
+        | - Kode buku
+        | - Kategori
+        | - Subkategori
         |--------------------------------------------------------------------------
         */
 
         if ($request->filled('search')) {
 
-            $search = $request->search;
-
-            $query->where(function ($q) use ($search) {
-
-                $q->where(
-                    'title',
-                    'like',
-                    "%{$search}%"
-                )
-
-                ->orWhere(
-                    'author',
-                    'like',
-                    "%{$search}%"
+            $search =
+                trim(
+                    (string) $request->search
                 );
-            });
+
+
+            if ($search !== '') {
+
+                $query->where(
+                    function ($q) use ($search) {
+
+                        $q->where(
+                            'judul_buku',
+                            'like',
+                            "%{$search}%"
+                        )
+
+                        ->orWhere(
+                            'penulis',
+                            'like',
+                            "%{$search}%"
+                        )
+
+                        ->orWhere(
+                            'isbn',
+                            'like',
+                            "%{$search}%"
+                        )
+
+                        ->orWhere(
+                            'sku',
+                            'like',
+                            "%{$search}%"
+                        )
+
+                        ->orWhere(
+                            'no_iventaris',
+                            'like',
+                            "%{$search}%"
+                        )
+
+                        ->orWhere(
+                            'kode_buku',
+                            'like',
+                            "%{$search}%"
+                        )
+
+                        ->orWhereHas(
+                            'category',
+                            function ($categoryQuery) use ($search) {
+
+                                $categoryQuery->where(
+                                    'name',
+                                    'like',
+                                    "%{$search}%"
+                                );
+
+                            }
+                        )
+
+                        ->orWhereHas(
+                            'subcategory',
+                            function ($subcategoryQuery) use ($search) {
+
+                                $subcategoryQuery->where(
+                                    'name',
+                                    'like',
+                                    "%{$search}%"
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+
         }
 
 
@@ -126,25 +263,31 @@ class CatalogController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $perPage = (int) $request->input(
-            'per_page',
-            25
-        );
+        $perPage =
+            (int) $request->input(
+                'per_page',
+                25
+            );
 
-        if (!in_array($perPage, [12, 25, 50, 100])) {
+
+        if (
+            !in_array(
+                $perPage,
+                [10, 25, 50, 100],
+                true
+            )
+        ) {
+
             $perPage = 25;
+
         }
 
-        $books = $query
-            ->paginate($perPage)
-            ->withQueryString();
 
+        $books =
+            $query
+                ->paginate($perPage)
+                ->withQueryString();
 
-        /*
-        |--------------------------------------------------------------------------
-        | VIEW
-        |--------------------------------------------------------------------------
-        */
 
         return view(
             'catalog.index',

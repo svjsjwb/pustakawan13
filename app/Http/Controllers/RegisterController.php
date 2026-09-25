@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WelcomeMail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class RegisterController extends Controller
 {
@@ -27,7 +31,11 @@ class RegisterController extends Controller
                 'string',
                 'email',
                 'max:255',
-                'unique:users,email',
+                Rule::unique('users', 'email')->where(function ($query) use ($request) {
+                    $query->whereRaw('LOWER(email) = ?', [
+                        strtolower(trim((string) $request->input('email'))),
+                    ]);
+                }),
             ],
 
             'password' => [
@@ -38,14 +46,24 @@ class RegisterController extends Controller
             ],
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'email' => strtolower(trim($validated['email'])),
             'password' => Hash::make(
                 $validated['password']
             ),
             'role' => 'user',
         ]);
+
+        try {
+            Mail::to($user->email)->send(new WelcomeMail($user));
+        } catch (\Throwable $mailException) {
+            Log::warning('Email sambutan register gagal dikirim.', [
+                'user_id' => $user->id,
+                'recipient' => $user->email,
+                'error' => $mailException->getMessage(),
+            ]);
+        }
 
         return redirect()
             ->route('login')

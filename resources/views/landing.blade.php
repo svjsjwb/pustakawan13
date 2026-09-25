@@ -45,13 +45,13 @@
 
             <div>
                 <strong>JAM OPERASIONAL</strong>
-                <span>Senin - Jumat: 07.00 - 17.30 WIB</span>
+                <span>Senin - Jumat: 07.00 - 16.30 WIB</span>
                 <span>Sabtu - Minggu: Libur</span>
             </div>
 
             <div>
                 <strong>ALAMAT</strong>
-                <span>Jl. Prof. DR. Supomo No.93, Sriwedari, Kec. Laweyan,</span>
+                <span>Jl. Prof. DR. Supomo No.23, Sriwedari, Kec. Laweyan,</span>
                 <span>Kota Surakarta, Jawa Tengah 57141</span>
             </div>
 
