@@ -100,16 +100,8 @@ class GoogleAuthController extends Controller
             return $user->fresh();
         });
 
-        if ($createdViaGoogle && $user->email) {
-            try {
-                Mail::to($user->email)->send(new WelcomeMail($user));
-            } catch (\Throwable $mailException) {
-                Log::warning('Email sambutan Google gagal dikirim.', [
-                    'user_id' => $user->id,
-                    'recipient' => $user->email,
-                    'error' => $mailException->getMessage(),
-                ]);
-            }
+        if ($createdViaGoogle) {
+            \App\Services\NotificationService::userRegistered($user);
         }
 
         /*
@@ -118,9 +110,17 @@ class GoogleAuthController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        $isFirstLogin = is_null($user->last_login_at);
+
         Auth::login($user);
 
         request()->session()->regenerate();
+
+        if ($isFirstLogin) {
+            \App\Services\NotificationService::firstLogin($user, request()->ip(), request()->userAgent());
+        }
+
+        $user->forceFill(['last_login_at' => now()])->save();
 
         /*
         |--------------------------------------------------------------------------

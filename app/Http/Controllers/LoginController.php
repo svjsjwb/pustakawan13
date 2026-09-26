@@ -58,8 +58,16 @@ class LoginController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        $isFirstLogin = is_null($user->last_login_at);
+
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
+
+        if ($isFirstLogin) {
+            \App\Services\NotificationService::firstLogin($user, $request->ip(), $request->userAgent());
+        }
+
+        $user->forceFill(['last_login_at' => now()])->save();
 
         /*
         |--------------------------------------------------------------------------

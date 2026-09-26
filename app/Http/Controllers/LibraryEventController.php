@@ -25,10 +25,23 @@ class LibraryEventController extends Controller
             ->where('email', '!=', '')
             ->chunkById(100, function ($users) use ($event): void {
                 foreach ($users as $user) {
-                    Mail::to($user->email)->send(new LibraryEventMail($event));
+                    Mail::to($user->email)->queue(new LibraryEventMail($event));
                 }
             });
 
-        return back()->with('success', 'Informasi acara berhasil dikirim melalui email.');
+        \App\Services\NotificationService::notifyAdmins(new \App\Mail\AdminActivityAlertMail(
+            eventTitle: 'Pengumuman Event Perpustakaan Baru',
+            messageText: "Event perpustakaan \"{$event->name}\" telah dibuat dan disiarkan ke seluruh anggota.",
+            details: [
+                'Nama Acara' => $event->name,
+                'Tanggal'    => $event->event_date ? \Carbon\Carbon::parse($event->event_date)->translatedFormat('d F Y') : '-',
+                'Lokasi'     => $event->location,
+                'Dibuat Oleh'=> $request->user()->name,
+            ],
+            actionUrl: url('/dashboard'),
+            actionLabel: 'Buka Dashboard'
+        ));
+
+        return back()->with('success', 'Informasi acara berhasil dikirim melalui antrean email.');
     }
 }

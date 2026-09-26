@@ -285,7 +285,7 @@
                 </span>
 
                 <h2>
-                    Sedang Populer
+                    Rekomendasi Untuk Anda
                 </h2>
 
             </div>
@@ -304,7 +304,7 @@
             <div class="user-book-carousel-viewport" data-book-carousel>
             <div class="user-book-row user-popular-row" data-book-carousel-track>
 
-            @foreach($popularBooks as $book)
+            @foreach($recommendations as $book)
 
             <article
                 class="user-book-card motion-book-card popular-book-card"

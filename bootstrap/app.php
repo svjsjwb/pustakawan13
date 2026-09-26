@@ -11,9 +11,6 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule): void {
-        $schedule->command('library:send-due-reminders')->dailyAt('07:00');
-    })
     ->withMiddleware(function (Middleware $middleware): void {
         // Alias middleware untuk proteksi role
         $middleware->alias([

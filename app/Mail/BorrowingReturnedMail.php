@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Reservation;
+use App\Models\Borrowing;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,22 +11,22 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ReservationSubmittedMail extends Mailable implements ShouldQueue
+class BorrowingReturnedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     public function __construct(
-        public Reservation $reservation,
-        public User $user,
+        public Borrowing $borrowing,
+        public ?User $user = null,
     ) {}
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Pengajuan Reservasi Buku Berhasil');
+        return new Envelope(subject: 'Tanda Terima Pengembalian Buku - ' . config('app.name'));
     }
 
     public function content(): Content
     {
-        return new Content(view: 'emails.reservation-submitted');
+        return new Content(view: 'emails.borrowing-returned');
     }
 }

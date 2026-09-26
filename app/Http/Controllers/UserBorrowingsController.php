@@ -20,7 +20,7 @@ class UserBorrowingsController extends Controller
         if ($member) {
             $borrowings = Borrowing::with(['details.book.category'])
                 ->where('member_id', $member->id)
-                ->where('status', 'dipinjam')
+                ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
                 ->latest()
                 ->get()
                 ->map(function (Borrowing $borrowing) {
@@ -64,7 +64,11 @@ class UserBorrowingsController extends Controller
             return response()->json(['message' => 'Buku tidak sedang dipinjam.'], 422);
         }
 
-        if ($borrowing->due_at?->isPast()) {
+            $currentDue = $borrowing->due_at
+                ? \Carbon\Carbon::parse($borrowing->due_at)
+                : null;
+
+            if ($currentDue?->isPast()) {
             return response()->json(['message' => 'Buku tidak dapat diperpanjang karena sudah melewati tanggal jatuh tempo.'], 422);
         }
 
@@ -78,7 +82,7 @@ class UserBorrowingsController extends Controller
             return response()->json(['message' => 'Buku tidak dapat diperpanjang karena sedang dalam antrean reservasi.'], 409);
         }
 
-        $currentDue = $borrowing->due_at;
+        $currentDue = \Carbon\Carbon::parse($borrowing->due_at);
         $maxExtensionDays = 14;
         $maxDate = $currentDue->copy()->addDays($maxExtensionDays);
 
@@ -112,20 +116,20 @@ class UserBorrowingsController extends Controller
         $user = Auth::user();
         if ($user && method_exists($user, 'notificationsAllowed') && $user->notificationsAllowed('extension')) {
             $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
-            \App\Models\AppNotification::notifyAdmin(
-                'extension_approved',
-                'Perpanjangan Peminjaman Mandiri',
-                "{$user->name} memperpanjang peminjaman buku \"{$bookTitle}\" (+{$extensionDays} hari) hingga {$borrowing->due_at->format('d M Y')}.",
-                ['borrowing_id' => $borrowing->id]
-            );
+                \App\Models\AppNotification::notifyAdmin(
+                    'extension_approved',
+                    'Perpanjangan Peminjaman Mandiri',
+                    "{$user->name} memperpanjang peminjaman buku \"{$bookTitle}\" (+{$extensionDays} hari) hingga {$newDueDate->format('d M Y')}.",
+                    ['borrowing_id' => $borrowing->id]
+                );
         }
 
         NotificationService::extensionSelfApproved($borrowing, $user);
 
         return response()->json([
             'message'        => 'Peminjaman berhasil diperpanjang.',
-            'due_at'         => $borrowing->due_at->format('d M Y'),
-            'days_remaining' => (int) now()->diffInDays($borrowing->due_at, false),
+                'due_at'         => $newDueDate->format('d M Y'),
+                'days_remaining' => (int) now()->diffInDays($newDueDate, false),
             'extension_days' => $extensionDays,
             'near_due_count' => $activeBorrowings->filter(fn ($item) => ($item->due_at ? now()->diffInDays($item->due_at, false) : 99) >= 0 && ($item->due_at ? now()->diffInDays($item->due_at, false) : 99) <= 3)->count(),
             'overdue_count'  => $activeBorrowings->filter(fn ($item) => ($item->due_at ? now()->diffInDays($item->due_at, false) : 0) < 0)->count(),

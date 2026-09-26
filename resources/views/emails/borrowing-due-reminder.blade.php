@@ -1,3 +1,49 @@
-<!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Pengingat Pengembalian</title></head>
-<body style="margin:0;background:#f4f7f8;font-family:Arial,sans-serif;color:#24323d;line-height:1.6;"><div style="max-width:600px;margin:32px auto;background:#fff;border:1px solid #dce5e8;border-radius:8px;overflow:hidden;"><div style="background:#b45309;padding:24px;color:#fff;"><h1 style="margin:0;font-size:22px;">Pengingat Pengembalian H-1</h1></div><div style="padding:24px;"><p>Halo {{ $borrowing->user?->name ?? $borrowing->member?->name ?? 'Anggota' }},</p><p>Pengembalian buku Anda jatuh tempo besok.</p><p style="padding:16px;background:#fff7ed;border-left:4px solid #f59e0b;"><strong>{{ $borrowing->book?->judul_buku ?? $borrowing->details->first()?->book?->judul_buku ?? 'Buku' }}</strong><br>Jatuh tempo: <strong>{{ $borrowing->due_at->format('d M Y') }}</strong></p><p>Mohon kembalikan buku tepat waktu ke perpustakaan.</p><p style="margin-bottom:0;">Terima kasih,<br><strong>{{ config('app.name') }}</strong></p></div></div></body></html>
+@extends('emails.layout')
+
+@section('content')
+<div style="text-align:center;margin-bottom:28px;">
+  <div style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:#fef3c7;font-size:28px;margin-bottom:12px;">
+    ⏰
+  </div>
+  <h2 style="margin:0 0 8px 0;color:#0f172a;font-size:22px;font-weight:700;">Pengingat Jatuh Tempo (H-1)</h2>
+  <p style="margin:0;color:#64748b;font-size:15px;">Buku pinjaman Anda akan jatuh tempo besok hari.</p>
+</div>
+
+@php
+  $userName = $borrowing->user?->name ?? $borrowing->member?->name ?? 'Anggota';
+  $bookTitle = $borrowing->details->first()?->book?->title ?? $borrowing->book?->title ?? 'Buku Perpustakaan';
+  $author = $borrowing->details->first()?->book?->penulis ?? $borrowing->book?->penulis ?? '-';
+  $dueDate = $borrowing->due_at ? \Carbon\Carbon::parse($borrowing->due_at)->translatedFormat('l, d F Y') : 'Besok';
+@endphp
+
+<p style="color:#334155;font-size:15px;">
+  Halo <strong>{{ $userName }}</strong>, masa peminjaman untuk buku koleksi berikut akan berakhir besok. Mohon segera mengembalikan buku ke perpustakaan untuk menghindari denda keterlambatan.
+</p>
+
+<div style="background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:12px;padding:20px;margin:20px 0;">
+  <table style="width:100%;border-collapse:collapse;font-size:14px;">
+    <tr>
+      <td style="padding:6px 0;color:#64748b;width:35%;">Judul Buku:</td>
+      <td style="padding:6px 0;color:#0f172a;font-weight:700;">{{ $bookTitle }}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;color:#64748b;">Penulis:</td>
+      <td style="padding:6px 0;color:#334155;">{{ $author }}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;color:#64748b;">Batas Waktu:</td>
+      <td style="padding:6px 0;color:#b45309;font-weight:700;">{{ $dueDate }}</td>
+    </tr>
+  </table>
+</div>
+
+<p style="color:#64748b;font-size:13px;line-height:1.6;">
+  <em>Catatan:</em> Jika Anda masih membutuhkan buku ini dan belum mencapai batas perpanjangan, Anda dapat mengajukan perpanjangan melalui halaman pinjaman akun Anda.
+</p>
+
+<div style="text-align:center;margin-top:28px;margin-bottom:16px;">
+  <a href="{{ route('user.loans') }}" style="display:inline-block;background:#f59e0b;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 28px;border-radius:8px;box-shadow:0 4px 6px -1px rgba(245,158,11,0.2);">
+    Periksa Peminjaman Saya &rarr;
+  </a>
+</div>
+@endsection

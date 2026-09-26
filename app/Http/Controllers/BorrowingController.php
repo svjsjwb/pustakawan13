@@ -400,6 +400,8 @@ class BorrowingController extends Controller
             );
         });
 
+        \App\Services\NotificationService::borrowingReturned($borrowing);
+
         return redirect()
             ->route('borrowings.index')
             ->with('success', 'Buku berhasil dikembalikan.');

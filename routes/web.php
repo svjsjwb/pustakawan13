@@ -300,3 +300,49 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/api/notifications/read-all',  [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });
+
+// ============================================================
+// EMAIL PREVIEW (LOCAL DEV)
+// ============================================================
+Route::prefix('email-preview')->group(function () {
+    Route::get('/welcome', function () {
+        $user = \App\Models\User::first() ?? new \App\Models\User(['name' => 'Budi Santoso', 'email' => 'budi.santoso@gmail.com']);
+        return (new \App\Mail\WelcomeMail($user))->render();
+    });
+
+    Route::get('/first-login', function () {
+        $user = \App\Models\User::first() ?? new \App\Models\User(['name' => 'Budi Santoso', 'email' => 'budi.santoso@gmail.com']);
+        return (new \App\Mail\FirstLoginMail($user, request()->ip(), request()->userAgent()))->render();
+    });
+
+    Route::get('/admin-alert', function () {
+        return (new \App\Mail\AdminActivityAlertMail(
+            eventTitle: 'Pendaftaran Pengguna Baru',
+            messageText: 'Pengguna baru telah mendaftar di sistem perpustakaan.',
+            details: [
+                'Nama Pengguna' => 'Budi Santoso',
+                'Email'         => 'budi.santoso@gmail.com',
+                'Role'          => 'user',
+                'Tanggal Daftar'=> now()->translatedFormat('d M Y H:i') . ' WIB',
+            ],
+            actionUrl: url('/members'),
+            actionLabel: 'Kelola Anggota'
+        ))->render();
+    });
+
+    Route::get('/borrowing-returned', function () {
+        $borrowing = \App\Models\Borrowing::with(['details.book', 'member'])->first();
+        if (!$borrowing) {
+            $user = \App\Models\User::first() ?? new \App\Models\User(['name' => 'Budi Santoso', 'email' => 'budi.santoso@gmail.com']);
+            $dummyBorrowing = new \App\Models\Borrowing([
+                'borrowed_at' => now()->subDays(7),
+                'due_at' => now()->addDays(7),
+                'returned_at' => now()->toDateString(),
+                'status' => 'dikembalikan',
+            ]);
+            return (new \App\Mail\BorrowingReturnedMail($dummyBorrowing, $user))->render();
+        }
+        return (new \App\Mail\BorrowingReturnedMail($borrowing))->render();
+    });
+});
+

@@ -55,15 +55,7 @@ class RegisterController extends Controller
             'role' => 'user',
         ]);
 
-        try {
-            Mail::to($user->email)->send(new WelcomeMail($user));
-        } catch (\Throwable $mailException) {
-            Log::warning('Email sambutan register gagal dikirim.', [
-                'user_id' => $user->id,
-                'recipient' => $user->email,
-                'error' => $mailException->getMessage(),
-            ]);
-        }
+        \App\Services\NotificationService::userRegistered($user);
 
         return redirect()
             ->route('login')
