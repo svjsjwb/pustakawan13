@@ -1,134 +1,116 @@
-document.addEventListener('DOMContentLoaded', function () {
+(function () {
+    if (window.__catalogJsInitialized) {
+        return;
+    }
+    window.__catalogJsInitialized = true;
 
-    /*
-    |--------------------------------------------------------------------------
-    | ANTI SELECT / ANTI DRAG
-    |--------------------------------------------------------------------------
-    */
+    function initCatalog() {
 
-    document.addEventListener('selectstart', function (e) {
-        e.preventDefault();
-    });
+        /* =========================================================
+           ANTI SELECT / ANTI DRAG
+        ========================================================= */
 
-    document.addEventListener('dragstart', function (e) {
-        e.preventDefault();
-    });
+        document.addEventListener('selectstart', function (e) {
+            e.preventDefault();
+        });
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | ELEMENT MODAL
-    |--------------------------------------------------------------------------
-    */
-
-    const modal =
-        document.getElementById('book-modal');
-
-    const book =
-        document.getElementById('book3D');
-
-    const modalClose =
-        document.getElementById('modal-close');
-
-    const modalAction =
-        document.getElementById('modal-action');
-
-    const modalTitle =
-        document.getElementById('modal-title');
-
-    const modalBookTitle =
-        document.getElementById('modalBookTitle');
-
-    const modalAuthor =
-        document.getElementById('modal-author');
-
-    const modalCategory =
-        document.getElementById('modal-category');
-
-    const modalStatus =
-        document.getElementById('modal-status');
-
-    const modalDescription =
-        document.getElementById('modal-description');
-
-    const modalStock =
-        document.getElementById('modal-stock');
-
-    const modalPublisher =
-        document.getElementById('modal-publisher');
-
-    const modalYear =
-        document.getElementById('modal-year');
-
-    const modalCallNumber =
-        document.getElementById('modal-call-number');
-
-    const modalIsbn =
-        document.getElementById('modal-isbn');
-
-    const bookFront =
-        document.getElementById('bookFront');
+        document.addEventListener('dragstart', function (e) {
+            e.preventDefault();
+        });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | BOOK 3D ROTATION
-    |--------------------------------------------------------------------------
-    */
+        /* =========================================================
+           ELEMENT
+        ========================================================= */
 
-    if (book) {
+        const modal = document.getElementById('book-modal');
 
-        let isDragging = false;
+        const form = document.getElementById('catalog-filter-form');
 
-        let rotX = 0;
-        let rotY = -15;
+        const searchInput =
+            form?.querySelector('input[name="search"]');
 
-        const defaultX = 0;
-        const defaultY = -15;
+        const statusSelect =
+            form?.querySelector('select[name="status"]');
 
 
-        book.style.transform =
-            'rotateX(0deg) rotateY(-15deg)';
+        /* =========================================================
+           STATE
+        ========================================================= */
+
+        let searchTimer = null;
+        let requestController = null;
 
 
-        book.addEventListener(
-            'mousedown',
-            function () {
+        /* =========================================================
+           MODAL ELEMENT
+        ========================================================= */
 
+        const modalClose = document.getElementById('modal-close');
+        const modalAction = document.getElementById('modal-action');
+        const modalTitle = document.getElementById('modal-title');
+        const modalCoverTitle = document.getElementById('modal-cover-title');
+        const modalAuthor = document.getElementById('modal-author');
+        const modalCategory = document.getElementById('modal-category');
+        const modalStatusList = document.getElementById('modal-status-list');
+        const modalDescription = document.getElementById('modal-description');
+        const modalStock = document.getElementById('modal-stock');
+        const modalCategoryDetail = document.getElementById('modal-category-detail');
+        const modalAuthorDetail = document.getElementById('modal-author-detail');
+        const modalStatusDetail = document.getElementById('modal-status-detail');
+        const modalPublisher = document.getElementById('modal-publisher');
+        const modalYear = document.getElementById('modal-year');
+        const modalCallNumber = document.getElementById('modal-call-number');
+        const modalIsbn = document.getElementById('modal-isbn');
+
+
+        /* =========================================================
+           BOOK 3D ELEMENT
+        ========================================================= */
+
+        const book = document.getElementById('book3D');
+        const bookFront = document.getElementById('bookFront');
+
+
+        /* =========================================================
+           BOOK 3D ROTATION (drag)
+        ========================================================= */
+
+        if (book) {
+
+            let isDragging = false;
+
+            let rotX = 0;
+            let rotY = -15;
+
+            const defaultX = 0;
+            const defaultY = -15;
+
+            book.style.transform =
+                'rotateX(0deg) rotateY(-15deg)';
+
+            book.addEventListener('mousedown', function () {
                 isDragging = true;
-
                 book.style.transition = 'none';
+            });
 
-            }
-        );
-
-
-        document.addEventListener(
-            'mouseup',
-            function () {
+            document.addEventListener('mouseup', function () {
 
                 if (!isDragging) {
                     return;
                 }
 
                 isDragging = false;
-
                 rotX = defaultX;
                 rotY = defaultY;
 
-                book.style.transition =
-                    'transform .8s ease';
+                book.style.transition = 'transform .8s ease';
 
                 book.style.transform =
                     `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            });
 
-            }
-        );
-
-
-        document.addEventListener(
-            'mousemove',
-            function (e) {
+            document.addEventListener('mousemove', function (e) {
 
                 if (!isDragging) {
                     return;
@@ -137,184 +119,58 @@ document.addEventListener('DOMContentLoaded', function () {
                 rotY += e.movementX * 0.5;
                 rotX -= e.movementY * 0.2;
 
-                rotX = Math.max(
-                    -40,
-                    Math.min(40, rotX)
-                );
+                rotX = Math.max(-40, Math.min(40, rotX));
 
                 book.style.transform =
                     `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            });
 
-            }
-        );
-
-    }
+        }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | BUKA MODAL BUKU
-    |--------------------------------------------------------------------------
-    |
-    | Menggunakan EVENT DELEGATION.
-    |
-    | Jadi book-card yang muncul setelah AJAX
-    | tetap bisa diklik.
-    |
-    |--------------------------------------------------------------------------
-    */
+        /* =========================================================
+           BOOK MODAL
+        ========================================================= */
 
-    document.addEventListener(
-        'click',
-        function (event) {
+        function openBookModal(card) {
 
-            const card =
-                event.target.closest('.book-card');
+            if (!modal || !card) return;
 
-
-            if (!card) {
-                return;
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Kalau modal tidak tersedia,
-            | jangan lakukan apa-apa.
-            |--------------------------------------------------------------------------
-            */
-
-            if (!modal) {
-                return;
-            }
-
-
-            const title =
-                card.dataset.title || '-';
-
-            const author =
-                card.dataset.author || '-';
-
-            const category =
-                card.dataset.category || '-';
-
-            const stock =
-                card.dataset.stock || '0';
-
-            const status =
-                card.dataset.status || 'Tersedia';
+            const title = card.dataset.title || '-';
+            const author = card.dataset.author || '-';
+            const category = card.dataset.category || '-';
+            const stock = card.dataset.stock || '0';
+            const status = card.dataset.status || 'Tersedia';
 
             const description =
                 card.dataset.description ||
                 'Informasi sinopsis/deskripsi belum tersedia untuk buku ini.';
 
-            const cover =
-                card.dataset.cover || '';
-
-            const publisher =
-                card.dataset.publisher || '-';
-
-            const year =
-                card.dataset.year || '-';
-
-            const callNumber =
-                card.dataset.callNumber || '-';
-
-            const isbn =
-                card.dataset.isbn || '-';
+            const cover = card.dataset.cover || '';
+            const publisher = card.dataset.publisher || '-';
+            const year = card.dataset.year || '-';
+            const callNumber = card.dataset.callNumber || '-';
+            const isbn = card.dataset.isbn || '-';
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | ISI MODAL
-            |--------------------------------------------------------------------------
-            */
-
-            if (modalTitle) {
-
-                modalTitle.textContent =
-                    title;
-
-            }
-
-
-            if (modalBookTitle) {
-
-                modalBookTitle.textContent =
-                    title;
-
-            }
+            if (modalTitle) modalTitle.textContent = title;
+            if (modalCoverTitle) modalCoverTitle.textContent = title;
+            if (modalAuthor) modalAuthor.textContent = 'Penulis: ' + author;
+            if (modalCategory) modalCategory.textContent = category;
+            if (modalCategoryDetail) modalCategoryDetail.textContent = category;
+            if (modalStock) modalStock.textContent = stock;
+            if (modalAuthorDetail) modalAuthorDetail.textContent = author;
+            if (modalStatusDetail) modalStatusDetail.textContent = status;
+            if (modalPublisher) modalPublisher.textContent = publisher;
+            if (modalYear) modalYear.textContent = year;
+            if (modalCallNumber) modalCallNumber.textContent = callNumber;
+            if (modalIsbn) modalIsbn.textContent = isbn;
+            if (modalDescription) modalDescription.textContent = description;
 
 
-            if (modalAuthor) {
-
-                modalAuthor.textContent =
-                    'Penulis: ' + author;
-
-            }
-
-
-            if (modalCategory) {
-
-                modalCategory.textContent =
-                    category;
-
-            }
-
-
-            if (modalStock) {
-
-                modalStock.textContent =
-                    stock;
-
-            }
-
-
-            if (modalPublisher) {
-
-                modalPublisher.textContent =
-                    publisher;
-
-            }
-
-
-            if (modalYear) {
-
-                modalYear.textContent =
-                    year;
-
-            }
-
-
-            if (modalCallNumber) {
-
-                modalCallNumber.textContent =
-                    callNumber;
-
-            }
-
-
-            if (modalIsbn) {
-
-                modalIsbn.textContent =
-                    isbn;
-
-            }
-
-
-            if (modalDescription) {
-
-                modalDescription.textContent =
-                    description;
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | COVER BUKU 3D
-            |--------------------------------------------------------------------------
-            */
+            /* =================================================
+               COVER pada BOOK 3D (bookFront)
+            ================================================= */
 
             if (bookFront) {
 
@@ -322,19 +178,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     bookFront.innerHTML = '';
 
-                    bookFront.style.backgroundImage =
-                        `url('${cover}')`;
-
-                    bookFront.style.backgroundSize =
-                        'cover';
-
-                    bookFront.style.backgroundPosition =
-                        'center';
+                    bookFront.style.backgroundImage = `url('${cover}')`;
+                    bookFront.style.backgroundSize = 'cover';
+                    bookFront.style.backgroundPosition = 'center';
 
                 } else {
 
-                    bookFront.style.backgroundImage =
-                        '';
+                    bookFront.style.backgroundImage = '';
 
                     bookFront.innerHTML =
                         `<div class="book-top">
@@ -354,864 +204,619 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS
-            |--------------------------------------------------------------------------
-            */
-
-            if (modalStatus) {
-
-                modalStatus.textContent =
-                    status;
-
-                modalStatus.classList.remove(
-                    'available',
-                    'borrowed'
-                );
-
-
-                if (status === 'Tersedia') {
-
-                    modalStatus.classList.add(
-                        'available'
-                    );
-
-                } else {
-
-                    modalStatus.classList.add(
-                        'borrowed'
-                    );
-
-                }
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | RESET POSISI BUKU
-            |--------------------------------------------------------------------------
-            */
+            /* RESET POSISI BUKU KE SUDUT SHOWCASE */
 
             if (book) {
-
-                book.style.transition =
-                    'transform .6s ease';
-
-                book.style.transform =
-                    'rotateX(-8deg) rotateY(-30deg)';
-
+                book.style.transition = 'transform .6s ease';
+                book.style.transform = 'rotateX(-8deg) rotateY(-30deg)';
             }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | OPEN MODAL
-            |--------------------------------------------------------------------------
-            */
+            /* =================================================
+               STATUS BADGES
+            ================================================= */
 
-            modal.classList.add('open');
+            if (modalStatusList) {
 
-            document.body.style.overflow =
-                'hidden';
+                const borrowed = parseInt(card.dataset.borrowed || '0', 10);
+                const reserved = parseInt(card.dataset.reserved || '0', 10);
+                const available = parseInt(card.dataset.available || stock || '0', 10);
 
-        }
-    );
+                modalStatusList.innerHTML = '';
 
+                if (borrowed > 0) {
+                    const badge = document.createElement('span');
+                    badge.className = 'catalog-modal-status borrowed';
+                    badge.textContent = `Dipinjam (${borrowed})`;
+                    modalStatusList.appendChild(badge);
+                }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CLOSE MODAL
-    |--------------------------------------------------------------------------
-    */
+                if (reserved > 0) {
+                    const badge = document.createElement('span');
+                    badge.className = 'catalog-modal-status reserved';
+                    badge.textContent = `Direservasi (${reserved})`;
+                    modalStatusList.appendChild(badge);
+                }
 
-    function closeModal() {
-
-        if (!modal) {
-            return;
-        }
-
-        modal.classList.remove('open');
-
-        document.body.style.overflow = '';
-
-    }
-
-
-    if (modalClose) {
-
-        modalClose.addEventListener(
-            'click',
-            closeModal
-        );
-
-    }
-
-
-    if (modalAction) {
-
-        modalAction.addEventListener(
-            'click',
-            closeModal
-        );
-
-    }
-
-
-    if (modal) {
-
-        modal.addEventListener(
-            'click',
-            function (event) {
-
-                if (event.target === modal) {
-                    closeModal();
+                if (borrowed === 0 && reserved === 0) {
+                    const badge = document.createElement('span');
+                    badge.className = 'catalog-modal-status available';
+                    badge.textContent = `Tersedia (${available})`;
+                    modalStatusList.appendChild(badge);
                 }
 
             }
-        );
-
-    }
 
 
-    document.addEventListener(
-        'keydown',
-        function (event) {
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
 
+        }
+
+
+        function closeBookModal() {
+
+            if (!modal) return;
+
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+
+        }
+
+
+        function attachBookCardEvents() {
+
+            const cards =
+                document.querySelectorAll('#page-catalog .book-card');
+
+            cards.forEach(function (card) {
+
+                if (card.dataset.modalReady === 'true') {
+                    return;
+                }
+
+                card.dataset.modalReady = 'true';
+
+                card.addEventListener('click', function () {
+                    openBookModal(card);
+                });
+
+            });
+
+        }
+
+
+        if (modalClose) modalClose.addEventListener('click', closeBookModal);
+        if (modalAction) modalAction.addEventListener('click', closeBookModal);
+
+        if (modal) {
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    closeBookModal();
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function (event) {
             if (
                 event.key === 'Escape' &&
                 modal &&
                 modal.classList.contains('open')
             ) {
+                closeBookModal();
+            }
+        });
 
-                closeModal();
 
+        /* =========================================================
+           DROPDOWN SYSTEM
+        ========================================================= */
+
+        function closeAllDropdowns() {
+
+            document
+                .querySelectorAll('#page-catalog .catalog-filter-dropdown')
+                .forEach(function (dropdown) {
+                    dropdown.classList.remove('show');
+                    dropdown.setAttribute('aria-hidden', 'true');
+                });
+
+            document
+                .querySelectorAll('#page-catalog .catalog-filter-btn')
+                .forEach(function (button) {
+                    button.classList.remove('open');
+                    button.setAttribute('aria-expanded', 'false');
+                });
+
+        }
+
+
+        function openDropdown(button, dropdown) {
+
+            if (!button || !dropdown) return;
+
+            closeAllDropdowns();
+
+            dropdown.classList.add('show');
+            dropdown.setAttribute('aria-hidden', 'false');
+
+            button.classList.add('open');
+            button.setAttribute('aria-expanded', 'true');
+
+        }
+
+
+        function toggleDropdown(buttonId, dropdownId) {
+
+            const button = document.getElementById(buttonId);
+            const dropdown = document.getElementById(dropdownId);
+
+            if (!button || !dropdown) {
+                console.error('Dropdown element tidak ditemukan:', buttonId, dropdownId);
+                return;
             }
 
-        }
-    );
+            const isOpen = dropdown.classList.contains('show');
 
+            if (isOpen) {
+                closeAllDropdowns();
+                return;
+            }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CATALOG AJAX
-    |--------------------------------------------------------------------------
-    */
+            openDropdown(button, dropdown);
 
-    const catalogForm =
-        document.getElementById(
-            'catalog-filter-form'
-        );
-
-    const catalogResults =
-        document.getElementById(
-            'catalog-results'
-        );
-
-    const catalogSearch =
-        document.getElementById(
-            'catalog-search'
-        );
-
-
-    let catalogSearchTimer = null;
-
-    let catalogRequestController = null;
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | BUILD URL
-    |--------------------------------------------------------------------------
-    */
-
-    function buildCatalogUrl(
-        resetPage = true
-    ) {
-
-        if (!catalogForm) {
-            return null;
         }
 
 
-        const url =
-            new URL(
-                catalogForm.action,
-                window.location.origin
-            );
+        document.addEventListener('click', function (event) {
+
+            const categoryButton = event.target.closest('#catalog-category-btn');
+
+            if (categoryButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleDropdown('catalog-category-btn', 'catalog-category-dropdown');
+                return;
+            }
+
+            const statusButton = event.target.closest('#catalog-status-btn');
+
+            if (statusButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleDropdown('catalog-status-btn', 'catalog-status-dropdown');
+                return;
+            }
+
+            if (!event.target.closest('#page-catalog .catalog-dropdown-wrapper')) {
+                closeAllDropdowns();
+            }
+
+        });
 
 
-        const formData =
-            new FormData(catalogForm);
+        /* =========================================================
+           SHOW SUBCATEGORY
+        ========================================================= */
 
+        function showSubcategory(categoryId) {
 
-        formData.forEach(
-            function (value, key) {
+            const subcategoriesContainer =
+                document.getElementById('catalog-dropdown-subcategories');
 
-                if (
-                    value !== null &&
-                    String(value).trim() !== ''
-                ) {
+            const groups =
+                document.querySelectorAll(
+                    '#catalog-dropdown-subcategories .catalog-subcategory-group'
+                );
 
-                    url.searchParams.set(
-                        key,
-                        value
-                    );
+            let found = false;
 
+            groups.forEach(function (group) {
+
+                const groupCategoryId = String(group.dataset.groupCategoryId || '');
+                const selectedId = String(categoryId || '');
+
+                if (selectedId !== '' && groupCategoryId === selectedId) {
+                    group.style.display = 'block';
+                    found = true;
+                } else {
+                    group.style.display = 'none';
+                }
+
+            });
+
+            if (subcategoriesContainer) {
+
+                if (found) {
+                    subcategoriesContainer.style.display = 'block';
+                    subcategoriesContainer.classList.add('show');
+                } else {
+                    subcategoriesContainer.style.display = 'none';
+                    subcategoriesContainer.classList.remove('show');
                 }
 
             }
-        );
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Filter/search berubah → halaman 1
-        |--------------------------------------------------------------------------
-        */
-
-        if (resetPage) {
-
-            url.searchParams.delete(
-                'page'
-            );
+            return found;
 
         }
 
 
-        return url;
+        /* =========================================================
+           LOAD CATALOG FROM URL (chip filter & keep-open dropdown)
+        ========================================================= */
 
-    }
+        async function loadCatalogFromUrl(targetUrl, options = {}) {
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE SUBCATEGORY DARI RESPONSE
-    |--------------------------------------------------------------------------
-    */
-
-    function updateSubcategoryFromResponse(
-        parsedDocument
-    ) {
-
-        const currentSubcategory =
-            document.getElementById(
-                'catalog-subcategory'
-            );
-
-
-        const newSubcategory =
-            parsedDocument.getElementById(
-                'catalog-subcategory'
-            );
-
-
-        if (
-            !currentSubcategory ||
-            !newSubcategory
-        ) {
-
-            return;
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Ganti option subcategory
-        |--------------------------------------------------------------------------
-        */
-
-        currentSubcategory.innerHTML =
-            newSubcategory.innerHTML;
-
-
-        currentSubcategory.disabled =
-            newSubcategory.disabled;
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | LOAD CATALOG AJAX
-    |--------------------------------------------------------------------------
-    */
-
-    async function loadCatalog(
-        urlString,
-        pushHistory = true,
-        keepSearchFocus = false
-    ) {
-
-        if (
-            !catalogResults ||
-            !catalogForm
-        ) {
-
-            return;
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN SEARCH
-        |--------------------------------------------------------------------------
-        */
-
-        const searchInput =
-            document.getElementById(
-                'catalog-search'
-            );
-
-
-        const currentSearch =
-            searchInput
-                ? searchInput.value
-                : '';
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN POSISI CURSOR
-        |--------------------------------------------------------------------------
-        */
-
-        const cursorPosition =
-            searchInput &&
-            document.activeElement === searchInput
-                ? searchInput.selectionStart
-                : null;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | BATALKAN REQUEST LAMA
-        |--------------------------------------------------------------------------
-        */
-
-        if (catalogRequestController) {
-
-            catalogRequestController.abort();
-
-        }
-
-
-        catalogRequestController =
-            new AbortController();
-
-
-        catalogResults.classList.add(
-            'catalog-loading'
-        );
-
-
-        try {
-
-            const url =
-                new URL(
-                    urlString,
-                    window.location.origin
-                );
-
-
-            const response =
-                await fetch(
-                    url.toString(),
-                    {
-                        method: 'GET',
-
-                        headers: {
-                            'X-Requested-With':
-                                'XMLHttpRequest',
-
-                            'Accept':
-                                'text/html'
-                        },
-
-                        signal:
-                            catalogRequestController.signal
-                    }
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    'Gagal mengambil data katalog.'
-                );
-
+            if (requestController) {
+                requestController.abort();
             }
 
+            requestController = new AbortController();
 
-            const html =
-                await response.text();
+            const url = new URL(targetUrl, window.location.origin);
 
+            const pageCatalog = document.getElementById('page-catalog');
+            const bookGrid = pageCatalog?.querySelector('.book-grid');
 
-            /*
-            |--------------------------------------------------------------------------
-            | PARSE RESPONSE
-            |--------------------------------------------------------------------------
-            */
-
-            const parsed =
-                new DOMParser()
-                    .parseFromString(
-                        html,
-                        'text/html'
-                    );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | HASIL KATALOG BARU
-            |--------------------------------------------------------------------------
-            */
-
-            const newResults =
-                parsed.getElementById(
-                    'catalog-results'
-                );
-
-
-            if (!newResults) {
-
-                throw new Error(
-                    'Element #catalog-results tidak ditemukan pada response.'
-                );
-
+            if (bookGrid) {
+                bookGrid.classList.add('catalog-loading');
             }
 
+            try {
 
-            /*
-            |--------------------------------------------------------------------------
-            | GANTI HANYA HASIL
-            |--------------------------------------------------------------------------
-            */
-
-            catalogResults.innerHTML =
-                newResults.innerHTML;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | UPDATE JUMLAH BUKU
-            |--------------------------------------------------------------------------
-            */
-
-            const currentCount =
-                document.getElementById(
-                    'catalog-count'
-                );
-
-
-            const newCount =
-                parsed.getElementById(
-                    'catalog-count'
-                );
-
-
-            if (
-                currentCount &&
-                newCount
-            ) {
-
-                currentCount.textContent =
-                    newCount.textContent;
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | UPDATE SUBKATEGORI
-            |--------------------------------------------------------------------------
-            */
-
-            updateSubcategoryFromResponse(
-                parsed
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | SEARCH TETAP DI INPUT
-            |--------------------------------------------------------------------------
-            |
-            | Karena input tidak diganti AJAX,
-            | sebenarnya value sudah aman.
-            |
-            | Bagian ini hanya memastikan value
-            | tetap sama.
-            |--------------------------------------------------------------------------
-            */
-
-            if (searchInput) {
-
-                searchInput.value =
-                    currentSearch;
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | KEEP SEARCH FOCUS
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                keepSearchFocus &&
-                searchInput
-            ) {
-
-                searchInput.focus();
-
-
-                const position =
-                    cursorPosition !== null
-                        ? Math.min(
-                            cursorPosition,
-                            searchInput.value.length
-                        )
-                        : searchInput.value.length;
-
-
-                searchInput.setSelectionRange(
-                    position,
-                    position
-                );
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | UPDATE URL
-            |--------------------------------------------------------------------------
-            */
-
-            if (pushHistory) {
-
-                window.history.pushState(
-                    {
-                        catalog: true
+                const response = await fetch(url.toString(), {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html'
                     },
-                    '',
-                    url.toString()
-                );
+                    signal: requestController.signal
+                });
 
-            }
-
-        } catch (error) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | AbortError bukan error.
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                error.name !==
-                'AbortError'
-            ) {
-
-                console.error(
-                    'Catalog AJAX Error:',
-                    error
-                );
-
-            }
-
-        } finally {
-
-            catalogResults.classList.remove(
-                'catalog-loading'
-            );
-
-        }
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | LIVE SEARCH
-    |--------------------------------------------------------------------------
-    |
-    | FEELING SEPERTI SEARCH ANGGOTA
-    |
-    | ketik → tunggu 300ms → AJAX
-    |
-    |--------------------------------------------------------------------------
-    */
-
-    if (
-        catalogSearch &&
-        catalogForm
-    ) {
-
-        catalogSearch.addEventListener(
-            'input',
-            function () {
-
-                clearTimeout(
-                    catalogSearchTimer
-                );
-
-
-                catalogSearchTimer =
-                    setTimeout(
-                        function () {
-
-                            const url =
-                                buildCatalogUrl(
-                                    true
-                                );
-
-
-                            if (!url) {
-                                return;
-                            }
-
-
-                            loadCatalog(
-                                url.toString(),
-                                true,
-                                true
-                            );
-
-                        },
-                        300
-                    );
-
-            }
-        );
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | SUBMIT FORM
-    |--------------------------------------------------------------------------
-    */
-
-    if (catalogForm) {
-
-        catalogForm.addEventListener(
-            'submit',
-            function (event) {
-
-                event.preventDefault();
-
-
-                clearTimeout(
-                    catalogSearchTimer
-                );
-
-
-                const url =
-                    buildCatalogUrl(
-                        true
-                    );
-
-
-                if (!url) {
-                    return;
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data katalog.');
                 }
 
+                const html = await response.text();
+                const parser = new DOMParser();
+                const newDocument = parser.parseFromString(html, 'text/html');
 
-                loadCatalog(
-                    url.toString(),
-                    true,
-                    false
-                );
+                /* GRID */
+                const newGrid = newDocument.querySelector('#page-catalog .book-grid');
+                const currentGrid = document.querySelector('#page-catalog .book-grid');
+                if (newGrid && currentGrid) currentGrid.innerHTML = newGrid.innerHTML;
 
-            }
-        );
+                /* PAGINATION */
+                const newPagination = newDocument.querySelector('#page-catalog .catalog-pagination');
+                const currentPagination = document.querySelector('#page-catalog .catalog-pagination');
 
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | FILTER CHANGE
-    |--------------------------------------------------------------------------
-    */
-
-    if (catalogForm) {
-
-        catalogForm.addEventListener(
-            'change',
-            function (event) {
-
-                const target =
-                    event.target;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Search bukan filter change.
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    target.name ===
-                    'search'
-                ) {
-
-                    return;
-
+                if (newPagination && currentPagination) {
+                    currentPagination.innerHTML = newPagination.innerHTML;
+                } else if (newPagination && !currentPagination) {
+                    const currentGridElement = document.querySelector('#page-catalog .book-grid');
+                    if (currentGridElement) {
+                        currentGridElement.insertAdjacentHTML('afterend', newPagination.outerHTML);
+                    }
+                } else if (!newPagination && currentPagination) {
+                    currentPagination.remove();
                 }
 
+                /* COUNT */
+                const newCount = newDocument.querySelector('#page-catalog .catalog-count');
+                const currentCount = document.querySelector('#page-catalog .catalog-count');
+                if (newCount && currentCount) currentCount.textContent = newCount.textContent;
 
-                if (
-                    ![
-                        'category',
-                        'subcategory',
-                        'status',
-                    ].includes(
-                        target.name
-                    )
-                ) {
-
-                    return;
-
+                /* CATEGORY / STATUS WRAPPER */
+                const newCategoryWrapper = newDocument.querySelector('#page-catalog #catalog-category-wrapper');
+                const currentCategoryWrapper = document.querySelector('#page-catalog #catalog-category-wrapper');
+                if (newCategoryWrapper && currentCategoryWrapper) {
+                    currentCategoryWrapper.innerHTML = newCategoryWrapper.innerHTML;
                 }
 
+                const newStatusWrapper = newDocument.querySelector('#page-catalog #catalog-status-wrapper');
+                const currentStatusWrapper = document.querySelector('#page-catalog #catalog-status-wrapper');
+                if (newStatusWrapper && currentStatusWrapper) {
+                    currentStatusWrapper.innerHTML = newStatusWrapper.innerHTML;
+                }
 
-                /*
-                |--------------------------------------------------------------------------
-                | KATEGORI BERUBAH
-                |--------------------------------------------------------------------------
-                */
+                /* HIDDEN INPUTS */
+                ['category', 'subcategory', 'status'].forEach(function (name) {
+                    const newInput = newDocument.querySelector(`#catalog-${name}-input`);
+                    const currentInput = document.querySelector(`#catalog-${name}-input`);
+                    if (newInput && currentInput) currentInput.value = newInput.value;
+                });
 
-                if (
-                    target.name ===
-                    'category'
-                ) {
+                /* LEGACY STATUS SELECT */
+                const newStatus = newDocument.querySelector('#page-catalog .catalog-status-select');
+                const currentStatus = document.querySelector('#page-catalog .catalog-status-select');
+                if (newStatus && currentStatus) currentStatus.value = newStatus.value;
 
-                    const subcategory =
-                        document.getElementById(
-                            'catalog-subcategory'
-                        );
+                /* URL */
+                window.history.pushState({}, '', url.toString());
 
+                /* DROPDOWN STATE */
+                if (options.keepCategoryOpen === true) {
 
-                    if (subcategory) {
+                    const updatedButton = document.getElementById('catalog-category-btn');
+                    const updatedDropdown = document.getElementById('catalog-category-dropdown');
 
-                        subcategory.value = '';
-
-                        subcategory.disabled =
-                            !target.value;
-
+                    if (updatedButton && updatedDropdown) {
+                        updatedDropdown.classList.add('show');
+                        updatedDropdown.setAttribute('aria-hidden', 'false');
+                        updatedButton.classList.add('open');
+                        updatedButton.setAttribute('aria-expanded', 'true');
                     }
 
+                    if (options.activeCategoryId) {
+                        showSubcategory(options.activeCategoryId);
+                    }
+
+                } else {
+                    closeAllDropdowns();
                 }
 
+                attachBookCardEvents();
 
-                const url =
-                    buildCatalogUrl(
-                        true
-                    );
+            } catch (error) {
 
-
-                if (!url) {
+                if (error.name === 'AbortError') {
                     return;
                 }
 
+                console.error('Catalog AJAX Error:', error);
 
-                loadCatalog(
-                    url.toString(),
-                    true,
-                    false
-                );
+            } finally {
 
-            }
-        );
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | PAGINATION AJAX
-    |--------------------------------------------------------------------------
-    */
-
-    if (catalogResults) {
-
-        catalogResults.addEventListener(
-            'click',
-            function (event) {
-
-                const link =
-                    event.target.closest(
-                        '.catalog-pagination a'
-                    );
-
-
-                if (!link) {
-                    return;
+                const currentBookGrid = document.querySelector('#page-catalog .book-grid');
+                if (currentBookGrid) {
+                    currentBookGrid.classList.remove('catalog-loading');
                 }
 
-
-                event.preventDefault();
-
-
-                loadCatalog(
-                    link.href,
-                    true,
-                    false
-                );
-
             }
-        );
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | BACK / FORWARD BROWSER
-    |--------------------------------------------------------------------------
-    */
-
-    window.addEventListener(
-        'popstate',
-        function () {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Sinkronkan search dengan URL
-            |--------------------------------------------------------------------------
-            */
-
-            if (catalogSearch) {
-
-                const url =
-                    new URL(
-                        window.location.href
-                    );
-
-
-                catalogSearch.value =
-                    url.searchParams.get(
-                        'search'
-                    ) || '';
-
-            }
-
-
-            loadCatalog(
-                window.location.href,
-                false,
-                false
-            );
 
         }
-    );
 
-});
+
+        /* =========================================================
+           FILTER CHIP CLICK
+        ========================================================= */
+
+        document.addEventListener('click', function (event) {
+
+            const filterLink = event.target.closest(
+                '#page-catalog .catalog-category-chip, ' +
+                '#page-catalog .catalog-subcategory-chip, ' +
+                '#page-catalog .catalog-status-chip'
+            );
+
+            if (!filterLink) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const url = new URL(filterLink.href, window.location.origin);
+            const currentSearchInput = form?.querySelector('input[name="search"]');
+
+            if (currentSearchInput && currentSearchInput.value.trim() !== '') {
+                url.searchParams.set('search', currentSearchInput.value.trim());
+            } else if (currentSearchInput) {
+                url.searchParams.delete('search');
+            }
+
+            /* CATEGORY */
+            if (filterLink.classList.contains('catalog-category-chip')) {
+
+                const categoryId = filterLink.dataset.categoryId || '';
+
+                if (!categoryId) {
+                    showSubcategory('');
+                    loadCatalogFromUrl(url.toString());
+                    return;
+                }
+
+                const hasSubcategory = showSubcategory(categoryId);
+
+                if (hasSubcategory) {
+                    loadCatalogFromUrl(url.toString(), {
+                        keepCategoryOpen: true,
+                        activeCategoryId: categoryId
+                    });
+                    return;
+                }
+
+                loadCatalogFromUrl(url.toString());
+                return;
+            }
+
+            /* SUBCATEGORY */
+            if (filterLink.classList.contains('catalog-subcategory-chip')) {
+                loadCatalogFromUrl(url.toString());
+                return;
+            }
+
+            /* STATUS */
+            if (filterLink.classList.contains('catalog-status-chip')) {
+                loadCatalogFromUrl(url.toString());
+            }
+
+        });
+
+
+        /* =========================================================
+           SEARCH
+        ========================================================= */
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function () {
+                    loadCatalog({ resetPage: true });
+                }, 350);
+            });
+        }
+
+
+        /* =========================================================
+           AJAX CATALOG (search & form submit)
+        ========================================================= */
+
+        async function loadCatalog(options = {}) {
+
+            if (!form) return;
+
+            if (requestController) {
+                requestController.abort();
+            }
+
+            requestController = new AbortController();
+
+            const url = new URL(form.action, window.location.origin);
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+
+            formData.forEach(function (value, key) {
+                if (value !== null && value !== '') {
+                    params.set(key, value);
+                }
+            });
+
+            if (options.resetPage !== false) {
+                params.delete('page');
+            }
+
+            url.search = params.toString();
+
+            try {
+
+                const response = await fetch(url.toString(), {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html'
+                    },
+                    signal: requestController.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data katalog.');
+                }
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const newDocument = parser.parseFromString(html, 'text/html');
+
+                const newGrid = newDocument.querySelector('#page-catalog .book-grid');
+                const currentGrid = document.querySelector('#page-catalog .book-grid');
+                if (newGrid && currentGrid) currentGrid.innerHTML = newGrid.innerHTML;
+
+                const newPagination = newDocument.querySelector('#page-catalog .catalog-pagination');
+                const currentPagination = document.querySelector('#page-catalog .catalog-pagination');
+
+                if (newPagination && currentPagination) {
+                    currentPagination.innerHTML = newPagination.innerHTML;
+                } else if (!newPagination && currentPagination) {
+                    currentPagination.remove();
+                }
+
+                const newCount = newDocument.querySelector('#page-catalog .catalog-count');
+                const currentCount = document.querySelector('#page-catalog .catalog-count');
+                if (newCount && currentCount) currentCount.textContent = newCount.textContent;
+
+                window.history.replaceState({}, '', url.toString());
+
+                attachBookCardEvents();
+
+            } catch (error) {
+
+                if (error.name === 'AbortError') {
+                    return;
+                }
+
+                console.error('Catalog AJAX Error:', error);
+
+            }
+
+        }
+
+
+        /* =========================================================
+           STATUS LEGACY SELECT
+        ========================================================= */
+
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function () {
+                loadCatalog({ resetPage: true });
+            });
+        }
+
+
+        /* =========================================================
+           PAGINATION
+        ========================================================= */
+
+        document.addEventListener('click', function (event) {
+
+            const paginationLink =
+                event.target.closest('#page-catalog .catalog-pagination a');
+
+            if (!paginationLink) return;
+
+            event.preventDefault();
+
+            const url = new URL(paginationLink.href, window.location.origin);
+
+            if (!form) return;
+
+            let pageInput = form.querySelector('input[name="page"]');
+
+            if (!pageInput) {
+                pageInput = document.createElement('input');
+                pageInput.type = 'hidden';
+                pageInput.name = 'page';
+                form.appendChild(pageInput);
+            }
+
+            pageInput.value = url.searchParams.get('page') || '1';
+
+            loadCatalog({ resetPage: false });
+
+        });
+
+
+        /* =========================================================
+           FORM SUBMIT
+        ========================================================= */
+
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                clearTimeout(searchTimer);
+                loadCatalog({ resetPage: true });
+            });
+        }
+
+
+        /* =========================================================
+           INITIAL
+        ========================================================= */
+
+        const initialCategoryInput = document.getElementById('catalog-category-input');
+
+        if (initialCategoryInput && initialCategoryInput.value) {
+            showSubcategory(initialCategoryInput.value);
+        }
+
+        attachBookCardEvents();
+
+    } // end initCatalog
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCatalog);
+    } else {
+        initCatalog();
+    }
+
+})();

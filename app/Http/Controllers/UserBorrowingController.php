@@ -157,12 +157,12 @@ class UserBorrowingController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message'      => 'Peminjaman disetujui. Silakan ambil buku di meja sirkulasi.',
+                'message'      => 'Buku berhasil dipinjam. Silakan ambil buku di meja sirkulasi.',
                 'redirect_url' => route('borrowings.index'),
             ]);
         }
 
-        return redirect()->route('borrowings.index')->with('success', 'Peminjaman disetujui. Silakan ambil buku di meja sirkulasi.');
+        return redirect()->route('borrowings.index')->with('success', 'Buku berhasil dipinjam. Silakan ambil buku di meja sirkulasi.');
     }
 
     /**

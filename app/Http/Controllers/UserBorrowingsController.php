@@ -128,8 +128,8 @@ class UserBorrowingsController extends Controller
 
         return response()->json([
             'message'        => 'Peminjaman berhasil diperpanjang.',
-                'due_at'         => $newDueDate->format('d M Y'),
-                'days_remaining' => (int) now()->diffInDays($newDueDate, false),
+            'due_at'         => $borrowing->due_at->format('d M Y'),
+            'days_remaining' => (int) now()->diffInDays($borrowing->due_at, false),
             'extension_days' => $extensionDays,
             'near_due_count' => $activeBorrowings->filter(fn ($item) => ($item->due_at ? now()->diffInDays($item->due_at, false) : 99) >= 0 && ($item->due_at ? now()->diffInDays($item->due_at, false) : 99) <= 3)->count(),
             'overdue_count'  => $activeBorrowings->filter(fn ($item) => ($item->due_at ? now()->diffInDays($item->due_at, false) : 0) < 0)->count(),
