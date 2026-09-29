@@ -24,7 +24,7 @@ class RoleAwareNavigationController extends Controller
 
     public function borrowings(Request $request)
     {
-        return Auth::user()->isAdmin() ? app(BorrowingController::class)->index($request) : app(UserBorrowingsController::class)->index();
+        return Auth::user()->isAdmin() ? app(BorrowingController::class)->index($request) : app(UserBorrowingController::class)->index();
     }
 
     public function history(Request $request)

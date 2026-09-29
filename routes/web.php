@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GoogleAuthController;
-use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CatalogController;
@@ -21,7 +20,6 @@ use App\Http\Controllers\BookCopyController;
 use App\Http\Controllers\UserHomeController;
 use App\Http\Controllers\UserCatalogController;
 use App\Http\Controllers\UserBorrowingController;
-use App\Http\Controllers\UserBorrowingsController;
 use App\Http\Controllers\RoleAwareNavigationController;
 use App\Http\Controllers\UserHistoryController;
 use App\Http\Controllers\UserProfileController;
@@ -65,6 +63,10 @@ Route::middleware('guest')->group(function () {
         ->name('google.redirect');
     Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])
         ->name('google.callback');
+    Route::get('/auth/google/complete', [GoogleAuthController::class, 'completeForm'])
+        ->name('google.complete');
+    Route::post('/auth/google/complete', [GoogleAuthController::class, 'complete'])
+        ->name('google.complete.store');
 });
 
 // Logout (butuh autentikasi)
@@ -79,7 +81,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reservations', [RoleAwareNavigationController::class, 'reservations'])->name('reservations.index');
     Route::get('/borrowings', [RoleAwareNavigationController::class, 'borrowings'])->name('borrowings.index');
     Route::get('/history', [RoleAwareNavigationController::class, 'history'])->name('history');
-    Route::patch('/borrowings/{borrowing}/extend', [UserBorrowingsController::class, 'extend'])->name('borrowings.extend');
+    Route::patch('/borrowings/{borrowing}/extend', [UserBorrowingController::class, 'extend'])->name('borrowings.extend');
 });
 
 // ============================================================
@@ -134,21 +136,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 'destroy'
             ])->name('destroy');
         });
-
-    Route::post('/borrowings', [
-        BorrowingController::class,
-        'store'
-    ])->name('borrowings.store');
-
-    Route::patch('/borrowings/{borrowing}/return', [
-        BorrowingController::class,
-        'returnBook'
-    ])->name('borrowings.return');
-
-    Route::delete('/borrowings/{borrowing}', [
-        BorrowingController::class,
-        'destroy'
-    ])->name('borrowings.destroy');
 
     // SIRKULASI
     Route::get('/circulation', [CirculationController::class, 'index'])
@@ -216,6 +203,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('fines');
 
     // ANGGOTA
+    Route::patch(
+        '/members/{member}/approve',
+        [MemberController::class, 'approve']
+    )->name('members.approve');
+
+    Route::delete(
+        '/members/{member}/reject',
+        [MemberController::class, 'reject']
+    )->name('members.reject');
+
     Route::resource('members', MemberController::class);
 
     // KALENDER
@@ -253,7 +250,7 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     Route::get('/user/catalog', [UserCatalogController::class, 'index'])->name('user.catalog');
 
     // PEMINJAMAN BUKU - HALAMAN KHUSUS
-    Route::get('/peminjaman', [UserBorrowingsController::class, 'index'])->name('user.borrowings');
+    Route::get('/peminjaman', [UserBorrowingController::class, 'index'])->name('user.borrowings');
 
     // PEMINJAMAN AKTIF & PERMINTAAN PINJAM
     Route::get('/user/loans', [UserBorrowingController::class, 'index'])->name('user.loans');
@@ -282,14 +279,24 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     Route::post('/user/notifications/dismiss',     [UserNotificationController::class, 'dismiss'])->name('user.notifications.dismiss');
     Route::post('/user/notifications/dismiss-all', [UserNotificationController::class, 'dismissAll'])->name('user.notifications.dismiss-all');
 
-    // PROFIL
-    Route::get('/user/profile',              [UserProfileController::class, 'index'])->name('user.profile');
-    Route::post('/user/profile/update',      [UserProfileController::class, 'update'])->name('user.profile.update');
-    Route::post('/user/profile/password',    [UserProfileController::class, 'changePassword'])->name('user.profile.password');
-    Route::post('/user/profile/preferences', [UserProfileController::class, 'updatePreferences'])->name('user.profile.preferences');
-
     // BANTUAN
     Route::get('/user/help', [UserHelpController::class, 'index'])->name('user.help');
+});
+
+Route::middleware('auth')->group(function () {
+
+    // PROFIL — bisa diakses guest maupun member
+    Route::get('/user/profile', [UserProfileController::class, 'index'])
+        ->name('user.profile');
+
+    Route::post('/user/profile/update', [UserProfileController::class, 'update'])
+        ->name('user.profile.update');
+
+    Route::post('/user/profile/password', [UserProfileController::class, 'changePassword'])
+        ->name('user.profile.password');
+
+    Route::post('/user/profile/preferences', [UserProfileController::class, 'updatePreferences'])
+        ->name('user.profile.preferences');
 });
 
 // ============================================================
@@ -323,7 +330,7 @@ Route::prefix('email-preview')->group(function () {
                 'Nama Pengguna' => 'Budi Santoso',
                 'Email'         => 'budi.santoso@gmail.com',
                 'Role'          => 'user',
-                'Tanggal Daftar'=> now()->translatedFormat('d M Y H:i') . ' WIB',
+                'Tanggal Daftar' => now()->translatedFormat('d M Y H:i') . ' WIB',
             ],
             actionUrl: url('/members'),
             actionLabel: 'Kelola Anggota'
@@ -345,4 +352,3 @@ Route::prefix('email-preview')->group(function () {
         return (new \App\Mail\BorrowingReturnedMail($borrowing))->render();
     });
 });
-

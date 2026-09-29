@@ -29,32 +29,56 @@
                 Dashboard
             </a>
 
-            <a href="{{ route('catalog') }}"
+
+            {{-- KATALOG --}}
+
+            <a
+                href="{{ route('catalog') }}"
                 class="{{ request()->routeIs('catalog') ? 'active' : '' }}">
                 Katalog Buku
             </a>
 
-            <a href="{{ route('books.index') }}"
+
+            {{-- MANAJEMEN BUKU --}}
+
+            <a
+                href="{{ route('books.index') }}"
                 class="{{ request()->routeIs('books.*') ? 'active' : '' }}">
                 Manajemen Buku
             </a>
 
-            <a href="{{ route('members.index') }}"
+
+            {{-- ANGGOTA --}}
+
+            <a
+                href="{{ route('members.index') }}"
                 class="{{ request()->routeIs('members.*') ? 'active' : '' }}">
                 Anggota
             </a>
 
-            <a href="{{ route('circulation') }}"
+
+            {{-- PEMINJAMAN --}}
+
+            <a
+                href="{{ route('circulation') }}"
                 class="{{ request()->routeIs('circulation') ? 'active' : '' }}">
                 Peminjaman Buku
             </a>
 
-            <a href="{{ route('reservations.index') }}"
-                class="{{ request()->routeIs('reservations*') ? 'active' : '' }}">
+
+            {{-- RESERVASI --}}
+
+            <a
+                href="{{ route('reservations.index') }}"
+                class="{{ request()->routeIs('reservations.*') ? 'active' : '' }}">
                 Reservasi Buku
             </a>
 
-            <a href="{{ route('reports.index') }}"
+
+            {{-- LAPORAN --}}
+
+            <a
+                href="{{ route('reports.index') }}"
                 class="{{ request()->routeIs('reports.*') ? 'active' : '' }}">
                 Laporan
             </a>

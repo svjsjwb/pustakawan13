@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,7 +10,7 @@ class UserProfileController extends Controller
     public function index()
     {
         $user   = Auth::user();
-        $member = Member::where('email', $user->email)->first();
+        $member = $user->member;
 
         // ── Data Statistik Informasi Anggota ──────────────────────────────
         $totalBorrowed     = $member ? $member->borrowings()->count() : 0;

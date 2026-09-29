@@ -7,7 +7,6 @@ use App\Models\Book;
 use App\Models\Category;
 use App\Models\Borrowing;
 use App\Models\Reservation;
-use App\Models\Member;
 use App\Services\RecommendationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -17,7 +16,7 @@ class UserHomeController extends Controller
     public function index(?Request $request = null)
     {
         $user   = Auth::user();
-        $member = Member::where('email', $user?->email)->first();
+        $member = $user?->member;
 
         // ── 4 WIDGET DASHBOARD USER ──────────────────────────────
         $activeLoansCount    = 0;

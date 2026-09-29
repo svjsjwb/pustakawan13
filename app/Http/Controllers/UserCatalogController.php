@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Category;
-use App\Models\Member;
 use App\Models\Reservation;
 use App\Models\Borrowing;
 use Illuminate\Http\Request;
@@ -184,7 +183,8 @@ class UserCatalogController extends Controller
         $borrowedBookIds = [];
 
         if (Auth::check() && Auth::user()->email) {
-            $member = Member::where('email', Auth::user()->email)->first();
+            $user = Auth::user();
+            $member = $user->member;
             if ($member) {
                 $reservedBookIds = Reservation::where('member_id', $member->id)
                     ->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->rememberToken();
 
             // Role & profile
-            $table->enum('role', ['admin', 'user'])->default('user');
+            $table->enum('role', ['admin', 'guest', 'member'])->default('guest');
             $table->string('phone')->nullable();
             $table->string('theme')->nullable();
             $table->string('layout_density')->nullable();

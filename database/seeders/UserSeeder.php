@@ -17,10 +17,10 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@gmail.com'],
             [
-                'name'     => 'Admin Perpustakaan',
-                'email'    => 'admin@gmail.com',
-                'password' => Hash::make('perpusts'),
-                'role'     => 'admin',
+                'name'            => 'Admin Perpustakaan',
+                'email'           => 'admin@gmail.com',
+                'password'        => Hash::make('perpusts'),
+                'role'            => 'admin',
             ]
         );
     }

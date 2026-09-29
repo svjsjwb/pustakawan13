@@ -17,8 +17,9 @@ class UserReservationController extends Controller
     public function index(Request $request)
     {
         $user         = Auth::user();
-        $member       = Member::where('email', $user->email)->first();
+        $member       = $user->member;
         $reservations = collect();
+
         $statusCounts = [
             'semua'        => 0,
             'menunggu'     => 0,
@@ -33,6 +34,7 @@ class UserReservationController extends Controller
 
             // Filter Pencarian
             $search = trim((string) $request->input('search', ''));
+
             if ($search !== '') {
                 $query->whereHas('book', function ($q) use ($search) {
                     $q->where('judul_buku', 'like', "{$search}%");
@@ -44,19 +46,45 @@ class UserReservationController extends Controller
                 $query->where('status', $status);
             }
 
-            $reservations = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
+            $reservations = $query
+                ->orderByDesc('created_at')
+                ->paginate(10)
+                ->withQueryString();
 
             // Hitungan status untuk tab / badge
             $allRes = Reservation::where('member_id', $member->id)->get();
-            $statusCounts['semua']        = $allRes->count();
-            $statusCounts['aktif']        = $allRes->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])->count();
-            $statusCounts['menunggu']     = $allRes->where('status', 'menunggu')->count();
-            $statusCounts['disetujui']    = $allRes->where('status', 'disetujui')->count();
-            $statusCounts['siap_diambil'] = $allRes->where('status', 'siap_diambil')->count();
-            $statusCounts['ditolak']      = $allRes->where('status', 'ditolak')->count();
+
+            $statusCounts['semua'] = $allRes->count();
+
+            $statusCounts['aktif'] = $allRes
+                ->whereIn('status', [
+                    'menunggu',
+                    'disetujui',
+                    'siap_diambil'
+                ])
+                ->count();
+
+            $statusCounts['menunggu'] = $allRes
+                ->where('status', 'menunggu')
+                ->count();
+
+            $statusCounts['disetujui'] = $allRes
+                ->where('status', 'disetujui')
+                ->count();
+
+            $statusCounts['siap_diambil'] = $allRes
+                ->where('status', 'siap_diambil')
+                ->count();
+
+            $statusCounts['ditolak'] = $allRes
+                ->where('status', 'ditolak')
+                ->count();
         }
 
-        return view('user.reservations', compact('reservations', 'member', 'statusCounts'));
+        return view(
+            'user.reservations',
+            compact('reservations', 'member', 'statusCounts')
+        );
     }
 
     /**
@@ -65,17 +93,25 @@ class UserReservationController extends Controller
     public function show($id)
     {
         $user   = Auth::user();
-        $member = Member::where('email', $user->email)->first();
+        $member = $user->member;
 
         if (!$member) {
-            return redirect()->route('user.reservations')->with('error', 'Data anggota tidak ditemukan.');
+            return redirect()
+                ->route('user.reservations')
+                ->with('error', 'Data anggota tidak ditemukan.');
         }
 
-        $reservation = Reservation::with(['book.category', 'bookCopy'])
+        $reservation = Reservation::with([
+            'book.category',
+            'bookCopy'
+        ])
             ->where('member_id', $member->id)
             ->findOrFail($id);
 
-        return view('user.reservation-detail', compact('reservation', 'member'));
+        return view(
+            'user.reservation-detail',
+            compact('reservation', 'member')
+        );
     }
 
     /**
@@ -89,27 +125,24 @@ class UserReservationController extends Controller
             'seat_number' => 'nullable|string|max:10',
         ]);
 
-        $user = Auth::user();
-        $member = Member::firstOrCreate(
-            ['email' => $user->email],
-            [
-                'name'    => $user->name,
-                'phone'   => '-',
-                'address' => '-',
-                'status'  => 'aktif',
-            ]
-        );
+        $user   = Auth::user();
+        $member = $user->member;
 
-        if (!$member->user_id) {
-            $member->update(['user_id' => $user->id]);
+        if (!$member) {
+            return response()->json([
+                'message' => 'Data anggota tidak ditemukan.',
+            ], 404);
         }
-        $member->update(['status' => 'aktif']);
 
         $book = Book::findOrFail($validated['book_id']);
 
         $alreadyReserved = Reservation::where('member_id', $member->id)
             ->where('book_id', $book->id)
-            ->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])
+            ->whereIn('status', [
+                'menunggu',
+                'disetujui',
+                'siap_diambil'
+            ])
             ->exists();
 
         if ($alreadyReserved) {
@@ -120,22 +153,40 @@ class UserReservationController extends Controller
         }
 
         if ($book->available_stock < 1) {
-            return back()->with('error', 'Maaf, stok buku ini sedang habis sehingga tidak dapat direservasi.');
+            return back()->with(
+                'error',
+                'Maaf, stok buku ini sedang habis sehingga tidak dapat direservasi.'
+            );
         }
 
         $reservedAt = $validated['reserved_at'] ?? now()->toDateString();
         $createdReservation = null;
 
-        DB::transaction(function () use ($member, $book, $reservedAt, $validated, $user, &$createdReservation) {
-            $lockedBook = Book::lockForUpdate()->findOrFail($book->id);
+        DB::transaction(function () use (
+            $member,
+            $book,
+            $reservedAt,
+            $validated,
+            $user,
+            &$createdReservation
+        ) {
+            $lockedBook = Book::lockForUpdate()
+                ->findOrFail($book->id);
 
             $duplicate = Reservation::where('member_id', $member->id)
                 ->where('book_id', $lockedBook->id)
-                ->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])
+                ->whereIn('status', [
+                    'menunggu',
+                    'disetujui',
+                    'siap_diambil'
+                ])
                 ->exists();
 
             if ($duplicate) {
-                abort(409, 'Buku ini sudah ada di daftar reservasi Anda.');
+                abort(
+                    409,
+                    'Buku ini sudah ada di daftar reservasi Anda.'
+                );
             }
 
             $bookCopy = BookCopy::where('book_id', $lockedBook->id)
@@ -144,10 +195,16 @@ class UserReservationController extends Controller
                 ->first();
 
             if (!$bookCopy || $lockedBook->available_stock < 1) {
-                abort(409, 'Maaf, stok buku ini baru saja habis.');
+                abort(
+                    409,
+                    'Maaf, stok buku ini baru saja habis.'
+                );
             }
 
-            $bookCopy->update(['status' => 'reserved']);
+            $bookCopy->update([
+                'status' => 'reserved'
+            ]);
+
             $lockedBook->decrement('stok');
 
             $createdReservation = Reservation::create([
@@ -156,7 +213,10 @@ class UserReservationController extends Controller
                 'book_id'      => $lockedBook->id,
                 'book_copy_id' => $bookCopy?->id,
                 'reserved_at'  => $reservedAt,
-                'expires_at'   => now()->parse($reservedAt)->addDays(3)->toDateString(),
+                'expires_at'   => now()
+                    ->parse($reservedAt)
+                    ->addDays(3)
+                    ->toDateString(),
                 'seat_number'  => $validated['seat_number'] ?? null,
                 'status'       => 'menunggu',
             ]);
@@ -166,12 +226,18 @@ class UserReservationController extends Controller
                 'reservation_request',
                 'Reservasi Buku Baru',
                 "{$user->name} mengajukan reservasi buku \"{$lockedBook->title}\".",
-                ['reservation_id' => $createdReservation->id, 'book_id' => $lockedBook->id]
+                [
+                    'reservation_id' => $createdReservation->id,
+                    'book_id'        => $lockedBook->id
+                ]
             );
         });
 
         if ($createdReservation) {
-            NotificationService::reservationSubmitted($createdReservation, $user);
+            NotificationService::reservationSubmitted(
+                $createdReservation,
+                $user
+            );
         }
 
         if ($request->expectsJson()) {
@@ -181,7 +247,12 @@ class UserReservationController extends Controller
             ]);
         }
 
-        return redirect()->route('user.reservations')->with('success', 'Reservasi buku berhasil diajukan! Menunggu persetujuan Admin.');
+        return redirect()
+            ->route('user.reservations')
+            ->with(
+                'success',
+                'Reservasi buku berhasil diajukan! Menunggu persetujuan Admin.'
+            );
     }
 
     /**
@@ -189,38 +260,66 @@ class UserReservationController extends Controller
      */
     public function statusFeed()
     {
-        $user = Auth::user();
-        $member = Member::where('email', $user->email)->first();
+        $user   = Auth::user();
+        $member = $user->member;
 
         if (!$member) {
             return response()->json([
-                'success'      => true,
-                'counts'       => ['aktif' => 0, 'menunggu' => 0, 'siap_diambil' => 0],
+                'success' => true,
+                'counts' => [
+                    'aktif' => 0,
+                    'menunggu' => 0,
+                    'siap_diambil' => 0
+                ],
                 'reservations' => []
             ]);
         }
 
-        $allRes = Reservation::where('member_id', $member->id)->get();
+        $allRes = Reservation::where(
+            'member_id',
+            $member->id
+        )->get();
+
         $counts = [
-            'aktif'        => $allRes->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])->count(),
-            'menunggu'     => $allRes->where('status', 'menunggu')->count(),
-            'disetujui'    => $allRes->where('status', 'disetujui')->count(),
-            'siap_diambil' => $allRes->where('status', 'siap_diambil')->count(),
-            'ditolak'      => $allRes->where('status', 'ditolak')->count(),
+            'aktif' => $allRes
+                ->whereIn('status', [
+                    'menunggu',
+                    'disetujui',
+                    'siap_diambil'
+                ])
+                ->count(),
+
+            'menunggu' => $allRes
+                ->where('status', 'menunggu')
+                ->count(),
+
+            'disetujui' => $allRes
+                ->where('status', 'disetujui')
+                ->count(),
+
+            'siap_diambil' => $allRes
+                ->where('status', 'siap_diambil')
+                ->count(),
+
+            'ditolak' => $allRes
+                ->where('status', 'ditolak')
+                ->count(),
         ];
 
         $reservations = $allRes->map(function ($r) {
             return [
-                'id'               => $r->id,
-                'status'           => strtolower($r->status),
+                'id' => $r->id,
+                'status' => strtolower($r->status),
                 'rejection_reason' => $r->rejection_reason,
-                'updated_at'       => $r->updated_at ? $r->updated_at->toISOString() : null,
+                'updated_at' => $r->updated_at
+                    ? $r->updated_at->toISOString()
+                    : null,
             ];
         });
 
         return response()->json([
-            'success'      => true,
-            'counts'       => $counts,
+            'success' => true,
+            'counts' => $counts,
             'reservations' => $reservations,
         ]);
     }

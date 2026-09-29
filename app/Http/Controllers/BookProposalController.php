@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\BookProposal;
 use App\Models\AppNotification;
-use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,7 +37,7 @@ class BookProposalController extends Controller
         ]);
 
         $user = Auth::user();
-        $member = Member::where('email', $user->email)->first();
+        $member = $user->member;
 
         $proposal = BookProposal::create([
             'user_id'       => $user->id,

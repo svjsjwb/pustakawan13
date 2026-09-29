@@ -88,7 +88,17 @@ class User extends Authenticatable
      */
     public function isUser(): bool
     {
-        return $this->role === 'user';
+        return $this->role === 'member';
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->role === 'guest';
+    }
+
+    public function isMember(): bool
+    {
+        return $this->role === 'member';
     }
 
     /**
@@ -116,7 +126,7 @@ class User extends Authenticatable
 
     public function member()
     {
-        return $this->hasOne(Member::class, 'email', 'email');
+        return $this->hasOne(Member::class);
     }
 
     /**
@@ -148,35 +158,5 @@ class User extends Authenticatable
     public function bookProposals()
     {
         return $this->hasMany(BookProposal::class);
-    }
-
-    protected static function booted(): void
-    {
-        static::saved(function (User $user) {
-            if ($user->role === 'user' && !empty($user->email)) {
-                Member::updateOrCreate(
-                    ['email' => $user->email],
-                    [
-                        'user_id'  => $user->id,
-                        'name'     => $user->name,
-                        'phone'    => $user->phone ?? '-',
-                        'division' => 'Anggota',
-                    ]
-                );
-            }
-        });
-    }
-
-    public function syncToMember(): Member
-    {
-        return Member::updateOrCreate(
-            ['email' => $this->email],
-            [
-                'user_id'  => $this->id,
-                'name'     => $this->name,
-                'phone'    => $this->phone ?? '-',
-                'division' => 'Anggota',
-            ]
-        );
     }
 }

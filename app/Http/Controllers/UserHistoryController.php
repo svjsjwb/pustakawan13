@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Borrowing;
 use App\Models\Reservation;
-use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,7 +12,7 @@ class UserHistoryController extends Controller
     public function index(Request $request)
     {
         $user   = Auth::user();
-        $member = Member::where('email', $user->email)->first();
+        $member = $user->member;
 
         $activities   = collect();
         $stats = [

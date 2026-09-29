@@ -9,47 +9,16 @@ use App\Models\Reservation;
 use App\Models\Borrowing;
 use App\Models\BorrowingDetail;
 use App\Services\NotificationService;
+use App\Services\MemberStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use App\Models\Shelf;
 use App\Models\LibraryZone;
 
 class ReservationController extends Controller
 {
-    /**
-     * Sinkronisasi status anggota berdasarkan aktivitas aktif.
-     *
-     * Aktif jika memiliki:
-     * - peminjaman yang belum dikembalikan, atau
-     * - reservasi yang masih berlaku.
-     */
-    private function syncMemberStatus(Member $member): void
-    {
-        $hasActiveBorrowing = Borrowing::where('member_id', $member->id)
-            ->whereNull('returned_at')
-            ->exists();
-
-        $hasActiveReservation = Reservation::where('member_id', $member->id)
-            ->whereNotIn('status', [
-                'ditolak',
-                'dibatalkan',
-                'selesai',
-            ])
-            ->where(function ($query) {
-                $query->whereNull('expires_at')
-                    ->orWhereDate('expires_at', '>=', now()->toDateString());
-            })
-            ->exists();
-
-        $member->update([
-            'status' => ($hasActiveBorrowing || $hasActiveReservation)
-                ? 'aktif'
-                : 'nonaktif',
-        ]);
-    }
-
     /*
     |--------------------------------------------------------------------------
     | DAFTAR RESERVASI
@@ -96,8 +65,8 @@ class ReservationController extends Controller
             ? 'due_at'
             : (
                 Schema::hasColumn('reservations', 'expires_at')
-                    ? 'expires_at'
-                    : 'reserved_at'
+                ? 'expires_at'
+                : 'reserved_at'
             );
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -167,7 +136,7 @@ class ReservationController extends Controller
     | SIMPAN RESERVASI
     |--------------------------------------------------------------------------
     */
-public function store(Request $request)
+    public function store(Request $request)
     {
         /*
          * =====================================================
@@ -237,8 +206,8 @@ public function store(Request $request)
                     ->with(
                         'error',
                         'Kursi ' .
-                        $validated['seat_number'] .
-                        ' sudah dipesan pada tanggal tersebut.'
+                            $validated['seat_number'] .
+                            ' sudah dipesan pada tanggal tersebut.'
                     );
             }
         }
@@ -356,8 +325,8 @@ public function store(Request $request)
                     abort(
                         422,
                         'Kursi ' .
-                        $validated['seat_number'] .
-                        ' baru saja dipesan oleh pengguna lain.'
+                            $validated['seat_number'] .
+                            ' baru saja dipesan oleh pengguna lain.'
                     );
                 }
             }
@@ -372,29 +341,29 @@ public function store(Request $request)
             $reservation = Reservation::create([
 
                 'member_id' =>
-                    $validated['member_id'],
+                $validated['member_id'],
 
                 'book_id' =>
-                    $book->id,
+                $book->id,
 
                 'book_copy_id' =>
-                    $bookCopy->id,
+                $bookCopy->id,
 
                 'reserved_at' =>
-                    $validated['reserved_at'],
+                $validated['reserved_at'],
 
                 'expires_at' =>
-                    $validated['expires_at'] ?? null,
+                $validated['expires_at'] ?? null,
 
                 'seat_number' =>
-                    $validated['seat_number'] ?? null,
+                $validated['seat_number'] ?? null,
 
                 'status' =>
-                    'menunggu',
+                'menunggu',
 
             ]);
 
-            $this->syncMemberStatus(
+            app(MemberStatusService::class)->sync(
                 Member::findOrFail($validated['member_id'])
             );
 
@@ -536,9 +505,9 @@ public function store(Request $request)
 
                     $bookCopy =
                         BookCopy::lockForUpdate()
-                            ->find(
-                                $reservation->book_copy_id
-                            );
+                        ->find(
+                            $reservation->book_copy_id
+                        );
 
 
                     if (
@@ -549,7 +518,7 @@ public function store(Request $request)
 
                         $bookCopy->update([
                             'status' =>
-                                'available',
+                            'available',
                         ]);
                     }
                 }
@@ -561,9 +530,9 @@ public function store(Request $request)
 
                 $book =
                     Book::lockForUpdate()
-                        ->findOrFail(
-                            $reservation->book_id
-                        );
+                    ->findOrFail(
+                        $reservation->book_id
+                    );
 
 
                 $book->increment(
@@ -606,9 +575,9 @@ public function store(Request $request)
 
                 $book =
                     Book::lockForUpdate()
-                        ->findOrFail(
-                            $reservation->book_id
-                        );
+                    ->findOrFail(
+                        $reservation->book_id
+                    );
 
 
                 /*
@@ -643,7 +612,7 @@ public function store(Request $request)
 
                 $bookCopy->update([
                     'status' =>
-                        'reserved',
+                    'reserved',
                 ]);
 
 
@@ -654,7 +623,7 @@ public function store(Request $request)
 
                 $reservation->update([
                     'book_copy_id' =>
-                        $bookCopy->id,
+                    $bookCopy->id,
                 ]);
 
 
@@ -691,9 +660,9 @@ public function store(Request $request)
 
             $reservation->update([
                 'status' =>
-                    $newStatus,
+                $newStatus,
                 'rejection_reason' =>
-                    $newStatus === 'ditolak' ? ($request->input('rejection_reason') ?? 'Ditolak oleh Admin') : $reservation->rejection_reason,
+                $newStatus === 'ditolak' ? ($request->input('rejection_reason') ?? 'Ditolak oleh Admin') : $reservation->rejection_reason,
             ]);
 
             // Kirim notifikasi dan email ke user serta proses pemindahan ke tabel peminjaman buku
@@ -718,23 +687,22 @@ public function store(Request $request)
 
                 // Cari atau sinkronkan Member jika belum terhubung
                 $member = null;
+
                 if ($reservation->member_id) {
                     $member = Member::find($reservation->member_id);
                 }
+
                 if (!$member && $reservation->user_id) {
                     $user = $reservation->user;
+
                     if ($user) {
-                        $member = Member::firstOrCreate(
-                            ['email' => $user->email],
-                            [
-                                'name'    => $user->name,
-                                'user_id' => $user->id,
-                                'phone'   => '-',
-                                'address' => '-',
-                                'status'  => 'aktif',
-                            ]
-                        );
-                        $reservation->update(['member_id' => $member->id]);
+                        $member = $user->member;
+
+                        if ($member) {
+                            $reservation->update([
+                                'member_id' => $member->id,
+                            ]);
+                        }
                     }
                 }
                 $memberId = $member?->id ?? $reservation->member_id;
@@ -794,7 +762,7 @@ public function store(Request $request)
 
             // Sinkronisasi status member
             if ($reservation->member) {
-                $this->syncMemberStatus($reservation->member);
+                app(MemberStatusService::class)->sync($reservation->member);
             }
         });
 
@@ -996,66 +964,66 @@ public function store(Request $request)
 
         $bookCopies =
             $shelves
-                ->flatMap(
-                    function ($shelf)
-                    use ($reservation) {
+            ->flatMap(
+                function ($shelf)
+                use ($reservation) {
 
-                        return $shelf->copies
-                            ->map(
-                                function ($copy)
-                                use (
-                                    $shelf,
-                                    $reservation
-                                ) {
+                    return $shelf->copies
+                        ->map(
+                            function ($copy)
+                            use (
+                                $shelf,
+                                $reservation
+                            ) {
 
-                                    return [
+                                return [
 
-                                        'id' =>
-                                            $copy->id,
+                                    'id' =>
+                                    $copy->id,
 
-                                        'book_id' =>
-                                            $copy->book_id,
+                                    'book_id' =>
+                                    $copy->book_id,
 
-                                        'title' =>
-                                            $copy->book?->title
-                                            ?? 'Buku',
+                                    'title' =>
+                                    $copy->book?->title
+                                        ?? 'Buku',
 
-                                        'barcode' =>
-                                            $copy->barcode,
+                                    'barcode' =>
+                                    $copy->barcode,
 
-                                        'status' =>
-                                            $copy->status,
+                                    'status' =>
+                                    $copy->status,
 
-                                        'shelf_id' =>
-                                            $shelf->id,
+                                    'shelf_id' =>
+                                    $shelf->id,
 
-                                        'shelf' =>
-                                            $shelf->code,
+                                    'shelf' =>
+                                    $shelf->code,
 
-                                        'section' =>
-                                            (int)
-                                            $copy->section,
+                                    'section' =>
+                                    (int)
+                                    $copy->section,
 
-                                        'row' =>
-                                            (int)
-                                            $copy->row,
+                                    'row' =>
+                                    (int)
+                                    $copy->row,
 
-                                        'column' =>
-                                            (int)
-                                            $copy->column,
+                                    'column' =>
+                                    (int)
+                                    $copy->column,
 
-                                        'is_target' =>
-                                            $copy->id ===
-                                            $reservation
-                                                ->book_copy_id,
+                                    'is_target' =>
+                                    $copy->id ===
+                                        $reservation
+                                        ->book_copy_id,
 
-                                    ];
-                                }
-                            );
-                    }
-                )
-                ->values()
-                ->toArray();
+                                ];
+                            }
+                        );
+                }
+            )
+            ->values()
+            ->toArray();
 
 
         /*
@@ -1069,16 +1037,16 @@ public function store(Request $request)
             [
 
                 'reservation' =>
-                    $reservation,
+                $reservation,
 
                 'targetShelf' =>
-                    $targetShelf,
+                $targetShelf,
 
                 'shelves' =>
-                    $shelves,
+                $shelves,
 
                 'bookCopies' =>
-                    $bookCopies,
+                $bookCopies,
 
             ]
         );
@@ -1102,9 +1070,9 @@ public function store(Request $request)
 
                 $reservation =
                     Reservation::lockForUpdate()
-                        ->findOrFail(
-                            $reservation->id
-                        );
+                    ->findOrFail(
+                        $reservation->id
+                    );
 
 
                 /*
@@ -1137,10 +1105,10 @@ public function store(Request $request)
 
                         $bookCopy =
                             BookCopy::lockForUpdate()
-                                ->find(
-                                    $reservation
-                                        ->book_copy_id
-                                );
+                            ->find(
+                                $reservation
+                                    ->book_copy_id
+                            );
 
 
                         if (
@@ -1151,7 +1119,7 @@ public function store(Request $request)
 
                             $bookCopy->update([
                                 'status' =>
-                                    'available',
+                                'available',
                             ]);
                         }
                     }
@@ -1163,9 +1131,9 @@ public function store(Request $request)
 
                     $book =
                         Book::lockForUpdate()
-                            ->findOrFail(
-                                $reservation->book_id
-                            );
+                        ->findOrFail(
+                            $reservation->book_id
+                        );
 
 
                     $book->increment(

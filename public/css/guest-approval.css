@@ -1,0 +1,270 @@
+/* ============================================================
+   GUEST APPROVAL POPUP
+   ============================================================ */
+
+.guest-approval-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+.guest-approval-modal {
+    position: relative;
+    width: min(420px, 100%);
+    padding: 32px;
+    background: #ffffff;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.20);
+    animation: guestApprovalShow 0.25s ease-out;
+}
+
+.guest-approval-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.guest-approval-close:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.guest-approval-icon {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.guest-approval-modal h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.guest-approval-modal p {
+    margin: 0 auto 24px;
+    max-width: 340px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #64748b;
+}
+
+.guest-approval-button {
+    width: 100%;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.guest-approval-button:hover {
+    background: #1d4ed8;
+}
+
+.guest-approval-overlay {
+    transition: opacity 0.18s ease;
+}
+
+.guest-approval-overlay.closing {
+    opacity: 0;
+}
+
+.guest-approval-overlay.closing .guest-approval-modal {
+    transform: translateY(10px) scale(0.97);
+}
+
+
+@keyframes guestApprovalShow {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================================
+   GUEST APPROVAL POPUP
+   ============================================================ */
+
+.guest-approval-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+
+    /* PENTING: overlay harus bisa menerima klik */
+    pointer-events: auto;
+
+    transition: opacity 0.18s ease;
+}
+
+.guest-approval-modal {
+    position: relative;
+    z-index: 1000000;
+
+    width: min(420px, 100%);
+    padding: 32px;
+    background: #ffffff;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.20);
+    animation: guestApprovalShow 0.25s ease-out;
+
+    /* PENTING: modal dan isinya bisa diklik */
+    pointer-events: auto;
+}
+
+.guest-approval-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+
+    z-index: 1000001;
+
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 50%;
+
+    pointer-events: auto;
+}
+
+.guest-approval-close:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.guest-approval-icon {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.guest-approval-modal h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.guest-approval-modal p {
+    margin: 0 auto 24px;
+    max-width: 340px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #64748b;
+}
+
+.guest-approval-button {
+    position: relative;
+    z-index: 1000001;
+
+    width: 100%;
+    padding: 12px 20px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: 0.2s ease;
+
+    pointer-events: auto;
+}
+
+.guest-approval-button:hover {
+    background: #1d4ed8;
+}
+
+/* ============================================================
+   CLOSING ANIMATION
+   ============================================================ */
+
+.guest-approval-overlay.closing {
+    opacity: 0;
+}
+
+.guest-approval-overlay.closing .guest-approval-modal {
+    transform: translateY(10px) scale(0.97);
+}
+
+/* ============================================================
+   ANIMATION
+   ============================================================ */
+
+@keyframes guestApprovalShow {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 480px) {
+    .guest-approval-modal {
+        padding: 28px 22px;
+    }
+}
