@@ -113,11 +113,14 @@ class UserProfileController extends Controller
         $user->save();
 
         if ($user->member) {
-            $user->member->update([
+            $memberData = [
                 'name'     => $user->name,
-                'division' => $request->input('division') ?: $user->member->division,
-                'phone'    => $request->input('phone'),
-            ]);
+                'division' => $request->filled('division') ? $request->input('division') : $user->member->division,
+            ];
+            if ($request->has('phone')) {
+                $memberData['phone'] = $request->input('phone');
+            }
+            $user->member->update($memberData);
         }
 
         return back()->with('success', 'Profil berhasil diperbarui.');

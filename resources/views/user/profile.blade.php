@@ -101,25 +101,6 @@
                             </div>
                         </div>
 
-                        <div class="uprof-form-row">
-                            <div class="uprof-form-group">
-                                <label>Divisi</label>
-                                <select name="division" class="uprof-select">
-                                    <option value="">Pilih Divisi</option>
-                                    @foreach($divisions as $div)
-                                        <option value="{{ $div }}" {{ old('division', $member->division ?? '') === $div ? 'selected' : '' }}>
-                                            {{ $div }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('division')<span class="uprof-error">{{ $message }}</span>@enderror
-                            </div>
-                            <div class="uprof-form-group">
-                                <label>Nomor Telepon</label>
-                                <input type="tel" name="phone" value="{{ old('phone', $member->phone ?? $user->phone) }}" placeholder="Contoh: 081234567890">
-                                @error('phone')<span class="uprof-error">{{ $message }}</span>@enderror
-                            </div>
-                        </div>
 
                         @if($member)
                         <div style="font-size: 11.5px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin: 18px 0 10px;">
@@ -152,9 +133,39 @@
                                 <span>TERDAFTAR SEJAK</span>
                                 <strong>{{ $stats['joinDate'] ?? '-' }}</strong>
                             </div>
-                            <div class="uprof-info-box" style="grid-column: 1 / -1;">
+                            <div class="uprof-info-box uprof-division-box" style="grid-column: 1 / -1;">
                                 <span>DIVISI</span>
-                                <strong>{{ $member->division ?? '-' }}</strong>
+                                @php $currentDivision = old('division', $member->division ?? ''); @endphp
+                                {{-- Hidden native select for form submission --}}
+                                <input type="hidden" name="division" id="divisionHidden" value="{{ $currentDivision }}">
+
+                                {{-- Custom styled dropdown (Drop-up) --}}
+                                <div class="uprof-cdrop" id="divisionDrop">
+                                    <button type="button" class="uprof-cdrop-trigger" id="divisionTrigger" aria-haspopup="listbox" aria-expanded="false">
+                                        <svg class="uprof-division-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                                        </svg>
+                                        <span class="uprof-cdrop-label" id="divisionLabel">
+                                            {{ $currentDivision ?: '— Pilih Divisi —' }}
+                                        </span>
+                                        <svg class="uprof-division-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="18 15 12 9 6 15"/>
+                                        </svg>
+                                    </button>
+                                    <div class="uprof-cdrop-panel" role="listbox" aria-label="Pilih Divisi">
+                                        <div class="uprof-cdrop-item {{ $currentDivision === '' ? 'is-selected' : '' }}" role="option" data-value="" data-label="— Pilih Divisi —">
+                                            <span class="uprof-cdrop-text">— Pilih Divisi —</span>
+                                            <svg class="uprof-cdrop-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        </div>
+                                        @foreach($divisions as $div)
+                                        <div class="uprof-cdrop-item {{ $currentDivision === $div ? 'is-selected' : '' }}" role="option" data-value="{{ $div }}" data-label="{{ $div }}">
+                                            <span class="uprof-cdrop-text">{{ $div }}</span>
+                                            <svg class="uprof-cdrop-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @error('division')<span class="uprof-error" style="font-size:11px;margin-top:4px;display:block;">{{ $message }}</span>@enderror
                             </div>
                         </div>
                         @else
@@ -881,6 +892,53 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sync active density from input
     const initialDensity = document.getElementById('inputDensity')?.value || localStorage.getItem('lib_density') || 'normal';
     selectDensity(initialDensity);
+
+    // Custom Division Dropdown Logic
+    const divisionDrop = document.getElementById('divisionDrop');
+    const divisionTrigger = document.getElementById('divisionTrigger');
+    const divisionHidden = document.getElementById('divisionHidden');
+    const divisionLabel = document.getElementById('divisionLabel');
+
+    if (divisionDrop && divisionTrigger) {
+        divisionTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = divisionDrop.classList.toggle('is-open');
+            divisionTrigger.setAttribute('aria-expanded', isOpen);
+        });
+
+        const items = divisionDrop.querySelectorAll('.uprof-cdrop-item');
+        items.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const val = item.dataset.value ?? '';
+                const label = item.dataset.label ?? '';
+
+                if (divisionHidden) divisionHidden.value = val;
+                if (divisionLabel) divisionLabel.textContent = label;
+
+                items.forEach(i => i.classList.remove('is-selected'));
+                item.classList.add('is-selected');
+
+                divisionDrop.classList.remove('is-open');
+                divisionTrigger.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!divisionDrop.contains(e.target)) {
+                divisionDrop.classList.remove('is-open');
+                divisionTrigger.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && divisionDrop.classList.contains('is-open')) {
+                divisionDrop.classList.remove('is-open');
+                divisionTrigger.setAttribute('aria-expanded', 'false');
+                divisionTrigger.focus();
+            }
+        });
+    }
 });
 </script>
 <style>

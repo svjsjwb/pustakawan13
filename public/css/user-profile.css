@@ -324,7 +324,7 @@ select.uprof-select {
     padding: 12px 16px;
 }
 
-.uprof-info-box span {
+.uprof-info-box > span {
     display: block;
     font-size: 10px;
     font-weight: 700;
@@ -339,6 +339,185 @@ select.uprof-select {
     font-weight: 700;
     color: var(--text);
 }
+
+/* ── Division Custom Dropdown (Drop-Up) ─────────────────────── */
+.uprof-division-box {
+    padding: 12px 16px 14px;
+    border-color: rgba(15, 118, 110, 0.2);
+    background: var(--background);
+}
+
+.uprof-cdrop {
+    position: relative;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.uprof-cdrop-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface, #ffffff);
+    border: 1.5px solid var(--border, #e2e8f0);
+    border-radius: 10px;
+    padding: 10px 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+    text-align: left;
+}
+
+.uprof-cdrop-trigger:hover {
+    border-color: var(--primary, #0f766e);
+}
+
+.uprof-cdrop.is-open .uprof-cdrop-trigger,
+.uprof-cdrop-trigger:focus-visible {
+    border-color: var(--primary, #0f766e);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+}
+
+.uprof-division-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--primary, #0f766e);
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.uprof-info-box .uprof-cdrop-label,
+.uprof-cdrop-label {
+    flex: 1;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: var(--text, #1e293b) !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    margin-bottom: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 2px;
+}
+
+.uprof-division-chevron {
+    width: 15px;
+    height: 15px;
+    color: var(--text-muted, #64748b);
+    flex-shrink: 0;
+    pointer-events: none;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.uprof-cdrop.is-open .uprof-division-chevron {
+    transform: rotate(180deg);
+    color: var(--primary, #0f766e);
+}
+
+/* Dropdown Panel: Buka ke atas (Drop-up) */
+.uprof-cdrop-panel {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    top: auto;
+    left: 0;
+    right: 0;
+    background: var(--surface, #ffffff);
+    border: 1.5px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    box-shadow: 0 -12px 30px -4px rgba(0, 0, 0, 0.15), 0 -4px 12px -2px rgba(0, 0, 0, 0.08);
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 100;
+    padding: 6px;
+}
+
+.uprof-cdrop.is-open .uprof-cdrop-panel {
+    display: block;
+    animation: uprofDropFadeUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes uprofDropFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.uprof-cdrop-panel::-webkit-scrollbar {
+    width: 6px;
+}
+.uprof-cdrop-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+.uprof-cdrop-panel::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.uprof-cdrop-panel::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.uprof-cdrop-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    user-select: none;
+}
+
+.uprof-info-box .uprof-cdrop-item span,
+.uprof-cdrop-item .uprof-cdrop-text,
+.uprof-cdrop-item span {
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: var(--text, #334155) !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    margin-bottom: 0 !important;
+    display: inline-block !important;
+}
+
+.uprof-cdrop-item:hover {
+    background: rgba(15, 118, 110, 0.08);
+}
+
+.uprof-cdrop-item:hover .uprof-cdrop-text,
+.uprof-cdrop-item:hover span {
+    color: var(--primary, #0f766e) !important;
+}
+
+.uprof-cdrop-item.is-selected {
+    background: rgba(15, 118, 110, 0.12);
+}
+
+.uprof-cdrop-item.is-selected .uprof-cdrop-text,
+.uprof-cdrop-item.is-selected span {
+    color: var(--primary, #0f766e) !important;
+    font-weight: 600 !important;
+}
+
+.uprof-cdrop-check {
+    width: 15px;
+    height: 15px;
+    color: var(--primary, #0f766e);
+    display: none;
+    flex-shrink: 0;
+}
+
+.uprof-cdrop-item.is-selected .uprof-cdrop-check {
+    display: block;
+}
+
 
 /* Switch Row in Preferences */
 .uprof-pref-group {

@@ -306,6 +306,7 @@
                                 Ket: {{ Str::limit($res->rejection_reason, 24) }}
                             </div>
                         @endif
+
                     </td>
 
                     {{-- 4. AKSI: LIHAT DETAIL PERMINTAAN (HALAMAN KHUSUS DETAIL RESERVASI) --}}
