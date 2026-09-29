@@ -227,19 +227,19 @@
                             <span class="field-subtext">Nomor telepon aktif untuk pemberitahuan peminjaman.</span>
                         </div>
 
-                        {{-- 4. Alamat / Lokasi --}}
+                        {{-- 4. Divisi --}}
                         <div class="user-profile-field-row">
-                            <label class="user-profile-field-label" for="profileInputLocation">
-                                Alamat / Domisili
+                            <label class="user-profile-field-label" for="profileInputDivision">
+                                Divisi
                             </label>
                             <div class="user-profile-field-input-wrap">
                                 <input
                                     type="text"
                                     class="user-profile-field-input"
-                                    id="profileInputLocation"
-                                    name="location"
-                                    value="{{ $userLocation }}"
-                                    placeholder="Contoh: Jakarta Selatan, DKI Jakarta"
+                                    id="profileInputDivision"
+                                    name="division"
+                                    value="{{ $user->member->division ?? '' }}"
+                                    placeholder="Divisi kerja"
                                 >
                             </div>
                         </div>

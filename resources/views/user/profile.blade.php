@@ -46,24 +46,33 @@
                         {{ strtoupper(substr($user->name ?? 'U', 0, 2)) }}
                     </div>
                     <h2 class="uprof-name">{{ $user->name }}</h2>
-                    <p class="uprof-role-label">Anggota Perpustakaan</p>
+                    <p class="uprof-role-label">{{ $isGuest ? 'Guest · Menunggu Persetujuan' : 'Anggota Perpustakaan' }}</p>
                     @if($member)
-                    <div class="uprof-member-badge">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                        </svg>
-                        Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
-                    </div>
-                    <div class="uprof-quick-stats">
-                        <div class="uprof-qstat">
-                            <strong>{{ $stats['totalBorrowed'] ?? ($member ? $member->borrowings()->count() : 0) }}</strong>
-                            <span>Total Pinjam</span>
+                        @if($isGuest)
+                        <div class="uprof-member-badge is-guest">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            Nonaktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                         </div>
-                        <div class="uprof-qstat">
-                            <strong>{{ $stats['activeLoans'] ?? ($member ? $member->borrowings()->where('status','dipinjam')->count() : 0) }}</strong>
-                            <span>Aktif</span>
+                        @else
+                        <div class="uprof-member-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                         </div>
-                    </div>
+                        @endif
+                        <div class="uprof-quick-stats">
+                            <div class="uprof-qstat">
+                                <strong>{{ $stats['totalBorrowed'] ?? ($member ? $member->borrowings()->count() : 0) }}</strong>
+                                <span>Total Pinjam</span>
+                            </div>
+                            <div class="uprof-qstat">
+                                <strong>{{ $stats['activeLoans'] ?? ($member ? $member->borrowings()->where('status','dipinjam')->count() : 0) }}</strong>
+                                <span>Aktif</span>
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -92,6 +101,26 @@
                             </div>
                         </div>
 
+                        <div class="uprof-form-row">
+                            <div class="uprof-form-group">
+                                <label>Divisi</label>
+                                <select name="division" class="uprof-select">
+                                    <option value="">Pilih Divisi</option>
+                                    @foreach($divisions as $div)
+                                        <option value="{{ $div }}" {{ old('division', $member->division ?? '') === $div ? 'selected' : '' }}>
+                                            {{ $div }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('division')<span class="uprof-error">{{ $message }}</span>@enderror
+                            </div>
+                            <div class="uprof-form-group">
+                                <label>Nomor Telepon</label>
+                                <input type="tel" name="phone" value="{{ old('phone', $member->phone ?? $user->phone) }}" placeholder="Contoh: 081234567890">
+                                @error('phone')<span class="uprof-error">{{ $message }}</span>@enderror
+                            </div>
+                        </div>
+
                         @if($member)
                         <div style="font-size: 11.5px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin: 18px 0 10px;">
                             Status Anggota Perpustakaan
@@ -103,19 +132,29 @@
                             </div>
                             <div class="uprof-info-box">
                                 <span>STATUS KEANGGOTAAN</span>
-                                <strong style="color: var(--primary);">✓ {{ ucfirst($member->status) }}</strong>
+                                @if($isGuest)
+                                    <strong style="color: #dc2626; display: flex; align-items: center; gap: 5px;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                        Nonaktif
+                                    </strong>
+                                @else
+                                    <strong style="color: #10b981; display: flex; align-items: center; gap: 5px;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                        Aktif
+                                    </strong>
+                                @endif
                             </div>
                             <div class="uprof-info-box">
                                 <span>NOMOR TELEPON</span>
-                                <strong>{{ $member->phone ?? '-' }}</strong>
+                                <strong>{{ $member->phone ?? $user->phone ?? '-' }}</strong>
                             </div>
                             <div class="uprof-info-box">
                                 <span>TERDAFTAR SEJAK</span>
                                 <strong>{{ $stats['joinDate'] ?? '-' }}</strong>
                             </div>
                             <div class="uprof-info-box" style="grid-column: 1 / -1;">
-                                <span>ALAMAT DOMISILI</span>
-                                <strong>{{ $member->address ?? '-' }}</strong>
+                                <span>DIVISI</span>
+                                <strong>{{ $member->division ?? '-' }}</strong>
                             </div>
                         </div>
                         @else
@@ -149,14 +188,23 @@
                         {{ strtoupper(substr($user->name ?? 'U', 0, 2)) }}
                     </div>
                     <h2 class="uprof-name">{{ $user->name }}</h2>
-                    <p class="uprof-role-label">Anggota Perpustakaan</p>
+                    <p class="uprof-role-label">{{ $isGuest ? 'Guest · Menunggu Persetujuan' : 'Anggota Perpustakaan' }}</p>
                     @if($member)
-                    <div class="uprof-member-badge">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                        </svg>
-                        Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
-                    </div>
+                        @if($isGuest)
+                        <div class="uprof-member-badge is-guest">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            Nonaktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
+                        </div>
+                        @else
+                        <div class="uprof-member-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
+                        </div>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -228,24 +276,33 @@
                             {{ strtoupper(substr($user->name ?? 'U', 0, 2)) }}
                         </div>
                         <h2 class="uprof-name">{{ $user->name }}</h2>
-                        <p class="uprof-role-label">Anggota Perpustakaan</p>
+                        <p class="uprof-role-label">{{ $isGuest ? 'Guest · Menunggu Persetujuan' : 'Anggota Perpustakaan' }}</p>
                         @if($member)
-                        <div class="uprof-member-badge">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                            </svg>
-                            Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
-                        </div>
-                        <div class="uprof-quick-stats">
-                            <div class="uprof-qstat">
-                                <strong>{{ $stats['totalBorrowed'] ?? 0 }}</strong>
-                                <span>Total Pinjam</span>
+                            @if($isGuest)
+                            <div class="uprof-member-badge is-guest">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                </svg>
+                                Nonaktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                             </div>
-                            <div class="uprof-qstat">
-                                <strong>{{ $stats['activeLoans'] ?? 0 }}</strong>
-                                <span>Aktif</span>
+                            @else
+                            <div class="uprof-member-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                                Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                             </div>
-                        </div>
+                            @endif
+                            <div class="uprof-quick-stats">
+                                <div class="uprof-qstat">
+                                    <strong>{{ $stats['totalBorrowed'] ?? 0 }}</strong>
+                                    <span>Total Pinjam</span>
+                                </div>
+                                <div class="uprof-qstat">
+                                    <strong>{{ $stats['activeLoans'] ?? 0 }}</strong>
+                                    <span>Aktif</span>
+                                </div>
+                            </div>
                         @endif
                     </div>
 
@@ -310,12 +367,14 @@
                             </div>
                             <div class="uprof-meta-item" style="padding-top: 8px; border-top: 1px dashed var(--border-subtle);">
                                 <span class="uprof-meta-label">Status Akun</span>
-                                @if(($stats['accountStatus'] ?? 'aktif') === 'aktif')
+                                @if($isGuest)
+                                    <span class="uprof-status-pill nonaktif" style="background: rgba(220, 38, 38, 0.12); color: #dc2626;">🔴 Nonaktif</span>
+                                @elseif(($stats['accountStatus'] ?? 'aktif') === 'aktif')
                                     <span class="uprof-status-pill aktif">🟢 Aktif</span>
                                 @elseif(($stats['accountStatus'] ?? '') === 'ditangguhkan')
                                     <span class="uprof-status-pill ditangguhkan">🔴 Ditangguhkan</span>
                                 @else
-                                    <span class="uprof-status-pill nonaktif">⚪ Nonaktif</span>
+                                    <span class="uprof-status-pill nonaktif" style="background: rgba(220, 38, 38, 0.12); color: #dc2626;">🔴 Nonaktif</span>
                                 @endif
                             </div>
                         </div>

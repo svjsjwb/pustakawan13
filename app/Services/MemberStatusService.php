@@ -17,25 +17,15 @@ class MemberStatusService
      */
     public function sync(Member $member): void
     {
-        $hasActiveBorrowing = Borrowing::where('member_id', $member->id)
-            ->whereNull('returned_at')
-            ->exists();
+        if ($member->user && $member->user->role === 'guest') {
+            $member->update(['status' => 'nonaktif']);
+            return;
+        }
 
-        $hasActiveReservation = Reservation::where('member_id', $member->id)
-            ->whereNotIn('status', [
-                'ditolak',
-                'dibatalkan',
-                'selesai',
-            ])
-            ->whereNotNull('expires_at')
-            ->whereDate('expires_at', '>=', now()->toDateString())
-            ->exists();
-
-        $member->update([
-            'status' => ($hasActiveBorrowing || $hasActiveReservation)
-                ? 'aktif'
-                : 'nonaktif',
-        ]);
+        if ($member->user && $member->user->role === 'member') {
+            $member->update(['status' => 'aktif']);
+            return;
+        }
     }
 
     /**
@@ -43,37 +33,16 @@ class MemberStatusService
      */
     public function syncAll(): void
     {
-        $activeBorrowingIds = Borrowing::query()
-            ->whereNull('returned_at')
-            ->whereNotNull('member_id')
-            ->distinct()
-            ->pluck('member_id');
+        // Pendaftar yang masih berstatus guest selalu nonaktif
+        Member::whereHas('user', function ($q) {
+            $q->where('role', 'guest');
+        })->where('status', '!=', 'nonaktif')
+          ->update(['status' => 'nonaktif']);
 
-        $activeReservationIds = Reservation::query()
-            ->whereNotIn('status', [
-                'ditolak',
-                'dibatalkan',
-                'selesai',
-            ])
-            ->whereNotNull('expires_at')
-            ->whereDate('expires_at', '>=', now()->toDateString())
-            ->whereNotNull('member_id')
-            ->distinct()
-            ->pluck('member_id');
-
-        $activeMemberIds = $activeBorrowingIds
-            ->merge($activeReservationIds)
-            ->unique()
-            ->values();
-
-        Member::query()
-            ->whereIn('id', $activeMemberIds)
-            ->where('status', '!=', 'aktif')
-            ->update(['status' => 'aktif']);
-
-        Member::query()
-            ->whereNotIn('id', $activeMemberIds)
-            ->where('status', '!=', 'nonaktif')
-            ->update(['status' => 'nonaktif']);
+        // Anggota yang sudah disetujui admin (role member) selalu aktif
+        Member::whereHas('user', function ($q) {
+            $q->where('role', 'member');
+        })->where('status', '!=', 'aktif')
+          ->update(['status' => 'aktif']);
     }
 }
