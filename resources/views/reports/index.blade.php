@@ -4,9 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
-
     <link rel="stylesheet" href="{{ asset('css/report.css') }}">
 @endpush
 
@@ -15,28 +13,16 @@
     <section class="report-page">
 
         {{-- =========================================================
-
-         HERO
-
-    ========================================================== --}}
-
+             HERO
+        ========================================================== --}}
         <div class="report-hero">
-
             <div class="report-hero-content">
-
                 <div class="report-label">
-
                     <span class="label-dot"></span>
-
                     Pusat Laporan
-
                 </div>
 
-                <h1>
-
-                    Laporan Perpustakaan
-
-                </h1>
+                <h1>Laporan Perpustakaan</h1>
 
                 <p>
                     Pantau seluruh aktivitas perpustakaan melalui
@@ -48,44 +34,33 @@
         </div>
 
         {{-- =========================================================
-
-         SUCCESS
-
-    ========================================================== --}}
-
+             SUCCESS
+        ========================================================== --}}
         @if (session('success'))
             <div class="report-success">
-
                 {{ session('success') }}
-
             </div>
         @endif
 
         {{-- =========================================================
-
-         FILTER
-
-    ========================================================== --}}
-
+             FILTER
+        ========================================================== --}}
         <div class="report-filter-box">
 
             <form method="GET" action="{{ route('reports.index') }}" id="dateRangeFilterForm" class="filter-form-group">
 
                 <div class="date-picker-input-wrapper">
-
-                    <span class="calendar-icon">
-
-                        📅
-
-                    </span>
+                    <span class="calendar-icon">📅</span>
 
                     <input type="text" id="date_range_picker" class="date-range-flatpickr"
                         placeholder="Pilih rentang tanggal..." readonly>
                 </div>
+
                 <input type="hidden" name="start_date" id="start_date"
                     value="{{ $startDateInput ?? $startDate->format('Y-m-d') }}">
                 <input type="hidden" name="end_date" id="end_date"
                     value="{{ $endDateInput ?? $endDate->format('Y-m-d') }}">
+
                 <button type="submit" class="btn-filter-apply">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
                         stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
@@ -103,209 +78,115 @@
                     Reset Filter
                 </a>
             </form>
+
             <div class="filter-period-badge">
                 <span>
                     🗓️ Periode:
-                    <strong>
-
-                        {{ $reportMonthLabel }}
-
-                    </strong>
+                    <strong>{{ $reportMonthLabel }}</strong>
                 </span>
             </div>
         </div>
 
         {{-- =========================================================
-
-         SECTION TITLE
-
-    ========================================================== --}}
-
+             SECTION TITLE
+        ========================================================== --}}
         <div class="report-section-title">
             <div>
-                <span>
-                    Ringkasan Aktivitas
-                </span>
-                <h2>
-                    Laporan Terbaru
-                </h2>
+                <span>Ringkasan Aktivitas</span>
+                <h2>Laporan Terbaru</h2>
             </div>
         </div>
 
         {{-- =========================================================
-
-         REPORT GRID
-
-    ========================================================== --}}
-
+             REPORT GRID
+        ========================================================== --}}
         <div class="report-grid">
 
             @forelse($reports as $report)
 
                 @php
-
                     $jenis = $report['jenis'];
 
-                    /*
-
-                                                             * PEMINJAMAN
-
-                     */
-
+                    /* PEMINJAMAN */
                     if (str_contains($jenis, 'Peminjaman')) {
                         $type = 'borrow';
-
                         $category = 'Sirkulasi';
-
                         $icon = '📖';
-
                         $valNum = $borrowedBooks ?? 0;
-
                         $badge = number_format($valNum, 0, ',', '.') . ' Dipinjam';
-
                         $badgeClass = 'positive';
-
                         $value = number_format($valNum, 0, ',', '.');
-
                         $valueLabel = 'peminjaman';
-
                         $description = 'Rekap transaksi peminjaman dan sirkulasi buku selama periode yang dipilih.';
-
                         $bars = $borrowChartBars ?? [];
-
                         $labels = $borrowChartLabels ?? [];
                     }
-                    /*
-
-                                                             * KETERLAMBATAN
-
-                     */ elseif (
-                        str_contains($jenis, 'Keterlambatan')
-                    ) {
+                    /* KETERLAMBATAN */
+                    elseif (str_contains($jenis, 'Keterlambatan')) {
                         $type = 'late';
-
                         $category = 'Monitoring';
-
                         $icon = '⏰';
-
                         $valNum = $lateBorrowings ?? 0;
-
                         $badge = number_format($valNum, 0, ',', '.') . ' Kasus';
-
                         $badgeClass = $valNum > 0 ? 'warning' : 'neutral';
-
                         $value = number_format($valNum, 0, ',', '.');
-
                         $valueLabel = 'kasus aktif';
-
                         $description = 'Daftar aktivitas buku yang terlambat dikembalikan pada periode yang dipilih.';
-
                         $bars = $lateChartBars ?? [];
-
                         $labels = $lateChartLabels ?? [];
                     }
-                    /*
-
-                                                             * KOLEKSI
-
-                     */ elseif (
-                        str_contains($jenis, 'Koleksi')
-                    ) {
+                    /* KOLEKSI */
+                    elseif (str_contains($jenis, 'Koleksi')) {
                         $type = 'collection';
-
                         $category = 'Koleksi';
-
                         $icon = '📚';
-
                         $valNum = $totalCollectionChanges ?? 0;
-
                         $badge = number_format($valNum, 0, ',', '.') . ' Perubahan';
-
                         $badgeClass = 'neutral';
-
                         $value = number_format($valNum, 0, ',', '.');
-
                         $valueLabel = 'perubahan koleksi';
-
                         $description = 'Rekap buku ditambahkan, buku ditarik, eksemplar dihapus, dan kondisi rusak.';
-
                         $bars = $collectionChartBars ?? [];
-
                         $labels = $collectionChartLabels ?? [];
                     }
-                    /*
-
-                                                             * ANGGOTA
-
-                     */ else {
+                    /* ANGGOTA */
+                    else {
                         $type = 'member';
-
                         $category = 'Keanggotaan';
-
                         $icon = '👥';
-
                         $valNum = $activeMembers ?? 0;
-
                         $badge = number_format($valNum, 0, ',', '.') . ' Aktif';
-
                         $badgeClass = 'positive';
-
                         $value = number_format($valNum, 0, ',', '.');
-
                         $valueLabel = 'anggota aktif';
-
                         $description = 'Rekap anggota aktif yang tercatat dalam periode laporan yang dipilih.';
-
                         $bars = $memberChartBars ?? [];
-
                         $labels = $memberChartLabels ?? [];
                     }
-
                 @endphp
 
                 {{-- =====================================================
-
-                 CARD
-
-            ====================================================== --}}
-
+                     CARD
+                ====================================================== --}}
                 <article class="report-card" onclick="openReportDetail(this)" data-report="{{ $report['jenis'] }}"
                     data-type="{{ $type }}" data-value="{{ $value }}" data-value-label="{{ $valueLabel }}"
                     data-period="{{ $periodLabel }}" data-labels="{{ implode('|', $labels) }}"
                     data-bars="{{ implode('|', $bars) }}">
 
                     {{-- TOP --}}
-
                     <div class="report-card-top">
-
                         <div class="report-card-icon {{ $type }}">
-
                             {{ $icon }}
-
                         </div>
 
                         <div class="report-card-info">
-
-                            <span class="report-card-category">
-
-                                {{ $category }}
-
-                            </span>
-
-                            <h3>
-
-                                {{ $report['jenis'] }}
-
-                            </h3>
-
+                            <span class="report-card-category">{{ $category }}</span>
+                            <h3>{{ $report['jenis'] }}</h3>
                         </div>
 
                         <span class="report-badge {{ $badgeClass }}">
-
                             {{ $badge }}
-
                         </span>
-
                     </div>
 
                     {{-- DESCRIPTION --}}
@@ -314,1420 +195,74 @@
                     </p>
 
                     {{-- CHART --}}
-
                     <div class="report-chart-wrapper">
                         <div class="chart-value">
-                            <strong>
-                                {{ $value }}
-                            </strong>
-                            <span>
-                                {{ $valueLabel }}
-                            </span>
+                            <strong>{{ $value }}</strong>
+                            <span>{{ $valueLabel }}</span>
                         </div>
 
                         <div class="report-chart">
                             <div class="chart-line"></div>
                             <div class="chart-line"></div>
                             <div class="chart-line"></div>
-                            <div class="chart-bars">
 
+                            <div class="chart-bars">
                                 @foreach ($bars as $index => $bar)
                                     <div class="chart-column {{ $index === count($bars) - 1 ? 'active' : '' }}">
-
                                         <div class="chart-bar" style="height: {{ $bar }}%;"></div>
-
-                                        <span>
-
-                                            {{ $labels[$index] ?? '' }}
-
-                                        </span>
-
+                                        <span>{{ $labels[$index] ?? '' }}</span>
                                     </div>
                                 @endforeach
-
                             </div>
                         </div>
                     </div>
 
                     {{-- KOLEKSI SUMMARY --}}
-
                     @if ($type === 'collection')
                         <div class="collection-summary" onclick="event.stopPropagation()">
-
                             <div class="collection-summary-item">
-                                <span>
-                                    DITAMBAHKAN
-                                </span>
-                                <strong>
-                                    {{ $collectionAddedCount ?? 0 }}
-                                </strong>
+                                <span>DITAMBAHKAN</span>
+                                <strong>{{ $collectionAddedCount ?? 0 }}</strong>
                             </div>
 
                             <div class="collection-summary-item">
-                                <span>
-                                    DITARIK
-                                </span>
-                                <strong>
-                                    {{ $collectionWithdrawnCount ?? 0 }}
-                                </strong>
+                                <span>DITARIK</span>
+                                <strong>{{ $collectionWithdrawnCount ?? 0 }}</strong>
                             </div>
 
                             <div class="collection-summary-item">
-                                <span>
-                                    EKSEMPLAR DIHAPUS
-                                </span>
-                                <strong>
-                                    {{ $collectionDeletedCopyCount ?? 0 }}
-                                </strong>
+                                <span>EKSEMPLAR DIHAPUS</span>
+                                <strong>{{ $collectionDeletedCopyCount ?? 0 }}</strong>
                             </div>
 
                             <div class="collection-summary-item">
-                                <span>
-                                    RUSAK
-                                </span>
-                                <strong>
-                                    {{ $collectionDamagedCount ?? 0 }}
-                                </strong>
+                                <span>RUSAK</span>
+                                <strong>{{ $collectionDamagedCount ?? 0 }}</strong>
                             </div>
                         </div>
                     @endif
 
                     {{-- FOOTER --}}
-
                     <div class="report-card-footer" onclick="event.stopPropagation()">
 
                         <span class="report-updated">
-
-                            ● Periode:
-
-                            {{ $periodLabel }}
-
+                            ● Periode: {{ $periodLabel }}
                         </span>
 
-
-
-
-
-
-
-
-
                         <div class="report-actions" onclick="event.stopPropagation()">
-
                             <button type="button" class="report-download-btn" onclick="downloadReport(this)">
-
-                                ↓
-
-                                Unduh PDF
-
+                                ↓ Unduh PDF
                             </button>
-
                         </div>
 
                     </div>
 
-<<<<<<< HEAD
-                </div>
-
-            </article>
-
-        @empty
-
-            <div class="report-empty">
-
-                <strong>
-                    Belum ada laporan
-                </strong>
-
-                <span>
-                    Klik "Tambah Laporan" untuk membuat laporan baru.
-                </span>
-
-            </div>
-
-        @endforelse
-
-    </div>
-
-</section>
-
-
-{{-- =========================================================
-     MODAL DETAIL
-========================================================= --}}
-
-<div
-    id="reportDetailModal"
-    class="report-modal"
-    onclick="closeReportDetail(event)"
->
-
-    <div
-        class="report-modal-content"
-        onclick="event.stopPropagation()"
-    >
-
-        <div class="report-modal-header">
-
-            <div>
-
-                <span class="report-modal-label">
-                    DETAIL LAPORAN
-                </span>
-
-                <h2 id="modalReportTitle">
-                    Laporan
-                </h2>
-
-            </div>
-
-
-            <button
-                type="button"
-                class="report-modal-close"
-                onclick="closeReportDetail()"
-            >
-                ×
-            </button>
-
-        </div>
-
-
-        <div class="report-modal-summary">
-
-            <div class="report-modal-value">
-
-                <strong id="modalReportValue">
-                    0
-                </strong>
-
-                <span id="modalReportValueLabel">
-                    data
-                </span>
-
-            </div>
-
-
-            <div
-                class="report-modal-period"
-                id="modalReportPeriod"
-            >
-                Periode:
-                {{ $periodLabel }}
-            </div>
-
-        </div>
-
-
-        <div class="report-detail-chart">
-
-            <div class="detail-chart-lines">
-
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-
-            </div>
-
-
-            <div
-                id="detailChartBars"
-                class="detail-chart-bars"
-            ></div>
-
-        </div>
-
-
-        <div class="report-modal-footer">
-
-            <span>
-                Data laporan berdasarkan periode
-                <strong>
-                    {{ $periodLabel }}
-                </strong>.
-            </span>
-
-
-            <button
-                type="button"
-                onclick="closeReportDetail()"
-            >
-                Tutup
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<script src="{{ asset('js/openReportDetail.js') }}"></script>
-
-
-{{-- =========================================================
-     CALENDAR JAVASCRIPT
-========================================================= --}}
-
-<script>
-
-document.addEventListener(
-    'DOMContentLoaded',
-    function () {
-
-        const popup =
-            document.getElementById(
-                'reportCalendarPopup'
-            );
-
-        const trigger =
-            document.getElementById(
-                'calendarTrigger'
-            );
-
-        const closeButton =
-            document.getElementById(
-                'calendarClose'
-            );
-
-        const daysContainer =
-            document.getElementById(
-                'calendarDays'
-            );
-
-        const monthTitle =
-            document.getElementById(
-                'calendarMonthTitle'
-            );
-
-        const selectedLabel =
-            document.getElementById(
-                'calendarSelectedLabel'
-            );
-
-        const triggerText =
-            document.getElementById(
-                'calendarTriggerText'
-            );
-
-        const info =
-            document.getElementById(
-                'calendarInfo'
-            );
-
-        const rangeTypeInput =
-            document.getElementById(
-                'rangeTypeInput'
-            );
-
-        const selectedDateInput =
-            document.getElementById(
-                'selectedDateInput'
-            );
-
-        const modeButtons =
-            document.querySelectorAll(
-                '.calendar-mode-btn'
-            );
-
-        const previousButton =
-            document.getElementById(
-                'calendarPrev'
-            );
-
-        const nextButton =
-            document.getElementById(
-                'calendarNext'
-            );
-
-
-        let currentMode =
-            rangeTypeInput.value ||
-            'month';
-
-
-        let selectedDate =
-            parseDate(
-                selectedDateInput.value
-            );
-
-
-        let currentMonth =
-            new Date(
-                selectedDate.getFullYear(),
-                selectedDate.getMonth(),
-                1
-            );
-
-
-        /*
-         * ========================================================
-         * OPEN
-         * ========================================================
-         */
-
-        trigger.addEventListener(
-            'click',
-            function (event) {
-
-                event.stopPropagation();
-
-                popup.classList.toggle(
-                    'show'
-                );
-
-            }
-        );
-
-
-        /*
-         * ========================================================
-         * CLOSE
-         * ========================================================
-         */
-
-        closeButton.addEventListener(
-            'click',
-            function () {
-
-                popup.classList.remove(
-                    'show'
-                );
-
-            }
-        );
-
-
-        document.addEventListener(
-            'click',
-            function (event) {
-
-                if (
-                    !popup.contains(
-                        event.target
-                    )
-                    &&
-                    !trigger.contains(
-                        event.target
-                    )
-                ) {
-
-                    popup.classList.remove(
-                        'show'
-                    );
-
-                }
-
-            }
-        );
-
-
-        /*
-         * ========================================================
-         * MODE
-         * ========================================================
-         */
-
-        modeButtons.forEach(
-            function (button) {
-
-                button.addEventListener(
-                    'click',
-                    function () {
-
-                        currentMode =
-                            this.dataset.mode;
-
-
-                        rangeTypeInput.value =
-                            currentMode;
-
-
-                        modeButtons.forEach(
-                            function (item) {
-
-                                item.classList.remove(
-                                    'active'
-                                );
-
-                            }
-                        );
-
-
-                        this.classList.add(
-                            'active'
-                        );
-
-
-                        renderCalendar();
-
-                    }
-                );
-
-            }
-        );
-
-
-        /*
-         * ========================================================
-         * PREVIOUS MONTH
-         * ========================================================
-         */
-
-        previousButton.addEventListener(
-            'click',
-            function () {
-
-                currentMonth.setMonth(
-                    currentMonth.getMonth() - 1
-                );
-
-                renderCalendar();
-
-            }
-        );
-
-
-        /*
-         * ========================================================
-         * NEXT MONTH
-         * ========================================================
-         */
-
-        nextButton.addEventListener(
-            'click',
-            function () {
-
-                currentMonth.setMonth(
-                    currentMonth.getMonth() + 1
-                );
-
-                renderCalendar();
-
-            }
-        );
-
-
-        /*
-         * ========================================================
-         * RENDER
-         * ========================================================
-         */
-
-        function renderCalendar()
-        {
-            daysContainer.innerHTML = '';
-
-
-            const year =
-                currentMonth.getFullYear();
-
-            const month =
-                currentMonth.getMonth();
-
-
-            const firstDay =
-                new Date(
-                    year,
-                    month,
-                    1
-                );
-
-
-            /*
-             * Senin = 0
-             * Minggu = 6
-             */
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/Moreno
-            let startDay =
-                firstDay.getDay() - 1;
-
-
-            if (startDay < 0) {
-                startDay = 6;
-            }
-
-
-            const daysInMonth =
-                new Date(
-                    year,
-                    month + 1,
-                    0
-                ).getDate();
-
-
-            const previousMonthDays =
-                new Date(
-                    year,
-                    month,
-                    0
-                ).getDate();
-
-
-            monthTitle.textContent =
-                formatMonth(
-                    currentMonth
-                );
-
-
-            /*
-             * TANGGAL BULAN SEBELUMNYA
-             */
-
-            for (
-                let i = startDay - 1;
-                i >= 0;
-                i--
-            ) {
-
-                const day =
-                    previousMonthDays - i;
-
-
-                const date =
-                    new Date(
-                        year,
-                        month - 1,
-                        day
-                    );
-
-
-                createDay(
-                    date,
-                    true
-                );
-
-            }
-
-
-            /*
-             * TANGGAL BULAN SEKARANG
-             */
-
-            for (
-                let day = 1;
-                day <= daysInMonth;
-                day++
-            ) {
-
-                const date =
-                    new Date(
-                        year,
-                        month,
-                        day
-                    );
-
-
-                createDay(
-                    date,
-                    false
-                );
-
-            }
-
-
-            /*
-             * TANGGAL BULAN BERIKUTNYA
-             */
-
-            const totalCells =
-                startDay +
-                daysInMonth;
-
-
-            const remaining =
-                Math.ceil(
-                    totalCells / 7
-                ) * 7
-                -
-                totalCells;
-
-
-            for (
-                let day = 1;
-                day <= remaining;
-                day++
-            ) {
-
-                const date =
-                    new Date(
-                        year,
-                        month + 1,
-                        day
-                    );
-
-
-                createDay(
-                    date,
-                    true
-                );
-
-            }
-
-
-            updateInformation();
-        }
-
-
-        /*
-         * ========================================================
-         * CREATE DAY
-         * ========================================================
-         */
-
-        function createDay(
-            date,
-            otherMonth
-        ) {
-
-            const element =
-                document.createElement(
-                    'button'
-                );
-
-
-            element.type =
-                'button';
-
-
-            element.className =
-                'calendar-day';
-
-
-            element.textContent =
-                date.getDate();
-
-
-            if (otherMonth) {
-
-                element.classList.add(
-                    'other-month'
-                );
-
-            }
-
-
-            /*
-             * TODAY
-             */
-
-            if (
-                isSameDate(
-                    date,
-                    new Date()
-                )
-            ) {
-
-                element.classList.add(
-                    'today'
-                );
-
-            }
-
-
-            /*
-             * HARIAN
-             */
-
-            if (
-                currentMode === 'day'
-                &&
-                isSameDate(
-                    date,
-                    selectedDate
-                )
-            ) {
-
-                element.classList.add(
-                    'selected'
-                );
-
-            }
-
-
-            /*
-             * MINGGUAN
-             */
-
-            if (
-                currentMode === 'week'
-                &&
-                isDateInSelectedWeek(
-                    date
-                )
-            ) {
-
-                element.classList.add(
-                    'week-range'
-                );
-
-
-                if (
-                    isSameDate(
-                        date,
-                        getWeekStart(
-                            selectedDate
-                        )
-                    )
-                ) {
-
-                    element.classList.add(
-                        'week-start'
-                    );
-
-                }
-
-
-                if (
-                    isSameDate(
-                        date,
-                        getWeekEnd(
-                            selectedDate
-                        )
-                    )
-                ) {
-
-                    element.classList.add(
-                        'week-end'
-                    );
-
-                }
-
-
-                if (
-                    isSameDate(
-                        date,
-                        selectedDate
-                    )
-                ) {
-
-                    element.classList.add(
-                        'week-selected'
-                    );
-
-                }
-
-            }
-
-
-            /*
-             * BULANAN
-             */
-
-            if (
-                currentMode === 'month'
-                &&
-                date.getMonth()
-                    ===
-                selectedDate.getMonth()
-                &&
-                date.getFullYear()
-                    ===
-                selectedDate.getFullYear()
-            ) {
-
-                element.classList.add(
-                    'month-selected'
-                );
-
-            }
-
-
-            /*
-             * KLIK
-             */
-
-            element.addEventListener(
-                'click',
-                function () {
-
-                    selectedDate =
-                        new Date(
-                            date.getFullYear(),
-                            date.getMonth(),
-                            date.getDate()
-                        );
-
-
-                    selectedDateInput.value =
-                        formatDate(
-                            selectedDate
-                        );
-
-
-                    currentMonth =
-                        new Date(
-                            selectedDate.getFullYear(),
-                            selectedDate.getMonth(),
-                            1
-                        );
-
-
-                    renderCalendar();
-
-                }
-            );
-
-
-            daysContainer.appendChild(
-                element
-            );
-        }
-
-
-        /*
-         * ========================================================
-         * INFORMATION
-         * ========================================================
-         */
-
-        function updateInformation()
-        {
-            let text = '';
-
-
-            /*
-             * HARIAN
-             */
-
-            if (
-                currentMode === 'day'
-            ) {
-
-                text =
-                    '1 hari • ' +
-                    formatLongDate(
-                        selectedDate
-                    );
-
-            }
-
-
-            /*
-             * MINGGUAN
-             */
-
-            else if (
-                currentMode === 'week'
-            ) {
-
-                const start =
-                    getWeekStart(
-                        selectedDate
-                    );
-
-
-                const end =
-                    getWeekEnd(
-                        selectedDate
-                    );
-
-
-                text =
-                    '1 minggu • ' +
-                    formatShortDate(
-                        start
-                    )
-                    +
-                    ' - ' +
-                    formatShortDate(
-                        end
-                    );
-
-            }
-
-
-            /*
-             * BULANAN
-             */
-
-            else {
-
-                const start =
-                    new Date(
-                        selectedDate.getFullYear(),
-                        selectedDate.getMonth(),
-                        1
-                    );
-
-
-                const end =
-                    new Date(
-                        selectedDate.getFullYear(),
-                        selectedDate.getMonth() + 1,
-                        0
-                    );
-
-
-                text =
-                    '1 bulan • ' +
-                    formatShortDate(
-                        start
-                    )
-                    +
-                    ' - ' +
-                    formatShortDate(
-                        end
-                    );
-
-            }
-
-
-            info.textContent =
-                text;
-
-
-            selectedLabel.textContent =
-                text;
-
-
-            triggerText.textContent =
-                text;
-        }
-
-
-        /*
-         * ========================================================
-         * WEEK START
-         * ========================================================
-         */
-
-        function getWeekStart(
-            date
-        ) {
-
-            const result =
-                new Date(date);
-
-
-            const day =
-                result.getDay();
-
-
-            const difference =
-                day === 0
-                    ? -6
-                    : 1 - day;
-
-
-            result.setDate(
-                result.getDate()
-                +
-                difference
-            );
-
-
-            result.setHours(
-                0,
-                0,
-                0,
-                0
-            );
-
-
-            return result;
-        }
-
-
-        /*
-         * ========================================================
-         * WEEK END
-         * ========================================================
-         */
-
-        function getWeekEnd(
-            date
-        ) {
-
-            const start =
-                getWeekStart(
-                    date
-                );
-
-
-            const result =
-                new Date(start);
-
-
-            result.setDate(
-                start.getDate()
-                +
-                6
-            );
-
-
-            result.setHours(
-                23,
-                59,
-                59,
-                999
-            );
-
-
-            return result;
-        }
-
-
-        /*
-         * ========================================================
-         * CHECK WEEK
-         * ========================================================
-         */
-
-        function isDateInSelectedWeek(
-            date
-        ) {
-
-            const start =
-                getWeekStart(
-                    selectedDate
-                );
-
-
-            const end =
-                getWeekEnd(
-                    selectedDate
-                );
-
-
-            return (
-                date >= start
-                &&
-                date <= end
-            );
-        }
-
-
-        /*
-         * ========================================================
-         * PARSE DATE
-         * ========================================================
-         */
-
-        function parseDate(
-            value
-        ) {
-
-            if (!value) {
-                return new Date();
-            }
-
-
-            const parts =
-                value.split('-');
-
-
-            return new Date(
-                Number(parts[0]),
-                Number(parts[1]) - 1,
-                Number(parts[2])
-            );
-        }
-
-
-        /*
-         * ========================================================
-         * FORMAT DATE
-         * ========================================================
-         */
-
-        function formatDate(
-            date
-        ) {
-
-            const year =
-                date.getFullYear();
-
-
-            const month =
-                String(
-                    date.getMonth() + 1
-                ).padStart(
-                    2,
-                    '0'
-                );
-
-
-            const day =
-                String(
-                    date.getDate()
-                ).padStart(
-                    2,
-                    '0'
-                );
-
-
-            return (
-                year +
-                '-' +
-                month +
-                '-' +
-                day
-            );
-        }
-
-
-        /*
-         * ========================================================
-         * FORMAT SHORT
-         * ========================================================
-         */
-
-        function formatShortDate(
-            date
-        ) {
-
-            return date.toLocaleDateString(
-                'id-ID',
-                {
-                    day: '2-digit',
-                    month: 'short'
-                }
-            );
-        }
-
-
-        /*
-         * ========================================================
-         * FORMAT LONG
-         * ========================================================
-         */
-
-        function formatLongDate(
-            date
-        ) {
-
-            return date.toLocaleDateString(
-                'id-ID',
-                {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric'
-                }
-            );
-        }
-
-
-        /*
-         * ========================================================
-         * FORMAT MONTH
-         * ========================================================
-         */
-
-        function formatMonth(
-            date
-        ) {
-
-            return date.toLocaleDateString(
-                'id-ID',
-                {
-                    month: 'long',
-                    year: 'numeric'
-                }
-            );
-        }
-
-
-        /*
-         * ========================================================
-         * SAME DATE
-         * ========================================================
-         */
-
-        function isSameDate(
-            first,
-            second
-        ) {
-
-            return (
-                first.getFullYear()
-                    ===
-                second.getFullYear()
-
-                &&
-
-                first.getMonth()
-                    ===
-                second.getMonth()
-
-                &&
-
-                first.getDate()
-                    ===
-                second.getDate()
-            );
-        }
-
-
-        /*
-         * ========================================================
-         * INITIAL RENDER
-         * ========================================================
-         */
-
-        renderCalendar();
-
-    });
-
-</script>
-
-
-{{-- =========================================================
-     PERIOD UPDATE MODAL
-========================================================= --}}
-
-<script>
-
-document.addEventListener(
-    'DOMContentLoaded',
-    function () {
-
-        const modalPeriod =
-            document.getElementById(
-                'modalReportPeriod'
-            );
-
-
-        if (modalPeriod) {
-
-            modalPeriod.textContent =
-                'Periode: {{ $periodLabel }}';
-
-        }
-
-    }
-);
-
-</script>
-
-
-{{-- =========================================================
-     REPORT DATA FOR PDF
-========================================================= --}}
-
-<script
-    id="borrowingsReportData"
-    type="application/json"
->{!! json_encode($borrowingsExportData ?? []) !!}</script>
-
-
-<script
-    id="activeMembersReportData"
-    type="application/json"
->{!! json_encode($activeMembersExportData ?? []) !!}</script>
-
-
-<script
-    id="collectionReportData"
-    type="application/json"
->{!! json_encode($collectionExportData ?? []) !!}</script>
-
-
-{{-- =========================================================
-     PDF DOWNLOAD LIBRARIES
-========================================================= --}}
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-{{-- =========================================================
-     PDF DOWNLOAD
-========================================================= --}}
-
-<script>
-
-function downloadReport(button) {
-
-    const card =
-        button.closest(
-            '.report-card'
-        );
-
-
-    if (!card) {
-        return;
-    }
-
-
-    const reportName =
-        card.dataset.report ||
-        'Laporan Perpustakaan';
-
-
-    const reportType =
-        card.dataset.type ||
-        'normal';
-
-
-    const period =
-        card.dataset.period ||
-        'Periode Terpilih';
-
-
-    const statValue =
-        card.dataset.value ||
-        '0';
-
-
-    const statLabel =
-        card.dataset.valueLabel ||
-        'data';
-
-
-    /*
-     * ========================================================
-     * DATA
-     * ========================================================
-     */
-
-    let tableData = [];
-
-
-    if (
-        reportType === 'collection'
-    ) {
-
-        const collectionScript =
-            document.getElementById(
-                'collectionReportData'
-            );
-
-
-        if (collectionScript) {
-
-            try {
-
-                tableData =
-                    JSON.parse(
-                        collectionScript.textContent
-                    );
-=======
                 </article>
 
             @empty
 
                 <div class="report-empty">
-
-                    <strong>
-
-                        Belum ada laporan
-
-                    </strong>
-
-                    <span>
-
-                        Klik "Tambah Laporan" untuk membuat laporan baru.
-
-                    </span>
-
+                    <strong>Belum ada laporan</strong>
                 </div>
 
             @endforelse
@@ -1737,345 +272,98 @@ function downloadReport(button) {
     </section>
 
 
-
-
-
-
-
-
-
     {{-- =============================================================
-
-     DETAIL MODAL
-
-============================================================= --}}
-
+         DETAIL MODAL
+    ============================================================= --}}
     <div id="reportDetailModal" class="report-modal" onclick="closeReportDetail(event)">
 
         <div class="report-modal-content" onclick="event.stopPropagation()">
 
             {{-- HEADER --}}
-
             <div class="report-modal-header">
-
                 <div>
-
-                    <span class="report-modal-label">
-
-                        DETAIL LAPORAN
-
-                    </span>
-
-
-
-
-
-
-
-
-
-                    <h2 id="modalReportTitle">
-
-                        Laporan
-
-                    </h2>
-
+                    <span class="report-modal-label">DETAIL LAPORAN</span>
+                    <h2 id="modalReportTitle">Laporan</h2>
                 </div>
-
-
-
-
-
-
-
-
 
                 <button type="button" class="report-modal-close" onclick="closeReportDetail()">
-
                     ×
-
                 </button>
-
             </div>
-
-
-
-
-
-
-
-
 
             {{-- SUMMARY --}}
-
             <div class="report-modal-summary">
-
                 <div class="report-modal-value">
-
-                    <strong id="modalReportValue">
-
-                        0
-
-                    </strong>
-
-                    <span id="modalReportValueLabel">
-
-                        data
-
-                    </span>
-
+                    <strong id="modalReportValue">0</strong>
+                    <span id="modalReportValueLabel">data</span>
                 </div>
-
-
-
-
-
-
-
-
 
                 <div class="report-modal-period" id="modalReportPeriod">
-
-                    Periode:
-
-                    {{ $periodLabel }}
-
+                    Periode: {{ $periodLabel }}
                 </div>
-
             </div>
-
-
-
-
-
-
-
-
 
             {{-- COLLECTION DETAIL --}}
-
             <div id="collectionDetailSection" style="display: none;">
-
                 <div class="collection-detail-wrapper">
-
                     <table class="collection-detail-table">
-
                         <thead>
-
                             <tr>
-
-                                <th>
-
-                                    Tanggal
-
-                                </th>
-
-                                <th>
-
-                                    Jenis Perubahan
-
-                                </th>
-
-                                <th>
-
-                                    Judul Buku
-
-                                </th>
-
-                                <th>
-
-                                    Eksemplar / Jumlah
-
-                                </th>
-
-                                <th>
-
-                                    Alasan / Keterangan
-
-                                </th>
-
+                                <th>Tanggal</th>
+                                <th>Jenis Perubahan</th>
+                                <th>Judul Buku</th>
+                                <th>Eksemplar / Jumlah</th>
+                                <th>Alasan / Keterangan</th>
                             </tr>
-
                         </thead>
 
-
-
-
-
-
-
-
-
                         <tbody id="collectionDetailBody">
-
-                            @forelse ($collectionExportData ?? []
-
-                                        as $item)
+                            @forelse (($collectionExportData ?? []) as $item)
                                 <tr>
-
+                                    <td>{{ $item['tanggal'] }}</td>
                                     <td>
-
-                                        {{ $item['tanggal'] }}
-
-                                    </td>
-
-
-
-
-
-
-
-
-
-                                    <td>
-
                                         <span class="collection-type-badge">
-
                                             {{ $item['jenis_perubahan'] }}
-
                                         </span>
-
                                     </td>
-
-
-
-
-
-
-
-
-
-                                    <td>
-
-                                        {{ $item['judul_buku'] }}
-
-                                    </td>
-
-
-
-
-
-
-
-
-
-                                    <td>
-
-                                        {{ $item['eksemplar_jumlah'] }}
-
-                                    </td>
-
-
-
-
-
-
-
-
-
-                                    <td>
-
-                                        {{ $item['alasan_keterangan'] }}
-
-                                    </td>
-
+                                    <td>{{ $item['judul_buku'] }}</td>
+                                    <td>{{ $item['eksemplar_jumlah'] }}</td>
+                                    <td>{{ $item['alasan_keterangan'] }}</td>
                                 </tr>
-
                             @empty
-
                                 <tr>
-
                                     <td colspan="5" class="collection-empty">
-
                                         Tidak ada perubahan koleksi pada periode yang dipilih.
-
                                     </td>
-
                                 </tr>
                             @endforelse
-
                         </tbody>
-
                     </table>
-
                 </div>
-
             </div>
-
-
-
-
-
-
-
-
 
             {{-- NORMAL CHART --}}
-
             <div id="normalDetailChart" class="report-detail-chart">
-
                 <div class="detail-chart-lines">
-
                     <span></span>
-
                     <span></span>
-
                     <span></span>
-
                     <span></span>
-
                 </div>
 
-
-
-
-
-
-
-
-
                 <div id="modalChartBars" class="detail-chart-bars"></div>
-
             </div>
 
-
-
-
-
-
-
-
-
             {{-- FOOTER --}}
-
             <div class="report-modal-footer">
-
                 <span>
-
                     Data laporan berdasarkan periode
-
-                    <strong>
-
-                        {{ $periodLabel }}
-
-                    </strong>.
-
+                    <strong>{{ $periodLabel }}</strong>.
                 </span>
 
-
-
-
-
-
-
-
-
                 <button type="button" onclick="closeReportDetail()">
-
                     Tutup
-
                 </button>
-
             </div>
 
         </div>
@@ -2083,1814 +371,327 @@ function downloadReport(button) {
     </div>
 
 
-
-
-
-
-
-
-
     {{-- =============================================================
-
-     DATA PEMINJAMAN
-
-============================================================= --}}
-
-    <script
-
-    id="borrowingsReportData"
-
-    type="application/json"
-
->
-
-{!! json_encode($borrowingsExportData ?? []) !!}
-
-</script>
-
-    {{-- =============================================================
-
-     DATA KETERLAMBATAN
-
+         DATA PEMINJAMAN
     ============================================================= --}}
+    <script id="borrowingsReportData" type="application/json">{!! json_encode($borrowingsExportData ?? [], JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
 
-    <script
+    {{-- DATA KETERLAMBATAN --}}
+    <script id="lateBorrowingsReportData" type="application/json">{!! json_encode($lateBorrowingsExportData ?? [], JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
 
-        id="lateBorrowingsReportData"
+    {{-- DATA ANGGOTA AKTIF --}}
+    <script id="activeMembersReportData" type="application/json">{!! json_encode($activeMembersExportData ?? [], JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
 
-        type="application/json"
-
-    >
-
-{!! json_encode($lateBorrowingsExportData ?? []) !!}
-
-</script>
-
-    {{-- =============================================================
-
-     DATA ANGGOTA AKTIF
-
-     ============================================================= --}}
-
-    <script
-
-        id="activeMembersReportData"
-
-        type="application/json"
-
-    >
-
-{!! json_encode($activeMembersExportData ?? []) !!}
-
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {{-- =============================================================
-
-     DATA KOLEKSI
-
-============================================================= --}}
-
-    <script
-
-    id="collectionReportData"
-
-    type="application/json"
-
->
-
-{!! json_encode($collectionExportData ?? []) !!}
-
-</script>
-
-
-
-
-
-
-
-
+    {{-- DATA KOLEKSI --}}
+    <script id="collectionReportData" type="application/json">{!! json_encode($collectionExportData ?? [], JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
 
 @endsection
 
 
-
-
-
-
-
-
-
 @push('scripts')
     {{-- FLATPICKR --}}
-
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
-
-
-
-
-
-
-
-
-    {{-- DETAIL MODAL LAMA --}}
-
+    {{-- DETAIL MODAL --}}
     <script src="{{ asset('js/openReportDetail.js') }}"></script>
 
-
-
-
-
-
-
-
-
     {{-- JSPDF --}}
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
-
-
-
-
-
-
-
-
     {{-- SWEETALERT --}}
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-
-
-
-
-
-
 
     <script>
         /*
-
-                    |--------------------------------------------------------------------------
-
-                    | DATE PICKER
-
-                    |--------------------------------------------------------------------------
-
-                    */
-
-        document.addEventListener(
-
-            'DOMContentLoaded',
-
-            function() {
-
-                const startDateInput =
-
-                    document.getElementById(
-
-                        'start_date'
-
-                    );
-
-
-
-
-
-
-
-
-
-                const endDateInput =
-
-                    document.getElementById(
-
-                        'end_date'
-
-                    );
-
-
-
-
-
-
-
-
-
-                const rangePicker =
-
-                    document.getElementById(
-
-                        'date_range_picker'
-
-                    );
-
-
-
-
-
-
-
-
-
-                if (
-
-                    !startDateInput ||
-
-                    !endDateInput ||
-
-                    !rangePicker
-
-                ) {
-
-                    return;
-
-                }
-
-
-
-
-
-
-
-
-
-                const currentStart =
-
-                    startDateInput.value;
-
-
-
-
-
-
-
-
-
-                const currentEnd =
-
-                    endDateInput.value;
-
-
-
-
-
-
-
-
-
-                flatpickr(
-
-                    rangePicker, {
-
-                        mode: 'range',
-
-                        dateFormat: 'Y-m-d',
-
-                        altInput: true,
-
-                        altFormat: 'j M Y',
-
-                        locale: 'id',
-
-                        defaultDate: [
-
-                            currentStart,
-
-                            currentEnd
-
-                        ],
-
-                        showMonths: 2,
-
-
-
-
-
-
-
-
-
-                        onChange: function(
-
-                            selectedDates,
-
-                            dateStr,
-
-                            instance
-
-                        ) {
-
-                            if (
-
-                                selectedDates.length === 2
-
-                            ) {
-
-                                const start =
-
-                                    instance.formatDate(
-
-                                        selectedDates[0],
-
-                                        'Y-m-d'
-
-                                    );
-
-
-
-
-
-
-
-
-
-                                const end =
-
-                                    instance.formatDate(
-
-                                        selectedDates[1],
-
-                                        'Y-m-d'
-
-                                    );
-
-
-
-
-
-
-
-
-
-                                startDateInput.value =
-
-                                    start;
-
-
-
-
-
-
-
-
-
-                                endDateInput.value =
-
-                                    end;
-
-                            } else if (
-
-                                selectedDates.length === 1
-
-                            ) {
-
-                                const start =
-
-                                    instance.formatDate(
-
-                                        selectedDates[0],
-
-                                        'Y-m-d'
-
-                                    );
-
-
-
-
-
-
-
-
-
-                                startDateInput.value =
-
-                                    start;
-
-
-
-
-
-
-
-
-
-                                endDateInput.value =
-
-                                    start;
-
-                            }
-
-                        }
-
-                    }
-
-                );
-
+        |--------------------------------------------------------------------------
+        | DATE PICKER
+        |--------------------------------------------------------------------------
+        */
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+            const rangePicker = document.getElementById('date_range_picker');
+
+            if (!startDateInput || !endDateInput || !rangePicker) {
+                return;
             }
 
-        );
+            flatpickr(rangePicker, {
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: 'j M Y',
+                locale: 'id',
+                defaultDate: [
+                    startDateInput.value,
+                    endDateInput.value
+                ],
+                showMonths: 2,
 
-
-
-
-
-
-
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 2) {
+                        startDateInput.value = instance.formatDate(selectedDates[0], 'Y-m-d');
+                        endDateInput.value = instance.formatDate(selectedDates[1], 'Y-m-d');
+                    } else if (selectedDates.length === 1) {
+                        const start = instance.formatDate(selectedDates[0], 'Y-m-d');
+                        startDateInput.value = start;
+                        endDateInput.value = start;
+                    }
+                }
+            });
+        });
 
 
         /*
-
         |--------------------------------------------------------------------------
-
         | DOWNLOAD PDF
-
         |--------------------------------------------------------------------------
-
         */
+        function readJsonData(elementId, errorMessage) {
+            const script = document.getElementById(elementId);
+
+            if (!script) {
+                return [];
+            }
+
+            try {
+                return JSON.parse(script.textContent);
+            } catch (error) {
+                console.error(errorMessage, error);
+                return [];
+            }
+        }
 
         function downloadReport(button) {
 
-            const card =
-
-                button.closest(
-
-                    '.report-card'
-
-                );
-
-
-
-
-
-
-
-
+            const card = button.closest('.report-card');
 
             if (!card) {
-
                 return;
-
             }
 
-
-
-
-
-
-
-
-
-            const reportName =
-
-                card.dataset.report ||
-
-                'Laporan Perpustakaan';
-
-
-
-
-
-
-
-
-
-            const reportType =
-
-                card.dataset.type ||
-
-                'normal';
-
-
-
-
-
-
-
-
-
-            const period =
-
-                card.dataset.period ||
-
-                'Periode Terpilih';
-
-
-
-
-
-
-
-
-
-            const statValue =
-
-                card.dataset.value ||
-
-                '0';
-
-
-
-
-
-
-
-
-
-            const statLabel =
-
-                card.dataset.valueLabel ||
-
-                'data';
-
-
-
-
-
-
-
-
+            const reportName = card.dataset.report || 'Laporan Perpustakaan';
+            const reportType = card.dataset.type || 'normal';
+            const period = card.dataset.period || 'Periode Terpilih';
+            const statValue = card.dataset.value || '0';
+            const statLabel = card.dataset.valueLabel || 'data';
 
             /*
-
              * ========================================================
-
              * DATA
-
              * ========================================================
-
              */
-
             let tableData = [];
 
-
-
-
-
-
-
-
-
-            if (
-
-                reportType === 'collection'
-
-            ) {
-
-                const collectionScript =
-
-                    document.getElementById(
-
-                        'collectionReportData'
-
-                    );
-
-                if (collectionScript) {
-
-                    try {
-
-                        tableData =
-
-                            JSON.parse(
-
-                                collectionScript.textContent
-
-                            );
-
-                    } catch (error) {
-
-                        console.error(
-
-                            'Gagal membaca data koleksi:',
-
-                            error
-
-                        );
-
-                        tableData = [];
-
-                    }
-
-                }
-
-            } else if (
-
-                reportType === 'member'
-
-            ) {
-
-                const memberScript =
-
-                    document.getElementById(
-
-                        'activeMembersReportData'
-
-                    );
-
-                if (memberScript) {
-
-                    try {
-
-                        tableData =
-
-                            JSON.parse(
-
-                                memberScript.textContent
-
-                            );
-
-                    } catch (error) {
-
-                        console.error(
-
-                            'Gagal membaca data anggota aktif:',
-
-                            error
-
-                        );
-
-                        tableData = [];
-
-                    }
-
-                }
-
-            } else if (
-
-                reportType === 'late'
-
-            ) {
-
-                const dataScript =
-
-                    document.getElementById(
-
-                        'lateBorrowingsReportData'
-
-                    );
-
-                if (dataScript) {
-
-                    try {
-
-                        tableData =
-
-                            JSON.parse(
-
-                                dataScript.textContent
-
-                            );
-
-                    } catch (error) {
-
-                        console.error(
-
-                            'Gagal membaca data keterlambatan:',
-
-                            error
-
-                        );
-
-                        tableData = [];
-
-                    }
-
-                }
-
+            if (reportType === 'collection') {
+                tableData = readJsonData('collectionReportData', 'Gagal membaca data koleksi:');
+            } else if (reportType === 'member') {
+                tableData = readJsonData('activeMembersReportData', 'Gagal membaca data anggota aktif:');
+            } else if (reportType === 'late') {
+                tableData = readJsonData('lateBorrowingsReportData', 'Gagal membaca data keterlambatan:');
             } else {
-
-                const dataScript =
-
-                    document.getElementById(
-
-                        'borrowingsReportData'
-
-                    );
-
-                if (dataScript) {
-
-                    try {
-
-                        tableData =
-
-                            JSON.parse(
-
-                                dataScript.textContent
-
-                            );
-
-                    } catch (error) {
-
-                        console.error(
-
-                            'Gagal membaca data laporan:',
-
-                            error
-
-                        );
-
-                        tableData = [];
-
-                    }
-
-                }
-
+                tableData = readJsonData('borrowingsReportData', 'Gagal membaca data laporan:');
             }
 
             /*
-
-                         * ========================================================
-
-                         * TANGGAL
-
-                         * ========================================================
-
-                         */
-
-            const startInput =
-
-                document.getElementById(
-
-                    'start_date'
-
-                );
-
-
-
-
-
-
-
-
-
-            const endInput =
-
-                document.getElementById(
-
-                    'end_date'
-
-                );
-
-
-
-
-
-
-
-
-
-            const startDate =
-
-                startInput?.value ||
-
-                'start';
-
-
-
-
-
-
-
-
-
-            const endDate =
-
-                endInput?.value ||
-
-                'end';
-
-
-
-
-
-
-
-
-
-            /*
-
              * ========================================================
-
-             * FILE NAME
-
+             * TANGGAL & NAMA FILE
              * ========================================================
-
              */
+            const startDate = document.getElementById('start_date')?.value || 'start';
+            const endDate = document.getElementById('end_date')?.value || 'end';
 
-            const safeName =
-
-                reportName
-
-                .replace(
-
-                    /[^a-zA-Z0-9_-]/g,
-
-                    '_'
-
-                );
-
-
-
-
-
-
-
-
-
-            const fileName =
-
-                `${safeName}_${startDate}_sd_${endDate}.pdf`;
-
-
-
-
-
-
-
-
+            const safeName = reportName.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const fileName = `${safeName}_${startDate}_sd_${endDate}.pdf`;
 
             /*
-
              * ========================================================
-
              * CEK JSPDF
-
              * ========================================================
-
              */
-
-            if (
-
-                !window.jspdf ||
-
-                !window.jspdf.jsPDF
-
-            ) {
-
+            if (!window.jspdf || !window.jspdf.jsPDF) {
                 Swal.fire({
-
                     icon: 'error',
-
                     title: 'PDF Tidak Siap',
-
                     text: 'Library PDF belum berhasil dimuat. Silakan refresh halaman.',
-
                     confirmButtonColor: '#287b7b'
-
                 });
 
                 return;
-
             }
 
-
-
-
-
-
-
-
-
             /*
-
              * ========================================================
-
              * BUAT PDF
-
              * ========================================================
-
              */
-
             try {
-
-                const {
-
-                    jsPDF
-
-                } =
-
-                window.jspdf;
-
-
-
-
-
-
-
-
+                const { jsPDF } = window.jspdf;
 
                 const isLateReport = reportType === 'late';
 
-                const doc =
-
-                    new jsPDF({
-
-                        orientation: isLateReport ? 'landscape' : 'portrait',
-
-                        unit: 'mm',
-
-                        format: 'a4'
-
-                    });
+                const doc = new jsPDF({
+                    orientation: isLateReport ? 'landscape' : 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
 
                 const pageWidth = doc.internal.pageSize.getWidth();
 
-
-
-
-
-
-
-
-
-                /*
-
-                 * ====================================================
-
-                 * HEADER
-
-                 * ====================================================
-
-                 */
-
-                doc.setFillColor(
-
-                    40,
-
-                    123,
-
-                    123
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.rect(
-
-                    0,
-
-                    0,
-
-                    pageWidth,
-
-                    24,
-
-                    'F'
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setTextColor(
-
-                    255,
-
-                    255,
-
-                    255
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFont(
-
-                    'helvetica',
-
-                    'bold'
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFontSize(
-
-                    14
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.text(
-
-                    'PERPUSTAKAAN TIGA SERANGKAI',
-
-                    14,
-
-                    11
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFont(
-
-                    'helvetica',
-
-                    'normal'
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFontSize(
-
-                    9
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.text(
-
-                    'Sistem Informasi Manajemen Laporan Perpustakaan',
-
-                    14,
-
-                    18
-
-                );
-
-
-
-
-
-
-
-
-
-                /*
-
-                 * ====================================================
-
-                 * JUDUL
-
-                 * ====================================================
-
-                 */
-
-                doc.setTextColor(
-
-                    23,
-
-                    47,
-
-                    47
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFont(
-
-                    'helvetica',
-
-                    'bold'
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFontSize(
-
-                    16
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.text(
-
-                    reportName.toUpperCase(),
-
-                    14,
-
-                    35
-
-                );
-
-
-
-
-
-
-
-
-
-                /*
-
-                 * ====================================================
-
-                 * PERIODE
-
-                 * ====================================================
-
-                 */
-
-                doc.setFont(
-
-                    'helvetica',
-
-                    'normal'
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFontSize(
-
-                    10
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setTextColor(
-
-                    80,
-
-                    99,
-
-                    99
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.text(
-
-                    `Periode: ${period}`,
-
-                    14,
-
-                    42
-
-                );
-
-
-
-
-
-
-
-
-
-                /*
-
-                 * ====================================================
-
-                 * TANGGAL UNDUH
-
-                 * ====================================================
-
-                 */
-
-                const downloadDate =
-
-                    new Date()
-
-                    .toLocaleDateString(
-
-                        'id-ID', {
-
-                            day: '2-digit',
-
-                            month: 'long',
-
-                            year: 'numeric'
-
-                        }
-
-                    );
-
-
-
-
-
-
-
-
-
-                doc.text(
-
-                    `Tanggal Unduh: ${downloadDate}`,
-
-                    14,
-
-                    47
-
-                );
-
-
-
-
-
-
-
-
-
-                /*
-
-                 * ====================================================
-
-                 * SUMMARY
-
-                 * ====================================================
-
-                 */
-
-                doc.setFillColor(
-
-                    243,
-
-                    248,
-
-                    248
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.roundedRect(
-
-                    14,
-
-                    52,
-
-                    pageWidth - 28,
-
-                    14,
-
-                    3,
-
-                    3,
-
-                    'F'
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setDrawColor(
-
-                    210,
-
-                    230,
-
-                    230
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.roundedRect(
-
-                    14,
-
-                    52,
-
-                    pageWidth - 28,
-
-                    14,
-
-                    3,
-
-                    3,
-
-                    'S'
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setTextColor(
-
-                    23,
-
-                    47,
-
-                    47
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFont(
-
-                    'helvetica',
-
-                    'bold'
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFontSize(
-
-                    12
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.text(
-
-                    String(statValue),
-
-                    20,
-
-                    61
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFont(
-
-                    'helvetica',
-
-                    'normal'
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.setFontSize(
-
-                    9
-
-                );
-
-
-
-
-
-
-
-
-
-                doc.text(
-
-                    String(statLabel),
-
-                    40,
-
-                    61
-
-                );
-
-
-
-
-
-
-
-
-
-                /*
-
-                 * ====================================================
-
-                 * TABEL KOLEKSI
-
-                 * ====================================================
-
-                 */
-
-                if (
-
-                    reportType === 'collection' &&
-
+                /* HEADER */
+                doc.setFillColor(40, 123, 123);
+                doc.rect(0, 0, pageWidth, 24, 'F');
+
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(14);
+                doc.text('PERPUSTAKAAN TIGA SERANGKAI', 14, 11);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.text('Sistem Informasi Manajemen Laporan Perpustakaan', 14, 18);
+
+                /* JUDUL */
+                doc.setTextColor(23, 47, 47);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(16);
+                doc.text(reportName.toUpperCase(), 14, 35);
+
+                /* PERIODE */
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                doc.setTextColor(80, 99, 99);
+                doc.text(`Periode: ${period}`, 14, 42);
+
+                /* TANGGAL UNDUH */
+                const downloadDate = new Date().toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                doc.text(`Tanggal Unduh: ${downloadDate}`, 14, 47);
+
+                /* SUMMARY */
+                doc.setFillColor(243, 248, 248);
+                doc.roundedRect(14, 52, pageWidth - 28, 14, 3, 3, 'F');
+
+                doc.setDrawColor(210, 230, 230);
+                doc.roundedRect(14, 52, pageWidth - 28, 14, 3, 3, 'S');
+
+                doc.setTextColor(23, 47, 47);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(12);
+                doc.text(String(statValue), 20, 61);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.text(String(statLabel), 40, 61);
+
+                const canDrawTable =
                     Array.isArray(tableData) &&
-
                     tableData.length > 0 &&
+                    typeof doc.autoTable === 'function';
 
-                    typeof doc.autoTable === 'function'
+                /*
+                 * ====================================================
+                 * TABEL KOLEKSI
+                 * ====================================================
+                 */
+                if (reportType === 'collection' && canDrawTable) {
 
-                ) {
-
-                    const rows =
-
-                        tableData.map(
-
-                            (row, index) => [
-
-                                index + 1,
-
-                                row.tanggal ?? '-',
-
-                                row.jenis_perubahan ?? '-',
-
-                                row.judul_buku ?? '-',
-
-                                row.eksemplar_jumlah ?? '-',
-
-                                row.alasan_keterangan ?? '-'
-
-                            ]
-
-                        );
-
-
-
-
-
-
-
-
+                    const rows = tableData.map((row, index) => [
+                        index + 1,
+                        row.tanggal ?? '-',
+                        row.jenis_perubahan ?? '-',
+                        row.judul_buku ?? '-',
+                        row.eksemplar_jumlah ?? '-',
+                        row.alasan_keterangan ?? '-'
+                    ]);
 
                     doc.autoTable({
-
                         startY: 72,
-
                         head: [
-
                             [
-
                                 'NO',
-
                                 'TANGGAL',
-
                                 'JENIS PERUBAHAN',
-
                                 'JUDUL BUKU',
-
                                 'EKSEMPLAR / JUMLAH',
-
                                 'ALASAN / KETERANGAN'
-
                             ]
-
                         ],
-
                         body: rows,
-
                         theme: 'grid',
-
                         styles: {
-
                             fontSize: 7.5,
-
                             cellPadding: 2.5
-
                         },
-
                         headStyles: {
-
                             fontStyle: 'bold'
-
                         },
-
                         columnStyles: {
-
-                            0: {
-
-                                cellWidth: 10,
-
-                                halign: 'center'
-
-                            },
-
-                            1: {
-
-                                cellWidth: 25
-
-                            },
-
-                            2: {
-
-                                cellWidth: 32
-
-                            },
-
-                            3: {
-
-                                cellWidth: 42
-
-                            },
-
-                            4: {
-
-                                cellWidth: 30
-
-                            },
-
-                            5: {
-
-                                cellWidth: 43
-
-                            }
-
+                            0: { cellWidth: 10, halign: 'center' },
+                            1: { cellWidth: 25 },
+                            2: { cellWidth: 32 },
+                            3: { cellWidth: 42 },
+                            4: { cellWidth: 30 },
+                            5: { cellWidth: 43 }
                         },
-
-                        margin: {
-
-                            left: 14,
-
-                            right: 14
-
-                        }
-
+                        margin: { left: 14, right: 14 }
                     });
-
                 }
 
-
-
-
-
-
-
-
-
                 /*
-
                  * ====================================================
-
                  * TABEL ANGGOTA AKTIF
-
                  * ====================================================
-
                  */
-                else if (
+                else if (reportType === 'member' && canDrawTable) {
 
-
-
-                    reportType === 'member' &&
-
-                    Array.isArray(tableData) &&
-
-                    tableData.length > 0 &&
-
-                    typeof doc.autoTable === 'function'
-
-                ) {
-
-                    const rows =
-
-                        tableData.map(row => [
-
-                            row.no ?? '-',
-
-                            row.member_name ?? '-',
-
-                            row.activity ?? '-',
-
-                            row.judul_buku ?? '-',
-
-                            row.date ?? '-',
-
-                            row.status ?? '-'
-
-                        ]);
+                    const rows = tableData.map(row => [
+                        row.no ?? '-',
+                        row.member_name ?? '-',
+                        row.activity ?? '-',
+                        row.judul_buku ?? '-',
+                        row.date ?? '-',
+                        row.status ?? '-'
+                    ]);
 
                     doc.autoTable({
-
                         startY: 72,
-
                         head: [
-
                             [
-
                                 'NO',
-
                                 'NAMA ANGGOTA',
-
                                 'AKTIVITAS',
-
                                 'JUDUL BUKU',
-
                                 'TANGGAL',
-
                                 'STATUS'
-
                             ]
-
                         ],
-
                         body: rows,
-
                         theme: 'grid',
-
                         styles: {
-
                             fontSize: 7.5,
-
                             cellPadding: 2.5
-
                         },
-
                         headStyles: {
-
                             fontStyle: 'bold'
-
                         },
-
                         columnStyles: {
-
-                            0: {
-
-                                cellWidth: 10
-
-                            },
-
-                            1: {
-
-                                cellWidth: 45
-
-                            },
-
-                            2: {
-
-                                cellWidth: 30
-
-                            },
-
-                            3: {
-
-                                cellWidth: 48
-
-                            },
-
-                            4: {
-
-                                cellWidth: 27
-
-                            },
-
-                            5: {
-
-                                cellWidth: 27
-
-                            }
-
+                            0: { cellWidth: 10 },
+                            1: { cellWidth: 45 },
+                            2: { cellWidth: 30 },
+                            3: { cellWidth: 48 },
+                            4: { cellWidth: 27 },
+                            5: { cellWidth: 27 }
                         },
-
-                        margin: {
-
-                            left: 14,
-
-                            right: 14
-
-                        }
-
+                        margin: { left: 14, right: 14 }
                     });
-
                 }
 
                 /*
@@ -3898,19 +699,12 @@ function downloadReport(button) {
                  * TABEL PEMINJAMAN & KETERLAMBATAN
                  * ====================================================
                  */
-                else if (
-                    Array.isArray(tableData) &&
-                    tableData.length > 0 &&
-                    typeof doc.autoTable === 'function'
-                ) {
+                else if (canDrawTable) {
 
                     /*
-                     * Tetap menggunakan data dari borrowingsReportData.
-                     * Hanya kolom yang ditampilkan di PDF yang ditentukan
-                     * secara eksplisit agar tidak mengambil semua key
-                     * dari object secara otomatis.
+                     * Kolom yang tampil di PDF ditentukan secara eksplisit
+                     * agar tidak mengambil semua key dari object otomatis.
                      */
-
                     const columns = isLateReport ?
                         [
                             'no',
@@ -3932,26 +726,14 @@ function downloadReport(button) {
                             'status'
                         ];
 
-                    const headers = isLateReport ?
-                        [
-                            'NO',
-                            'NAMA',
-                            'JUDUL BUKU',
-                            'TENGGAT PENGEMBALIAN',
-                            'STATUS',
-                            'TGL PERPANJANGAN',
-                            'TENGGAT PENGEMBALIAN BARU',
-                            'TGL PENGEMBALIAN',
-                            'KETERANGAN'
-                        ] :
-                        [
-                            'NO',
-                            'NAMA ANGGOTA',
-                            'JUDUL BUKU',
-                            'TANGGAL PINJAM',
-                            'BATAS PENGEMBALIAN',
-                            'STATUS'
-                        ];
+                    const headers = [
+                        'NO',
+                        'NAMA ANGGOTA',
+                        'JUDUL BUKU',
+                        'TANGGAL PINJAM',
+                        'BATAS PENGEMBALIAN',
+                        'STATUS'
+                    ];
 
                     const statusMap = {
                         'dipinjam': 'Sedang Dipinjam',
@@ -3967,35 +749,41 @@ function downloadReport(button) {
                         'dibatalkan': 'Dibatalkan'
                     };
 
+                    const translateStatus = (value) => {
+                        const key = String(value ?? '-').toLowerCase();
+                        return statusMap[key] ?? value ?? '-';
+                    };
+
+                    const splitLines = (value) =>
+                        String(value ?? '-')
+                        .split(/<br\s*\/?>(?:\s*)|\n/)
+                        .map(item => item.trim())
+                        .filter(Boolean);
+
                     const rows = [];
 
                     tableData.forEach((row, index) => {
+
+                        /* ---------- PEMINJAMAN ---------- */
                         if (!isLateReport) {
                             rows.push(columns.map(column => {
-                                if (column === 'no' && (row[column] === undefined || row[column] ===
-                                        null)) {
+                                if (column === 'no' && (row[column] === undefined || row[column] === null)) {
                                     return index + 1;
                                 }
 
                                 if (column === 'status') {
-                                    const status = String(row[column] ?? '-').toLowerCase();
-                                    return statusMap[status] ?? row[column] ?? '-';
+                                    return translateStatus(row[column]);
                                 }
 
                                 return row[column] ?? '-';
                             }));
+
                             return;
                         }
 
-                        const extensionDates = String(row.extension_date ?? '-')
-                            .split(/<br\s*\/?>(?:\s*)|\n/)
-                            .map(value => value.trim())
-                            .filter(Boolean);
-
-                        const newDueDates = String(row.new_due_at ?? '-')
-                            .split(/<br\s*\/?>(?:\s*)|\n/)
-                            .map(value => value.trim())
-                            .filter(Boolean);
+                        /* ---------- KETERLAMBATAN ---------- */
+                        const extensionDates = splitLines(row.extension_date);
+                        const newDueDates = splitLines(row.new_due_at);
 
                         const extensionCount = Math.max(
                             extensionDates.length,
@@ -4003,48 +791,34 @@ function downloadReport(button) {
                             1
                         );
 
-                        for (
-                            let extensionIndex = 0; extensionIndex < extensionCount; extensionIndex++
-                        ) {
-                            const isFirstExtensionRow = extensionIndex === 0;
+                        for (let extensionIndex = 0; extensionIndex < extensionCount; extensionIndex++) {
+
                             const rowSpan = extensionCount;
 
-                            const baseCell = (content, extra = {}) => ({
+                            const baseCell = (content) => ({
                                 content: content ?? '-',
-                                ...(extensionCount > 1 ? {
-                                    rowSpan
-                                } : {}),
-                                ...extra
+                                ...(extensionCount > 1 ? { rowSpan } : {})
                             });
 
                             const extensionCell = extensionDates[extensionIndex] ?? '-';
                             const newDueCell = newDueDates[extensionIndex] ?? '-';
 
-                            if (isFirstExtensionRow) {
-                                // BARIS PERTAMA:
-                                // Semua kolom ditampilkan.
+                            if (extensionIndex === 0) {
+                                // Baris pertama: semua kolom ditampilkan.
                                 rows.push([
                                     baseCell(row.no ?? index + 1),
                                     baseCell(row.member_name ?? '-'),
                                     baseCell(row.judul_buku ?? '-'),
                                     baseCell(row.due_at ?? '-'),
-
-                                    baseCell(
-                                        statusMap[
-                                            String(row.status ?? '-').toLowerCase()
-                                        ] ?? row.status ?? '-'
-                                    ),
-
+                                    baseCell(translateStatus(row.status)),
                                     extensionCell,
                                     newDueCell,
-
                                     baseCell(row.returned_at ?? '-'),
                                     baseCell(row.keterangan ?? '-')
                                 ]);
                             } else {
-                                // BARIS PERPANJANGAN BERIKUTNYA:
-                                // Kolom yang sudah rowSpan TIDAK dibuat lagi.
-                                // Hanya kolom PERPANJANG yang diisi.
+                                // Baris perpanjangan berikutnya: kolom rowSpan
+                                // tidak dibuat ulang, hanya kolom perpanjangan.
                                 rows.push([
                                     extensionCell,
                                     newDueCell
@@ -4058,38 +832,15 @@ function downloadReport(button) {
 
                         head: isLateReport ?
                             [
-                                [{
-                                        content: 'NO',
-                                        rowSpan: 2
-                                    },
-                                    {
-                                        content: 'NAMA',
-                                        rowSpan: 2
-                                    },
-                                    {
-                                        content: 'JUDUL BUKU',
-                                        rowSpan: 2
-                                    },
-                                    {
-                                        content: 'TENGGAT PENGEMBALIAN',
-                                        rowSpan: 2
-                                    },
-                                    {
-                                        content: 'STATUS',
-                                        rowSpan: 2
-                                    },
-                                    {
-                                        content: 'PERPANJANG',
-                                        colSpan: 2
-                                    },
-                                    {
-                                        content: 'TGL PENGEMBALIAN',
-                                        rowSpan: 2
-                                    },
-                                    {
-                                        content: 'KETERANGAN',
-                                        rowSpan: 2
-                                    }
+                                [
+                                    { content: 'NO', rowSpan: 2 },
+                                    { content: 'NAMA', rowSpan: 2 },
+                                    { content: 'JUDUL BUKU', rowSpan: 2 },
+                                    { content: 'TENGGAT PENGEMBALIAN', rowSpan: 2 },
+                                    { content: 'STATUS', rowSpan: 2 },
+                                    { content: 'PERPANJANG', colSpan: 2 },
+                                    { content: 'TGL PENGEMBALIAN', rowSpan: 2 },
+                                    { content: 'KETERANGAN', rowSpan: 2 }
                                 ],
                                 [
                                     'TGL PERPANJANGAN',
@@ -4099,7 +850,6 @@ function downloadReport(button) {
                             [headers],
 
                         body: rows,
-
                         theme: 'grid',
 
                         styles: {
@@ -4117,55 +867,23 @@ function downloadReport(button) {
 
                         columnStyles: isLateReport ?
                             {
-                                0: {
-                                    cellWidth: 10,
-                                    halign: 'center'
-                                },
-                                1: {
-                                    cellWidth: 32
-                                },
-                                2: {
-                                    cellWidth: 40
-                                },
-                                3: {
-                                    cellWidth: 34
-                                },
-                                4: {
-                                    cellWidth: 28
-                                },
-                                5: {
-                                    cellWidth: 30
-                                },
-                                6: {
-                                    cellWidth: 38
-                                },
-                                7: {
-                                    cellWidth: 30
-                                },
-                                8: {
-                                    cellWidth: 35
-                                }
+                                0: { cellWidth: 10, halign: 'center' },
+                                1: { cellWidth: 32 },
+                                2: { cellWidth: 40 },
+                                3: { cellWidth: 34 },
+                                4: { cellWidth: 28 },
+                                5: { cellWidth: 30 },
+                                6: { cellWidth: 38 },
+                                7: { cellWidth: 30 },
+                                8: { cellWidth: 35 }
                             } :
                             {
-                                0: {
-                                    cellWidth: 10,
-                                    halign: 'center'
-                                },
-                                1: {
-                                    cellWidth: 40
-                                },
-                                2: {
-                                    cellWidth: 45
-                                },
-                                3: {
-                                    cellWidth: 28
-                                },
-                                4: {
-                                    cellWidth: 32
-                                },
-                                5: {
-                                    cellWidth: 27
-                                }
+                                0: { cellWidth: 10, halign: 'center' },
+                                1: { cellWidth: 40 },
+                                2: { cellWidth: 45 },
+                                3: { cellWidth: 28 },
+                                4: { cellWidth: 32 },
+                                5: { cellWidth: 27 }
                             },
 
                         tableWidth: isLateReport ? 277 : 'wrap',
@@ -4178,1542 +896,129 @@ function downloadReport(button) {
                 }
 
                 /*
-
-                                 * ====================================================
-
-                                 * EMPTY
-
-                                 * ====================================================
-
-                                 */
+                 * ====================================================
+                 * EMPTY
+                 * ====================================================
+                 */
                 else {
-
-                    doc.setTextColor(
-
-                        80,
-
-                        99,
-
-                        99
-
-                    );
-
-
-
-
-
-
-
-
-
-                    doc.setFont(
-
-                        'helvetica',
-
-                        'normal'
-
-                    );
-
-
-
-
-
-
-
-
-
-                    doc.setFontSize(
-
-                        10
-
-                    );
-
-
-
-
-
-
-
-
-
-                    doc.text(
-
-                        'Tidak ada data detail untuk periode yang dipilih.',
-
-                        14,
-
-                        78
-
-                    );
-
+                    doc.setTextColor(80, 99, 99);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(10);
+                    doc.text('Tidak ada data detail untuk periode yang dipilih.', 14, 78);
                 }
 
-
-
-
-
-
-
-
-
                 /*
-
                  * ====================================================
-
                  * FOOTER
-
                  * ====================================================
-
                  */
+                const pageCount = doc.internal.getNumberOfPages();
 
-                const pageCount =
+                for (let page = 1; page <= pageCount; page++) {
+                    doc.setPage(page);
 
-                    doc.internal.getNumberOfPages();
+                    const pageHeight = doc.internal.pageSize.height;
 
+                    doc.setFontSize(8);
+                    doc.setTextColor(120, 120, 120);
 
-
-
-
-
-
-
-
-                for (
-
-                    let page = 1; page <= pageCount; page++
-
-                ) {
-
-                    doc.setPage(
-
-                        page
-
-                    );
-
-
-
-
-
-
-
-
-
-                    const pageHeight =
-
-                        doc.internal
-
-                        .pageSize
-
-                        .height;
-
-
-
-
-
-
-
-
-
-                    doc.setFontSize(
-
-                        8
-
-                    );
-
-
-
-
-
-
-
-
-
-                    doc.setTextColor(
-
-                        120,
-
-                        120,
-
-                        120
-
-                    );
-
-
-
-
-
-
-
-
+                    doc.text(`Halaman ${page} dari ${pageCount}`, 14, pageHeight - 10);
 
                     doc.text(
-
-                        `Halaman ${page} dari ${pageCount}`,
-
-                        14,
-
-                        pageHeight - 10
-
-                    );
-
-
-
-
-
-
-
-
-
-                    doc.text(
-
                         'Perpustakaan Tiga Serangkai',
-
                         pageWidth - 14,
-
-                        pageHeight - 10, {
-
-                            align: 'right'
-
-                        }
-
+                        pageHeight - 10, { align: 'right' }
                     );
-
                 }
 
-
-
-
-
-
-
-
-
-                /*
-
-                 * ====================================================
-
-                 * SAVE
-
-                 * ====================================================
-
-                 */
-
-                doc.save(
-
-                    fileName
-
-                );
-
-
-
-
-
-
-
-
+                /* SAVE */
+                doc.save(fileName);
 
                 Swal.fire({
-
                     icon: 'success',
-
                     title: 'Unduh Selesai!',
-
                     text: 'Laporan PDF berhasil diunduh.',
-
                     confirmButtonText: 'Tutup',
-
                     confirmButtonColor: '#287b7b',
-
                     timer: 3000,
-
                     timerProgressBar: true
-
                 });
-
-
-
-
-
-
-
-
->>>>>>> origin/pandu
 
             } catch (error) {
 
-                console.error(
-<<<<<<< HEAD
-                    'Gagal membaca data koleksi:',
-                    error
-                );
-
-                tableData = [];
-=======
-
-                    'Gagal membuat PDF:',
-
-                    error
-
-                );
-
-
-
-
-
-
-
-
+                console.error('Gagal membuat PDF:', error);
 
                 Swal.fire({
-
                     icon: 'error',
-
                     title: 'Gagal Membuat PDF',
-
                     text: 'Laporan PDF gagal dibuat. Silakan coba lagi.',
-
                     confirmButtonColor: '#287b7b'
-
                 });
->>>>>>> origin/pandu
-
             }
-
-        }
-
-<<<<<<< HEAD
-    }
-
-
-    else if (
-        reportType === 'member'
-    ) {
-
-        const memberScript =
-            document.getElementById(
-                'activeMembersReportData'
-            );
-
-
-        if (memberScript) {
-
-            try {
-
-                tableData =
-                    JSON.parse(
-                        memberScript.textContent
-                    );
-
-            } catch (error) {
-
-                console.error(
-                    'Gagal membaca data anggota aktif:',
-                    error
-                );
-
-                tableData = [];
-
-            }
-
-        }
-
-    }
-
-
-    else {
-
-        const dataScript =
-            document.getElementById(
-                'borrowingsReportData'
-            );
-
-
-        if (dataScript) {
-
-            try {
-
-                tableData =
-                    JSON.parse(
-                        dataScript.textContent
-                    );
-
-            } catch (error) {
-
-                console.error(
-                    'Gagal membaca data laporan:',
-                    error
-                );
-
-                tableData = [];
-
-            }
-
-        }
-
-    }
-
-
-    /*
-     * ========================================================
-     * TANGGAL
-     * ========================================================
-     */
-
-    const startInput =
-        document.getElementById(
-            'start_date'
-        );
-
-
-    const endInput =
-        document.getElementById(
-            'end_date'
-        );
-
-
-    const startDate =
-        startInput?.value ||
-        'start';
-
-
-    const endDate =
-        endInput?.value ||
-        'end';
-
-
-    /*
-     * ========================================================
-     * FILE NAME
-     * ========================================================
-     */
-
-    const safeName =
-        reportName.replace(
-            /[^a-zA-Z0-9_-]/g,
-            '_'
-        );
-
-
-    const fileName =
-        `${safeName}_${startDate}_sd_${endDate}.pdf`;
-
-
-    /*
-     * ========================================================
-     * CEK JSPDF
-     * ========================================================
-     */
-
-    if (
-        !window.jspdf ||
-        !window.jspdf.jsPDF
-    ) {
-
-        if (typeof Swal !== 'undefined') {
-
-            Swal.fire({
-                icon: 'error',
-                title: 'PDF Tidak Siap',
-                text: 'Library PDF belum berhasil dimuat. Silakan refresh halaman.',
-                confirmButtonColor: '#287b7b'
-            });
-
-        } else {
-
-            alert(
-                'Library PDF belum berhasil dimuat. Silakan refresh halaman.'
-            );
-
-        }
-
-        return;
-    }
-
-
-    /*
-     * ========================================================
-     * BUAT PDF
-     * ========================================================
-     */
-
-    try {
-
-        const {
-            jsPDF
-        } =
-            window.jspdf;
-
-
-        const doc =
-            new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-
-        /*
-         * ====================================================
-         * HEADER
-         * ====================================================
-         */
-
-        doc.setFillColor(
-            40,
-            123,
-            123
-        );
-
-
-        doc.rect(
-            0,
-            0,
-            210,
-            24,
-            'F'
-        );
-
-
-        doc.setTextColor(
-            255,
-            255,
-            255
-        );
-
-
-        doc.setFont(
-            'helvetica',
-            'bold'
-        );
-
-
-        doc.setFontSize(
-            14
-        );
-
-
-        doc.text(
-            'PERPUSTAKAAN TIGA SERANGKAI',
-            14,
-            11
-        );
-
-
-        doc.setFont(
-            'helvetica',
-            'normal'
-        );
-
-
-        doc.setFontSize(
-            9
-        );
-
-
-        doc.text(
-            'Sistem Informasi Manajemen Laporan Perpustakaan',
-            14,
-            18
-        );
-
-
-        /*
-         * ====================================================
-         * JUDUL
-         * ====================================================
-         */
-
-        doc.setTextColor(
-            23,
-            47,
-            47
-        );
-
-
-        doc.setFont(
-            'helvetica',
-            'bold'
-        );
-
-
-        doc.setFontSize(
-            16
-        );
-
-
-        doc.text(
-            reportName.toUpperCase(),
-            14,
-            35
-        );
-
-
-        /*
-         * ====================================================
-         * PERIODE
-         * ====================================================
-         */
-
-        doc.setFont(
-            'helvetica',
-            'normal'
-        );
-
-
-        doc.setFontSize(
-            10
-        );
-
-
-        doc.setTextColor(
-            80,
-            99,
-            99
-        );
-
-
-        doc.text(
-            `Periode: ${period}`,
-            14,
-            42
-        );
-
-
-        /*
-         * ====================================================
-         * TANGGAL UNDUH
-         * ====================================================
-         */
-
-        const downloadDate =
-            new Date().toLocaleDateString(
-                'id-ID',
-                {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric'
-                }
-            );
-
-
-        doc.text(
-            `Tanggal Unduh: ${downloadDate}`,
-            14,
-            47
-        );
-
-
-        /*
-         * ====================================================
-         * SUMMARY
-         * ====================================================
-         */
-
-        doc.setFillColor(
-            243,
-            248,
-            248
-        );
-
-
-        doc.roundedRect(
-            14,
-            52,
-            182,
-            14,
-            3,
-            3,
-            'F'
-        );
-
-
-        doc.setDrawColor(
-            210,
-            230,
-            230
-        );
-
-
-        doc.roundedRect(
-            14,
-            52,
-            182,
-            14,
-            3,
-            3,
-            'S'
-        );
-
-
-        doc.setTextColor(
-            23,
-            47,
-            47
-        );
-
-
-        doc.setFont(
-            'helvetica',
-            'bold'
-        );
-
-
-        doc.setFontSize(
-            12
-        );
-
-
-        doc.text(
-            String(statValue),
-            20,
-            61
-        );
-
-
-        doc.setFont(
-            'helvetica',
-            'normal'
-        );
-
-
-        doc.setFontSize(
-            9
-        );
-
-
-        doc.text(
-            String(statLabel),
-            40,
-            61
-        );
-
-
-        /*
-         * ====================================================
-         * TABEL KOLEKSI
-         * ====================================================
-         */
-
-        if (
-            reportType === 'collection' &&
-            Array.isArray(tableData) &&
-            tableData.length > 0 &&
-            typeof doc.autoTable === 'function'
-        ) {
-
-            const rows =
-                tableData.map(
-                    (row, index) => [
-
-                        index + 1,
-
-                        row.tanggal ?? '-',
-
-                        row.jenis_perubahan ?? '-',
-
-                        row.judul_buku ?? '-',
-
-                        row.eksemplar_jumlah ?? '-',
-
-                        row.alasan_keterangan ?? '-'
-
-                    ]
-                );
-
-
-            doc.autoTable({
-
-                startY: 72,
-
-                head: [[
-
-                    'NO',
-
-                    'TANGGAL',
-
-                    'JENIS PERUBAHAN',
-
-                    'JUDUL BUKU',
-
-                    'EKSEMPLAR / JUMLAH',
-
-                    'ALASAN / KETERANGAN'
-
-                ]],
-
-                body: rows,
-
-                theme: 'grid',
-
-                styles: {
-
-                    fontSize: 7.5,
-
-                    cellPadding: 2.5
-
-                },
-
-                headStyles: {
-
-                    fontStyle: 'bold'
-
-                },
-
-                columnStyles: {
-
-                    0: {
-
-                        cellWidth: 10,
-
-                        halign: 'center'
-
-                    },
-
-                    1: {
-
-                        cellWidth: 25
-
-                    },
-
-                    2: {
-
-                        cellWidth: 32
-
-                    },
-
-                    3: {
-
-                        cellWidth: 42
-
-                    },
-
-                    4: {
-
-                        cellWidth: 30
-
-                    },
-
-                    5: {
-
-                        cellWidth: 43
-
-                    }
-
-                },
-
-                margin: {
-
-                    left: 14,
-
-                    right: 14
-
-                }
-
-            });
-
         }
 
 
         /*
-         * ====================================================
-         * TABEL ANGGOTA AKTIF
-         * ====================================================
-         */
-
-        else if (
-
-            reportType === 'member' &&
-
-            Array.isArray(tableData) &&
-
-            tableData.length > 0 &&
-
-            typeof doc.autoTable === 'function'
-
-        ) {
-
-            const rows =
-                tableData.map(
-                    row => [
-
-                        row.no ?? '-',
-
-                        row.member_name ?? '-',
-
-                        row.member_code ?? '-',
-
-                        row.activity ?? '-',
-
-                        row.books ?? '-',
-
-                        row.date ?? '-',
-
-                        row.status ?? '-'
-
-                    ]
-                );
-
-
-            doc.autoTable({
-
-                startY: 72,
-
-                head: [[
-
-                    'NO',
-
-                    'NAMA ANGGOTA',
-
-                    'KODE ANGGOTA',
-
-                    'AKTIVITAS',
-
-                    'BUKU',
-
-                    'TANGGAL',
-
-                    'STATUS'
-
-                ]],
-
-                body: rows,
-
-                theme: 'grid',
-
-                styles: {
-
-                    fontSize: 7.5,
-
-                    cellPadding: 2.5
-
-                },
-
-                headStyles: {
-
-                    fontStyle: 'bold'
-
-                },
-
-                columnStyles: {
-
-                    0: {
-
-                        cellWidth: 10
-
-                    },
-
-                    1: {
-
-                        cellWidth: 34
-
-                    },
-
-                    2: {
-
-                        cellWidth: 25
-
-                    },
-
-                    3: {
-
-                        cellWidth: 25
-
-                    },
-
-                    4: {
-
-                        cellWidth: 42
-
-                    },
-
-                    5: {
-
-                        cellWidth: 22
-
-                    },
-
-                    6: {
-
-                        cellWidth: 24
-
-                    }
-
-                },
-
-                margin: {
-
-                    left: 14,
-
-                    right: 14
-
-                }
-
-            });
-
-        }
-
-
-        /*
-         * ====================================================
-         * TABEL PEMINJAMAN
-         * ====================================================
-         */
-
-        else if (
-
-            Array.isArray(tableData) &&
-
-            tableData.length > 0 &&
-
-            typeof doc.autoTable === 'function'
-
-        ) {
-
-            const firstRow =
-                tableData[0];
-
-
-            const columns =
-                Object.keys(
-                    firstRow
-                );
-
-
-            const headers =
-                columns.map(
-                    column =>
-                        column
-                            .replace(
-                                /_/g,
-                                ' '
-                            )
-                            .toUpperCase()
-                );
-
-
-            const rows =
-                tableData.map(
-                    row =>
-                        columns.map(
-                            column =>
-                                row[column] ?? '-'
-                        )
-                );
-
-
-            doc.autoTable({
-
-                startY: 72,
-
-                head: [
-                    headers
-                ],
-
-                body: rows,
-
-                theme: 'grid',
-
-                styles: {
-
-                    fontSize: 8,
-
-                    cellPadding: 3
-
-                },
-
-                headStyles: {
-
-                    fontStyle: 'bold'
-
-                },
-
-                margin: {
-
-                    left: 14,
-
-                    right: 14
-
-                }
-
-            });
-
-        }
-
-
-        /*
-         * ====================================================
-         * EMPTY
-         * ====================================================
-         */
-
-        else {
-
-            doc.setTextColor(
-                80,
-                99,
-                99
-            );
-
-
-            doc.setFont(
-                'helvetica',
-                'normal'
-            );
-
-
-            doc.setFontSize(
-                10
-            );
-
-
-            doc.text(
-                'Tidak ada data detail untuk periode yang dipilih.',
-                14,
-                78
-            );
-
-        }
-
-
-        /*
-         * ====================================================
-         * FOOTER
-         * ====================================================
-         */
-
-        const pageCount =
-            doc.internal.getNumberOfPages();
-
-
-        for (
-            let page = 1;
-            page <= pageCount;
-            page++
-        ) {
-
-            doc.setPage(
-                page
-            );
-
-
-            const pageHeight =
-                doc.internal
-                    .pageSize
-                    .height;
-
-
-            doc.setFontSize(
-                8
-            );
-
-
-            doc.setTextColor(
-                120,
-                120,
-                120
-            );
-
-
-            doc.text(
-                `Halaman ${page} dari ${pageCount}`,
-                14,
-                pageHeight - 10
-            );
-
-
-            doc.text(
-                'Perpustakaan Tiga Serangkai',
-                196,
-                pageHeight - 10,
-                {
-                    align: 'right'
-                }
-            );
-
-        }
-
-
-        /*
-         * ====================================================
-         * SAVE
-         * ====================================================
-         */
-
-        doc.save(
-            fileName
-        );
-
-
-        if (typeof Swal !== 'undefined') {
-
-            Swal.fire({
-
-                icon: 'success',
-
-                title: 'Unduh Selesai!',
-
-                text: 'Laporan PDF berhasil diunduh.',
-
-                confirmButtonText: 'Tutup',
-
-                confirmButtonColor: '#287b7b',
-
-                timer: 3000,
-
-                timerProgressBar: true
-
-            });
-
-        }
-
-
-    } catch (error) {
-
-        console.error(
-            'Gagal membuat PDF:',
-            error
-        );
-
-
-        if (typeof Swal !== 'undefined') {
-
-            Swal.fire({
-
-                icon: 'error',
-
-                title: 'Gagal Membuat PDF',
-
-                text: 'Laporan PDF gagal dibuat. Silakan coba lagi.',
-
-                confirmButtonColor: '#287b7b'
-
-            });
-
-        } else {
-
-            alert(
-                'Laporan PDF gagal dibuat. Silakan coba lagi.'
-            );
-
-        }
-
-    }
-
-}
-
-</script>
-
-@endsection
-=======
-
-
-
-
-
-
-
-
-        /*
-
         |--------------------------------------------------------------------------
-
         | DETAIL KOLEKSI
-
         |--------------------------------------------------------------------------
-
         |
-
         | Saat card koleksi diklik:
-
         | - chart disembunyikan
-
         | - tabel koleksi ditampilkan
-
         |
-
         */
+        document.addEventListener('DOMContentLoaded', function() {
 
-        document.addEventListener(
+            const cards = document.querySelectorAll('.report-card');
 
-            'DOMContentLoaded',
+            cards.forEach(function(card) {
+                card.addEventListener('click', function() {
 
-            function() {
-
-                const cards =
-
-                    document.querySelectorAll(
-
-                        '.report-card'
-
-                    );
-
-
-
-
-
-
-
-
-
-                cards.forEach(
-
-                    function(card) {
-
-                        card.addEventListener(
-
-                            'click',
-
-                            function() {
-
-                                if (
-
-                                    card.dataset.type !==
-
-                                    'collection'
-
-                                ) {
-
-                                    return;
-
-                                }
-
-
-
-
-
-
-
-
-
-                                setTimeout(
-
-                                    function() {
-
-                                        const collectionSection =
-
-                                            document.getElementById(
-
-                                                'collectionDetailSection'
-
-                                            );
-
-
-
-
-
-
-
-
-
-                                        const normalChart =
-
-                                            document.getElementById(
-
-                                                'normalDetailChart'
-
-                                            );
-
-
-
-
-
-
-
-
-
-                                        if (
-
-                                            collectionSection
-
-                                        ) {
-
-                                            collectionSection.style.display =
-
-                                                'block';
-
-                                        }
-
-
-
-
-
-
-
-
-
-                                        if (
-
-                                            normalChart
-
-                                        ) {
-
-                                            normalChart.style.display =
-
-                                                'none';
-
-                                        }
-
-                                    },
-
-                                    50
-
-                                );
-
-                            }
-
-                        );
-
+                    if (card.dataset.type !== 'collection') {
+                        return;
                     }
 
-                );
-
-
-
-
-
-
-
-
-
-                /*
-
-                 * Reset saat modal ditutup.
-
-                 */
-
-                const modal =
-
-                    document.getElementById(
-
-                        'reportDetailModal'
-
-                    );
-
-
-
-
-
-
-
-
-
-                if (modal) {
-
-                    const observer =
-
-                        new MutationObserver(
-
-                            function() {
-
-                                if (
-
-                                    !modal.classList.contains(
-
-                                        'show'
-
-                                    )
-
-                                ) {
-
-                                    const collectionSection =
-
-                                        document.getElementById(
-
-                                            'collectionDetailSection'
-
-                                        );
-
-
-
-
-
-
-
-
-
-                                    const normalChart =
-
-                                        document.getElementById(
-
-                                            'normalDetailChart'
-
-                                        );
-
-
-
-
-
-
-
-
-
-                                    if (
-
-                                        collectionSection
-
-                                    ) {
-
-                                        collectionSection.style.display =
-
-                                            'none';
-
-                                    }
-
-
-
-
-
-
-
-
-
-                                    if (
-
-                                        normalChart
-
-                                    ) {
-
-                                        normalChart.style.display =
-
-                                            '';
-
-                                    }
-
-                                }
-
-                            }
-
-                        );
-
-
-
-
-
-
-
-
-
-                    observer.observe(
-
-                        modal, {
-
-                            attributes: true,
-
-                            attributeFilter: [
-
-                                'class'
-
-                            ]
-
+                    setTimeout(function() {
+                        const collectionSection = document.getElementById('collectionDetailSection');
+                        const normalChart = document.getElementById('normalDetailChart');
+
+                        if (collectionSection) {
+                            collectionSection.style.display = 'block';
                         }
 
-                    );
+                        if (normalChart) {
+                            normalChart.style.display = 'none';
+                        }
+                    }, 50);
+                });
+            });
 
-                }
+            /* Reset saat modal ditutup. */
+            const modal = document.getElementById('reportDetailModal');
 
+            if (modal) {
+                const observer = new MutationObserver(function() {
+
+                    if (!modal.classList.contains('show')) {
+                        const collectionSection = document.getElementById('collectionDetailSection');
+                        const normalChart = document.getElementById('normalDetailChart');
+
+                        if (collectionSection) {
+                            collectionSection.style.display = 'none';
+                        }
+
+                        if (normalChart) {
+                            normalChart.style.display = '';
+                        }
+                    }
+                });
+
+                observer.observe(modal, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
             }
-
-        );
+        });
     </script>
 @endpush
->>>>>>> origin/pandu

@@ -967,7 +967,7 @@ class ReportController extends Controller
                         $item['label'],
 
                     'judul_buku' =>
-                        $item['book_title'],
+                        $item['judul_buku'],
 
                     'eksemplar_jumlah' =>
                         $item['display_quantity'],
