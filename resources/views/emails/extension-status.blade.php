@@ -52,7 +52,7 @@
       </table>
     </div>
     @if($isRejected)
-    <p>Pastikan buku dikembalikan sebelum tanggal jatuh tempo yang berlaku.</p>
+    <p>Pastikan buku dikembalikan sebelum tenggat pengembalian yang berlaku.</p>
     @else
     <p>Pastikan buku dikembalikan tepat waktu sebelum <strong>{{ $borrowing->due_at?->format('d M Y') }}</strong>.</p>
     @endif

@@ -630,41 +630,26 @@
 /* Dipin selalu di kanan */
 
 .activities-pinned-btn {
-
     min-width: 86px;
-
     height: 40px;
-
     padding: 0 14px;
-
-    border: 1px solid #dce8e7;
-
+    border: 1px solid #287f80;
     border-radius: 8px;
-
-    background: #ffffff;
-
-    color: #667474;
-
+    background: #287f80;
+    color: #ffffff;
     font-family: inherit;
-
     font-size: 10px;
-
     font-weight: 700;
-
     cursor: pointer;
-
     white-space: nowrap;
-
 }
 
 .activities-pinned-btn:hover,
 
 .activities-pinned-btn.active {
 
-    background: #287f80;
-
-    border-color: #287f80;
-
+    background: #236f70;
+    border-color: #236f70;
     color: #ffffff;
 
 }

@@ -407,7 +407,7 @@
                             <div class="uprof-pref-row">
                                 <div>
                                     <div class="uprof-pref-title">Pengingat Pengembalian</div>
-                                    <p class="uprof-pref-desc">Pengingat sebelum jatuh tempo pengembalian.</p>
+                                    <p class="uprof-pref-desc">Pengingat sebelum tenggat pengembalian.</p>
                                 </div>
                                 <label class="eg-switch">
                                     <input type="checkbox" name="return_reminder_notifications" class="sub-pref-item" value="1" {{ ($user->return_reminder_notifications ?? true) ? 'checked' : '' }} {{ ($user->allow_notifications ?? true) ? '' : 'disabled' }}>

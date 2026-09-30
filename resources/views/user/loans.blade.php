@@ -704,12 +704,12 @@
                     <div class="ext-info-box-value" id="extBorrowedAt">—</div>
                 </div>
                 <div class="ext-info-box">
-                    <div class="ext-info-box-label">Jatuh Tempo Saat Ini</div>
+                    <div class="ext-info-box-label">Tenggat Pengembalian Saat Ini</div>
                     <div class="ext-info-box-value" id="extCurrentDue">—</div>
                 </div>
                 <div class="ext-info-box is-full is-warning">
                     <div class="ext-info-box-label">Perpanjangan Maksimal</div>
-                    <div class="ext-info-box-value">14 Hari dari jatuh tempo</div>
+                    <div class="ext-info-box-value">14 Hari dari tenggat saat ini</div>
                 </div>
             </div>
 
@@ -897,7 +897,7 @@ function onDateSelected(dateStr) {
 
     // Validasi
     if (selected <= currentDue) {
-        showError('Tanggal harus lebih besar dari tanggal jatuh tempo saat ini.');
+        showError('Tanggal harus lebih besar dari tenggat pengembalian saat ini.');
         btnSubmit.disabled = true;
         pickerInput.classList.add('is-error');
         previewCard.classList.remove('show');

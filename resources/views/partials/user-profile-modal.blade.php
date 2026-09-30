@@ -462,7 +462,7 @@
                                     </span>
                                 </div>
                                 <p class="pref-desc">
-                                    Terima notifikasi status persetujuan reservasi buku dan peringatan pengembalian H-1 sebelum jatuh tempo.
+                                    Terima notifikasi status persetujuan reservasi buku dan peringatan pengembalian H-1 sebelum tenggat yang berlaku.
                                 </p>
                             </div>
                         </div>

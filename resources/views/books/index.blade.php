@@ -46,38 +46,144 @@
     </div>
     @endif
 
-    {{-- TOOLBAR PENCARIAN --}}
+    {{-- TOOLBAR PENCARIAN + FILTER KATEGORI --}}
     <div class="book-toolbar">
+
         <div class="book-search-wrapper">
-            <svg class="book-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="book-search-icon" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <input type="text" id="books-search" class="book-search-input" placeholder="Cari buku berdasarkan judul, pengarang, ISBN..." autocomplete="off">
+
+            <input
+                type="text"
+                id="books-search"
+                class="book-search-input"
+                placeholder="Cari buku berdasarkan judul, pengarang, ISBN..."
+                autocomplete="off"
+            >
         </div>
-        <button type="button" id="books-search-button" class="book-toolbar-btn book-search-btn">Cari</button>
+
+        {{-- <button
+            type="button"
+            id="books-search-button"
+            class="book-toolbar-btn book-search-btn"
+        >
+            Cari
+        </button> --}}
+
+        {{-- FILTER KATEGORI --}}
+        <div class="books-category-dropdown" id="books-category-dropdown">
+
+            <button
+                type="button"
+                class="books-category-trigger"
+                id="books-category-trigger"
+                aria-expanded="false"
+            >
+                <svg
+                    class="books-category-filter-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M4 6h16" />
+                    <path d="M7 12h10" />
+                    <path d="M10 18h4" />
+                </svg>
+
+                <span id="books-category-label">Semua Kategori</span>
+
+                <svg
+                    class="books-category-trigger-chevron"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+
+            <div
+                class="books-category-menu"
+                id="books-category-menu"
+            >
+
+                <div class="books-category-menu-title">
+                    PILIH KATEGORI
+                </div>
+
+                <button
+                    type="button"
+                    class="books-category-option active"
+                    data-value=""
+                >
+                    <span>Semua Kategori</span>
+                    <span class="books-category-count">
+                        {{ $books->count() }}
+                    </span>
+                </button>
+
+                @foreach($books->pluck('category')->filter()->unique('id')->sortBy('name') as $category)
+
+                    @php
+                        $categoryCount = $books->where('category_id', $category->id)->count();
+                    @endphp
+
+                    <button
+                        type="button"
+                        class="books-category-option"
+                        data-value="{{ $category->id }}"
+                    >
+                        <span>{{ $category->name }}</span>
+
+                        <span class="books-category-count">
+                            {{ $categoryCount }}
+                        </span>
+                    </button>
+
+                @endforeach
+
+            </div>
+
+            {{-- Hidden select tetap dipakai JavaScript sebagai sumber filter --}}
+            <select
+                id="books-filter-kategori"
+                class="books-category-filter books-category-hidden-select"
+                aria-hidden="true"
+                tabindex="-1"
+            >
+                <option value="">Semua Kategori</option>
+
+                @foreach($books->pluck('category')->filter()->unique('id')->sortBy('name') as $category)
+                    <option value="{{ $category->id }}">
+                        {{ $category->name }}
+                    </option>
+                @endforeach
+            </select>
+
+        </div>
+
     </div>
 
-    {{-- TABLE HEADER & FILTER KATEGORI --}}
+    {{-- TABLE HEADER --}}
     <div class="books-table-header">
         <div class="books-table-title">
             <h2>Daftar Koleksi Buku</h2>
         </div>
+
         <div class="books-table-controls">
-            <div class="category-filter-wrapper">
-                <div class="books-category-select-box">
-                    <select id="books-filter-kategori" class="books-category-filter">
-                        <option value="">Semua Kategori</option>
-                        @foreach($books->pluck('category')->filter()->unique('id')->sortBy('name') as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                    <svg class="books-category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </div>
-                <span class="book-total" id="books-total">Total: {{ $books->count() }} Buku</span>
-            </div>
+            <span class="book-total" id="books-total">
+                Total: {{ $books->count() }} Buku
+            </span>
         </div>
     </div>
 
@@ -159,7 +265,92 @@ document.addEventListener('DOMContentLoaded', function () {
     const paginationInfo = document.getElementById('books-pagination-info');
     const rows = Array.from(document.querySelectorAll('#books-table-body tr[data-category]'));
 
+    const categoryDropdown = document.getElementById('books-category-dropdown');
+    const categoryTrigger = document.getElementById('books-category-trigger');
+    const categoryMenu = document.getElementById('books-category-menu');
+    const categoryLabel = document.getElementById('books-category-label');
+    const categoryOptions = Array.from(
+        document.querySelectorAll('.books-category-option')
+    );
+
     const BOOKS_PER_PAGE = 25;
+
+    /* =========================================================
+       CUSTOM CATEGORY DROPDOWN
+    ========================================================= */
+
+    if (categoryTrigger && categoryMenu && categoryDropdown) {
+
+        categoryTrigger.addEventListener('click', function (event) {
+            event.stopPropagation();
+
+            const isOpen = categoryMenu.classList.contains('is-open');
+
+            categoryMenu.classList.toggle('is-open', !isOpen);
+            categoryTrigger.classList.toggle('is-open', !isOpen);
+
+            categoryTrigger.setAttribute(
+                'aria-expanded',
+                !isOpen ? 'true' : 'false'
+            );
+        });
+
+        categoryOptions.forEach(function (option) {
+
+            option.addEventListener('click', function () {
+
+                const value = option.dataset.value || '';
+                const textElement = option.querySelector('span:first-child');
+                const text = textElement
+                    ? textElement.textContent.trim()
+                    : 'Semua Kategori';
+
+                /* Update hidden select */
+                if (categoryFilter) {
+                    categoryFilter.value = value;
+                }
+
+                /* Update tulisan tombol */
+                if (categoryLabel) {
+                    categoryLabel.textContent = text;
+                }
+
+                /* Update active state */
+                categoryOptions.forEach(function (item) {
+                    item.classList.remove('active');
+                });
+
+                option.classList.add('active');
+
+                /* Tutup dropdown */
+                categoryMenu.classList.remove('is-open');
+                categoryTrigger.classList.remove('is-open');
+
+                categoryTrigger.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+
+                /* Reset pagination + render */
+                resetAndRender();
+            });
+        });
+
+        /* Klik di luar dropdown */
+        document.addEventListener('click', function (event) {
+
+            if (!categoryDropdown.contains(event.target)) {
+
+                categoryMenu.classList.remove('is-open');
+                categoryTrigger.classList.remove('is-open');
+
+                categoryTrigger.setAttribute(
+                    'aria-expanded',
+                    'false'
+                );
+            }
+        });
+    }
     let currentPage = 1;
     let filteredRows = [...rows];
 

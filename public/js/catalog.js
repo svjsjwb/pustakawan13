@@ -62,6 +62,8 @@
         const modalYear = document.getElementById('modal-year');
         const modalCallNumber = document.getElementById('modal-call-number');
         const modalIsbn = document.getElementById('modal-isbn');
+        const modalCoverImage = document.getElementById('modal-cover-image');
+        const modalBookBox = document.getElementById('modal-book-box');
 
 
         /* =========================================================
@@ -168,39 +170,35 @@
             if (modalDescription) modalDescription.textContent = description;
 
 
+            
             /* =================================================
-               COVER pada BOOK 3D (bookFront)
+            COVER MODAL
             ================================================= */
 
-            if (bookFront) {
+            if (modalCoverImage && modalBookBox) {
+                // Tampilkan cover default jika gambar gagal dimuat.
+                modalCoverImage.onerror = function () {
+                    modalCoverImage.style.display = 'none';
+                    modalBookBox.style.display = 'flex';
+                };
 
                 if (cover) {
+                    modalCoverImage.alt = `Cover ${title}`;
 
-                    bookFront.innerHTML = '';
+                    // Sembunyikan cover default ketika gambar berhasil dimuat.
+                    modalCoverImage.onload = function () {
+                        modalCoverImage.style.display = 'block';
+                        modalBookBox.style.display = 'none';
+                    };
 
-                    bookFront.style.backgroundImage = `url('${cover}')`;
-                    bookFront.style.backgroundSize = 'cover';
-                    bookFront.style.backgroundPosition = 'center';
-
+                    modalCoverImage.src = cover;
                 } else {
-
-                    bookFront.style.backgroundImage = '';
-
-                    bookFront.innerHTML =
-                        `<div class="book-top">
-                            TIGA SERANGKAI
-                        </div>
-
-                        <div class="book-title" id="modalBookTitle">
-                            ${title}
-                        </div>
-
-                        <div class="book-bottom">
-                            PERPUSTAKAAN
-                        </div>`;
-
+                    // Buku tidak mempunyai cover.
+                    modalCoverImage.onload = null;
+                    modalCoverImage.removeAttribute('src');
+                    modalCoverImage.style.display = 'none';
+                    modalBookBox.style.display = 'flex';
                 }
-
             }
 
 

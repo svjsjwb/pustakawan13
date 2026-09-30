@@ -68,7 +68,7 @@
                             <div class="loan-card-accent" style="background:{{ $color }}"></div>
                             <div class="loan-card-content">
                                 <div class="loan-card-head"><div><p class="loan-meta-label">NO. PEMINJAMAN</p><p class="loan-number">#{{ str_pad($borrowing->id, 6, '0', STR_PAD_LEFT) }}</p></div><div><span class="loan-status" style="background:{{ $bg }};color:{{ $color }}">{{ $overdue ? 'Terlambat' : ($nearDue ? 'Mendekati Batas Pengembalian' : 'Sedang Dipinjam') }}</span></div></div>
-                                <div class="loan-dates"><div><p class="loan-meta-label">TANGGAL PINJAM</p><p class="loan-date-value">{{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }}</p></div><div class="loan-date-divider"></div><div><p class="loan-meta-label">TANGGAL JATUH TEMPO</p><p class="loan-date-value due-date" style="color:{{ $color }}">{{ $borrowing->due_at?->format('d M Y') ?? '-' }}</p></div></div>
+                                <div class="loan-dates"><div><p class="loan-meta-label">TANGGAL PINJAM</p><p class="loan-date-value">{{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }}</p></div><div class="loan-date-divider"></div><div><p class="loan-meta-label">TANGGAL TENGGAT PENGEMBALIAN</p><p class="loan-date-value due-date" style="color:{{ $color }}">{{ $borrowing->due_at?->format('d M Y') ?? '-' }}</p></div></div>
                                 <div class="loan-book-row">
                                     @if($book?->cover)<img src="{{ asset('storage/'.$book->cover) }}" class="loan-cover" alt="{{ $book->title }}">@else<div class="loan-cover loan-cover-fallback">{{ strtoupper(substr($book?->title ?? 'B', 0, 1)) }}</div>@endif
                                     <div class="loan-book-info"><p class="loan-book-title">{{ $book?->title ?? 'Buku' }}</p><p class="loan-book-author">{{ $book?->author ?? '-' }}</p><span class="loan-category">{{ $book?->category?->name ?? 'Umum' }}</span></div>
@@ -106,7 +106,7 @@
             <dd id="borrowingModalBook" style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</dd>
             <dt>Tanggal Pinjam</dt>
             <dd id="borrowingModalBorrowed">-</dd>
-            <dt>Jatuh Tempo Saat Ini</dt>
+            <dt>Tenggat Pengembalian Saat Ini</dt>
             <dd id="borrowingModalDue" class="highlight">-</dd>
             <dt>Perpanjangan Maksimal</dt>
             <dd>14 Hari</dd>

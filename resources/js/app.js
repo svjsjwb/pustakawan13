@@ -217,7 +217,7 @@ function renderDashboard(){
       <div><div class="due-title">${b.title}</div><div class="due-sub">${m.name}</div></div>
       <span class="due-tag" style="${tagClass}">${tag}</span>
     </div>`;
-  }).join('') || emptyRow('Tidak ada jatuh tempo mendatang.');
+  }).join('') || emptyRow('Belum ada jadwal pengembalian buku dalam waktu dekat.');
 
   const catCount = {};
   loans.forEach(l=>{ const b=bookById(l.bookId); catCount[b.category]=(catCount[b.category]||0)+1; });

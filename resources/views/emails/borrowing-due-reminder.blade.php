@@ -5,8 +5,8 @@
   <div style="display:inline-block;width:56px;height:56px;line-height:56px;border-radius:50%;background:#fef3c7;font-size:28px;margin-bottom:12px;">
     ⏰
   </div>
-  <h2 style="margin:0 0 8px 0;color:#0f172a;font-size:22px;font-weight:700;">Pengingat Jatuh Tempo (H-1)</h2>
-  <p style="margin:0;color:#64748b;font-size:15px;">Buku pinjaman Anda akan jatuh tempo besok hari.</p>
+  <h2 style="margin:0 0 8px 0;color:#0f172a;font-size:22px;font-weight:700;">Pengingat Tenggat Pengembalian (H-1)</h2>
+  <p style="margin:0;color:#64748b;font-size:15px;">Masa peminjaman buku Anda akan berakhir besok hari.</p>
 </div>
 
 @php

@@ -28,7 +28,7 @@
 </div>
 
 <p style="color:#475569;font-size:14px;line-height:1.7;">
-  Email ini akan digunakan untuk mengirim informasi reservasi, persetujuan, tanda terima pengembalian buku, event perpustakaan, serta pengingat jatuh tempo secara otomatis.
+  Email ini akan digunakan untuk mengirim informasi reservasi, persetujuan, tanda terima pengembalian buku, event perpustakaan, serta pengingat tenggat pengembalian secara otomatis.
 </p>
 
 <div style="text-align:center;margin-top:28px;margin-bottom:16px;">

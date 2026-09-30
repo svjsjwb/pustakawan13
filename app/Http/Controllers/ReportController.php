@@ -143,15 +143,12 @@ class ReportController extends Controller
                 if ($diffDays <= 1) {
 
                     $rangeType = 'day';
-
                 } elseif ($diffDays <= 7) {
 
                     $rangeType = 'week';
-
                 } else {
 
                     $rangeType = 'month';
-
                 }
 
 
@@ -352,16 +349,7 @@ class ReportController extends Controller
             );
 
 
-        /*
-         * ========================================================
-         * KOLEKSI
-         * ========================================================
-         *
-         * 1. Buku Ditambahkan
-         * 2. Buku Ditarik
-         * 3. Eksemplar Dihapus
-         * 4. Kondisi Rusak
-         */
+      
         $collectionReportData =
             $this->getCollectionReportData(
                 $startDate,
@@ -387,6 +375,15 @@ class ReportController extends Controller
         $totalBooks = $collectionAddedCount;
 
 
+        $collectionAddedCopyCount =
+            $collectionReportData
+            ->where(
+                'type',
+                'copy_added'
+            )
+            ->count();
+
+
         $collectionWithdrawnCount =
             $collectionReportData
             ->where(
@@ -400,7 +397,7 @@ class ReportController extends Controller
             $collectionReportData
             ->where(
                 'type',
-                'copy_deleted'
+                'copy_withdrawn'
             )
             ->count();
 
@@ -861,8 +858,7 @@ class ReportController extends Controller
                     $bookTitles =
                         $borrowing->details
                         ->map(function ($detail) {
-                            return
-                                ($detail->book->judul_buku ?? 'Buku')
+                            return ($detail->book->judul_buku ?? 'Buku')
                                 .
                                 (
                                     $detail->quantity > 1
@@ -893,16 +889,16 @@ class ReportController extends Controller
                     return [
                         'no' => $index + 1,
                         'member_name' =>
-                            $member->name
+                        $member->name
                             ??
                             ('Anggota #' . $member->id),
                         'member_code' =>
-                            $member->member_code ?? '-',
+                        $member->member_code ?? '-',
                         'activity' => 'Peminjaman',
                         'books' =>
-                            $bookTitles ?: 'Tidak ada rincian',
+                        $bookTitles ?: 'Tidak ada rincian',
                         'date' =>
-                            $borrowingDate->translatedFormat('d M Y'),
+                        $borrowingDate->translatedFormat('d M Y'),
                         'status' => $statusText,
                     ];
                 }
@@ -911,29 +907,29 @@ class ReportController extends Controller
                     return [
                         'no' => $index + 1,
                         'member_name' =>
-                            $member->name
+                        $member->name
                             ??
                             ('Anggota #' . $member->id),
                         'member_code' =>
-                            $member->member_code ?? '-',
+                        $member->member_code ?? '-',
                         'activity' => 'Reservasi',
                         'books' =>
-                            $reservation->book->judul_buku ?? 'Buku',
+                        $reservation->book->judul_buku ?? 'Buku',
                         'date' =>
-                            $reservationDate->translatedFormat('d M Y'),
+                        $reservationDate->translatedFormat('d M Y'),
                         'status' =>
-                            ucfirst($reservation->status),
+                        ucfirst($reservation->status),
                     ];
                 }
 
                 return [
                     'no' => $index + 1,
                     'member_name' =>
-                        $member->name
+                    $member->name
                         ??
                         ('Anggota #' . $member->id),
                     'member_code' =>
-                        $member->member_code ?? '-',
+                    $member->member_code ?? '-',
                     'activity' => '-',
                     'books' => '-',
                     'date' => '-',
@@ -955,25 +951,25 @@ class ReportController extends Controller
 
                 return [
                     'no' =>
-                        $index + 1,
+                    $index + 1,
 
                     'tanggal' =>
-                        $item['date']
+                    $item['date']
                         ->translatedFormat(
                             'd M Y'
                         ),
 
                     'jenis_perubahan' =>
-                        $item['label'],
+                    $item['label'],
 
                     'judul_buku' =>
-                        $item['judul_buku'],
+                    $item['judul_buku'],
 
                     'eksemplar_jumlah' =>
-                        $item['display_quantity'],
+                    $item['display_quantity'],
 
                     'alasan_keterangan' =>
-                        $item['reason'],
+                    $item['reason'],
 
                 ];
             })
@@ -1053,12 +1049,16 @@ class ReportController extends Controller
 
 
         /*
-         * ========================================================
-         * 1. BUKU DITAMBAHKAN
-         * ========================================================
-         *
-         * Hanya buku aktif yang dibuat dalam periode.
-         */
+     * ========================================================
+     * 1. BUKU DITAMBAHKAN
+     * ========================================================
+     *
+     * Buku baru yang dibuat dalam periode laporan.
+     *
+     * Eksemplar yang dibuat bersamaan dengan buku baru
+     * dihitung sebagai bagian dari buku baru, bukan sebagai
+     * "Eksemplar Ditambahkan".
+     */
         $addedBooks =
             Book::with('copies')
             ->whereBetween(
@@ -1082,9 +1082,11 @@ class ReportController extends Controller
 
 
             $data->push([
-                'type' => 'added',
+                'type' =>
+                'added',
 
-                'label' => 'Buku Ditambahkan',
+                'label' =>
+                'Buku Ditambahkan',
 
                 'date' =>
                 $book->created_at,
@@ -1101,24 +1103,105 @@ class ReportController extends Controller
                     : 1,
 
                 'display_quantity' =>
-                    $copyCount > 0
+                $copyCount > 0
                     ? $copyCount . ' eksemplar'
                     : '1 buku',
 
                 'reason' =>
-                    'Koleksi baru',
+                'Koleksi baru',
 
                 'sort_date' =>
-                    $book->created_at,
+                $book->created_at,
             ]);
         }
 
 
         /*
-         * ========================================================
-         * 2. BUKU DITARIK
-         * ========================================================
-         */
+     * ========================================================
+     * 2. EKSEMPLAR DITAMBAHKAN
+     * ========================================================
+     *
+     * Mencatat eksemplar baru yang ditambahkan ke buku
+     * yang SUDAH ADA sebelumnya.
+     *
+     * Eksemplar dianggap sebagai tambahan apabila:
+     *
+     * book_copies.created_at > books.created_at
+     *
+     * Dengan begitu eksemplar awal ketika buku pertama kali
+     * dibuat tidak dihitung lagi sebagai eksemplar tambahan.
+     */
+        $addedCopies =
+            BookCopy::query()
+            ->join(
+                'books',
+                'books.id',
+                '=',
+                'book_copies.book_id'
+            )
+            ->whereBetween(
+                'book_copies.created_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
+            )
+            ->whereColumn(
+                'book_copies.created_at',
+                '>',
+                'books.created_at'
+            )
+            ->select(
+                'book_copies.*'
+            )
+            ->with('book')
+            ->orderBy(
+                'book_copies.created_at',
+                'desc'
+            )
+            ->get();
+
+
+        foreach ($addedCopies as $copy) {
+
+            $data->push([
+                'type' =>
+                'copy_added',
+
+                'label' =>
+                'Eksemplar Ditambahkan',
+
+                'date' =>
+                $copy->created_at,
+
+                'judul_buku' =>
+                $copy->book->judul_buku
+                    ?? 'Buku',
+
+                'barcode' =>
+                $copy->barcode,
+
+                'quantity' =>
+                1,
+
+                'display_quantity' =>
+                $copy->barcode
+                    ?? '1 eksemplar',
+
+                'reason' =>
+                'Penambahan eksemplar',
+
+                'sort_date' =>
+                $copy->created_at,
+            ]);
+        }
+
+
+        /*
+     * ========================================================
+     * 3. BUKU DITARIK
+     * ========================================================
+     */
         $withdrawnBooks =
             CollectionWithdrawal::query()
             ->where(
@@ -1145,41 +1228,49 @@ class ReportController extends Controller
         ) {
 
             $data->push([
-                'type' => 'withdrawn',
+                'type' =>
+                'withdrawn',
 
-                'label' => 'Buku Ditarik',
+                'label' =>
+                'Buku Ditarik',
 
                 'date' =>
-                    $withdrawal->withdrawn_at,
+                $withdrawal->withdrawn_at,
 
                 'judul_buku' =>
-                    $withdrawal->book_title,
+                $withdrawal->book_title,
 
                 'barcode' =>
-                    null,
+                null,
 
                 'quantity' =>
-                    $withdrawal->quantity,
+                $withdrawal->quantity,
 
                 'display_quantity' =>
-                    $withdrawal->quantity
+                $withdrawal->quantity
                     . ' eksemplar',
 
                 'reason' =>
-                    $withdrawal->reason,
+                $withdrawal->reason,
 
                 'sort_date' =>
-                    $withdrawal->withdrawn_at,
+                $withdrawal->withdrawn_at,
             ]);
         }
 
 
         /*
-         * ========================================================
-         * 3. EKSEMPLAR DIHAPUS
-         * ========================================================
-         */
-        $deletedCopies =
+     * ========================================================
+     * 4. EKSEMPLAR DITARIK
+     * ========================================================
+     *
+     * Data berasal dari CollectionWithdrawal dengan
+     * type = copy.
+     *
+     * Eksemplar yang ditarik tetap bisa muncul di laporan
+     * walaupun record BookCopy sudah dihapus dari database.
+     */
+        $withdrawnCopies =
             CollectionWithdrawal::query()
             ->where(
                 'type',
@@ -1200,16 +1291,16 @@ class ReportController extends Controller
 
 
         foreach (
-            $deletedCopies
+            $withdrawnCopies
             as $withdrawal
         ) {
 
             $data->push([
                 'type' =>
-                'copy_deleted',
+                'copy_withdrawn',
 
                 'label' =>
-                'Eksemplar Dihapus',
+                'Eksemplar Ditarik',
 
                 'date' =>
                 $withdrawal->withdrawn_at,
@@ -1237,17 +1328,17 @@ class ReportController extends Controller
 
 
         /*
-         * ========================================================
-         * 4. KONDISI RUSAK
-         * ========================================================
-         *
-         * Saat ini database hanya menyimpan kondisi terakhir.
-         *
-         * Jadi bagian ini menampilkan eksemplar yang sekarang
-         * mempunyai condition = rusak.
-         *
-         * Bukan histori perubahan kondisi.
-         */
+     * ========================================================
+     * 5. KONDISI RUSAK
+     * ========================================================
+     *
+     * Database saat ini menyimpan kondisi terakhir.
+     *
+     * Jadi bagian ini menampilkan eksemplar yang sekarang
+     * mempunyai condition = rusak.
+     *
+     * Bukan histori perubahan kondisi.
+     */
         $damagedCopies =
             BookCopy::with([
                 'book'
@@ -1303,11 +1394,6 @@ class ReportController extends Controller
         }
 
 
-        /*
-         * ========================================================
-         * URUTKAN TERBARU
-         * ========================================================
-         */
         return $data
             ->sortByDesc(
                 'sort_date'
@@ -1316,33 +1402,6 @@ class ReportController extends Controller
     }
 
 
-    /**
-     * ============================================================
-     * HITUNG RIWAYAT KETERLAMBATAN PEMINJAMAN
-     * ============================================================
-     *
-     * Menghasilkan:
-     *
-     * - apakah pernah terlambat
-     * - tanggal mulai terlambat
-     * - tanggal akhir keterlambatan
-     * - total hari terlambat
-     * - riwayat perpanjangan
-     *
-     * Aturan:
-     *
-     * Peminjaman jatuh tempo tanggal 15
-     * -> belum terlambat sepanjang tanggal 15
-     * -> mulai terlambat 00:00 tanggal 16
-     *
-     * Jika diperpanjang:
-     *
-     * 15 Sep -> 20 Sep
-     *
-     * dan perpanjangan dilakukan 16 Sep,
-     * maka tanggal 16 dihitung sebagai 1 hari terlambat
-     * sebelum deadline baru berlaku.
-     */
     private function getLateInfo(Borrowing $borrowing)
     {
         if (!$borrowing->due_at) {
@@ -1871,10 +1930,7 @@ class ReportController extends Controller
         $endDate,
         $type
     ) {
-        /*
-         * Grafik koleksi menggunakan jumlah seluruh perubahan
-         * koleksi per bagian periode.
-         */
+        
         $data =
             $this->getCollectionReportData(
                 $startDate,
@@ -2557,10 +2613,9 @@ class ReportController extends Controller
                     8,
                     round(
                         ($value / $max)
-                        * 100
+                            * 100
                     )
                 );
-
             },
             $values
         );

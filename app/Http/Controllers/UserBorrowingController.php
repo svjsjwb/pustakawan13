@@ -316,7 +316,7 @@ class UserBorrowingController extends Controller
             'Format tanggal tidak valid.',
 
             'new_due_date.after' =>
-            'Tanggal harus lebih besar dari tanggal jatuh tempo saat ini.',
+            'Tanggal harus lebih besar dari tenggat saat ini.',
 
             'new_due_date.before_or_equal' =>
             "Perpanjangan melebihi batas maksimum {$maxExtensionDays} hari.",

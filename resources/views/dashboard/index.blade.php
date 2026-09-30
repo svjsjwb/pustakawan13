@@ -209,7 +209,7 @@
                         </div>
 
                         <div class="stat-description">
-                            Peminjaman melewati jatuh tempo
+                            Peminjaman melewati tenggat pengembalian
                         </div>
 
                     </div>

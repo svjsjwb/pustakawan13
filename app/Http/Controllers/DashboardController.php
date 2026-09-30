@@ -28,7 +28,7 @@ class DashboardController extends Controller
         $activeMembers = Member::where('status', 'aktif')->count();
 
         $lateBorrowings = Borrowing::where('status', 'dipinjam')
-            ->where('due_at', '<', now())
+            ->whereDate('due_at', '<', today())
             ->count();
 
 

@@ -10,6 +10,8 @@ use App\Models\Subcategory;
 use App\Models\Shelf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use App\Services\BookMetadataService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -87,345 +89,54 @@ class BookController extends Controller
     | STORE
     |--------------------------------------------------------------------------
     */
-    public function isbnLookup(Request $request)
+    public function isbnLookup(Request $request, BookMetadataService $metadataService)
     {
         $request->validate([
-            'isbn' => [
-                'required',
-                'string',
-                'regex:/^[0-9Xx -]{10,17}$/',
-            ],
+            'isbn' => ['required', 'string', 'max:30'],
         ]);
 
-        $isbn = strtoupper(
-            preg_replace('/[^0-9Xx]/', '', $request->isbn)
-        );
+        $isbn = $metadataService->normalizeIsbn($request->string('isbn')->toString());
 
-        if (!preg_match('/^(?:\d{10}|\d{13})$/', $isbn)) {
+        if (!$isbn) {
             return response()->json([
                 'success' => false,
-                'message' => 'Format ISBN tidak valid.',
+                'message' => 'Format ISBN tidak valid. Masukkan ISBN-10 atau ISBN-13.',
             ], 422);
         }
 
-        $isbnCandidates = [$isbn];
+        $metadata = $metadataService->findByIsbn($isbn);
 
-        if (
-            strlen($isbn) === 13 &&
-            in_array(substr($isbn, 0, 3), ['978', '979'], true)
-        ) {
-            $isbn10 = $this->convertIsbn13ToIsbn10($isbn);
-
-            if ($isbn10) {
-                $isbnCandidates[] = $isbn10;
-            }
+        if (!$metadata) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data buku dengan ISBN tersebut tidak ditemukan. ISBN tetap dapat digunakan untuk pengisian manual.',
+                'data' => ['isbn' => $isbn],
+            ], 404);
         }
-
-        $isbnCandidates = array_values(
-            array_unique($isbnCandidates)
-        );
-
-        $apiKey = config('services.google_books.key');
-
-        /*
-    |--------------------------------------------------------------------------
-    | GOOGLE BOOKS
-    |--------------------------------------------------------------------------
-    */
-
-        try {
-            foreach ($isbnCandidates as $candidate) {
-
-                $queries = [
-                    'isbn:' . $candidate,
-                    $candidate,
-                ];
-
-                foreach ($queries as $query) {
-
-                    $params = [
-                        'q' => $query,
-                        'maxResults' => 10,
-                    ];
-
-                    if ($apiKey) {
-                        $params['key'] = $apiKey;
-                    }
-
-                    $response = Http::timeout(8)
-                        ->acceptJson()
-                        ->get(
-                            'https://www.googleapis.com/books/v1/volumes',
-                            $params
-                        );
-
-                    if (!$response->successful()) {
-                        continue;
-                    }
-
-                    $items = $response->json('items', []);
-
-                    if (empty($items)) {
-                        continue;
-                    }
-
-                    /*
-                |--------------------------------------------------------------------------
-                | Cari item yang ISBN-nya benar-benar cocok
-                |--------------------------------------------------------------------------
-                */
-
-                    $matchedItem = null;
-
-                    foreach ($items as $item) {
-
-                        $identifiers = collect(
-                            $item['volumeInfo']['industryIdentifiers'] ?? []
-                        )
-                            ->pluck('identifier')
-                            ->map(function ($value) {
-                                return preg_replace(
-                                    '/[^0-9Xx]/',
-                                    '',
-                                    strtoupper($value)
-                                );
-                            })
-                            ->all();
-
-                        if (
-                            in_array($candidate, $identifiers, true) ||
-                            in_array($isbn, $identifiers, true)
-                        ) {
-                            $matchedItem = $item;
-                            break;
-                        }
-                    }
-
-                    /*
-                |--------------------------------------------------------------------------
-                | Untuk query ISBN spesifik, boleh gunakan hasil pertama
-                |--------------------------------------------------------------------------
-                */
-
-                    if (
-                        !$matchedItem &&
-                        str_starts_with($query, 'isbn:') &&
-                        isset($items[0]['volumeInfo'])
-                    ) {
-                        $matchedItem = $items[0];
-                    }
-
-                    if (
-                        !$matchedItem ||
-                        !isset($matchedItem['volumeInfo'])
-                    ) {
-                        continue;
-                    }
-
-                    $volume = $matchedItem['volumeInfo'];
-
-                    $authors = collect(
-                        $volume['authors'] ?? []
-                    )
-                        ->filter()
-                        ->implode(', ');
-
-                    $publicationYear = null;
-
-                    if (!empty($volume['publishedDate'])) {
-
-                        if (
-                            preg_match(
-                                '/\b(18|19|20)\d{2}\b/',
-                                $volume['publishedDate'],
-                                $matches
-                            )
-                        ) {
-                            $publicationYear = (int) $matches[0];
-                        }
-                    }
-
-                    $cover = null;
-
-                    if (!empty($volume['imageLinks'])) {
-
-                        $cover =
-                            $volume['imageLinks']['thumbnail']
-                            ?? $volume['imageLinks']['smallThumbnail']
-                            ?? null;
-
-                        if ($cover) {
-                            $cover = str_replace(
-                                'http://',
-                                'https://',
-                                $cover
-                            );
-                        }
-                    }
-
-                    return response()->json([
-                        'success' => true,
-
-                        'data' => [
-                            'isbn' => $isbn,
-
-                            'title' =>
-                            $volume['title']
-                                ?? null,
-
-                            'author' =>
-                            $authors ?: null,
-
-                            'publisher' =>
-                            $volume['publisher']
-                                ?? null,
-
-                            'publication_year' =>
-                            $publicationYear,
-
-                            'ddc' => null,
-
-                            'edition' => null,
-
-                            'description' =>
-                            $volume['description']
-                                ?? null,
-
-                            'cover' => $cover,
-
-                            'source_url' =>
-                            $matchedItem['selfLink']
-                                ?? null,
-                        ],
-                    ]);
-                }
-            }
-        } catch (\Throwable $e) {
-
-            \Log::warning(
-                'Google Books ISBN Lookup Failed',
-                [
-                    'isbn' => $isbn,
-                    'message' => $e->getMessage(),
-                ]
-            );
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | GOOGLE BOOKS TIDAK MENEMUKAN DATA
-    |--------------------------------------------------------------------------
-    |
-    | Jangan bikin scanner menunggu Open Library karena dari environment
-    | Laravel kamu endpoint Open Library sedang timeout.
-    |
-    */
 
         return response()->json([
-            'success' => false,
-
-            'message' =>
-            'ISBN berhasil dibaca, tetapi metadata buku tidak ditemukan otomatis. ISBN tetap diisi, silakan lengkapi data buku secara manual.',
-
-            'data' => [
-                'isbn' => $isbn,
-            ],
-        ], 404);
-    }
-
-
-    private function convertIsbn13ToIsbn10(
-        string $isbn13
-    ): ?string {
-
-        /*
-        |--------------------------------------------------------------------------
-        | ISBN-10 hanya bisa dihitung dari ISBN-13
-        | dengan prefix 978 atau 979.
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            strlen($isbn13) !== 13 ||
-            !in_array(
-                substr($isbn13, 0, 3),
-                ['978', '979'],
-                true
-            )
-        ) {
-
-            return null;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | AMBIL 9 DIGIT SETELAH PREFIX
-        |--------------------------------------------------------------------------
-        */
-
-        $digits =
-            substr(
-                $isbn13,
-                3,
-                9
-            );
-
-        if (
-            strlen($digits) !== 9 ||
-            !ctype_digit($digits)
-        ) {
-
-            return null;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | HITUNG CHECK DIGIT
-        |--------------------------------------------------------------------------
-        */
-
-        $sum = 0;
-
-        for (
-            $i = 0;
-            $i < 9;
-            $i++
-        ) {
-
-            $sum +=
-                ((int) $digits[$i])
-                * (10 - $i);
-        }
-
-        $remainder =
-            11 -
-            ($sum % 11);
-
-        if ($remainder === 10) {
-
-            $checkDigit = 'X';
-        } elseif ($remainder === 11) {
-
-            $checkDigit = '0';
-        } else {
-
-            $checkDigit =
-                (string) $remainder;
-        }
-
-        return
-            $digits .
-            $checkDigit;
+            'success' => true,
+            'message' => 'Metadata buku berhasil ditemukan dari ' . $metadata['source'] . '.',
+            'data' => $metadata,
+        ]);
     }
 
     public function store(Request $request)
     {
+        if ($request->filled('isbn')) {
+            $request->merge(['isbn' => preg_replace('/[^0-9Xx]/', '', strtoupper($request->input('isbn')))]);
+        }
+
         $validated = $request->validate([
             'category_id' => ['required', 'exists:categories,id'],
             'subcategory_id' => ['nullable', 'exists:subcategories,id'],
+            'isbn' => ['nullable', 'string', 'max:20', 'unique:books,isbn'],
             'title' => ['required', 'string', 'max:255'],
             'sku' => ['required', 'string', 'max:100', 'unique:books,sku'],
             'author' => ['required', 'string', 'max:255'],
+            'publisher' => ['nullable', 'string', 'max:255'],
+            'publication_year' => ['nullable', 'integer', 'min:1000', 'max:' . (date('Y') + 1)],
+            'description' => ['nullable', 'string'],
             'stock' => ['required', 'integer', 'min:1'],
             'rak' => ['required', 'exists:racks,code'],
             'no_iventaris' => ['nullable', 'string', 'max:255'],
@@ -433,6 +144,7 @@ class BookController extends Controller
             'ddc' => ['nullable', 'string', 'max:255'],
             'edition' => ['nullable', 'string', 'max:255'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'cover_url' => ['nullable', 'url', 'max:2048'],
         ]);
 
         if ($request->filled('subcategory_id')) {
@@ -456,8 +168,16 @@ class BookController extends Controller
         $subCategoryName = $subcategory?->name;
         $educationLevel = $mainCategory === 'Pendidikan' ? $subCategoryName : null;
 
+        $coverPath = null;
+        if ($request->hasFile('cover')) {
+            $coverPath = $request->file('cover')->store('covers', 'public');
+        } elseif ($request->filled('cover_url')) {
+            $coverPath = $this->downloadRemoteCover($request->string('cover_url')->toString(), $request->input('isbn'));
+        }
+
         DB::transaction(function () use (
             $request,
+            $coverPath,
             $mainCategory,
             $subCategoryName,
             $educationLevel
@@ -470,6 +190,11 @@ class BookController extends Controller
                 'education_level' => $educationLevel,
                 'judul_buku' => $request->title,
                 'penulis' => $request->author,
+                'isbn' => $request->filled('isbn') ? preg_replace('/[^0-9Xx]/', '', strtoupper($request->isbn)) : null,
+                'publisher' => $request->publisher,
+                'publication_year' => $request->publication_year,
+                'description' => $request->description,
+                'cover' => $coverPath,
                 'sku' => $request->sku,
                 'stok' => $request->stock,
                 'status' => 'Tersedia',
@@ -600,12 +325,20 @@ class BookController extends Controller
     */
     public function update(Request $request, Book $book)
     {
+        if ($request->filled('isbn')) {
+            $request->merge(['isbn' => preg_replace('/[^0-9Xx]/', '', strtoupper($request->input('isbn')))]);
+        }
+
         $request->validate([
             'category_id' => ['required', 'exists:categories,id'],
             'subcategory_id' => ['nullable', 'exists:subcategories,id'],
+            'isbn' => ['nullable', 'string', 'max:20', Rule::unique('books', 'isbn')->ignore($book->id)],
             'title' => ['required', 'string', 'max:255'],
             'sku' => ['required', 'string', 'max:100', Rule::unique('books', 'sku')->ignore($book->id)],
             'author' => ['required', 'string', 'max:255'],
+            'publisher' => ['nullable', 'string', 'max:255'],
+            'publication_year' => ['nullable', 'integer', 'min:1000', 'max:' . (date('Y') + 1)],
+            'description' => ['nullable', 'string'],
             'stock' => ['required', 'integer', 'min:1'],
             'rak' => ['required', 'exists:racks,code'],
             'no_iventaris' => ['nullable', 'string', 'max:255'],
@@ -613,6 +346,7 @@ class BookController extends Controller
             'ddc' => ['nullable', 'string', 'max:255'],
             'edition' => ['nullable', 'string', 'max:255'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'cover_url' => ['nullable', 'url', 'max:2048'],
         ]);
 
         if ($request->filled('subcategory_id')) {
@@ -659,9 +393,17 @@ class BookController extends Controller
         $subCategoryName = $subcategory?->name;
         $educationLevel = $mainCategory === 'Pendidikan' ? $subCategoryName : null;
 
+        $coverPath = null;
+        if ($request->hasFile('cover')) {
+            $coverPath = $request->file('cover')->store('covers', 'public');
+        } elseif ($request->filled('cover_url')) {
+            $coverPath = $this->downloadRemoteCover($request->string('cover_url')->toString(), $request->input('isbn'));
+        }
+
         DB::transaction(function () use (
             $request,
             $book,
+            $coverPath,
             $copyCount,
             $occupiedCount,
             $mainCategory,
@@ -676,12 +418,17 @@ class BookController extends Controller
                 'education_level' => $educationLevel,
                 'judul_buku' => $request->title,
                 'penulis' => $request->author,
+                'isbn' => $request->filled('isbn') ? preg_replace('/[^0-9Xx]/', '', strtoupper($request->isbn)) : null,
+                'publisher' => $request->publisher,
+                'publication_year' => $request->publication_year,
+                'description' => $request->description,
                 'sku' => $request->sku,
                 'no_iventaris' => $request->no_iventaris,
                 'kode_buku' => $request->kode_buku,
                 'ddc' => $request->ddc ?: $request->input('call_number'),
                 'rak' => $request->rak,
                 'edition' => $request->edition,
+                ...($coverPath ? ['cover' => $coverPath] : []),
             ]);
 
             if ($request->stock > $copyCount) {
@@ -780,6 +527,55 @@ class BookController extends Controller
     }
 
 
+
+    private function downloadRemoteCover(string $url, ?string $isbn): ?string
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $allowedHosts = [
+            'books.google.com',
+            'books.googleusercontent.com',
+            'googleusercontent.com',
+            'covers.openlibrary.org',
+        ];
+
+        $allowed = false;
+        foreach ($allowedHosts as $allowedHost) {
+            if ($host === $allowedHost || str_ends_with($host, '.' . $allowedHost)) {
+                $allowed = true;
+                break;
+            }
+        }
+
+        if (!$allowed) {
+            return null;
+        }
+
+        try {
+            $response = Http::timeout(10)->get($url);
+            if (!$response->successful() || !$response->body()) {
+                return null;
+            }
+
+            $contentType = strtolower($response->header('Content-Type', ''));
+            $extension = match (true) {
+                str_contains($contentType, 'png') => 'png',
+                str_contains($contentType, 'webp') => 'webp',
+                default => 'jpg',
+            };
+
+            $filename = 'covers/' . ($isbn ?: uniqid('book_', true)) . '.' . $extension;
+            Storage::disk('public')->put($filename, $response->body());
+
+            return $filename;
+        } catch (\Throwable $e) {
+            report($e);
+            return null;
+        }
+    }
 
     /*
     |--------------------------------------------------------------------------

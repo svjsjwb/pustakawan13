@@ -44,7 +44,7 @@ class BorrowingDueWarningNotification extends Notification
 
         return [
             'title'        => 'Peringatan Jatuh Tempo (H-1)',
-            'message'      => "Peminjaman buku \"{$bookTitle}\" akan jatuh tempo besok ({$dueFormatted}). Harap segera kembalikan atau lakukan perpanjangan.",
+            'message'      => "Masa peminjaman buku \"{$bookTitle}\" akan akan berakhir besok ({$dueFormatted}). Mohon segera lakukan pengembalian atau perpanjangan masa pinjam.",
             'type'         => 'borrowing_due_soon',
             'color'        => 'amber',
             'url'          => route('user.history', ['tab' => 'borrowings']),

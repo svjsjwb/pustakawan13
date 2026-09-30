@@ -342,9 +342,7 @@ class CirculationController extends Controller
             ],
         ]);
 
-        /*
-     * Pastikan tanggal jatuh tempo tersedia.
-     */
+        
         if (!$borrowing->due_at) {
             return back()->with(
                 'error',
