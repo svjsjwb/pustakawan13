@@ -184,6 +184,15 @@
     height: 3px;
     background: var(--border);
     z-index: 1;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.rsv-tracking-bar-fill {
+    height: 100%;
+    background: #16A34A;
+    border-radius: 3px;
+    transition: width 0.4s ease;
 }
 
 .rsv-tracking-step {
@@ -390,6 +399,13 @@
 .rsv-admin-alert.alert-info .rsv-admin-alert-title {
     color: #0F766E;
 }
+.rsv-admin-alert.alert-success {
+    background: rgba(16, 185, 129, 0.07);
+    border: 1.5px solid rgba(16, 185, 129, 0.28);
+}
+.rsv-admin-alert.alert-success .rsv-admin-alert-title {
+    color: #065F46;
+}
 .rsv-admin-alert-desc {
     font-size: 13px;
     color: var(--text);
@@ -544,18 +560,36 @@
         </p>
 
         @php
-            $isMenunggu = $status === 'menunggu';
-            $isDisetujui = $status === 'disetujui';
+            $isMenunggu    = $status === 'menunggu';
+            $isDisetujui   = $status === 'disetujui';
             $isSiapDiambil = $status === 'siap_diambil';
-            $isSelesai = $status === 'selesai';
-            $isDitolak = $status === 'ditolak';
-            $doneVerifikasi = in_array($status, ['disetujui', 'siap_diambil', 'selesai']);
-            $donePersetujuan = in_array($status, ['siap_diambil', 'selesai']);
-            $donePengambilan = $isSelesai;
+            $isSelesai     = $status === 'selesai';
+            $isDitolak     = in_array($status, ['ditolak', 'dibatalkan']);
+
+            // "disetujui" or "siap_diambil" means approval is done
+            $isApproved = $isDisetujui || $isSiapDiambil;
+
+            $donePengajuan    = true;
+            $doneVerifikasi   = in_array($status, ['disetujui', 'siap_diambil', 'selesai']);
+            $donePersetujuan  = in_array($status, ['disetujui', 'siap_diambil', 'selesai']);
+            // Pengambilan: done only when 'selesai', active (current step) when disetujui or siap_diambil
+            $donePengambilan  = $isSelesai;
+            $activePengambilan = $isApproved; // highlight pickup step as current when approved
+
+            $barFillWidth = match(true) {
+                $isSelesai              => '100%',
+                $isSiapDiambil         => '100%',
+                $isDisetujui           => '100%', // bar goes full – step 4 is now active
+                $isMenunggu            => '33%',
+                $isDitolak             => '33%',
+                default                => '0%',
+            };
         @endphp
 
         <div class="rsv-tracking-timeline">
-            <div class="rsv-tracking-bar-bg"></div>
+            <div class="rsv-tracking-bar-bg">
+                <div class="rsv-tracking-bar-fill" style="width: {{ $barFillWidth }};"></div>
+            </div>
 
             {{-- Langkah 1: Pengajuan Reservasi --}}
             <div class="rsv-tracking-step is-done">
@@ -572,17 +606,17 @@
             </div>
 
             {{-- Langkah 3: Persetujuan Reservasi --}}
-            <div class="rsv-tracking-step {{ $isDisetujui ? 'is-active' : ($donePersetujuan ? 'is-done' : 'is-upcoming') }}">
-                <div class="rsv-step-node">@if($donePersetujuan) ✓ @elseif($isDisetujui) ● @else ○ @endif</div>
-                <div class="rsv-step-label">@if($donePersetujuan) ✓ Persetujuan Reservasi @elseif($isDisetujui) ● Persetujuan Reservasi @else ○ Persetujuan Reservasi @endif</div>
-                <p class="rsv-step-desc">@if($donePersetujuan) Selesai @elseif($isDisetujui) Sedang Diproses @else Belum Selesai @endif</p>
+            <div class="rsv-tracking-step {{ $isDitolak ? 'is-rejected' : ($donePersetujuan ? 'is-done' : 'is-upcoming') }}">
+                <div class="rsv-step-node">@if($isDitolak) ✕ @elseif($donePersetujuan) ✓ @else ○ @endif</div>
+                <div class="rsv-step-label">@if($isDitolak) ✕ Ditolak @elseif($donePersetujuan) ✓ Persetujuan Reservasi @else ○ Persetujuan Reservasi @endif</div>
+                <p class="rsv-step-desc">@if($isDitolak) Ditolak @elseif($donePersetujuan) Selesai @else Menunggu @endif</p>
             </div>
 
             {{-- Langkah 4: Pengambilan Buku --}}
-            <div class="rsv-tracking-step {{ $isSelesai ? 'is-done' : ($isSiapDiambil ? 'is-active' : 'is-upcoming') }}">
-                <div class="rsv-step-node">@if($donePengambilan) ✓ @elseif($isSiapDiambil) ● @else ○ @endif</div>
-                <div class="rsv-step-label">@if($donePengambilan) ✓ Pengambilan Buku @elseif($isSiapDiambil) ● Pengambilan Buku @else ○ Pengambilan Buku @endif</div>
-                <p class="rsv-step-desc">@if($donePengambilan) Selesai @elseif($isSiapDiambil) Menunggu Pengambilan @else Menunggu @endif</p>
+            <div class="rsv-tracking-step {{ $donePengambilan ? 'is-done' : ($activePengambilan ? 'is-active' : 'is-upcoming') }}">
+                <div class="rsv-step-node">@if($donePengambilan) ✓ @elseif($activePengambilan) ● @else ○ @endif</div>
+                <div class="rsv-step-label">@if($donePengambilan) ✓ Pengambilan Buku @elseif($activePengambilan) ● Pengambilan Buku @else ○ Pengambilan Buku @endif</div>
+                <p class="rsv-step-desc">@if($donePengambilan) Selesai · Buku Sudah Diambil @elseif($isSiapDiambil) Buku Siap – Segera Ambil @elseif($isDisetujui) Menunggu Pengambilan @else Menunggu @endif</p>
             </div>
         </div>
     </div>
@@ -651,13 +685,17 @@
                     </p>
                 </div>
             </div>
-        @elseif($status === 'siap_diambil')
-            <div class="rsv-admin-alert alert-info">
-                <div class="rsv-admin-alert-icon">ℹ️</div>
+        @elseif($isDisetujui || $isSiapDiambil)
+            <div class="rsv-admin-alert {{ $isSiapDiambil ? 'alert-info' : 'alert-success' }}">
+                <div class="rsv-admin-alert-icon">{{ $isSiapDiambil ? 'ℹ️' : '✅' }}</div>
                 <div>
-                    <div class="rsv-admin-alert-title">Petunjuk Pengambilan:</div>
+                    <div class="rsv-admin-alert-title">{{ $isSiapDiambil ? 'Buku Siap Diambil:' : 'Reservasi Disetujui – Menunggu Pengambilan:' }}</div>
                     <p class="rsv-admin-alert-desc">
-                        Buku fisik telah disiapkan di meja layanan sirkulasi. Silakan tunjukkan kode <strong>#{{ $reservationCode }}</strong> kepada petugas sebelum tanggal <strong>{{ $reservation->expires_at ? \Carbon\Carbon::parse($reservation->expires_at)->format('d F Y') : '-' }}</strong>.
+                        @if($isSiapDiambil)
+                            Buku fisik telah disiapkan di meja layanan sirkulasi. Silakan tunjukkan kode <strong>#{{ $reservationCode }}</strong> kepada petugas sebelum tanggal <strong>{{ $reservation->expires_at ? \Carbon\Carbon::parse($reservation->expires_at)->format('d F Y') : '-' }}</strong>.
+                        @else
+                            Reservasi Anda telah <strong>disetujui</strong> oleh petugas. Buku sedang disiapkan dan akan segera tersedia untuk diambil. Silakan datang ke meja layanan sirkulasi dan tunjukkan kode <strong>#{{ $reservationCode }}</strong>.
+                        @endif
                     </p>
                 </div>
             </div>

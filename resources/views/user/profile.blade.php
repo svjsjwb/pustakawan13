@@ -46,24 +46,33 @@
                         {{ strtoupper(substr($user->name ?? 'U', 0, 2)) }}
                     </div>
                     <h2 class="uprof-name">{{ $user->name }}</h2>
-                    <p class="uprof-role-label">Anggota Perpustakaan</p>
+                    <p class="uprof-role-label">{{ $isGuest ? 'Guest · Menunggu Persetujuan' : 'Anggota Perpustakaan' }}</p>
                     @if($member)
-                    <div class="uprof-member-badge">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                        </svg>
-                        Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
-                    </div>
-                    <div class="uprof-quick-stats">
-                        <div class="uprof-qstat">
-                            <strong>{{ $stats['totalBorrowed'] ?? ($member ? $member->borrowings()->count() : 0) }}</strong>
-                            <span>Total Pinjam</span>
+                        @if($isGuest)
+                        <div class="uprof-member-badge is-guest">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            Nonaktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                         </div>
-                        <div class="uprof-qstat">
-                            <strong>{{ $stats['activeLoans'] ?? ($member ? $member->borrowings()->where('status','dipinjam')->count() : 0) }}</strong>
-                            <span>Aktif</span>
+                        @else
+                        <div class="uprof-member-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                         </div>
-                    </div>
+                        @endif
+                        <div class="uprof-quick-stats">
+                            <div class="uprof-qstat">
+                                <strong>{{ $stats['totalBorrowed'] ?? ($member ? $member->borrowings()->count() : 0) }}</strong>
+                                <span>Total Pinjam</span>
+                            </div>
+                            <div class="uprof-qstat">
+                                <strong>{{ $stats['activeLoans'] ?? ($member ? $member->borrowings()->where('status','dipinjam')->count() : 0) }}</strong>
+                                <span>Aktif</span>
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -92,6 +101,7 @@
                             </div>
                         </div>
 
+
                         @if($member)
                         <div style="font-size: 11.5px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin: 18px 0 10px;">
                             Status Anggota Perpustakaan
@@ -103,19 +113,70 @@
                             </div>
                             <div class="uprof-info-box">
                                 <span>STATUS KEANGGOTAAN</span>
-                                <strong style="color: var(--primary);">✓ {{ ucfirst($member->status) }}</strong>
+                                @if($isGuest)
+                                    <strong style="color: #dc2626; display: flex; align-items: center; gap: 5px;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                        Nonaktif
+                                    </strong>
+                                @else
+                                    <strong style="color: #10b981; display: flex; align-items: center; gap: 5px;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                        Aktif
+                                    </strong>
+                                @endif
                             </div>
-                            <div class="uprof-info-box">
+                            <div class="uprof-info-box uprof-phone-box">
                                 <span>NOMOR TELEPON</span>
-                                <strong>{{ $member->phone ?? '-' }}</strong>
+                                <div class="uprof-phone-input-wrap">
+                                    <svg class="uprof-phone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                    </svg>
+                                    <input type="tel" 
+                                           name="phone" 
+                                           id="inputPhone" 
+                                           class="uprof-phone-field" 
+                                           value="{{ old('phone', $member->phone ?? $user->phone ?? '') }}" 
+                                           placeholder="Contoh: 08123456789">
+                                </div>
+                                @error('phone')<span class="uprof-error" style="font-size:11px;margin-top:4px;display:block;">{{ $message }}</span>@enderror
                             </div>
                             <div class="uprof-info-box">
                                 <span>TERDAFTAR SEJAK</span>
                                 <strong>{{ $stats['joinDate'] ?? '-' }}</strong>
                             </div>
-                            <div class="uprof-info-box" style="grid-column: 1 / -1;">
-                                <span>ALAMAT DOMISILI</span>
-                                <strong>{{ $member->address ?? '-' }}</strong>
+                            <div class="uprof-info-box uprof-division-box" style="grid-column: 1 / -1;">
+                                <span>DIVISI</span>
+                                @php $currentDivision = old('division', $member->division ?? ''); @endphp
+                                {{-- Hidden native select for form submission --}}
+                                <input type="hidden" name="division" id="divisionHidden" value="{{ $currentDivision }}">
+
+                                {{-- Custom styled dropdown (Drop-up) --}}
+                                <div class="uprof-cdrop" id="divisionDrop">
+                                    <button type="button" class="uprof-cdrop-trigger" id="divisionTrigger" aria-haspopup="listbox" aria-expanded="false">
+                                        <svg class="uprof-division-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                                        </svg>
+                                        <span class="uprof-cdrop-label" id="divisionLabel">
+                                            {{ $currentDivision ?: '— Pilih Divisi —' }}
+                                        </span>
+                                        <svg class="uprof-division-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="18 15 12 9 6 15"/>
+                                        </svg>
+                                    </button>
+                                    <div class="uprof-cdrop-panel" role="listbox" aria-label="Pilih Divisi">
+                                        <div class="uprof-cdrop-item {{ $currentDivision === '' ? 'is-selected' : '' }}" role="option" data-value="" data-label="— Pilih Divisi —">
+                                            <span class="uprof-cdrop-text">— Pilih Divisi —</span>
+                                            <svg class="uprof-cdrop-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        </div>
+                                        @foreach($divisions as $div)
+                                        <div class="uprof-cdrop-item {{ $currentDivision === $div ? 'is-selected' : '' }}" role="option" data-value="{{ $div }}" data-label="{{ $div }}">
+                                            <span class="uprof-cdrop-text">{{ $div }}</span>
+                                            <svg class="uprof-cdrop-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @error('division')<span class="uprof-error" style="font-size:11px;margin-top:4px;display:block;">{{ $message }}</span>@enderror
                             </div>
                         </div>
                         @else
@@ -149,14 +210,23 @@
                         {{ strtoupper(substr($user->name ?? 'U', 0, 2)) }}
                     </div>
                     <h2 class="uprof-name">{{ $user->name }}</h2>
-                    <p class="uprof-role-label">Anggota Perpustakaan</p>
+                    <p class="uprof-role-label">{{ $isGuest ? 'Guest · Menunggu Persetujuan' : 'Anggota Perpustakaan' }}</p>
                     @if($member)
-                    <div class="uprof-member-badge">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                        </svg>
-                        Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
-                    </div>
+                        @if($isGuest)
+                        <div class="uprof-member-badge is-guest">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            Nonaktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
+                        </div>
+                        @else
+                        <div class="uprof-member-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
+                        </div>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -228,24 +298,33 @@
                             {{ strtoupper(substr($user->name ?? 'U', 0, 2)) }}
                         </div>
                         <h2 class="uprof-name">{{ $user->name }}</h2>
-                        <p class="uprof-role-label">Anggota Perpustakaan</p>
+                        <p class="uprof-role-label">{{ $isGuest ? 'Guest · Menunggu Persetujuan' : 'Anggota Perpustakaan' }}</p>
                         @if($member)
-                        <div class="uprof-member-badge">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                            </svg>
-                            Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
-                        </div>
-                        <div class="uprof-quick-stats">
-                            <div class="uprof-qstat">
-                                <strong>{{ $stats['totalBorrowed'] ?? 0 }}</strong>
-                                <span>Total Pinjam</span>
+                            @if($isGuest)
+                            <div class="uprof-member-badge is-guest">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                </svg>
+                                Nonaktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                             </div>
-                            <div class="uprof-qstat">
-                                <strong>{{ $stats['activeLoans'] ?? 0 }}</strong>
-                                <span>Aktif</span>
+                            @else
+                            <div class="uprof-member-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                                Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                             </div>
-                        </div>
+                            @endif
+                            <div class="uprof-quick-stats">
+                                <div class="uprof-qstat">
+                                    <strong>{{ $stats['totalBorrowed'] ?? 0 }}</strong>
+                                    <span>Total Pinjam</span>
+                                </div>
+                                <div class="uprof-qstat">
+                                    <strong>{{ $stats['activeLoans'] ?? 0 }}</strong>
+                                    <span>Aktif</span>
+                                </div>
+                            </div>
                         @endif
                     </div>
 
@@ -310,12 +389,14 @@
                             </div>
                             <div class="uprof-meta-item" style="padding-top: 8px; border-top: 1px dashed var(--border-subtle);">
                                 <span class="uprof-meta-label">Status Akun</span>
-                                @if(($stats['accountStatus'] ?? 'aktif') === 'aktif')
+                                @if($isGuest)
+                                    <span class="uprof-status-pill nonaktif" style="background: rgba(220, 38, 38, 0.12); color: #dc2626;">🔴 Nonaktif</span>
+                                @elseif(($stats['accountStatus'] ?? 'aktif') === 'aktif')
                                     <span class="uprof-status-pill aktif">🟢 Aktif</span>
                                 @elseif(($stats['accountStatus'] ?? '') === 'ditangguhkan')
                                     <span class="uprof-status-pill ditangguhkan">🔴 Ditangguhkan</span>
                                 @else
-                                    <span class="uprof-status-pill nonaktif">⚪ Nonaktif</span>
+                                    <span class="uprof-status-pill nonaktif" style="background: rgba(220, 38, 38, 0.12); color: #dc2626;">🔴 Nonaktif</span>
                                 @endif
                             </div>
                         </div>
@@ -822,6 +903,53 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sync active density from input
     const initialDensity = document.getElementById('inputDensity')?.value || localStorage.getItem('lib_density') || 'normal';
     selectDensity(initialDensity);
+
+    // Custom Division Dropdown Logic
+    const divisionDrop = document.getElementById('divisionDrop');
+    const divisionTrigger = document.getElementById('divisionTrigger');
+    const divisionHidden = document.getElementById('divisionHidden');
+    const divisionLabel = document.getElementById('divisionLabel');
+
+    if (divisionDrop && divisionTrigger) {
+        divisionTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = divisionDrop.classList.toggle('is-open');
+            divisionTrigger.setAttribute('aria-expanded', isOpen);
+        });
+
+        const items = divisionDrop.querySelectorAll('.uprof-cdrop-item');
+        items.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const val = item.dataset.value ?? '';
+                const label = item.dataset.label ?? '';
+
+                if (divisionHidden) divisionHidden.value = val;
+                if (divisionLabel) divisionLabel.textContent = label;
+
+                items.forEach(i => i.classList.remove('is-selected'));
+                item.classList.add('is-selected');
+
+                divisionDrop.classList.remove('is-open');
+                divisionTrigger.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!divisionDrop.contains(e.target)) {
+                divisionDrop.classList.remove('is-open');
+                divisionTrigger.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && divisionDrop.classList.contains('is-open')) {
+                divisionDrop.classList.remove('is-open');
+                divisionTrigger.setAttribute('aria-expanded', 'false');
+                divisionTrigger.focus();
+            }
+        });
+    }
 });
 </script>
 <style>

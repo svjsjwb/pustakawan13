@@ -296,15 +296,13 @@ class GoogleAuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | EMAIL SAMBUTAN
+        | EMAIL SAMBUTAN & NOTIFIKASI PENDAFTARAN GOOGLE
         |--------------------------------------------------------------------------
         */
 
         if ($user->email) {
             try {
-                Mail::to($user->email)->send(
-                    new WelcomeMail($user)
-                );
+                \App\Services\NotificationService::userRegistered($user);
             } catch (\Throwable $mailException) {
                 Log::warning(
                     'Email sambutan Google gagal dikirim.',

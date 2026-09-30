@@ -31,6 +31,7 @@ use App\Http\Controllers\UserHelpController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\BookLocatorController;
+use App\Http\Controllers\AdminBroadcastController;
 
 // ============================================================
 // LANDING
@@ -238,6 +239,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // BOOK LOCATOR (dari Pandu — fitur baru)
     Route::get('/book-locator', [BookLocatorController::class, 'index'])->name('book-locator.index');
     Route::get('/book-locator/{reservation}', [BookLocatorController::class, 'show'])->name('book-locator.show');
+
+    // ============================================================
+    // BROADCAST EMAIL NOTIFICATION (admin only)
+    // ============================================================
+    Route::prefix('admin/broadcast')->name('admin.broadcast.')->group(function () {
+        Route::get('/',         [AdminBroadcastController::class, 'index'])  ->name('index');
+        Route::get('/preview',  [AdminBroadcastController::class, 'preview'])->name('preview');
+        Route::post('/',        [AdminBroadcastController::class, 'send'])   ->name('send');
+        Route::get('/history',  [AdminBroadcastController::class, 'history'])->name('history');
+    });
 });
 
 Route::middleware(['auth', 'role.user'])->group(function () {
@@ -350,5 +361,17 @@ Route::prefix('email-preview')->group(function () {
             return (new \App\Mail\BorrowingReturnedMail($dummyBorrowing, $user))->render();
         }
         return (new \App\Mail\BorrowingReturnedMail($borrowing))->render();
+    });
+
+    // Preview AdminBroadcast
+    Route::get('/admin-broadcast', function () {
+        return (new \App\Mail\AdminBroadcastMail(
+            subjectText:   'Pengumuman: Perpustakaan Libur Nasional',
+            messageBody:   "Kami ingin memberitahukan bahwa perpustakaan akan tutup pada tanggal 17 Agustus 2026 dalam rangka memperingati Hari Kemerdekaan Republik Indonesia.\n\nSilakan rencanakan kunjungan Anda sebelum atau sesudah tanggal tersebut.",
+            recipientName: 'Budi Santoso',
+            actionUrl:     url('/home'),
+            actionLabel:   'Kunjungi Perpustakaan',
+            senderName:    'Admin Perpustakaan Tiga Serangkai',
+        ))->render();
     });
 });

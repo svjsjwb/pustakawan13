@@ -44,7 +44,10 @@ class UserProfileController extends Controller
         // Tanggal Bergabung & Terakhir Login
         $joinDate   = $member?->created_at?->format('d M Y') ?? $user->created_at?->format('d M Y') ?? now()->format('d M Y');
         $lastLogin  = $user->last_login_at?->format('d M Y, H:i') ?? now()->format('d M Y, H:i');
-        $accountStatus = $member?->status ?? 'aktif';
+
+        // Status Keanggotaan: Guest = nonaktif, Member = aktif
+        $isGuest       = $user->isGuest() || ($member && $member->status === 'nonaktif');
+        $accountStatus = $isGuest ? 'nonaktif' : ($member?->status ?? 'aktif');
 
         $stats = [
             'totalBorrowed'     => $totalBorrowed,
@@ -62,18 +65,63 @@ class UserProfileController extends Controller
         $allCategories = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa', 'Teknologi', 'Sains', 'Bisnis', 'Sejarah'];
         $allGenres     = ['Fiksi', 'Non Fiksi', 'Petualangan', 'Motivasi', 'Sains', 'Sejarah', 'Novel', 'Komik', 'Bisnis', 'Biografi'];
 
-        return view('user.profile', compact('user', 'member', 'stats', 'allCategories', 'allGenres'));
+        // Daftar Divisi Perusahaan
+        $divisions = [
+            'Center Of Excellence',
+            'Digital Business',
+            'E-Publishing',
+            'Finance',
+            'General Trading',
+            'HR & GA',
+            'HSE',
+            'IQA',
+            'IT',
+            'Marketing',
+            'MTIS Perpuskita dan Tisera',
+            'MTIS Planning and Development',
+            'People Development Center',
+            'Production',
+            'School Book Sales',
+            'School Book Publishing',
+            'SCM',
+            'TAX',
+        ];
+
+        if ($member?->division && !in_array($member->division, $divisions)) {
+            array_unshift($divisions, $member->division);
+        }
+
+        return view('user.profile', compact('user', 'member', 'stats', 'allCategories', 'allGenres', 'divisions', 'isGuest'));
     }
 
     public function update(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name'     => 'required|string|max:255',
+            'division' => 'nullable|string|max:100',
+            'phone'    => 'nullable|string|max:25',
+        ], [
+            'name.required' => 'Nama pengguna wajib diisi.',
+            'phone.max'     => 'Nomor telepon maksimal 25 karakter.',
         ]);
 
         $user = Auth::user();
         $user->name = $request->input('name');
+        if ($request->has('phone')) {
+            $user->phone = $request->input('phone');
+        }
         $user->save();
+
+        if ($user->member) {
+            $memberData = [
+                'name'     => $user->name,
+                'division' => $request->filled('division') ? $request->input('division') : $user->member->division,
+            ];
+            if ($request->has('phone')) {
+                $memberData['phone'] = $request->input('phone');
+            }
+            $user->member->update($memberData);
+        }
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }

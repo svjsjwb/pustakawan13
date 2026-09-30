@@ -168,6 +168,9 @@ class MemberController extends Controller
             $member->user->update([
                 'role' => 'member',
             ]);
+            $member->update([
+                'status' => 'aktif',
+            ]);
         });
 
         return redirect()

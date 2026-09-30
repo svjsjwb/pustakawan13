@@ -196,11 +196,11 @@
 
                                 <td>
 
-                                    @if ($member->user?->role === 'guest')
-                                        <span class="status-pending">
-                                            -
+                                    @if ($member->user?->role === 'guest' || $member->status === 'nonaktif')
+                                        <span class="status-inactive">
+                                            Nonaktif
                                         </span>
-                                    @elseif($member->status === 'aktif')
+                                    @elseif($member->status === 'aktif' || $member->user?->role === 'member')
                                         <span class="status-active">
                                             Aktif
                                         </span>

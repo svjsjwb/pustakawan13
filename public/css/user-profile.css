@@ -87,10 +87,20 @@
     margin-bottom: 20px;
 }
 
+.uprof-member-badge.is-guest {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #fecaca;
+}
+
 .uprof-member-badge svg {
     width: 13px;
     height: 13px;
     color: #99f6e4;
+}
+
+.uprof-member-badge.is-guest svg {
+    color: #f87171;
 }
 
 .uprof-quick-stats {
@@ -244,7 +254,9 @@
     color: var(--text);
 }
 
-.uprof-form-group input {
+.uprof-form-group input,
+.uprof-form-group select,
+.uprof-select {
     height: 44px;
     padding: 0 14px;
     border: 1.5px solid var(--border);
@@ -256,15 +268,31 @@
     outline: none;
     box-sizing: border-box;
     transition: var(--transition);
+    width: 100%;
 }
 
-.uprof-form-group input:focus {
+.uprof-form-group select,
+select.uprof-select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 38px;
+}
+
+.uprof-form-group input:focus,
+.uprof-form-group select:focus,
+.uprof-select:focus {
     border-color: var(--primary);
     background: var(--surface);
     box-shadow: 0 0 0 3px var(--primary-subtle);
 }
 
-.uprof-form-group input:disabled {
+.uprof-form-group input:disabled,
+.uprof-form-group select:disabled {
     background: var(--border-subtle);
     color: var(--text-muted);
     cursor: not-allowed;
@@ -296,7 +324,7 @@
     padding: 12px 16px;
 }
 
-.uprof-info-box span {
+.uprof-info-box > span {
     display: block;
     font-size: 10px;
     font-weight: 700;
@@ -311,6 +339,238 @@
     font-weight: 700;
     color: var(--text);
 }
+
+/* ── Phone Number Box (Styled Input) ─────────────────────────── */
+.uprof-phone-box {
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--background);
+    transition: all 0.2s ease;
+    cursor: text;
+}
+
+.uprof-phone-box:hover,
+.uprof-phone-box:focus-within {
+    border-color: var(--primary, #0f766e);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.uprof-phone-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.uprof-phone-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--primary, #0f766e);
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+.uprof-phone-field {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: inherit;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.uprof-phone-field::placeholder {
+    color: var(--text-muted, #94a3b8);
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* ── Division Custom Dropdown (Drop-Up) ─────────────────────── */
+.uprof-division-box {
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--background);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.uprof-division-box:hover,
+.uprof-cdrop.is-open .uprof-division-box,
+.uprof-division-box:focus-within {
+    border-color: var(--primary, #0f766e);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.uprof-cdrop {
+    position: relative;
+    margin-top: 4px;
+    width: 100%;
+}
+
+.uprof-cdrop-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    transition: none;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+    text-align: left;
+}
+
+.uprof-division-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--primary, #0f766e);
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+.uprof-info-box .uprof-cdrop-label,
+.uprof-cdrop-label {
+    flex: 1;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--text) !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    margin-bottom: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.uprof-division-chevron {
+    width: 15px;
+    height: 15px;
+    color: var(--text-muted, #64748b);
+    flex-shrink: 0;
+    pointer-events: none;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.uprof-cdrop.is-open .uprof-division-chevron {
+    transform: rotate(180deg);
+    color: var(--primary, #0f766e);
+}
+
+/* Dropdown Panel: Buka ke atas (Drop-up) */
+.uprof-cdrop-panel {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    top: auto;
+    left: 0;
+    right: 0;
+    background: var(--surface, #ffffff);
+    border: 1.5px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    box-shadow: 0 -12px 30px -4px rgba(0, 0, 0, 0.15), 0 -4px 12px -2px rgba(0, 0, 0, 0.08);
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 100;
+    padding: 6px;
+}
+
+.uprof-cdrop.is-open .uprof-cdrop-panel {
+    display: block;
+    animation: uprofDropFadeUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes uprofDropFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.uprof-cdrop-panel::-webkit-scrollbar {
+    width: 6px;
+}
+.uprof-cdrop-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+.uprof-cdrop-panel::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.uprof-cdrop-panel::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.uprof-cdrop-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    user-select: none;
+}
+
+.uprof-info-box .uprof-cdrop-item span,
+.uprof-cdrop-item .uprof-cdrop-text,
+.uprof-cdrop-item span {
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: var(--text, #334155) !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    margin-bottom: 0 !important;
+    display: inline-block !important;
+}
+
+.uprof-cdrop-item:hover {
+    background: rgba(15, 118, 110, 0.08);
+}
+
+.uprof-cdrop-item:hover .uprof-cdrop-text,
+.uprof-cdrop-item:hover span {
+    color: var(--primary, #0f766e) !important;
+}
+
+.uprof-cdrop-item.is-selected {
+    background: rgba(15, 118, 110, 0.12);
+}
+
+.uprof-cdrop-item.is-selected .uprof-cdrop-text,
+.uprof-cdrop-item.is-selected span {
+    color: var(--primary, #0f766e) !important;
+    font-weight: 600 !important;
+}
+
+.uprof-cdrop-check {
+    width: 15px;
+    height: 15px;
+    color: var(--primary, #0f766e);
+    display: none;
+    flex-shrink: 0;
+}
+
+.uprof-cdrop-item.is-selected .uprof-cdrop-check {
+    display: block;
+}
+
 
 /* Switch Row in Preferences */
 .uprof-pref-group {
