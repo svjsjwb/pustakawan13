@@ -245,7 +245,7 @@
 
                         <div class="report-actions" onclick="event.stopPropagation()">
                             <button type="button" class="report-download-btn" onclick="downloadReport(this)">
-                                ↓ Unduh PDF
+                                Unduh PDF
                             </button>
                         </div>
 
