@@ -3,6 +3,10 @@ echo ====================================================
 echo Starting Lib System Servers
 echo ====================================================
 
+if exist "C:\laragon\bin\php\php-8.4.24-Win32-vs17-x64" (
+    set "PATH=C:\laragon\bin\php\php-8.4.24-Win32-vs17-x64;%PATH%"
+)
+
 echo [1/4] Starting Vite Dev Server (npm run dev)...
 start "Vite Dev Server" cmd /k "npm run dev"
 
@@ -10,7 +14,7 @@ echo [2/4] Starting Laravel Server (php artisan serve)...
 start "Laravel Server" cmd /k "php artisan serve"
 
 echo [3/4] Starting Queue Worker (php artisan queue:work)...
-start "Queue Worker" cmd /k "php artisan queue:work --tries=3 --timeout=90"
+start "Queue Worker" cmd /k "php artisan queue:work --tries=3 --timeout=90 --sleep=3"
 
 echo [4/4] Starting Schedule Worker (php artisan schedule:work)...
 start "Scheduler" cmd /k "php artisan schedule:work"

@@ -83,6 +83,17 @@
                 Laporan
             </a>
 
+
+            {{-- BROADCAST EMAIL (admin only) --}}
+            @if(Auth::check() && Auth::user()->role === 'admin')
+            <a
+                href="{{ route('admin.broadcast.index') }}"
+                class="{{ request()->routeIs('admin.broadcast.*') ? 'active' : '' }}"
+                title="Kirim email notifikasi ke semua pengguna">
+                📢 Broadcast
+            </a>
+            @endif
+
         </nav>
 
 

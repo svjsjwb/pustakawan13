@@ -92,17 +92,15 @@ class RegisterController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | EMAIL SAMBUTAN
+        | EMAIL SAMBUTAN & NOTIFIKASI
         |--------------------------------------------------------------------------
         */
 
         try {
-            Mail::to($user->email)->send(
-                new WelcomeMail($user)
-            );
+            \App\Services\NotificationService::userRegistered($user);
         } catch (\Throwable $mailException) {
             Log::warning(
-                'Email sambutan register gagal dikirim.',
+                'Notifikasi sambutan register gagal dikirim.',
                 [
                     'user_id' => $user->id,
                     'recipient' => $user->email,

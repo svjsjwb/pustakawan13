@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => env('MAIL_MAILER', 'smtp'),
 
     /*
     |--------------------------------------------------------------------------
@@ -64,6 +64,7 @@ return [
 
         'resend' => [
             'transport' => 'resend',
+            'key'       => env('RESEND_API_KEY'),
         ],
 
         'sendmail' => [

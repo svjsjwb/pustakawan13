@@ -19,6 +19,9 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
+use App\Jobs\SendNotificationEmailJob;
+use App\Mail\AdminBroadcastMail;
+
 class NotificationService
 {
     /**
@@ -50,14 +53,14 @@ class NotificationService
     }
 
     /**
-     * Dispatch an email safely using queue so mail failure doesn't break the transaction.
+     * Dispatch an email safely using SendNotificationEmailJob with retry, backoff, and audit logging.
      */
-    protected static function queueMailSafely(string $email, $mailable): void
+    protected static function queueMailSafely(string $email, $mailable, string $notificationType = 'general', ?int $userId = null, ?string $subject = null): void
     {
         try {
-            Mail::to($email)->queue($mailable);
+            SendNotificationEmailJob::dispatch($email, $mailable, $notificationType, $userId, $subject);
         } catch (\Throwable $e) {
-            Log::warning("Failed to queue email to {$email}: " . $e->getMessage());
+            Log::warning("Failed to dispatch email job to {$email}: " . $e->getMessage());
         }
     }
 
@@ -473,7 +476,110 @@ class NotificationService
 
         // 2. Email notification
         if ($user->email && $user->notificationsAllowed('extension')) {
-            self::queueMailSafely($user->email, new ExtensionStatusMail($borrowing, $user, 'mandiri'));
+            self::queueMailSafely($user->email, new ExtensionStatusMail($borrowing, $user, 'mandiri'), 'extension', $user->id, 'Perpanjangan Peminjaman Berhasil');
         }
     }
+
+    /**
+     * Broadcast pengumuman email kepada pengguna secara aman melalui queue dan chunking.
+     *
+     * @return array{total_targeted: int, valid_queued: int, skipped_invalid: int}
+     */
+    public static function broadcastNotification(
+        string $subject,
+        string $message,
+        string $targetAudience = 'all',
+        ?string $actionUrl = null,
+        ?string $actionLabel = 'Buka Aplikasi',
+        ?string $senderName = 'Admin Perpustakaan'
+    ): array {
+        $query = User::query()
+            ->whereNotNull('email')
+            ->where('email', '!=', '');
+
+        if ($targetAudience === 'members') {
+            $query->where('role', '!=', 'admin');
+        } elseif ($targetAudience === 'admins') {
+            $query->where('role', 'admin');
+        }
+
+        $validQueued = 0;
+        $skippedInvalid = 0;
+        $counter = 0;
+
+        $query->chunkById(50, function ($users) use (
+            $subject,
+            $message,
+            $actionUrl,
+            $actionLabel,
+            $senderName,
+            &$validQueued,
+            &$skippedInvalid,
+            &$counter
+        ) {
+            foreach ($users as $user) {
+                $email = trim((string) $user->email);
+
+                // Cek format email dan dummy domain
+                $isDummy = str_ends_with(strtolower($email), '@example.com') || str_ends_with(strtolower($email), '@test.local');
+                $isValid = filter_var($email, FILTER_VALIDATE_EMAIL) && !$isDummy;
+
+                if ($isValid) {
+                    $validQueued++;
+                    $counter++;
+
+                    // 1. Web in-app notification (terisolasi)
+                    try {
+                        AppNotification::notifyUser(
+                            $user->id,
+                            'announcement',
+                            $subject,
+                            \Illuminate\Support\Str::limit($message, 150),
+                            ['url' => $actionUrl]
+                        );
+                    } catch (\Throwable $notifErr) {
+                        Log::warning("Web notification error in broadcast for user {$user->id}: " . $notifErr->getMessage());
+                    }
+
+                    // 2. Email notification job (staggered delay to protect SMTP/API limits)
+                    $staggerSeconds = (int) floor($counter / 5);
+                    $mailable = new AdminBroadcastMail(
+                        subjectText: $subject,
+                        messageBody: $message,
+                        recipientName: $user->name,
+                        actionUrl: $actionUrl,
+                        actionLabel: $actionLabel,
+                        senderName: $senderName
+                    );
+
+                    SendNotificationEmailJob::dispatch(
+                        $email,
+                        $mailable,
+                        'broadcast',
+                        $user->id,
+                        $subject
+                    )->delay(now()->addSeconds($staggerSeconds));
+                } else {
+                    $skippedInvalid++;
+
+                    \App\Models\EmailLog::create([
+                        'user_id'           => $user->id,
+                        'email'             => $email,
+                        'notification_type' => 'broadcast',
+                        'subject'           => $subject,
+                        'status'            => 'skipped',
+                        'provider'          => config('mail.default', 'smtp'),
+                        'error_message'     => 'Email dilewati: alamat email dummy atau format tidak valid.',
+                    ]);
+                }
+            }
+        });
+
+        return [
+            'total_targeted'  => $validQueued + $skippedInvalid,
+            'valid_queued'    => $validQueued,
+            'skipped_invalid' => $skippedInvalid,
+        ];
+    }
 }
+
