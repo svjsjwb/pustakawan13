@@ -84,7 +84,7 @@
             </a>
 
 
-            {{-- BROADCAST EMAIL (admin only) --}}
+            {{-- BROADCAST EMAIL (admin only) 
             @if(Auth::check() && Auth::user()->role === 'admin')
             <a
                 href="{{ route('admin.broadcast.index') }}"
@@ -92,7 +92,7 @@
                 title="Kirim email notifikasi ke semua pengguna">
                 📢 Broadcast
             </a>
-            @endif
+            @endif --}}
 
         </nav>
 

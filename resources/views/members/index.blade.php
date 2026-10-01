@@ -9,6 +9,32 @@
 
 @section('content')
 
+    @if (session('error'))
+        <div class="member-delete-error-overlay" id="memberDeleteError">
+            <div class="member-delete-error-modal">
+
+                <button type="button" class="member-delete-error-close" onclick="closeMemberDeleteError()">
+                    &times;
+                </button>
+
+                <div class="member-delete-error-icon">
+                    !
+                </div>
+
+                <h3>Penghapusan Anggota Gagal</h3>
+
+                <p>
+                    {{ session('error') }}
+                </p>
+
+                <button type="button" class="member-delete-error-button" onclick="closeMemberDeleteError()">
+                    Mengerti
+                </button>
+
+            </div>
+        </div>
+    @endif
+
     <div class="member-page">
 
         {{-- =====================================================
@@ -196,17 +222,13 @@
 
                                 <td>
 
-                                    @if ($member->user?->role === 'guest' || $member->status === 'nonaktif')
-                                        <span class="status-inactive">
-                                            Nonaktif
-                                        </span>
-                                    @elseif($member->status === 'aktif' || $member->user?->role === 'member')
+                                    @if ($member->status === 'aktif')
                                         <span class="status-active">
                                             Aktif
                                         </span>
                                     @else
                                         <span class="status-inactive">
-                                            Tidak Aktif
+                                            Nonaktif
                                         </span>
                                     @endif
 
@@ -254,9 +276,8 @@
 
                                             <a href="{{ route('members.edit', $member->id) }}" class="btn-edit"
                                                 title="Edit Anggota" aria-label="Edit Anggota">
-                                                <svg viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                                     aria-hidden="true">
                                                     <path d="M12 20h9" />
                                                     <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
@@ -266,21 +287,16 @@
 
                                             {{-- HAPUS --}}
 
-                                            <form action="{{ route('members.destroy', $member->id) }}"
-                                                method="POST"
+                                            <form action="{{ route('members.destroy', $member->id) }}" method="POST"
                                                 class="delete-member-form">
 
                                                 @csrf
                                                 @method('DELETE')
 
-                                                <button type="button"
-                                                    class="btn-delete"
-                                                    title="Hapus Anggota"
-                                                    aria-label="Hapus Anggota"
-                                                    onclick="openMemberDeleteModal(this)">
-                                                    <svg viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                <button type="button" class="btn-delete" title="Hapus Anggota"
+                                                    aria-label="Hapus Anggota" onclick="openMemberDeleteModal(this)">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                                         aria-hidden="true">
                                                         <polyline points="3 6 5 6 21 6" />
                                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
@@ -291,7 +307,6 @@
                                                 </button>
 
                                             </form>
-
                                         @endif
 
                                     </div>
@@ -482,6 +497,7 @@
                 );
 
             }
+
 
 
             /*
@@ -686,6 +702,34 @@
             memberDeleteForm.submit();
 
         }
+    </script>
+
+    <script>
+        function closeMemberDeleteError() {
+            const popup = document.getElementById('memberDeleteError');
+
+            if (popup) {
+                popup.remove();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const popup = document.getElementById('memberDeleteError');
+
+            if (popup) {
+
+                popup.addEventListener('click', function(event) {
+
+                    if (event.target === popup) {
+                        closeMemberDeleteError();
+                    }
+
+                });
+
+            }
+
+        });
     </script>
 
 @endsection

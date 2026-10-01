@@ -23,6 +23,14 @@ class CirculationController extends Controller
     {
         $members = Member::orderBy('name')->get();
 
+        $extensionRequests = Borrowing::with([
+            'member',
+            'details.book',
+        ])
+            ->where('extension_status', 'menunggu')
+            ->latest()
+            ->get();
+            
         /*
          * Semua buku tetap ditampilkan,
          * termasuk yang stok tersedia = 0.
@@ -95,6 +103,7 @@ class CirculationController extends Controller
             'books',
             'reservations',
             'borrowings',
+            'extensionRequests',
             'monthLabel',
             'month',
             'year',
@@ -342,7 +351,7 @@ class CirculationController extends Controller
             ],
         ]);
 
-        
+
         if (!$borrowing->due_at) {
             return back()->with(
                 'error',

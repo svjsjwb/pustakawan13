@@ -8,41 +8,109 @@ use App\Models\Reservation;
 
 class MemberStatusService
 {
-    /**
-     * Sinkronkan status satu member berdasarkan tanggung jawab yang masih berlangsung.
-     *
-     * Aktif jika masih memiliki:
-     * - peminjaman yang belum dikembalikan; atau
-     * - reservasi yang belum selesai/ditolak/dibatalkan dan belum kedaluwarsa.
-     */
     public function sync(Member $member): void
     {
+        // Guest selalu nonaktif
         if ($member->user && $member->user->role === 'guest') {
-            $member->update(['status' => 'nonaktif']);
+            $member->update([
+                'status' => 'nonaktif'
+            ]);
+
             return;
         }
 
+        // Hanya member yang diproses sebagai anggota aktif/nonaktif
         if ($member->user && $member->user->role === 'member') {
-            $member->update(['status' => 'aktif']);
+
+            // Cek peminjaman yang masih berlangsung
+            $hasActiveBorrowing = $member->borrowings()
+                ->whereNull('returned_at')
+                ->whereIn('status', [
+                    'dipinjam',
+                    'diperpanjang',
+                    'terlambat',
+                ])
+                ->exists();
+
+            // Cek reservasi yang masih berlangsung
+            $hasActiveReservation = $member->reservations()
+                ->whereNotIn('status', [
+                    'selesai',
+                    'ditolak',
+                    'dibatalkan',
+                ])
+                ->where(function ($query) {
+                    $query->whereNull('expires_at')
+                        ->orWhere('expires_at', '>=', now());
+                })
+                ->exists();
+
+            $member->update([
+                'status' => ($hasActiveBorrowing || $hasActiveReservation)
+                    ? 'aktif'
+                    : 'nonaktif'
+            ]);
+
             return;
         }
+
+        // Jika tidak memiliki user / role yang valid
+        $member->update([
+            'status' => 'nonaktif'
+        ]);
     }
 
     /**
-     * Sinkronkan seluruh member tanpa query per member.
+     * Sinkronkan seluruh member.
      */
     public function syncAll(): void
     {
-        // Pendaftar yang masih berstatus guest selalu nonaktif
+        /*
+         * Guest selalu nonaktif.
+         */
         Member::whereHas('user', function ($q) {
             $q->where('role', 'guest');
         })->where('status', '!=', 'nonaktif')
-          ->update(['status' => 'nonaktif']);
+          ->update([
+              'status' => 'nonaktif'
+          ]);
 
-        // Anggota yang sudah disetujui admin (role member) selalu aktif
+        /*
+         * Member perlu dihitung berdasarkan aktivitasnya.
+         */
         Member::whereHas('user', function ($q) {
             $q->where('role', 'member');
-        })->where('status', '!=', 'aktif')
-          ->update(['status' => 'aktif']);
+        })
+        ->with(['borrowings', 'reservations'])
+        ->get()
+        ->each(function (Member $member) {
+
+            $hasActiveBorrowing = $member->borrowings()
+                ->whereNull('returned_at')
+                ->whereIn('status', [
+                    'dipinjam',
+                    'diperpanjang',
+                    'terlambat',
+                ])
+                ->exists();
+
+            $hasActiveReservation = $member->reservations()
+                ->whereNotIn('status', [
+                    'selesai',
+                    'ditolak',
+                    'dibatalkan',
+                ])
+                ->where(function ($query) {
+                    $query->whereNull('expires_at')
+                        ->orWhere('expires_at', '>=', now());
+                })
+                ->exists();
+
+            $member->update([
+                'status' => ($hasActiveBorrowing || $hasActiveReservation)
+                    ? 'aktif'
+                    : 'nonaktif'
+            ]);
+        });
     }
 }

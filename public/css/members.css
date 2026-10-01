@@ -1175,6 +1175,129 @@
     font-weight: 600;
 }
 
+.member-delete-error-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+.member-delete-error-modal {
+    position: relative;
+
+    width: min(440px, calc(100% - 40px));
+    padding: 32px;
+
+    background: #ffffff;
+    border-radius: 22px;
+
+    text-align: center;
+
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.18);
+
+    animation: memberDeleteErrorShow 0.2s ease-out;
+}
+
+.member-delete-error-icon {
+    width: 58px;
+    height: 58px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #fee2e2;
+    color: #dc2626;
+
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.member-delete-error-modal h3 {
+    margin: 0 0 10px;
+
+    color: #172033;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.member-delete-error-modal p {
+    margin: 0 auto 24px;
+
+    max-width: 350px;
+
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.member-delete-error-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+
+    width: 34px;
+    height: 34px;
+
+    border: none;
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 25px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.member-delete-error-close:hover {
+    color: #172033;
+}
+
+.member-delete-error-button {
+    min-width: 130px;
+
+    padding: 11px 22px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #0f8f89;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.member-delete-error-button:hover {
+    background: #0b7772;
+}
+
+@keyframes memberDeleteErrorShow {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* =========================================================
    RESPONSIVE TABLET
 ========================================================= */

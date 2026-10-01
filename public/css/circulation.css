@@ -1,68 +1,107 @@
 /* =========================================================
+
    SIRKULASI / PEMINJAMAN BUKU
+
 ========================================================= */
 
 #page-circulation {
+
     width: 100%;
+
     box-sizing: border-box;
+
 }
 
-
 /* =========================================================
+
    HERO HEADER
+
 ========================================================= */
 
 .circulation-hero {
+
     position: relative;
+
     width: 100%;
+
     min-height: 140px;
 
     margin-bottom: 24px;
+
     padding: 28px 36px;
 
     display: flex;
+
     align-items: center;
 
     box-sizing: border-box;
+
     overflow: hidden;
 
     background:
+
         linear-gradient(
+
             110deg,
+
             #eef8f7 0%,
+
             #f5fbfb 55%,
+
             #ffffff 100%
+
         );
 
     border: 1px solid #d9ebea;
+
     border-radius: 16px;
 
     box-shadow:
+
         0 4px 16px rgba(27, 42, 58, 0.03),
+
         0 1px 2px rgba(27, 42, 58, 0.02);
+
 }
 
 .circulation-hero::after {
+
     content: "";
+
     position: absolute;
+
     width: 210px;
+
     height: 210px;
+
     right: -60px;
+
     top: -80px;
+
     border-radius: 50%;
+
     background: rgba(40, 127, 128, 0.06);
+
     pointer-events: none;
+
 }
 
 .circulation-hero-content {
+
     position: relative;
+
     z-index: 1;
+
     max-width: 750px;
+
 }
 
 .circulation-hero-label {
+
     display: inline-flex;
+
     align-items: center;
+
     gap: 8px;
 
     margin-bottom: 8px;
@@ -70,81 +109,115 @@
     color: #287f80;
 
     font-size: 12px;
+
     font-weight: 700;
 
     letter-spacing: 0.06em;
+
     text-transform: uppercase;
+
 }
 
 .circulation-hero-dot {
+
     width: 8px;
+
     height: 8px;
 
     border-radius: 50%;
 
     background: #287f80;
+
 }
 
 .circulation-hero h1 {
+
     margin: 0 0 6px;
 
     color: #0f2d42;
 
     font-size: 28px;
+
     line-height: 1.2;
+
     font-weight: 800;
 
     letter-spacing: -0.02em;
+
 }
 
 .circulation-hero p {
+
     margin: 0;
 
     color: #526b7a;
 
     font-size: 14px;
+
     line-height: 1.5;
+
 }
 
-
 /* =========================================================
+
    ALERT
+
 ========================================================= */
 
 #page-circulation .alert-success,
+
 #page-circulation .alert-error {
+
     margin-bottom: 14px;
+
     padding: 10px 14px;
+
     border-radius: 7px;
+
     font-size: 11px;
+
 }
 
 #page-circulation .alert-success {
+
     background: #e7f4e8;
+
     border: 1px solid #b8d9ba;
+
     color: #28632c;
+
 }
 
 #page-circulation .alert-error {
+
     background: #fbeaea;
+
     border: 1px solid #e2b8b8;
+
     color: #8a2d2d;
+
 }
 
 #page-circulation .error-list {
+
     margin: 0;
+
     padding-left: 18px;
+
 }
 
-
 /* =========================================================
+
    TWO COLUMN
+
 ========================================================= */
 
 #page-circulation .two-col {
+
     display: grid;
 
     grid-template-columns:
+
         548px minmax(0, 1fr);
 
     gap: 24px;
@@ -152,14 +225,17 @@
     width: 100%;
 
     align-items: start;
+
 }
 
-
 /* =========================================================
+
    CARD
+
 ========================================================= */
 
 #page-circulation .card {
+
     background: #ffffff;
 
     border: 1px solid #e2e8f0;
@@ -171,25 +247,33 @@
     box-sizing: border-box;
 
     box-shadow: 0 4px 14px rgba(22, 63, 63, 0.04);
+
 }
 
 #page-circulation .form-card {
+
     min-width: 0;
+
 }
 
 #page-circulation .card-pad {
+
     padding: 20px;
+
 }
 
 #page-circulation h3 {
+
     margin: 0 0 5px;
 
     font-size: 18px;
 
     color: #111827;
+
 }
 
 #page-circulation .loan-description {
+
     margin: 0 0 20px;
 
     color: #6b7280;
@@ -197,18 +281,23 @@
     font-size: 12px;
 
     line-height: 1.5;
+
 }
 
-
 /* =========================================================
+
    FORM
+
 ========================================================= */
 
 #page-circulation .field {
+
     margin-bottom: 15px;
+
 }
 
 #page-circulation .field label {
+
     display: block;
 
     margin-bottom: 6px;
@@ -218,10 +307,13 @@
     font-weight: 600;
 
     color: #111827;
+
 }
 
 #page-circulation .field select,
+
 #page-circulation .field input {
+
     width: 100%;
 
     height: 40px;
@@ -243,55 +335,73 @@
     font-family: inherit;
 
     font-size: 12px;
+
 }
 
 #page-circulation .field select:focus,
+
 #page-circulation .field input:focus {
+
     border-color: #62a8e8;
 
     box-shadow:
+
         0 0 0 2px rgba(98, 168, 232, .12);
+
 }
 
 #page-circulation .field input[type="date"] {
+
     display: flex;
 
     align-items: center;
+
 }
 
 #page-circulation .field input[type="date"]::-webkit-datetime-edit {
+
     display: flex;
 
     align-items: center;
 
     padding: 0;
+
 }
 
 #page-circulation .field input[type="date"]::-webkit-calendar-picker-indicator {
+
     margin-left: auto;
+
 }
 
 #page-circulation .field select option:disabled {
+
     color: #999999;
 
     background: #eeeeee;
+
 }
 
 #page-circulation .field-row {
+
     display: grid;
 
     grid-template-columns:
+
         1fr 1fr;
 
     gap: 12px;
+
 }
 
-
 /* =========================================================
+
    SUBMIT
+
 ========================================================= */
 
 #page-circulation .loan-submit {
+
     width: 100%;
 
     height: 40px;
@@ -315,22 +425,29 @@
     cursor: pointer;
 
     transition:
-        background .2s ease,
+
+        *background* .2s ease,
+
         transform .15s ease;
+
 }
 
 #page-circulation .loan-submit:hover {
+
     background: #217174;
 
     transform: translateY(-1px);
+
 }
 
-
 /* =========================================================
+
    HEADER DAFTAR PEMINJAMAN
+
 ========================================================= */
 
 #page-circulation .borrowing-header {
+
     min-height: 68px;
 
     display: flex;
@@ -346,34 +463,43 @@
     box-sizing: border-box;
 
     background: #ffffff;
+
 }
 
 #page-circulation .borrowing-header h3 {
+
     margin: 0 0 3px;
 
     font-size: 16px;
 
     color: #111827;
+
 }
 
 #page-circulation .borrowing-header p {
+
     margin: 0;
 
     color: #6b7280;
 
     font-size: 10px;
+
 }
 
-
 /* =========================================================
+
    SEARCH
+
 ========================================================= */
 
 #page-circulation .search-box {
+
     flex-shrink: 0;
+
 }
 
 #page-circulation .search-box input {
+
     width: 205px;
 
     height: 32px;
@@ -395,39 +521,51 @@
     font-family: inherit;
 
     font-size: 10px;
+
 }
 
 #page-circulation .search-box input::placeholder {
+
     color: #9ca3af;
+
 }
 
 #page-circulation .search-box input:focus {
+
     border-color: #287b7b;
 
     box-shadow:
+
         0 0 0 2px rgba(40, 123, 123, .08);
+
 }
 
-
 /* =========================================================
+
    TABLE
+
 ========================================================= */
 
 #page-circulation .table-wrap {
+
     width: 100%;
 
     overflow-x: auto;
+
 }
 
 #page-circulation table {
+
     width: 100%;
 
     min-width: 700px;
 
     border-collapse: collapse;
+
 }
 
 #page-circulation table th {
+
     padding: 12px 10px;
 
     background: #a8cfd0;
@@ -443,14 +581,19 @@
     text-align: left;
 
     white-space: nowrap;
+
 }
 
 #page-circulation table th:nth-child(3),
+
 #page-circulation table th:nth-child(4) {
+
     text-align: center;
+
 }
 
 #page-circulation table td {
+
     padding: 13px 10px;
 
     border-bottom: 1px solid #eef0f2;
@@ -460,30 +603,41 @@
     font-size: 10px;
 
     vertical-align: middle;
+
 }
 
 #page-circulation table td:nth-child(3),
+
 #page-circulation table td:nth-child(4) {
+
     text-align: center;
+
 }
 
 #page-circulation table td,
+
 #page-circulation table td span:not(.status-badge) {
+
     color: #263b3b !important;
 
     text-decoration: none !important;
+
 }
 
 #page-circulation table tbody tr:hover {
+
     background: #f8fbfb;
+
 }
 
-
 /* =========================================================
+
    STATUS
+
 ========================================================= */
 
 #page-circulation .status-badge {
+
     display: inline-flex;
 
     align-items: center;
@@ -499,251 +653,341 @@
     font-weight: 600;
 
     white-space: nowrap;
+
 }
 
 #page-circulation .status-badge.aktif {
+
     background: #FFF7DB;
 
     color: #8A6A12;
+
 }
 
 #page-circulation .status-badge.diperpanjang {
+
     background: #e6efff;
+
     color: #3267a8;
+
 }
 
 #page-circulation .status-badge.terlambat {
+
     background: #FDE8E8;
 
     color: #A33A3A;
+
 }
 
 #page-circulation .status-badge.kembali {
+
     background: #E7F3E3;
 
     color: #3F7138;
+
 }
 
-
 /* =========================================================
+
    BUTTON AKSI PEMINJAMAN
+
 ========================================================= */
 
 #page-circulation .borrowing-action-buttons {
+
     display: flex;
+
     flex-direction: column;
+
     align-items: flex-start;
+
     gap: 5px;
+
 }
 
-
 /* =========================================================
+
    BUTTON PERPANJANG
+
 ========================================================= */
 
 #page-circulation .btn-extend {
+
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
 
     width: 100%;
+
     min-width: 100px;
+
     height: 34px;
 
     padding: 0 12px;
 
     border: none;
+
     border-radius: 7px;
 
     background: #f3f4f6;
+
     color: #374151;
 
     font-family: inherit;
+
     font-size: 10px;
+
     font-weight: 600;
 
     cursor: pointer;
+
     box-sizing: border-box;
 
     transition:
-        background .2s ease,
-        color .2s ease,
-        transform .15s ease;
-}
 
+        *background* .2s ease,
+
+        color .2s ease,
+
+        transform .15s ease;
+
+}
 
 /* ICON PERPANJANG */
 
 #page-circulation .btn-extend .extend-icon {
+
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
 
     margin-right: 5px;
 
     font-size: 13px;
-    line-height: 1;
-}
 
+    line-height: 1;
+
+}
 
 /* HOVER PERPANJANG */
 
 #page-circulation .btn-extend:hover {
+
     background: #e5e7eb;
+
     color: #1f2937;
 
     transform: translateY(-1px);
+
 }
 
-
 /* =========================================================
+
    BUTTON KEMBALIKAN
+
 ========================================================= */
 
 #page-circulation .return-form {
+
     width: 100%;
+
     margin: 0;
+
 }
 
-
 #page-circulation .btn-secondary {
+
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
 
     width: 100%;
+
     min-width: 100px;
+
     height: 34px;
 
     padding: 0 12px;
 
     border: none;
+
     border-radius: 7px;
 
     background: #f3f4f6;
+
     color: #374151;
 
     font-family: inherit;
+
     font-size: 10px;
+
     font-weight: 600;
 
     cursor: pointer;
+
     box-sizing: border-box;
 
     transition:
-        background .2s ease,
+
+        *background* .2s ease,
+
         color .2s ease,
+
         transform .15s ease;
+
 }
 
-
 #page-circulation .btn-secondary:hover {
+
     background: #e5e7eb;
+
     color: #1f2937;
 
     transform: translateY(-1px);
+
 }
 
-
 /* =========================================================
+
    TEXT SELESAI
+
 ========================================================= */
 
 #page-circulation .completed-text {
+
     color: #6b7280;
+
     font-size: 10px;
+
 }
 
 /* =========================================================
+
    EMPTY
+
 ========================================================= */
 
 #page-circulation .empty-state {
+
     padding: 30px !important;
 
     text-align: center;
 
     color: #9ca3af !important;
+
 }
 
-
 /* =========================================================
+
    MODAL PERPANJANG PEMINJAMAN
+
 ========================================================= */
 
 #extendLoanModal {
+
     position: fixed !important;
+
     inset: 0 !important;
 
     width: 100vw !important;
+
     height: 100vh !important;
 
     display: flex !important;
+
     align-items: center !important;
+
     justify-content: center !important;
 
     padding: 20px !important;
+
     box-sizing: border-box !important;
 
     z-index: 99999 !important;
 
     visibility: hidden !important;
+
     opacity: 0 !important;
 
     pointer-events: none !important;
 
     transition:
+
         opacity 0.25s ease,
+
         visibility 0.25s ease !important;
+
 }
 
-
 /* =========================================================
+
    MODAL OPEN
+
 ========================================================= */
 
 #extendLoanModal.open {
+
     visibility: visible !important;
+
     opacity: 1 !important;
+
     pointer-events: auto !important;
+
 }
 
-
 /* =========================================================
+
    OVERLAY
+
 ========================================================= */
 
 #extendLoanModal .extend-modal-overlay {
+
     position: absolute !important;
+
     inset: 0 !important;
 
     width: 100% !important;
+
     height: 100% !important;
 
     background: rgba(16, 45, 45, 0.62) !important;
 
     backdrop-filter: blur(6px) !important;
+
     -webkit-backdrop-filter: blur(6px) !important;
 
     opacity: 1 !important;
+
 }
 
-
 /* =========================================================
+
    MODAL CARD
+
 ========================================================= */
 
 #extendLoanModal .extend-modal-card {
+
     position: relative !important;
 
     z-index: 2 !important;
 
     width: 460px !important;
+
     max-width: calc(100vw - 40px) !important;
 
     min-height: auto !important;
 
     margin: 0 !important;
+
     padding: 30px !important;
 
     box-sizing: border-box !important;
@@ -751,9 +995,11 @@
     background: #ffffff !important;
 
     border: 1px solid #e2eeee !important;
+
     border-radius: 20px !important;
 
     box-shadow:
+
         0 30px 80px rgba(0, 40, 40, 0.25) !important;
 
     transform: translateY(25px) scale(0.96) !important;
@@ -761,40 +1007,53 @@
     opacity: 0 !important;
 
     transition:
-        transform 0.4s cubic-bezier(.22, 1, .36, 1),
-        opacity 0.3s ease !important;
-}
 
+        transform 0.4s cubic-bezier(.22, 1, .36, 1),
+
+        opacity 0.3s ease !important;
+
+}
 
 /* CARD SAAT OPEN */
 
 #extendLoanModal.open .extend-modal-card {
+
     transform: translateY(0) scale(1) !important;
+
     opacity: 1 !important;
+
 }
 
-
 /* =========================================================
+
    CLOSE
+
 ========================================================= */
 
 #extendLoanModal .extend-modal-close {
+
     position: absolute !important;
 
     top: 18px !important;
+
     right: 18px !important;
 
     width: 38px !important;
+
     height: 38px !important;
 
     display: flex !important;
+
     align-items: center !important;
+
     justify-content: center !important;
 
     padding: 0 !important;
+
     margin: 0 !important;
 
     border: none !important;
+
     border-radius: 50% !important;
 
     background: #edf5f5 !important;
@@ -802,35 +1061,45 @@
     color: #174a4c !important;
 
     font-family: inherit !important;
+
     font-size: 24px !important;
+
     line-height: 1 !important;
 
     cursor: pointer !important;
 
     transition:
-        background 0.2s ease,
+
+        *background* 0.2s ease,
+
         transform 0.2s ease !important;
+
 }
 
 #extendLoanModal .extend-modal-close:hover {
+
     background: #dceeee !important;
 
     transform: rotate(90deg) !important;
+
 }
 
-
 /* =========================================================
+
    HEADER
+
 ========================================================= */
 
 #extendLoanModal .extend-modal-header {
+
     padding-right: 45px !important;
 
     margin: 0 0 24px 0 !important;
+
 }
 
-
 #extendLoanModal .extend-modal-label {
+
     display: block !important;
 
     margin: 0 0 8px 0 !important;
@@ -838,25 +1107,29 @@
     color: #287b7b !important;
 
     font-size: 10px !important;
+
     font-weight: 800 !important;
 
     letter-spacing: 1.5px !important;
+
 }
 
-
 #extendLoanModal .extend-modal-header h3 {
+
     margin: 0 0 8px 0 !important;
 
     color: #173f40 !important;
 
     font-size: 25px !important;
+
     font-weight: 800 !important;
 
     line-height: 1.2 !important;
+
 }
 
-
 #extendLoanModal .extend-modal-header p {
+
     margin: 0 !important;
 
     color: #718080 !important;
@@ -864,15 +1137,19 @@
     font-size: 12px !important;
 
     line-height: 1.5 !important;
+
 }
 
-
 /* =========================================================
+
    BOOK INFO
+
 ========================================================= */
 
 #extendLoanModal .extend-book-info {
+
     display: flex !important;
+
     flex-direction: column !important;
 
     gap: 5px !important;
@@ -886,35 +1163,43 @@
     border: 1px solid #e1eeee !important;
 
     border-radius: 12px !important;
+
 }
 
-
 #extendLoanModal .extend-book-info span {
+
     color: #789090 !important;
 
     font-size: 9px !important;
+
     font-weight: 800 !important;
 
     letter-spacing: 0.8px !important;
+
 }
 
-
 #extendLoanModal .extend-book-info strong {
+
     color: #174a4c !important;
 
     font-size: 14px !important;
+
     font-weight: 700 !important;
+
 }
 
-
 /* =========================================================
+
    CURRENT DUE DATE
+
 ========================================================= */
 
 #extendLoanModal .extend-current-date {
+
     display: flex !important;
 
     align-items: center !important;
+
     justify-content: space-between !important;
 
     gap: 15px !important;
@@ -928,35 +1213,43 @@
     border: 1px solid #edf2f2 !important;
 
     border-radius: 10px !important;
+
 }
 
-
 #extendLoanModal .extend-current-date span {
+
     color: #789090 !important;
 
     font-size: 10px !important;
+
     font-weight: 600 !important;
+
 }
 
-
 #extendLoanModal .extend-current-date strong {
+
     color: #174a4c !important;
 
     font-size: 12px !important;
+
     font-weight: 700 !important;
+
 }
 
-
 /* =========================================================
+
    INPUT GROUP
+
 ========================================================= */
 
 #extendLoanModal .extend-input-group {
+
     margin: 0 0 24px 0 !important;
+
 }
 
-
 #extendLoanModal .extend-input-group label {
+
     display: block !important;
 
     margin: 0 0 8px 0 !important;
@@ -964,20 +1257,25 @@
     color: #1c3030 !important;
 
     font-size: 12px !important;
+
     font-weight: 700 !important;
+
 }
 
-
 /* =========================================================
+
    INPUT WRAPPER
+
 ========================================================= */
 
 #extendLoanModal .extend-input-wrap {
+
     display: flex !important;
 
     align-items: center !important;
 
     width: 100% !important;
+
     height: 48px !important;
 
     padding: 0 14px !important;
@@ -989,27 +1287,33 @@
     border: 1px solid #cbdada !important;
 
     border-radius: 11px !important;
+
 }
 
-
 #extendLoanModal .extend-input-wrap:focus-within {
+
     border-color: #287b7b !important;
 
     box-shadow:
+
         0 0 0 3px rgba(40, 123, 123, 0.10) !important;
+
 }
 
-
 #extendLoanModal .extend-input-wrap input {
+
     flex: 1 !important;
 
     width: 100% !important;
+
     height: 100% !important;
 
     padding: 0 !important;
+
     margin: 0 !important;
 
     border: none !important;
+
     outline: none !important;
 
     background: transparent !important;
@@ -1019,48 +1323,61 @@
     font-family: inherit !important;
 
     font-size: 16px !important;
+
     font-weight: 700 !important;
+
 }
 
-
 #extendLoanModal .extend-input-wrap span {
+
     color: #718080 !important;
 
     font-size: 12px !important;
-    font-weight: 600 !important;
-}
 
+    font-weight: 600 !important;
+
+}
 
 /* HILANGKAN SPINNER */
 
 #extendLoanModal
+
 .extend-input-wrap
+
 input::-webkit-inner-spin-button,
 
 #extendLoanModal
+
 .extend-input-wrap
+
 input::-webkit-outer-spin-button {
 
     -webkit-appearance: none !important;
 
     margin: 0 !important;
+
 }
 
-
 #extendLoanModal
+
 .extend-input-wrap
+
 input[type="number"] {
 
     appearance: textfield !important;
+
     -moz-appearance: textfield !important;
+
 }
 
-
 /* =========================================================
+
    HELPER TEXT
+
 ========================================================= */
 
 #extendLoanModal .extend-input-group small {
+
     display: block !important;
 
     margin: 7px 0 0 0 !important;
@@ -1068,26 +1385,31 @@ input[type="number"] {
     color: #8a9999 !important;
 
     font-size: 10px !important;
+
 }
 
-
 /* =========================================================
+
    ACTION BUTTONS
+
 ========================================================= */
 
 #extendLoanModal .extend-modal-actions {
+
     display: flex !important;
 
     align-items: center !important;
+
     justify-content: flex-end !important;
 
     gap: 10px !important;
 
     margin: 0 !important;
+
 }
 
-
 #extendLoanModal .extend-cancel,
+
 #extendLoanModal .extend-confirm {
 
     height: 42px !important;
@@ -1101,16 +1423,20 @@ input[type="number"] {
     font-family: inherit !important;
 
     font-size: 11px !important;
+
     font-weight: 700 !important;
 
     cursor: pointer !important;
 
     transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease !important;
-}
 
+        *background* 0.2s ease,
+
+        transform 0.2s ease,
+
+        box-shadow 0.2s ease !important;
+
+}
 
 /* BATAL */
 
@@ -1121,16 +1447,16 @@ input[type="number"] {
     background: #ffffff !important;
 
     color: #526565 !important;
-}
 
+}
 
 #extendLoanModal .extend-cancel:hover {
 
     background: #f5f8f8 !important;
 
     transform: translateY(-1px) !important;
-}
 
+}
 
 /* PERPANJANG */
 
@@ -1143,9 +1469,10 @@ input[type="number"] {
     color: #ffffff !important;
 
     box-shadow:
-        0 6px 16px rgba(39, 132, 134, 0.20) !important;
-}
 
+        0 6px 16px rgba(39, 132, 134, 0.20) !important;
+
+}
 
 #extendLoanModal .extend-confirm:hover {
 
@@ -1154,60 +1481,81 @@ input[type="number"] {
     transform: translateY(-1px) !important;
 
     box-shadow:
+
         0 9px 22px rgba(39, 132, 134, 0.28) !important;
+
 }
 
-
 /* =========================================================
+
    MODAL KONFIRMASI PERPANJANGAN
+
 ========================================================= */
 
 .extend-confirm-modal {
+
     position: fixed;
+
     inset: 0;
+
     z-index: 9999;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     padding: 24px;
 
     visibility: hidden;
+
     opacity: 0;
 
     transition:
-        opacity 0.2s ease,
-        visibility 0.2s ease;
-}
 
+        opacity 0.2s ease,
+
+        visibility 0.2s ease;
+
+}
 
 .extend-confirm-modal.open {
+
     visibility: visible;
+
     opacity: 1;
+
 }
 
-
 /* =========================================================
+
    OVERLAY
+
 ========================================================= */
 
 .extend-confirm-overlay {
+
     position: absolute;
+
     inset: 0;
 
     background: rgba(25, 47, 47, 0.58);
 
     backdrop-filter: blur(5px);
+
 }
 
-
 /* =========================================================
+
    CARD
+
 ========================================================= */
 
 .extend-confirm-card {
+
     position: relative;
+
     z-index: 1;
 
     width: min(100%, 520px);
@@ -1221,39 +1569,51 @@ input[type="number"] {
     text-align: center;
 
     box-shadow:
+
         0 24px 70px rgba(20, 50, 50, 0.25);
 
     transform:
+
         translateY(12px)
+
         scale(0.97);
 
     transition:
+
         transform 0.22s ease;
+
 }
 
-
 .extend-confirm-modal.open
+
 .extend-confirm-card {
 
     transform:
+
         translateY(0)
+
         scale(1);
+
 }
 
-
 /* =========================================================
+
    ICON
+
 ========================================================= */
 
 .extend-confirm-icon {
 
     width: 76px;
+
     height: 76px;
 
     margin: 0 auto 22px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 50%;
@@ -1261,18 +1621,21 @@ input[type="number"] {
     background: #e8f5f5;
 
     color: #287f80;
-}
 
+}
 
 .extend-confirm-icon svg {
 
     width: 38px;
+
     height: 38px;
+
 }
 
-
 /* =========================================================
+
    LABEL
+
 ========================================================= */
 
 .extend-confirm-label {
@@ -1284,14 +1647,17 @@ input[type="number"] {
     color: #287f80;
 
     font-size: 12px;
+
     font-weight: 800;
 
     letter-spacing: 3px;
+
 }
 
-
 /* =========================================================
+
    TITLE
+
 ========================================================= */
 
 .extend-confirm-card h3 {
@@ -1301,14 +1667,17 @@ input[type="number"] {
     color: #19364f;
 
     font-size: 28px;
+
     font-weight: 800;
 
     line-height: 1.25;
+
 }
 
-
 /* =========================================================
+
    DESCRIPTION
+
 ========================================================= */
 
 .extend-confirm-description {
@@ -1322,19 +1691,21 @@ input[type="number"] {
     font-size: 15px;
 
     line-height: 1.6;
-}
 
+}
 
 .extend-confirm-description strong {
 
     color: #287f80;
 
     font-weight: 800;
+
 }
 
-
 /* =========================================================
+
    BUTTON
+
 ========================================================= */
 
 .extend-confirm-actions {
@@ -1344,10 +1715,11 @@ input[type="number"] {
     justify-content: center;
 
     gap: 12px;
+
 }
 
-
 .extend-confirm-cancel,
+
 .extend-confirm-submit {
 
     min-width: 145px;
@@ -1367,9 +1739,10 @@ input[type="number"] {
     cursor: pointer;
 
     transition:
-        all 0.2s ease;
-}
 
+        all 0.2s ease;
+
+}
 
 /* BATAL */
 
@@ -1380,8 +1753,8 @@ input[type="number"] {
     border: 1px solid #d5e1e1;
 
     color: #60727c;
-}
 
+}
 
 .extend-confirm-cancel:hover {
 
@@ -1390,8 +1763,8 @@ input[type="number"] {
     border-color: #c4d4d4;
 
     color: #40545d;
-}
 
+}
 
 /* YA PERPANJANG */
 
@@ -1404,14 +1777,20 @@ input[type="number"] {
     color: #ffffff;
 
     box-shadow:
-        0 5px 14px rgba(
-            40,
-            127,
-            128,
-            0.18
-        );
-}
 
+        0 5px 14px rgba(
+
+            40,
+
+            127,
+
+            128,
+
+            0.18
+
+        );
+
+}
 
 .extend-confirm-submit:hover {
 
@@ -1420,20 +1799,29 @@ input[type="number"] {
     border-color: #236f70;
 
     transform:
+
         translateY(-1px);
 
     box-shadow:
+
         0 7px 18px rgba(
+
             40,
+
             127,
+
             128,
+
             0.25
+
         );
+
 }
 
-
 /* =========================================================
+
    RESPONSIVE
+
 ========================================================= */
 
 @media (max-width: 600px) {
@@ -1441,40 +1829,47 @@ input[type="number"] {
     .extend-confirm-card {
 
         padding:
+
             30px 24px 26px;
 
         border-radius: 18px;
-    }
 
+    }
 
     .extend-confirm-card h3 {
 
         font-size: 23px;
-    }
 
+    }
 
     .extend-confirm-actions {
 
         flex-direction: column;
+
     }
 
-
     .extend-confirm-cancel,
+
     .extend-confirm-submit {
 
         width: 100%;
+
     }
 
 }
 
 /* =========================================================
+
    MOBILE
+
 ========================================================= */
 
 @media (max-width: 520px) {
 
     #extendLoanModal {
+
         padding: 16px !important;
+
     }
 
     #extendLoanModal .extend-modal-card {
@@ -1486,74 +1881,627 @@ input[type="number"] {
         padding: 24px !important;
 
         border-radius: 17px !important;
+
     }
 
     #extendLoanModal .extend-modal-header h3 {
+
         font-size: 21px !important;
+
     }
 
     #extendLoanModal .extend-modal-actions {
 
         flex-direction: column-reverse !important;
+
     }
 
     #extendLoanModal .extend-cancel,
+
     #extendLoanModal .extend-confirm {
 
         width: 100% !important;
+
     }
+
 }
 
 /* =========================================================
+
    RESPONSIVE
+
 ========================================================= */
 
 @media (max-width: 1200px) {
 
     #page-circulation .two-col {
+
         grid-template-columns:
+
             500px minmax(0, 1fr);
+
     }
 
 }
-
 
 @media (max-width: 1050px) {
 
     #page-circulation .two-col {
+
         grid-template-columns: 1fr;
+
     }
 
 }
-
 
 @media (max-width: 700px) {
 
     #page-circulation .field-row {
+
         grid-template-columns: 1fr;
+
     }
 
     #page-circulation .borrowing-header {
+
         align-items: flex-start;
 
         flex-direction: column;
+
     }
 
     #page-circulation .search-box {
+
         width: 100%;
+
     }
 
     #page-circulation .search-box input {
+
         width: 100%;
+
     }
 
 }
 
-
 @media (max-width: 480px) {
 
     #page-circulation .card-pad {
+
         padding: 15px;
+
     }
 
+}
+
+/* =========================================================
+
+       NAVIGATOR BULAN & FILTER
+
+    ========================================================= */
+
+    .circulation-filter-bar {
+
+        display: flex;
+
+        flex-wrap: wrap;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 12px;
+
+        margin-top: 14px;
+
+        margin-bottom: 14px;
+
+    }
+
+    .month-navigator {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        background: #ffffff;
+
+        border: 1px solid #d1d5db;
+
+        border-radius: 8px;
+
+        padding: 3px 6px;
+
+        box-shadow:
+
+            0 1px 2px rgba(0, 0, 0, .05);
+
+        gap: 4px;
+
+    }
+
+    .btn-nav-month {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        width: 28px;
+
+        height: 28px;
+
+        border: none;
+
+        border-radius: 6px;
+
+        background: transparent;
+
+        color: #374151;
+
+        text-decoration: none;
+
+        font-size: 16px;
+
+        font-weight: 700;
+
+        cursor: pointer;
+
+        transition: all .15s ease;
+
+    }
+
+    .btn-nav-month:hover {
+
+        background: #f3f4f6;
+
+        color: #111827;
+
+    }
+
+    .month-display-label {
+
+        min-width: 130px;
+
+        padding: 0 10px;
+
+        color: #1f2937;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        text-align: center;
+
+        user-select: none;
+
+    }
+
+    .btn-today-badge {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        padding: 5px 10px;
+
+        border: 1px solid #a8d5d5;
+
+        border-radius: 6px;
+
+        background: #e6f4f4;
+
+        color: #287b7b;
+
+        font-size: 11px;
+
+        font-weight: 600;
+
+        text-decoration: none;
+
+        transition: all .15s ease;
+
+    }
+
+    .btn-today-badge:hover {
+
+        background: #287b7b;
+
+        color: #ffffff;
+
+    }
+
+    .borrowing-search-wrap {
+
+        flex-grow: 1;
+
+        max-width: 240px;
+
+    }
+
+    .borrowing-search-wrap input {
+
+        width: 100%;
+
+        padding: 7px 12px;
+
+        border: 1px solid #d1d5db;
+
+        border-radius: 6px;
+
+        background: #ffffff;
+
+        outline: none;
+
+        font-size: 12px;
+
+        transition:
+
+            border-color .15s ease,
+
+            box-shadow .15s ease;
+
+    }
+
+    .borrowing-search-wrap input:focus {
+
+        border-color: #287b7b;
+
+        box-shadow:
+
+            0 0 0 2px rgba(40, 123, 123, .15);
+
+    }
+
+    /* =========================================================
+
+       RESPONSIVE FILTER
+
+    ========================================================= */
+
+    @media (max-width: 700px) {
+
+        .circulation-filter-bar {
+
+            align-items: stretch;
+
+            flex-direction: column;
+
+        }
+
+        .borrowing-search-wrap {
+
+            width: 100%;
+
+            max-width: none;
+
+        }
+
+        .borrowing-search-wrap input {
+
+            width: 100%;
+
+        }
+
+    }
+
+/* =========================================================
+   NAVIGATOR BULAN & FILTER
+========================================================= */
+
+.circulation-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+    margin-bottom: 14px;
+}
+
+.month-navigator {
+    display: inline-flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 3px 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+    gap: 4px;
+}
+
+.btn-nav-month {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #374151;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s ease;
+}
+
+.btn-nav-month:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.month-display-label {
+    min-width: 130px;
+    padding: 0 10px;
+    color: #1f2937;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    user-select: none;
+}
+
+.btn-today-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border: 1px solid #a8d5d5;
+    border-radius: 6px;
+    background: #e6f4f4;
+    color: #287b7b;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all .15s ease;
+}
+
+.btn-today-badge:hover {
+    background: #287b7b;
+    color: #ffffff;
+}
+
+.borrowing-search-wrap {
+    flex-grow: 1;
+    max-width: 240px;
+}
+
+.borrowing-search-wrap input {
+    width: 100%;
+    padding: 7px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    outline: none;
+    font-size: 12px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    box-sizing: border-box;
+}
+
+.borrowing-search-wrap input:focus {
+    border-color: #287b7b;
+    box-shadow: 0 0 0 2px rgba(40, 123, 123, .15);
+}
+
+.circulation-month-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.circulation-period-description {
+    margin-bottom: 0 !important;
+}
+
+/* =========================================================
+   PERMINTAAN PERPANJANGAN
+========================================================= */
+
+.extension-requests-card {
+    width: 100%;
+    margin-bottom: 24px;
+    background: #ffffff;
+    border: 1px solid #dfeaea;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(22, 63, 63, 0.04);
+    overflow: hidden;
+}
+
+.extension-requests-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 20px;
+    border-bottom: 1px solid #edf2f2;
+}
+
+.extension-requests-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #287f80;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+}
+
+.extension-requests-header h3 {
+    margin: 0 0 4px;
+    color: #173f40;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.extension-requests-header p {
+    margin: 0;
+    color: #718080;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.extension-requests-count {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border: 1px solid #b9dddd;
+    border-radius: 999px;
+    background: #eef8f7;
+    color: #287b7b;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.extension-requests-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.extension-request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 17px 20px;
+    border-bottom: 1px solid #edf2f2;
+}
+
+.extension-request-item:last-child {
+    border-bottom: none;
+}
+
+.extension-request-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.extension-request-member {
+    margin-bottom: 3px;
+    color: #173f40;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.extension-request-book {
+    margin-bottom: 8px;
+    color: #4d6262;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.extension-request-dates {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: #718080;
+    font-size: 10px;
+}
+
+.extension-request-dates strong {
+    color: #334b4b;
+    font-weight: 700;
+}
+
+.extension-request-arrow {
+    color: #9aabab;
+    font-size: 12px;
+}
+
+.extension-request-new-date strong {
+    color: #287b7b;
+}
+
+.extension-request-reason {
+    margin-top: 7px;
+    color: #879595;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.extension-request-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.extension-request-actions form {
+    margin: 0;
+}
+
+.extension-request-btn {
+    min-width: 82px;
+    height: 34px;
+    padding: 0 13px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.extension-request-btn-reject {
+    border: 1px solid #e1c7c7;
+    background: #ffffff;
+    color: #9a4444;
+}
+
+.extension-request-btn-reject:hover {
+    background: #fdf1f1;
+    border-color: #d9a9a9;
+}
+
+.extension-request-btn-approve {
+    border: 1px solid #287f80;
+    background: #287f80;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(40, 127, 128, .15);
+}
+
+.extension-request-btn-approve:hover {
+    background: #236f70;
+    border-color: #236f70;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 700px) {
+    .circulation-filter-bar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .circulation-month-controls,
+    .borrowing-search-wrap {
+        width: 100%;
+    }
+
+    .borrowing-search-wrap {
+        max-width: none;
+    }
+
+    .borrowing-search-wrap input {
+        width: 100%;
+    }
+
+    .extension-requests-header,
+    .extension-request-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .extension-requests-count {
+        align-self: flex-start;
+    }
+
+    .extension-request-actions {
+        width: 100%;
+    }
+
+    .extension-request-actions form,
+    .extension-request-btn {
+        flex: 1;
+        width: 100%;
+    }
 }

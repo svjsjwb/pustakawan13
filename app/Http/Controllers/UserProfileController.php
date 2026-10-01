@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -46,8 +47,11 @@ class UserProfileController extends Controller
         $lastLogin  = $user->last_login_at?->format('d M Y, H:i') ?? now()->format('d M Y, H:i');
 
         // Status Keanggotaan: Guest = nonaktif, Member = aktif
-        $isGuest       = $user->isGuest() || ($member && $member->status === 'nonaktif');
-        $accountStatus = $isGuest ? 'nonaktif' : ($member?->status ?? 'aktif');
+        $isGuest = $user->isGuest();
+
+        $accountStatus = $isGuest
+            ? 'nonaktif'
+            : ($user->isMember() ? 'aktif' : 'nonaktif');
 
         $stats = [
             'totalBorrowed'     => $totalBorrowed,

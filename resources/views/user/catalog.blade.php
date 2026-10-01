@@ -311,13 +311,13 @@
                         {{-- 2. Back Cover (Z = -18px) --}}
                         <div class="saas-face-back">
                             <div>
-                                <div style="font-weight: 800; font-size: 11px; color: #a8d5d1; margin-bottom: 8px;">PERPUSTAKAAN DIGITAL</div>
+                                <div style="font-weight: 800; font-size: 11px; color: #a8d5d1; margin-bottom: 8px;">SINOPSIS</div>
                                 <div class="blurb" id="modalBookBackBlurb">
                                     Buku koleksi digital resmi dengan standar indeksasi dan katalogisasi terpadu.
                                 </div>
                             </div>
                             <div>
-                                <div style="font-size: 8.5px; color: #a8d5d1; opacity: 0.8;">OFFICIAL DIGITAL EDITION</div>
+                                <div style="font-size: 8.5px; color: #a8d5d1; opacity: 0.8;"></div>
                                 <div class="barcode-mock"></div>
                             </div>
                         </div>
@@ -685,47 +685,65 @@ function clearStatusFilter() {
 }
 
 function syncCategoryUiState(mainCat, subCat) {
-    // 1. Remove active state from all subcategory buttons
+    // 1. Reset SEMUA subkategori terlebih dahulu.
     document.querySelectorAll('.pd-subcat-btn').forEach(btn => {
         btn.classList.remove('is-selected', 'active-subcat');
     });
 
-    // 2. Remove active state from all category wrappers and reset trigger labels
-    const groups = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
-    groups.forEach(g => {
-        const slug = g.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        const wrapper = document.getElementById('catWrapper_' + slug);
-        const trigger = document.getElementById('catTrigger_' + slug);
-        const label = document.getElementById('catLabel_' + slug);
+    // 2. Reset SEMUA dropdown kategori.
+    //    Jangan hard-code nama seperti "Pendidikan" / "Anak-Anak".
+    //    Gunakan data-category-group karena nama group sebenarnya berasal dari
+    //    $catalogHierarchy (contoh: "Buku Pendidikan", "Anak", "Remaja", "Dewasa").
+    document.querySelectorAll('.pd-category-wrapper[data-category-group]').forEach(wrapper => {
+        wrapper.classList.remove('has-active-category');
 
-        if (wrapper) wrapper.classList.remove('has-active-category');
+        const trigger = wrapper.querySelector('.pd-trigger');
+        const label = wrapper.querySelector('.pd-trigger-label');
+
         if (trigger) trigger.classList.remove('has-value');
-        if (label) label.textContent = g;
+
+        if (label) {
+            label.textContent = wrapper.dataset.categoryGroup || '';
+        }
     });
 
     const allCatWrapper = document.getElementById('wrapperAllCategories');
     const allCatTrigger = document.getElementById('triggerAllCategories');
 
-    // 3. If a subcategory is selected, highlight only that one
+    // 3. Jika ada subkategori aktif, hanya group + subkategori tersebut
+    //    yang diberi state aktif.
     if (mainCat && subCat) {
         if (allCatWrapper) allCatWrapper.classList.remove('has-active-category');
         if (allCatTrigger) allCatTrigger.classList.remove('has-value');
 
-        const activeBtn = document.querySelector(`.pd-subcat-btn[data-main="${mainCat}"][data-sub="${subCat}"]`);
+        const activeBtn = Array.from(
+            document.querySelectorAll('.pd-subcat-btn')
+        ).find(btn =>
+            btn.dataset.main === mainCat &&
+            btn.dataset.sub === subCat
+        );
+
         if (activeBtn) {
             activeBtn.classList.add('is-selected', 'active-subcat');
         }
 
-        const slug = mainCat.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        const activeWrapper = document.getElementById('catWrapper_' + slug);
-        const activeTrigger = document.getElementById('catTrigger_' + slug);
-        const activeLabel = document.getElementById('catLabel_' + slug);
+        const activeWrapper = Array.from(
+            document.querySelectorAll('.pd-category-wrapper[data-category-group]')
+        ).find(wrapper => wrapper.dataset.categoryGroup === mainCat);
 
-        if (activeWrapper) activeWrapper.classList.add('has-active-category');
-        if (activeTrigger) activeTrigger.classList.add('has-value');
-        if (activeLabel) activeLabel.textContent = `${mainCat}: ${subCat} ✓`;
+        if (activeWrapper) {
+            activeWrapper.classList.add('has-active-category');
+
+            const activeTrigger = activeWrapper.querySelector('.pd-trigger');
+            const activeLabel = activeWrapper.querySelector('.pd-trigger-label');
+
+            if (activeTrigger) activeTrigger.classList.add('has-value');
+            if (activeLabel) {
+                activeLabel.textContent = `${mainCat}: ${subCat} ✓`;
+            }
+        }
     } else {
-        // "Semua Kategori" is active
+        // Tidak ada kategori/subkategori = Semua Kategori aktif.
         if (allCatWrapper) allCatWrapper.classList.add('has-active-category');
         if (allCatTrigger) allCatTrigger.classList.add('has-value');
     }
