@@ -180,7 +180,7 @@
 
                         <div class="extension-request-actions">
                             <form
-                                action="{{ route('circulation.rejectExtension', $request) }}"
+                                action="{{ route('borrowings.rejectExtension', $request) }}"
                                 method="POST"
                             >
                                 @csrf
@@ -192,7 +192,7 @@
                             </form>
 
                             <form
-                                action="{{ route('circulation.approveExtension', $request) }}"
+                                action="{{ route('borrowings.approveExtension', $request) }}"
                                 method="POST"
                             >
                                 @csrf
@@ -243,7 +243,7 @@
 
                 <form
 
-                    action="{{ route('circulation.store') }}"
+                    action="{{ route('borrowings.store') }}"
 
                     method="POST"
 
@@ -493,7 +493,7 @@
 
                                 href="{{ route(
 
-                                    'circulation',
+                                    'borrowings.index',
 
                                     [
 
@@ -523,7 +523,7 @@
 
                                 href="{{ route(
 
-                                    'circulation',
+                                    'borrowings.index',
 
                                     [
 
@@ -549,7 +549,7 @@
 
                             <a
 
-                                href="{{ route('circulation') }}"
+                                href="{{ route('borrowings.index') }}"
 
                                 class="btn-today-badge"
 
@@ -891,7 +891,7 @@
 
                                                     action="{{ route(
 
-                                                        'circulation.return',
+                                                        'borrowings.return',
 
                                                         $borrowing
 
@@ -1659,7 +1659,7 @@ function openExtendModal(
 
     form.action =
 
-        `/circulation/${borrowingId}/extend`;
+        `/borrowings/${borrowingId}/extend`;
 
     /* =========================================
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\CategoryController;
@@ -52,6 +53,25 @@ Route::middleware('guest')->group(function () {
     // Proses login (email + password → redirect berdasarkan role)
     Route::post('/login', [LoginController::class, 'login'])
         ->name('login.store');
+
+    // Lupa password dengan OTP email
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showEmailForm'])
+        ->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendOtp'])
+        ->middleware('throttle:5,1')
+        ->name('password.email');
+    Route::get('/forgot-password/otp', [ForgotPasswordController::class, 'showOtpForm'])
+        ->name('password.otp');
+    Route::post('/forgot-password/otp', [ForgotPasswordController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('password.otp.verify');
+    Route::post('/forgot-password/otp/resend', [ForgotPasswordController::class, 'resendOtp'])
+        ->middleware('throttle:3,1')
+        ->name('password.otp.resend');
+    Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm'])
+        ->name('password.reset');
+    Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])
+        ->name('password.update');
 
     // Registrasi
     Route::get('/register', [RegisterController::class, 'create'])
@@ -139,23 +159,20 @@ Route::middleware(['auth', 'admin'])->group(function () {
         });
 
     // SIRKULASI
-    Route::get('/circulation', [CirculationController::class, 'index'])
-        ->name('circulation');
+    Route::post('/borrowings', [CirculationController::class, 'store'])
+        ->name('borrowings.store');
 
-    Route::post('/circulation', [CirculationController::class, 'store'])
-        ->name('circulation.store');
+    Route::patch('/borrowings/{borrowing}/return', [CirculationController::class, 'returnBook'])
+        ->name('borrowings.return');
 
-    Route::patch('/circulation/{borrowing}/return', [CirculationController::class, 'returnBook'])
-        ->name('circulation.return');
+    Route::patch('/borrowings/{borrowing}/extend', [CirculationController::class, 'extend'])
+        ->name('borrowings.extend');
 
-    Route::patch('/circulation/{borrowing}/extend', [CirculationController::class, 'extend'])
-        ->name('circulation.extend');
+    Route::patch('/borrowings/{borrowing}/approve-extension', [CirculationController::class, 'approveExtension'])
+        ->name('borrowings.approveExtension');
 
-    Route::patch('/circulation/{borrowing}/approve-extension', [CirculationController::class, 'approveExtension'])
-        ->name('circulation.approveExtension');
-
-    Route::patch('/circulation/{borrowing}/reject-extension', [CirculationController::class, 'rejectExtension'])
-        ->name('circulation.rejectExtension');
+    Route::patch('/borrowings/{borrowing}/reject-extension', [CirculationController::class, 'rejectExtension'])
+        ->name('borrowings.rejectExtension');
 
     Route::post('/reservations', [
         ReservationController::class,
@@ -244,9 +261,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // BROADCAST EMAIL NOTIFICATION (admin only)
     // ============================================================
     Route::prefix('admin/broadcast')->name('admin.broadcast.')->group(function () {
-        Route::get('/',         [AdminBroadcastController::class, 'index'])  ->name('index');
+        Route::get('/',         [AdminBroadcastController::class, 'index'])->name('index');
         Route::get('/preview',  [AdminBroadcastController::class, 'preview'])->name('preview');
-        Route::post('/',        [AdminBroadcastController::class, 'send'])   ->name('send');
+        Route::post('/',        [AdminBroadcastController::class, 'send'])->name('send');
         Route::get('/history',  [AdminBroadcastController::class, 'history'])->name('history');
     });
 });
@@ -366,12 +383,12 @@ Route::prefix('email-preview')->group(function () {
     // Preview AdminBroadcast
     Route::get('/admin-broadcast', function () {
         return (new \App\Mail\AdminBroadcastMail(
-            subjectText:   'Pengumuman: Perpustakaan Libur Nasional',
-            messageBody:   "Kami ingin memberitahukan bahwa perpustakaan akan tutup pada tanggal 17 Agustus 2026 dalam rangka memperingati Hari Kemerdekaan Republik Indonesia.\n\nSilakan rencanakan kunjungan Anda sebelum atau sesudah tanggal tersebut.",
+            subjectText: 'Pengumuman: Perpustakaan Libur Nasional',
+            messageBody: "Kami ingin memberitahukan bahwa perpustakaan akan tutup pada tanggal 17 Agustus 2026 dalam rangka memperingati Hari Kemerdekaan Republik Indonesia.\n\nSilakan rencanakan kunjungan Anda sebelum atau sesudah tanggal tersebut.",
             recipientName: 'Budi Santoso',
-            actionUrl:     url('/home'),
-            actionLabel:   'Kunjungi Perpustakaan',
-            senderName:    'Admin Perpustakaan Tiga Serangkai',
+            actionUrl: url('/home'),
+            actionLabel: 'Kunjungi Perpustakaan',
+            senderName: 'Admin Perpustakaan Tiga Serangkai',
         ))->render();
     });
 });

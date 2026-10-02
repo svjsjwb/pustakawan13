@@ -236,7 +236,7 @@ class CirculationController extends Controller
         }
 
         return redirect()
-            ->route('circulation')
+            ->route('borrowings.index')
             ->with('success', 'Peminjaman berhasil diproses.');
     }
 
@@ -323,7 +323,7 @@ class CirculationController extends Controller
         NotificationService::borrowingReturned($borrowing);
 
         return redirect()
-            ->route('circulation')
+            ->route('borrowings.index')
             ->with('success', 'Buku berhasil dikembalikan.');
     }
 
@@ -420,7 +420,7 @@ class CirculationController extends Controller
         ]);
 
         return redirect()
-            ->route('circulation')
+            ->route('borrowings.index')
             ->with(
                 'success',
                 "Peminjaman berhasil diperpanjang {$extensionDays} hari."

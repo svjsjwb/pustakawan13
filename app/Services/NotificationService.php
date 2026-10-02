@@ -182,8 +182,8 @@ class NotificationService
                 'Judul Buku'  => $bookTitle,
                 'Batas Waktu' => $borrowing->due_at ? $borrowing->due_at->format('d M Y') : '-',
             ],
-            actionUrl: url('/circulation'),
-            actionLabel: 'Buka Sirkulasi'
+            actionUrl: url('/borrowings'),
+            actionLabel: 'Buka Peminjaman'
         ));
     }
 
@@ -233,8 +233,8 @@ class NotificationService
                 'Tanggal Pinjam' => $borrowing->borrowed_at ? \Carbon\Carbon::parse($borrowing->borrowed_at)->translatedFormat('d M Y') : '-',
                 'Tanggal Kembali'=> now()->translatedFormat('d M Y'),
             ],
-            actionUrl: url('/circulation'),
-            actionLabel: 'Buka Sirkulasi'
+            actionUrl: url('/borrowings'),
+            actionLabel: 'Buka Peminjaman'
         ));
     }
 

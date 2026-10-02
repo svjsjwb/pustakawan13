@@ -60,8 +60,8 @@
             {{-- PEMINJAMAN --}}
 
             <a
-                href="{{ route('circulation') }}"
-                class="{{ request()->routeIs('circulation') ? 'active' : '' }}">
+                href="{{ route('borrowings.index') }}"
+                class="{{ request()->routeIs('borrowings.*') ? 'active' : '' }}">
                 Peminjaman Buku
             </a>
 

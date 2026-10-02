@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     this.dataset.id;
 
                 extendForm.action =
-                    `/circulation/${borrowingId}/extend`;
+                    `/borrowings/${borrowingId}/extend`;
 
                 extendModal.classList.add('show');
 
