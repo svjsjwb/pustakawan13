@@ -262,7 +262,7 @@ class UserBorrowingController extends Controller
 
     /**
      * User mengajukan perpanjangan peminjaman menggunakan date picker.
-     * Validasi: tanggal harus > due_at sekarang dan max 14 hari dari due_at.
+        * Validasi: tanggal harus > due_at sekarang dan max 14 hari dari due_at.
      */
     public function requestExtension(
         Request $request,

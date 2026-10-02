@@ -318,7 +318,7 @@
                     <button
                         type="button"
                         class="user-book-cover user-book-open"
-
+                        data-id="{{ $book->id }}"
                         data-title="{{ $book->title }}"
                         data-author="{{ $book->author ?? '-' }}"
                         data-category="{{ $book->category->name ?? '-' }}"
@@ -462,7 +462,7 @@
         <div class="user-book-3d-section">
 
             <div class="user-book-3d-hint">
-                🖱️ Geser untuk memutar buku
+                <span aria-hidden="true">🔄</span> Drag mouse untuk memutar 360°
             </div>
 
 
@@ -539,19 +539,16 @@
 
 
             <div class="book-3d-controls">
-
                 <button
                     type="button"
-                    id="book3dReset">
-
-                    ↻ Reset
-
+                    id="book3dReset"
+                    aria-label="Reset sudut 3D">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                        <path d="M3 3v5h5"></path>
+                    </svg>
+                    <span>Reset Sudut 3D</span>
                 </button>
-
-                <span>
-                    Drag untuk memutar
-                </span>
-
             </div>
 
         </div>

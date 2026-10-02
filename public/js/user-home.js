@@ -324,9 +324,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         modalReservationBookId.value = book.dataset.id || '';
                     }
 
-                    const modalCatalogBtn = document.getElementById('modalCatalogBtn');
-                    if (modalCatalogBtn && book.dataset.title) {
-                        modalCatalogBtn.href = '/catalog?search=' + encodeURIComponent(book.dataset.title);
+                    if (catalogButton && book.dataset.title && book.dataset.id) {
+                        const catalogUrl = new URL(catalogButton.href, window.location.href);
+                        catalogUrl.searchParams.set('search', book.dataset.title);
+                        catalogUrl.searchParams.set('open_book', book.dataset.id);
+                        catalogButton.href = catalogUrl.toString();
                     }
 
 
@@ -774,7 +776,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let currentX = 0;
         let dragDistance = 0;
         const SWIPE_THRESHOLD = 35;
-        const AUTOPLAY_DELAY = 3000;
+        const AUTOPLAY_DELAY = 2000;
 
         // Build pagination dots
         if (pagination) {
@@ -878,70 +880,6 @@ document.addEventListener('DOMContentLoaded', function () {
             startAutoplay();
         }
 
-        // Card clicks: side card rotates, center card opens modal
-        cards.forEach((card, index) => {
-            card.addEventListener('click', (e) => {
-                if (Math.abs(dragDistance) > 10) return;
-
-                let diff = (index - activeIndex) % total;
-                if (diff > total / 2) diff -= total;
-                if (diff < -total / 2) diff += total;
-
-                if (diff === 0) {
-                    openCardModal(card);
-                } else {
-                    goTo(index);
-                }
-            });
-        });
-
-        function openCardModal(card) {
-            const title = card.dataset.title;
-            const matchingBtn = document.querySelector(`.user-book-open[data-title="${title}"]`);
-            if (matchingBtn) {
-                matchingBtn.click();
-                return;
-            }
-
-            const modal = document.getElementById('userBookModal');
-            if (!modal) return;
-
-            const modalTitle = document.getElementById('modalBookTitle');
-            const modalAuthor = document.getElementById('modalBookAuthor');
-            const modalCategory = document.getElementById('modalBookCategory');
-            const modalStock = document.getElementById('modalBookStock');
-            const modalPublisher = document.getElementById('modalBookPublisher');
-            const modalYear = document.getElementById('modalBookYear');
-            const modalIsbn = document.getElementById('modalBookIsbn');
-            const modalDescription = document.getElementById('modalBookDescription');
-            const cover = document.getElementById('book3dCover');
-            const fallback = document.querySelector('.book-cover-fallback');
-
-            if (modalTitle) modalTitle.textContent = card.dataset.title || 'Buku';
-            if (modalAuthor) modalAuthor.textContent = 'Penulis ' + (card.dataset.author || '-');
-            if (modalCategory) modalCategory.textContent = card.dataset.category || 'BUKU';
-            if (modalStock) modalStock.textContent = card.dataset.stock || '0';
-            if (modalPublisher) modalPublisher.textContent = card.dataset.publisher || '-';
-            if (modalYear) modalYear.textContent = card.dataset.year || '-';
-            if (modalIsbn) modalIsbn.textContent = card.dataset.isbn || '-';
-            if (modalDescription) modalDescription.textContent = card.dataset.description || 'Deskripsi buku belum tersedia.';
-
-            if (cover && fallback) {
-                if (card.dataset.cover) {
-                    cover.src = card.dataset.cover;
-                    cover.classList.add('loaded');
-                    fallback.style.display = 'none';
-                } else {
-                    cover.classList.remove('loaded');
-                    fallback.style.display = 'flex';
-                }
-            }
-
-            modal.classList.add('open');
-            modal.setAttribute('aria-hidden', 'false');
-            document.body.style.overflow = 'hidden';
-        }
-
         // Pointer Drag & Swipe
         const coverflowEl = document.getElementById('heroCoverflow');
         if (coverflowEl) {
@@ -1023,7 +961,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initHeroCoverflow();
 
     const CAROUSEL_CONFIG = Object.freeze({
-        autoplayInterval:  2500,   // Autoplay slide tiap 2.5 detik
+        autoplayInterval:  2000,   // Autoplay slide tiap 2 detik
         autoplayDuration:  850,    // Animasi autoplay: lambat, smooth & elegan (850ms)
         manualDuration:    420,    // Animasi klik/swipe: responsif & cepat (420ms)
     });
@@ -1084,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', function () {
             card.style.width = '';
             card.style.flexBasis = '';
 
-            // Setup click handler modal buku
+            // Sambungkan kartu hasil kloning ke pembuka detail kartu sumber.
             const origOpenBtn = masterCards[cleanIndex].querySelector('.user-book-open');
             const cardOpenBtn = card.querySelector('.user-book-open');
             if (cardOpenBtn && origOpenBtn) {

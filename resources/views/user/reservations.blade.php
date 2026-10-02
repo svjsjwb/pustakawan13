@@ -38,8 +38,17 @@
     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
 
         {{-- CUSTOM STATUS DROPDOWN --}}
+        @php
+            $statusTriggerClass = match(request('status')) {
+                'menunggu' => 'reservation-status-menunggu',
+                'disetujui' => 'reservation-status-disetujui',
+                'siap_diambil' => 'reservation-status-siap',
+                'ditolak' => 'reservation-status-ditolak',
+                default => '',
+            };
+        @endphp
         <div class="pd-select-wrapper" data-filter-key="status" data-form-id="reservationFilterForm">
-            <button type="button" class="pd-trigger {{ request('status') ? 'has-value' : '' }}" aria-haspopup="listbox" aria-expanded="false">
+            <button type="button" class="pd-trigger {{ request('status') ? 'has-value' : '' }} {{ $statusTriggerClass }}" aria-haspopup="listbox" aria-expanded="false">
                 <span class="pd-trigger-icon">
                     @if(request('status') === 'menunggu')
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>

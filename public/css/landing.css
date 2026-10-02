@@ -1,139 +1,473 @@
-* {
+/* =========================================================
+   PERPUSTAKAAN TIGA SERANGKAI — PREMIUM LANDING PAGE
+   Ultra cinematic, glass-architecture university library
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #020f10;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background: #fff;
+    font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #020f10;
 }
+
+/* =========================================================
+   WRAPPER
+   ========================================================= */
 
 .landing {
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
-/* HERO */
+.landing > .site-footer {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto;
+    contain: layout paint;
+}
 
-.landing-image {
+.landing > .site-footer .footer-brand-info,
+.landing > .site-footer .footer-col-body,
+.landing > .site-footer .footer-copyright {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto;
+}
+
+/* =========================================================
+   HERO — FULL SCREEN
+   ========================================================= */
+
+.landing-hero {
     position: relative;
     flex: 1;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    background-image: url('/images/bg-ts.jpeg');
-    background-size: cover;
-    background-position: center;
+    overflow: hidden;
 }
 
-.overlay {
+/* ── Background photo ── */
+.hero-bg {
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.58);
+    background-image: url('/images/bg-ts.jpeg');
+    background-size: cover;
+    background-position: center 35%;
+    background-repeat: no-repeat;
+    transform: scale(1.04);
 }
 
-.landing-content {
-    position: relative;
+/* ── Dark cinematic layer ── */
+.hero-overlay-dark {
+    position: absolute;
+    inset: 0;
+    background: rgba(3, 20, 22, 0.56);
+    z-index: 1;
+}
+
+/* ── Teal color-grade ── */
+.hero-overlay-teal {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        162deg,
+        rgba(4, 55, 52, 0.62) 0%,
+        rgba(10, 82, 76, 0.22) 38%,
+        rgba(5, 42, 38, 0.55) 100%
+    );
     z-index: 2;
-
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    gap: 65px;
 }
 
-.landing-logo {
+/* ── Teal glow edges (vignette) ── */
+.hero-glow-edge {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(20,184,166,0.14) 0%, transparent 65%),
+        radial-gradient(ellipse 35% 80% at 0%   50%, rgba(20,184,166,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 35% 80% at 100% 50%, rgba(20,184,166,0.08) 0%, transparent 60%);
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* =========================================================
+   CORNER DECORATIONS — Futuristic arcs
+   ========================================================= */
+
+.hero-decor {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.decor-arc {
+    position: absolute;
     width: 220px;
-    height: auto;
+    height: 220px;
 }
 
-.login-button {
-    width: 230px;
-    padding: 10px 20px;
+.decor-arc--tl { top: -2px;    left: -2px;  }
+.decor-arc--bl { bottom: -2px; left: -2px;  transform: scaleY(-1); }
+.decor-arc--br { bottom: -2px; right: -2px; }
 
-    background: #286f70;
-    color: white;
+/* =========================================================
+   HERO CONTENT
+   ========================================================= */
 
-    text-align: center;
-    text-decoration: none;
-
-    font-size: 15spx;
-    font-weight: bold;
-
-    border-radius: 6px;
-
-    transition: 0.2s;
-}
-
-.login-button:hover {
-    background: #205d5e;
-}
-
-/* FOOTER */
-
-.landing-footer {
-    min-height: 88px;
-
-    background: #287879;
-    color: white;
-
-    display: grid;
-    grid-template-columns: 1.2fr 1fr 1.4fr 1fr;
-
-    align-items: center;
-
-    padding: 12px 25px;
-
-    gap: 30px;
-
-    font-size: 10px;
-}
-
-.landing-footer>div {
+.hero-content {
+    position: relative;
+    z-index: 10;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-}
-
-.landing-footer strong {
-    font-size: 13px;
-}
-
-.footer-brand {
-    flex-direction: row !important;
     align-items: center;
-    gap: 12px !important;
+    text-align: center;
+    padding: 36px 24px 24px;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-.footer-brand img {
-    width: 42px;
+/* ── Logo ── */
+.hero-logo-wrap {
+    margin-bottom: 16px;
+    animation: fadeUp 1.6s cubic-bezier(.33,1,.68,1) both;
+    will-change: transform;
+}
+
+.hero-logo {
+    width: 140px;
     height: auto;
+    object-fit: contain;
+    filter:
+        drop-shadow(0 0 28px rgba(94,234,212,0.38))
+        drop-shadow(0 6px 18px rgba(0,0,0,0.55));
 }
 
-.footer-brand span {
+/* ── Title ── */
+.hero-title-wrap {
+    margin-bottom: 12px;
+    animation: fadeUp 1.6s 0.16s cubic-bezier(.33,1,.68,1) both;
+    will-change: transform;
+}
+
+.hero-subtitle-top {
+    font-family: 'Cinzel', 'Trajan Pro', 'Garamond', Georgia, serif;
+    font-size: clamp(12px, 1.4vw, 16px);
+    font-weight: 500;
+    letter-spacing: clamp(6px, 1vw, 10px);
+    color: rgba(255,255,255,0.82);
+    line-height: 1.4;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+}
+
+.hero-title {
+    font-family: 'Cinzel', 'Trajan Pro', 'Garamond', Georgia, serif;
+    font-size: clamp(28px, 5vw, 56px);
+    font-weight: 900;
+    letter-spacing: clamp(3px, 0.7vw, 8px);
+    color: #ffffff;
+    line-height: 1.06;
+    text-shadow:
+        0 2px 32px rgba(0,0,0,0.45),
+        0 0  50px rgba(94,234,212,0.15);
+}
+
+/* ── Tagline ── */
+.hero-tagline {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-size: clamp(13px, 1.45vw, 15.5px);
+    font-style: italic;
+    font-weight: 300;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.76;
+    margin-bottom: 30px;
+    animation: fadeUp 1.6s 0.3s cubic-bezier(.33,1,.68,1) both;
+    will-change: transform;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.hero-buttons {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 28px;
+    animation: fadeUp 1.6s 0.44s cubic-bezier(.33,1,.68,1) both;
+    will-change: transform;
+}
+
+.btn-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 30px;
+    border-radius: 999px;
+    font-family: 'Poppins', 'Inter', sans-serif;
     font-size: 13px;
-    font-weight: bold;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        background 0.22s ease,
+        border-color 0.22s ease,
+        opacity 0.22s ease;
+    white-space: nowrap;
 }
 
+/* LOGIN — teal gradient filled */
+.btn-login {
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #0f766e 100%);
+    color: #ffffff;
+    border: 2px solid transparent;
+    box-shadow:
+        0 6px 24px rgba(20,184,166,0.42),
+        inset 0 1px 0 rgba(255,255,255,0.18);
+}
 
+.btn-login:hover {
+    background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%);
+    transform: translateY(-4px);
+    box-shadow:
+        0 14px 34px rgba(20,184,166,0.52),
+        inset 0 1px 0 rgba(255,255,255,0.22);
+}
+
+/* DAFTAR — outline */
+.btn-register {
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+    border: 1.8px solid rgba(255,255,255,0.65);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.btn-register:hover {
+    background: rgba(255,255,255,0.13);
+    border-color: rgba(255,255,255,0.95);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+}
+
+.btn-icon {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    stroke: currentColor;
+}
+
+.btn-arrow {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    stroke: currentColor;
+}
+
+/* =========================================================
+   ORNAMENT  ───  📖  ───
+   ========================================================= */
+
+.hero-ornament {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: fadeUp 1.6s 0.58s cubic-bezier(.33,1,.68,1) both;
+    will-change: transform;
+    opacity: 1;
+}
+
+.orn-line {
+    display: block;
+    width: 72px;
+    height: 1px;
+    background: #ffffff;
+}
+
+.orn-book {
+    width: 20px;
+    height: 20px;
+    color: rgba(255,255,255,0.85);
+    flex-shrink: 0;
+}
+
+/* =========================================================
+   KEYFRAMES — Entrance
+   ========================================================= */
+
+@keyframes fadeUp {
+    from { opacity: 1; transform: translate3d(0, 8px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* =========================================================
+   CINEMATIC TRANSITION — OVERLAY + PARTICLES
+   Semua animasi exit dikendalikan oleh JavaScript.
+   CSS di sini hanya mendefinisikan style dasar elemen-
+   elemen yang dibuat/dimanipulasi secara programatik.
+   ========================================================= */
+
+/* ── Lapisan gradient premium yang mengisi layar ── */
+#cinematic-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    pointer-events: none;
+
+    /* Gradient premium teal-dark */
+    background: linear-gradient(
+        160deg,
+        #287c7c 0%,
+        #1a5c5a 40%,
+        #12403e 100%
+    );
+
+    /* Mulai invisible */
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+
+    /* Transisi dikontrol JS; property ini hanya fallback */
+    will-change: opacity, backdrop-filter;
+}
+
+/* State aktif — dikelas via JS */
+#cinematic-overlay.is-visible {
+    opacity: 1;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition:
+        opacity      1.3s cubic-bezier(0.4, 0, 0.2, 1),
+        backdrop-filter 1.3s ease;
+}
+
+/* ── Noise texture overlay untuk kedalaman premium ── */
+#cinematic-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(
+            ellipse 70% 60% at 50% 0%,
+            rgba(94, 234, 212, 0.18) 0%,
+            transparent 60%
+        ),
+        radial-gradient(
+            ellipse 45% 55% at 80% 50%,
+            rgba(20, 184, 166, 0.12) 0%,
+            transparent 55%
+        );
+    pointer-events: none;
+}
+
+/* ── Partikel cahaya teal/putih ── */
+.cinematic-particle {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 15;
+    pointer-events: none;
+    /* Animasi dikontrol per-partikel via JS (requestAnimationFrame) */
+    will-change: transform, opacity;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .decor-arc { width: 160px; height: 160px; }
+
+    .hero-logo { width: 110px; }
+}
 
 @media (max-width: 768px) {
+    .hero-logo { width: 90px; }
 
-    .landing-footer {
-        grid-template-columns: 1fr 1fr;
+    .hero-subtitle-top { letter-spacing: 5px; }
+
+    .hero-buttons { gap: 12px; }
+
+    .btn-hero {
+        padding: 11px 22px;
+        font-size: 12px;
+        letter-spacing: 1px;
     }
 
-    .landing-content {
-        gap: 40px;
+    .orn-line { width: 48px; }
+}
+
+@media (max-width: 480px) {
+    .hero-content { padding-top: 20px; }
+
+    .hero-logo { width: 76px; }
+
+    .hero-buttons {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        max-width: 290px;
     }
 
-    .landing-logo {
-        width: 180px;
+    .btn-hero {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .decor-arc { width: 110px; height: 110px; }
+}
+
+/* =========================================================
+   REDUCED MOTION — Aksesibilitas
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    /* Matikan entrance animations */
+    .hero-logo-wrap,
+    .hero-title-wrap,
+    .hero-tagline,
+    .hero-buttons,
+    .hero-ornament {
+        animation: none !important;
+    }
+
+    /* Overlay langsung muncul tanpa transisi */
+    #cinematic-overlay.is-visible {
+        transition: opacity 0.3s ease !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    /* Sembunyikan partikel */
+    .cinematic-particle {
+        display: none !important;
     }
 }

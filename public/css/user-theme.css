@@ -102,20 +102,24 @@ body {
 .eg-brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
+    flex: 0 0 auto;
     text-decoration: none;
     color: var(--text);
     user-select: none;
 }
 
 .eg-brand-badge {
-    width: 42px;
-    height: 42px;
+    width: 56px;
+    height: 56px;
+    box-sizing: border-box;
+    padding: 7px;
     border-radius: 12px;
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
+    object-fit: contain;
     color: #ffffff;
     font-family: 'Poppins', sans-serif;
     font-weight: 800;
@@ -126,8 +130,9 @@ body {
 }
 
 .eg-brand:hover .eg-brand-badge {
-    transform: scale(1.06) rotate(-3deg);
-    box-shadow: 0 6px 20px rgba(20, 184, 166, 0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
+    filter: brightness(1.12);
 }
 
 .eg-brand-text {
@@ -1519,7 +1524,7 @@ body {
 }
 
 /* Responsive */
-@media (max-width: 900px) {
+@media (max-width: 1050px) {
     .eg-stats-grid { grid-template-columns: 1fr; }
     .eg-nav-menu { display: none; }
 }

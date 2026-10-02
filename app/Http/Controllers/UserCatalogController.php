@@ -93,8 +93,13 @@ class UserCatalogController extends Controller
         if ($mainCategory) {
             $query->where(function ($q) use ($mainCategory) {
                 $q->where('main_category', $mainCategory)
-                    ->orWhereHas('category', function ($c) use ($mainCategory) {
-                        $c->where('name', $mainCategory);
+                    ->orWhere(function ($legacyQuery) use ($mainCategory) {
+                        $legacyQuery->where(function ($categoryQuery) {
+                            $categoryQuery->whereNull('main_category')
+                                ->orWhere('main_category', '');
+                        })->whereHas('category', function ($category) use ($mainCategory) {
+                            $category->where('name', $mainCategory);
+                        });
                     });
             });
         }
@@ -141,9 +146,8 @@ class UserCatalogController extends Controller
         $books->getCollection()->transform(function (Book $book) {
             if (isset($this->catalogSynopses[$book->title])) {
                 $book->description = $this->catalogSynopses[$book->title];
-            } elseif (!$book->description || str_starts_with($book->description, 'Deskripsi buku dummy')) {
-                $category = $book->category?->name ?? $book->main_category ?? 'koleksi umum';
-                $book->description = "Buku berjudul {$book->title} membahas topik utama yang berkaitan dengan {$category} melalui uraian dan contoh yang disesuaikan dengan tema koleksi. Pembaca dapat memperoleh pemahaman dasar, memperluas wawasan, serta menggunakan gagasan yang dibahas sebagai bahan belajar dan rujukan awal sesuai kebutuhan.";
+            } else {
+                $book->description = $this->buildCatalogSynopsis($book);
             }
             return $book;
         });
@@ -246,5 +250,74 @@ class UserCatalogController extends Controller
             'reservedBookIds'  => $reservedBookIds,
             'borrowedBookIds'  => $borrowedBookIds,
         ]);
+    }
+
+    private function buildCatalogSynopsis(Book $book): string
+    {
+        $title = trim((string) $book->title);
+        $mainCategory = $book->main_category ?: ($book->category?->name ?? 'Koleksi Umum');
+        $subCategory = $book->sub_category ?: $book->education_level;
+        $source = trim((string) $book->description);
+        $isDemoDescription = $source === '' || str_starts_with(strtolower($source), 'deskripsi demo');
+
+        $subjectFocus = match (true) {
+            str_contains(strtolower($title), 'matematika'),
+            str_contains(strtolower($title), 'kalkulus'),
+            str_contains(strtolower($title), 'aljabar'),
+            str_contains(strtolower($title), 'geometri') =>
+                'Fokus bacaan dapat membantu pembaca memahami konsep, melihat hubungan antaride, dan melatih penalaran untuk menyelesaikan persoalan secara bertahap.',
+            str_contains(strtolower($title), 'fisika'),
+            str_contains(strtolower($title), 'biologi'),
+            str_contains(strtolower($title), 'kimia'),
+            str_contains(strtolower($title), 'sains'),
+            str_contains(strtolower($title), 'ipa') =>
+                'Topik tersebut membuka ruang untuk mengenali konsep, menghubungkan gejala dengan penjelasan, serta membangun rasa ingin tahu dan cara berpikir berbasis bukti.',
+            str_contains(strtolower($title), 'bahasa'),
+            str_contains(strtolower($title), 'membaca'),
+            str_contains(strtolower($title), 'menulis'),
+            str_contains(strtolower($title), 'english') =>
+                'Bacaan ini dapat mendukung pemahaman teks, pengembangan kosakata, dan penyampaian gagasan dengan lebih runtut sesuai kebutuhan pembaca.',
+            str_contains(strtolower($title), 'sejarah'),
+            str_contains(strtolower($title), 'sosial'),
+            str_contains(strtolower($title), 'budaya') =>
+                'Tema tersebut membantu pembaca melihat hubungan antara manusia, lingkungan, peristiwa, dan perubahan masyarakat dari berbagai sudut pandang.',
+            str_contains(strtolower($title), 'ekonomi'),
+            str_contains(strtolower($title), 'akuntansi'),
+            str_contains(strtolower($title), 'uang'),
+            str_contains(strtolower($title), 'bisnis') =>
+                'Pembahasan tematiknya dapat memperluas pemahaman tentang pengelolaan sumber daya, pertimbangan dalam mengambil keputusan, dan dampaknya dalam kehidupan sehari-hari.',
+            str_contains(strtolower($title), 'digital'),
+            str_contains(strtolower($title), 'teknologi'),
+            str_contains(strtolower($title), 'web'),
+            str_contains(strtolower($title), 'cloud'),
+            str_contains(strtolower($title), 'kecerdasan buatan') =>
+                'Buku ini memberi konteks untuk memahami perkembangan teknologi, penerapannya, serta pertanyaan tentang manfaat dan dampaknya bagi masyarakat.',
+            default =>
+                'Tema dalam judulnya dapat menjadi titik awal untuk memperluas wawasan, memahami gagasan utama, dan menghubungkan bacaan dengan pengalaman pembaca.',
+        };
+
+        $categoryContext = match (true) {
+            $mainCategory === 'Buku Pendidikan' =>
+                "Sebagai koleksi pendidikan tingkat {$subCategory}, buku {$title} ditujukan untuk mendampingi proses belajar sesuai jenjangnya. Pembaca dapat menggunakan tema dan konsepnya sebagai bahan penguatan pemahaman serta rujukan belajar.",
+            $mainCategory === 'Anak' && $subCategory === 'Fiksi' =>
+                "Dalam koleksi fiksi anak, {$title} mengajak pembaca mengikuti pengalaman tokoh dan membayangkan dunia cerita. Bacaan ini dapat membuka percakapan tentang perasaan, pilihan, hubungan dengan orang lain, dan nilai yang ditemukan sepanjang cerita tanpa membocorkan akhir kisah.",
+            $mainCategory === 'Anak' =>
+                "Sebagai bacaan nonfiksi anak, {$title} membantu pembaca mengenal pengetahuan melalui tema yang dekat dengan rasa ingin tahu mereka. Isinya dapat menjadi pemantik pengamatan, pertanyaan, dan diskusi sederhana bersama keluarga atau pendamping belajar.",
+            $mainCategory === 'Remaja' && $subCategory === 'Fiksi' =>
+                "Dalam kelompok fiksi remaja, {$title} memberi ruang bagi pembaca untuk mengikuti perjalanan tokoh, relasi, dan pilihan yang membentuk cerita. Tema-temanya dapat mengundang refleksi tentang identitas, pertemanan, perubahan, dan cara menghadapi tantangan tanpa mengungkap penyelesaian cerita.",
+            $mainCategory === 'Remaja' =>
+                "Sebagai koleksi nonfiksi remaja, {$title} menyentuh tema yang dapat mendukung proses belajar dan pengembangan diri. Pembaca dapat menimbang gagasan di dalamnya, mengaitkannya dengan situasi sehari-hari, dan memilih wawasan yang berguna bagi kebutuhannya.",
+            $mainCategory === 'Dewasa' && $subCategory === 'Fiksi' =>
+                "Dalam koleksi fiksi dewasa, {$title} dapat dibaca melalui tema, perjalanan tokoh, dan konflik yang memberi kedalaman pada cerita. Pembaca diajak menafsirkan motivasi, relasi, serta konteks yang memengaruhi pilihan para tokoh tanpa mengungkap akhir kisah.",
+            $mainCategory === 'Dewasa' =>
+                "Sebagai koleksi nonfiksi dewasa, {$title} menawarkan bahan untuk memperdalam wawasan dan menelaah suatu bidang secara lebih terarah. Gagasan utamanya dapat menjadi landasan untuk belajar mandiri, berdiskusi, atau mencari rujukan lanjutan.",
+            default =>
+                "Buku {$title} merupakan bagian dari {$mainCategory}" . ($subCategory ? " dengan subkategori {$subCategory}." : '.') . ' Sinopsis katalog ini memberi gambaran mengenai tema bacaan dan konteks koleksinya agar pembaca dapat menilai kesesuaiannya dengan kebutuhan.',
+        };
+
+        $base = $isDemoDescription ? '' : $source;
+        $synopsis = trim($base . ' ' . $categoryContext . ' ' . $subjectFocus);
+
+        return preg_replace('/\s+/', ' ', $synopsis) ?? $synopsis;
     }
 }

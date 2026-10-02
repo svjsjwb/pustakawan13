@@ -304,11 +304,13 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .pd-category-wrapper {
-    flex: 0 1 auto;
+    flex: 0 0 184px;
 }
 
 .pd-category-wrapper .pd-trigger {
-    min-width: 172px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     padding-left: 14px;
     padding-right: 14px;
 }

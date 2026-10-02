@@ -7,12 +7,19 @@
     box-sizing: border-box;
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 html,
 body {
     margin: 0;
     padding: 0;
     width: 100%;
     min-height: 100%;
+    background: #093033;
 }
 
 body {
@@ -23,7 +30,7 @@ body {
         sans-serif;
 
     color: #102f32;
-    background: #eef5f4;
+    background: #093033;
 }
 
 
@@ -37,13 +44,26 @@ body {
     width: 100%;
     min-height: 100vh;
 
-    overflow: hidden;
+    overflow-y: auto;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    padding: 32px;
+    padding: 36px 24px;
+
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
+    /* Cinematic dissolve-in removed to prevent green flash on refresh */
+}
+
+.login-page input,
+.login-page textarea {
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 
@@ -56,12 +76,10 @@ body {
     inset: 0;
 
     background-image:
-        linear-gradient(
-            90deg,
+        linear-gradient(90deg,
             rgba(9, 48, 51, .72),
             rgba(9, 48, 51, .35) 45%,
-            rgba(9, 48, 51, .15)
-        ),
+            rgba(9, 48, 51, .15)),
         url("/images/bg-ts.jpeg");
 
     background-size: cover;
@@ -70,6 +88,8 @@ body {
     z-index: 0;
 
     transform: scale(1.02);
+
+    /* Cinematic dissolve-in removed to prevent green flash on refresh */
 }
 
 
@@ -87,11 +107,9 @@ body {
     inset: 0;
 
     background:
-        radial-gradient(
-            circle at 75% 45%,
+        radial-gradient(circle at 75% 45%,
             rgba(115, 218, 210, .16),
-            transparent 35%
-        );
+            transparent 35%);
 
     pointer-events: none;
 }
@@ -108,13 +126,10 @@ body {
 
     width: min(1120px, 100%);
 
-    min-height: 680px;
-
     display: grid;
 
     grid-template-columns:
-        minmax(0, 1fr)
-        430px;
+        minmax(0, 1fr) 430px;
 
     overflow: hidden;
 
@@ -126,6 +141,8 @@ body {
         0 30px 80px rgba(0, 0, 0, .25);
 
     backdrop-filter: blur(2px);
+
+    /* Cinematic dissolve-in removed to prevent green flash on refresh */
 }
 
 
@@ -139,9 +156,14 @@ body {
     display: flex;
     align-items: center;
 
-    padding: 70px;
+    padding: 48px 52px;
 
     color: #ffffff;
+
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 
@@ -153,17 +175,15 @@ body {
 .login-logo {
     display: block;
 
-    width: 86px;
-    height: 86px;
+    width: 110px;
+    height: 110px;
 
     object-fit: contain;
 
-    margin-bottom: 26px;
+    margin-bottom: 20px;
 
     filter:
-        drop-shadow(
-            0 8px 18px rgba(0, 0, 0, .18)
-        );
+        drop-shadow(0 8px 18px rgba(0, 0, 0, .18));
 }
 
 
@@ -196,6 +216,7 @@ body {
     margin: 0;
 
     max-width: 520px;
+    min-height: 2.08em;
 
     font-size: clamp(38px, 5vw, 62px);
 
@@ -219,6 +240,7 @@ body {
 
 .intro-content p {
     max-width: 470px;
+    min-height: 5.1em;
 
     margin: 24px 0 0;
 
@@ -232,7 +254,7 @@ body {
 
 
 /* =========================================================
-   DECORATION
+   DECORATION / CAROUSEL INDICATOR
 ========================================================= */
 
 .intro-decoration {
@@ -242,33 +264,74 @@ body {
 
     gap: 7px;
 
-    margin-top: 34px;
+    margin-top: 24px;
 }
 
 
 .intro-decoration span {
     display: block;
 
-    width: 32px;
     height: 4px;
 
     border-radius: 999px;
 
     background: #8fe2dc;
-}
 
+    opacity: .35;
 
-.intro-decoration span:nth-child(2) {
     width: 12px;
 
-    opacity: .65;
+    transition:
+        width .4s ease,
+        opacity .4s ease;
 }
 
 
-.intro-decoration span:nth-child(3) {
-    width: 7px;
+.intro-decoration span.active {
+    width: 32px;
+    opacity: 1;
+}
 
-    opacity: .4;
+
+/* =========================================================
+   CAROUSEL CONTENT — HORIZONTAL ANIMATION
+========================================================= */
+
+.carousel-text {
+    width: 100%;
+    min-width: 0;
+    transition:
+        opacity .7s ease-in-out,
+        transform .7s cubic-bezier(.22, 1, .36, 1);
+    opacity: 1;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+.carousel-slide {
+    grid-area: 1 / 1;
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.carousel-slide.is-active {
+    transform: translateX(0);
+    opacity: 1;
+    z-index: 2;
+}
+
+.carousel-slide.is-exiting {
+    opacity: 0;
+    transform: translateX(-100%);
+    z-index: 1;
+}
+
+.carousel-viewport {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
 }
 
 
@@ -282,7 +345,7 @@ body {
     align-items: center;
     justify-content: center;
 
-    padding: 34px 30px;
+    padding: 26px 30px;
 
     background:
         rgba(255, 255, 255, .96);
@@ -304,7 +367,7 @@ body {
 ========================================================= */
 
 .login-header {
-    margin-bottom: 25px;
+    margin-bottom: 18px;
 }
 
 
@@ -374,7 +437,7 @@ body {
 
 
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 
@@ -404,7 +467,7 @@ body {
 
     width: 100%;
 
-    height: 48px;
+    height: 46px;
 
     border:
         1px solid #d7e2e2;
@@ -440,15 +503,29 @@ body {
     align-items: center;
     justify-content: center;
 
-    width: 46px;
+    width: 44px;
 
     flex-shrink: 0;
 
-    color: #278486;
+    color: #9ab4b5;
 
     font-size: 14px;
 
     font-weight: 700;
+
+    transition: color .2s ease;
+}
+
+.input-icon svg {
+    width: 17px;
+    height: 17px;
+    stroke: currentColor;
+    flex-shrink: 0;
+    transition: stroke .2s ease;
+}
+
+.input-wrapper:focus-within .input-icon {
+    color: #278486;
 }
 
 
@@ -474,6 +551,189 @@ body {
     font-family: inherit;
 
     font-size: 13px;
+}
+
+.input-wrapper select {
+    width: 100%;
+    height: 100%;
+
+    padding: 0 40px 0 0;
+
+    border: none;
+    outline: none;
+    appearance: none;
+
+    background: transparent;
+    color: #a4b1b2;
+
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.input-wrapper select:valid {
+    color: #193b3d;
+}
+
+.select-arrow {
+    position: absolute;
+    right: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #9ab4b5;
+    pointer-events: none;
+}
+
+.select-arrow svg {
+    width: 17px;
+    height: 17px;
+    stroke: currentColor;
+}
+
+.input-wrapper:focus-within .select-arrow {
+    color: #278486;
+}
+
+.division-select {
+    z-index: 1;
+}
+
+.division-select.is-open {
+    z-index: 30;
+}
+
+.division-select-trigger {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 40px 0 0;
+
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #193b3d;
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.division-select-trigger.is-placeholder {
+    color: #a4b1b2;
+}
+
+.input-wrapper select.division-native-select {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.division-options {
+    position: absolute;
+    top: calc(100% + 7px);
+    right: 0;
+    left: 0;
+    z-index: 35;
+
+    max-height: 260px;
+    padding: 6px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+
+    border: 1px solid #d7e2e2;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(25, 59, 61, .16);
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity .16s ease, transform .16s ease, visibility 0s linear .16s;
+}
+
+.division-select.is-open .division-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition: opacity .16s ease, transform .16s ease, visibility 0s;
+}
+
+.division-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 34px 8px 11px;
+
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #405456;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+    cursor: pointer;
+    transition: background-color .14s ease, color .14s ease;
+}
+
+.division-option:hover,
+.division-option:focus-visible {
+    outline: 0;
+    background: #eef8f7;
+    color: #193b3d;
+}
+
+.division-option[aria-selected="true"] {
+    background: #e4f3ef;
+    color: #176f70;
+    font-weight: 700;
+}
+
+.division-option[aria-selected="true"]::after {
+    position: absolute;
+    right: 13px;
+    width: 6px;
+    height: 10px;
+    border-right: 2px solid #278486;
+    border-bottom: 2px solid #278486;
+    content: "";
+    transform: rotate(45deg);
+}
+
+.division-select .select-arrow svg {
+    transition: transform .18s ease;
+}
+
+.division-select.is-open .select-arrow svg {
+    transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .division-options,
+    .division-option,
+    .division-select .select-arrow svg {
+        scroll-behavior: auto;
+        transition: none;
+    }
 }
 
 
@@ -535,6 +795,14 @@ body {
     color: #278486;
 }
 
+.password-toggle svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
 .password-wrapper {
     position: relative;
 }
@@ -574,7 +842,7 @@ body {
     justify-content: center;
 
     width: 100%;
-    height: 50px;
+    height: 48px;
 
     margin-top: 8px;
 
@@ -585,11 +853,9 @@ body {
     border-radius: 13px;
 
     background:
-        linear-gradient(
-            135deg,
+        linear-gradient(135deg,
             #278486,
-            #1d6f71
-        );
+            #1d6f71);
 
     color: #ffffff;
 
@@ -654,7 +920,7 @@ body {
 
     gap: 12px;
 
-    margin: 22px 0 18px;
+    margin: 16px 0 14px;
 }
 
 
@@ -691,7 +957,7 @@ body {
     gap: 10px;
 
     width: 100%;
-    height: 48px;
+    height: 46px;
 
     border:
         1px solid #d9e3e3;
@@ -759,7 +1025,7 @@ body {
 
     gap: 5px;
 
-    margin-top: 22px;
+    margin-top: 16px;
 
     color: #7a898a;
 
@@ -781,37 +1047,62 @@ body {
 }
 
 
+.forgot-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin: -4px 0 14px;
+}
+
+.forgot-link {
+    color: #278486;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+.alert-error,
+.alert-success {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.alert-error {
+    background: #fff3f3;
+    border: 1px solid #f2c5c5;
+    color: #a53737;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+}
+
+
 /* =========================================================
    ANIMATION
 ========================================================= */
 
 .login-card {
-    animation:
-        registerCardReveal .65s
-        cubic-bezier(.22, 1, .36, 1)
-        both;
+    opacity: 1;
+    transform: none;
 }
 
-
-@keyframes registerCardReveal {
-
-    from {
-        opacity: 0;
-
-        transform:
-            translateY(22px)
-            scale(.98);
-    }
-
-    to {
-        opacity: 1;
-
-        transform:
-            translateY(0)
-            scale(1);
-    }
-
+.login-intro .intro-content {
+    opacity: 1;
+    transform: none;
 }
+
 
 
 /* =========================================================
@@ -883,4 +1174,54 @@ body {
         transition-duration: .01ms !important;
     }
 
+}
+
+
+/* =========================================================
+   CINEMATIC DISSOLVE-IN TRANSITION (LOGIN PAGE)
+   Halaman Login muncul dengan fade-in elegan setelah
+   navigasi dari Landing Page.
+   Semua elemen kembali ke posisi & ukuran aslinya setelah
+   animasi selesai — tidak ada perubahan permanen.
+========================================================= */
+
+/* Halaman secara keseluruhan: opacity 0 → 1 */
+@keyframes cinematicPageFadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Background: muncul sedikit lebih lambat untuk kesan depth */
+@keyframes cinematicBgFadeIn {
+    0% {
+        opacity: 0;
+        filter: blur(4px);
+    }
+
+    60% {
+        filter: blur(0px);
+    }
+
+    100% {
+        opacity: 1;
+        filter: blur(0px);
+    }
+}
+
+/* Container (card+intro): naik 12px dari bawah lalu ke posisi asli */
+@keyframes cinematicContainerFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
