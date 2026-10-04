@@ -132,6 +132,39 @@ class UserProfileController extends Controller
 
     public function changePassword(Request $request)
     {
+        $user = Auth::user();
+
+        /*
+    |--------------------------------------------------------------------------
+    | GOOGLE USER YANG BELUM PUNYA PASSWORD LOKAL
+    |--------------------------------------------------------------------------
+    */
+
+        if (is_null($user->password)) {
+
+            $request->validate([
+                'password' => 'required|string|min:8|confirmed',
+            ], [
+                'password.required'  => 'Kata sandi baru wajib diisi.',
+                'password.min'       => 'Kata sandi baru minimal 8 karakter.',
+                'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+            ]);
+
+            $user->password = Hash::make($request->input('password'));
+            $user->save();
+
+            return back()->with(
+                'success',
+                'Kata sandi berhasil dibuat. Sekarang Anda dapat login menggunakan email dan kata sandi.'
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | USER YANG SUDAH PUNYA PASSWORD
+    |--------------------------------------------------------------------------
+    */
+
         $request->validate([
             'current_password' => 'required',
             'password'         => 'required|string|min:8|confirmed',
@@ -141,17 +174,21 @@ class UserProfileController extends Controller
             'password.confirmed'        => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
-        $user = Auth::user();
-
         if (!Hash::check($request->input('current_password'), $user->password)) {
-            return back()->withErrors(['current_password' => 'Kata sandi lama tidak sesuai.'])
+            return back()
+                ->withErrors([
+                    'current_password' => 'Kata sandi lama tidak sesuai.',
+                ])
                 ->withInput();
         }
 
         $user->password = Hash::make($request->input('password'));
         $user->save();
 
-        return back()->with('success', 'Kata sandi berhasil diubah.');
+        return back()->with(
+            'success',
+            'Kata sandi berhasil diubah.'
+        );
     }
 
     /**

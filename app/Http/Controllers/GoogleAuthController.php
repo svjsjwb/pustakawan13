@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Hash;
 
 class GoogleAuthController extends Controller
 {
@@ -220,9 +221,14 @@ class GoogleAuthController extends Controller
                 'max:100',
                 'in:Center Of Excellence,Digital Business,E-Publishing,Finance,General Trading,HR & GA,HSE,IQA,IT,Marketing,MTIS Perpuskita dan Tisera,MTIS Planning and Development,People Development Center,Production,School Book Sales,School Book Publishing,SCM,TAX',
             ],
+
         ], [
             'division.required' => 'Divisi wajib dipilih.',
-            'division.in' => 'Divisi yang dipilih tidak valid.',
+            'division.in'       => 'Divisi yang dipilih tidak valid.',
+
+            'password.required'  => 'Password wajib dibuat.',
+            'password.min'       => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
         /*
