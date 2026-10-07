@@ -23,7 +23,7 @@ class MemberController extends Controller
                 'max:100',
                 'in:Center Of Excellence,Digital Business,E-Publishing,Finance,General Trading,HR & GA,HSE,IQA,IT,Marketing,MTIS Perpuskita dan Tisera,MTIS Planning and Development,People Development Center,Production,School Book Sales,School Book Publishing,SCM,TAX'
             ],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'max:20'],
         ];
     }
 
@@ -33,7 +33,8 @@ class MemberController extends Controller
             'name.required' => 'Nama karyawan wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'division.required' => 'Divisi wajib dipilih.',
-            'phone.required' => 'Nomor telepon wajib diisi.',
+            'phone.string' => 'Nomor telepon harus diisi dengan format yang valid.',
+            'phone.max' => 'Nomor telepon maksimal 20 karakter.',
         ];
     }
 

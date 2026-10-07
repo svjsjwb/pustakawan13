@@ -37,7 +37,7 @@ class UserProfileController extends Controller
         $favoriteBook = $favoriteBook ?? 'Laskar Pelangi';
 
         // Kategori Favorit
-        $favoriteCategory = 'Pendidikan';
+        $favoriteCategory = 'Buku Pendidikan';
         if (!empty($user->favorite_categories) && is_array($user->favorite_categories)) {
             $favoriteCategory = $user->favorite_categories[0];
         }
@@ -66,7 +66,7 @@ class UserProfileController extends Controller
         ];
 
         // Daftar Pilihan Kategori & Genre Katalog
-        $allCategories = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa', 'Teknologi', 'Sains', 'Bisnis', 'Sejarah'];
+        $allCategories = ['Buku Pendidikan', 'Anak', 'Remaja', 'Dewasa', 'Teknologi', 'Sains', 'Bisnis', 'Sejarah'];
         $allGenres     = ['Fiksi', 'Non Fiksi', 'Petualangan', 'Motivasi', 'Sains', 'Sejarah', 'Novel', 'Komik', 'Bisnis', 'Biografi'];
 
         // Daftar Divisi Perusahaan

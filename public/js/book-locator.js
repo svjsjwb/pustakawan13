@@ -95,101 +95,101 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('DOMContentLoaded', function () {
 
-    const level1 =
-        document.getElementById('category_level_1');
+        const level1 =
+            document.getElementById('category_level_1');
 
-    const level2 =
-        document.getElementById('category_level_2');
+        const level2 =
+            document.getElementById('category_level_2');
 
-    const level3 =
-        document.getElementById('category_level_3');
+        const level3 =
+            document.getElementById('category_level_3');
 
-    if (!level1 || !level2 || !level3) {
-        return;
-    }
-
-    const categories = {
-
-        "Pendidikan": {
-
-            "SD": [],
-
-            "SMP": [],
-
-            "SMA": []
-        },
-
-        "Anak-Anak": {
-
-            "Fiksi": [],
-
-            "Non Fiksi": []
-        },
-
-        "Remaja": {
-
-            "Fiksi": [],
-
-            "Non Fiksi": []
-        },
-
-        "Dewasa": {
-
-            "Fiksi": [],
-
-            "Non Fiksi": []
-        }
-
-    };
-
-    level1.addEventListener('change', function () {
-
-        level2.innerHTML =
-            '<option value="">Pilih Subkategori</option>';
-
-        level3.innerHTML =
-            '<option value="">Pilih Detail</option>';
-
-        if (!categories[this.value]) {
+        if (!level1 || !level2 || !level3) {
             return;
         }
 
-        Object.keys(
-            categories[this.value]
-        ).forEach(function (item) {
+        const categories = {
 
-            level2.innerHTML +=
-                `<option value="${item}">${item}</option>`;
+            "Buku Pendidikan": {
 
-        });
+                "SD": [],
 
-    });
+                "SMP": [],
 
-    level2.addEventListener('change', function () {
+                "SMA": []
+            },
 
-        level3.innerHTML =
-            '<option value="">Pilih Detail</option>';
+            "Anak": {
 
-        const parent =
-            level1.value;
+                "Fiksi": [],
 
-        if (
-            !categories[parent] ||
-            !categories[parent][this.value]
-        ) {
-            return;
-        }
+                "Non Fiksi": []
+            },
 
-        categories[parent][this.value]
-            .forEach(function (item) {
+            "Remaja": {
 
-                level3.innerHTML +=
+                "Fiksi": [],
+
+                "Non Fiksi": []
+            },
+
+            "Dewasa": {
+
+                "Fiksi": [],
+
+                "Non Fiksi": []
+            }
+
+        };
+
+        level1.addEventListener('change', function () {
+
+            level2.innerHTML =
+                '<option value="">Pilih Subkategori</option>';
+
+            level3.innerHTML =
+                '<option value="">Pilih Detail</option>';
+
+            if (!categories[this.value]) {
+                return;
+            }
+
+            Object.keys(
+                categories[this.value]
+            ).forEach(function (item) {
+
+                level2.innerHTML +=
                     `<option value="${item}">${item}</option>`;
 
             });
 
-    });
+        });
 
-});
+        level2.addEventListener('change', function () {
+
+            level3.innerHTML =
+                '<option value="">Pilih Detail</option>';
+
+            const parent =
+                level1.value;
+
+            if (
+                !categories[parent] ||
+                !categories[parent][this.value]
+            ) {
+                return;
+            }
+
+            categories[parent][this.value]
+                .forEach(function (item) {
+
+                    level3.innerHTML +=
+                        `<option value="${item}">${item}</option>`;
+
+                });
+
+        });
+
+    });
 
 });

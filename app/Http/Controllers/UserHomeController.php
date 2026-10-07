@@ -88,7 +88,7 @@ class UserHomeController extends Controller
             ->getForUser($user, 8);
 
         // Kategori
-        $categoryOrder = ['Pendidikan', 'Anak-Anak', 'Remaja', 'Dewasa'];
+        $categoryOrder = ['Buku Pendidikan', 'Anak', 'Remaja', 'Dewasa'];
         $categories    = Category::whereIn('name', $categoryOrder)
             ->get()
             ->sortBy(fn($category) => array_search($category->name, $categoryOrder, true))

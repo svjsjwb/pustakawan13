@@ -94,241 +94,279 @@
 
 
         {{-- =====================================================
-         MEMBER CARD
-    ====================================================== --}}
+    MEMBER CONTENT CARD
+====================================================== --}}
 
         <div class="member-card">
 
-            {{-- =================================================
-             TOOLBAR
+            <div class="member-content-card">
+
+                {{-- =================================================
+            SEARCH + FILTER STATUS
         ================================================== --}}
 
-            <div class="member-toolbar">
+                <div class="member-filter-row">
 
-                <div>
+                    {{-- SEARCH --}}
+                    <div class="member-search">
+                        <svg class="member-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <path d="m20 20-4-4"></path>
+                        </svg>
 
-                    <h3>
-                        Daftar Anggota
-                    </h3>
+                        <input type="text" id="memberSearch" placeholder="Cari data anggota..." autocomplete="off">
+                    </div>
 
-                    <p>
-                        Data anggota yang terdaftar di perpustakaan.
-                    </p>
+
+                    {{-- FILTER STATUS --}}
+                    <button type="button" class="member-status-filter" id="memberStatusFilter">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                        </svg>
+
+                        <span>Semua Status</span>
+                    </button>
 
                 </div>
 
 
-                {{-- SEARCH --}}
-
-                <div class="member-search">
-
-                    <input type="text" id="memberSearch" placeholder="Cari anggota..." autocomplete="off">
-
-                </div>
-
-            </div>
-
-
-            {{-- =================================================
-             TABLE
+                {{-- =================================================
+            TABLE
         ================================================== --}}
 
-            <div class="table-wrap">
+                <div class="table-wrap">
 
-                <table id="memberTable">
+                    <table id="memberTable">
 
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                NO
-                            </th>
-
-                            <th>
-                                NAMA
-                            </th>
-
-                            <th>
-                                EMAIL
-                            </th>
-
-                            <th>
-                                DIVISI
-                            </th>
-
-                            <th>
-                                NO. TELEPON
-                            </th>
-
-                            <th>
-                                STATUS
-                            </th>
-
-                            <th>
-                                AKSI
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        @forelse($members as $member)
+                        <thead>
                             <tr>
 
-                                {{-- NO --}}
+                                <th>
+                                    NO
+                                </th>
 
-                                <td>
-                                    {{ $loop->iteration }}
-                                </td>
+                                <th>
+                                    NAMA
+                                </th>
 
+                                <th>
+                                    EMAIL
+                                </th>
 
-                                {{-- NAMA --}}
+                                <th>
+                                    DIVISI
+                                </th>
 
-                                <td>
+                                <th>
+                                    NO. TELEPON
+                                </th>
 
-                                    <strong>
-                                        {{ $member->name }}
-                                    </strong>
+                                <th>
+                                    STATUS
+                                </th>
 
-                                </td>
+                                <th>
+                                    AKSI
+                                </th>
 
-
-                                {{-- EMAIL --}}
-
-                                <td>
-                                    {{ $member->email ?? '-' }}
-                                </td>
-
-
-                                {{-- DIVISI --}}
-
-                                <td>
-                                    {{ $member->division ?? '-' }}
-                                </td>
-
-
-                                {{-- TELEPON --}}
-
-                                <td>
-                                    {{ $member->phone ?? '-' }}
-                                </td>
+                            </tr>
+                        </thead>
 
 
-                                {{-- STATUS --}}
+                        <tbody>
 
-                                <td>
+                            @forelse($members as $member)
+                                <tr>
 
-                                    @if ($member->status === 'aktif')
-                                        <span class="status-active">
-                                            Aktif
-                                        </span>
-                                    @else
-                                        <span class="status-inactive">
-                                            Nonaktif
-                                        </span>
-                                    @endif
-
-                                </td>
+                                    {{-- NO --}}
+                                    <td>
+                                        {{ $loop->iteration }}
+                                    </td>
 
 
-                                {{-- AKSI --}}
-
-                                <td>
-
-                                    <div class="action-buttons">
-
-                                        @if ($member->user?->role === 'guest')
-                                            {{-- SETUJUI --}}
-
-                                            <form action="{{ route('members.approve', $member->id) }}" method="POST"
-                                                style="display:inline;">
-
-                                                @csrf
-                                                @method('PATCH')
-
-                                                <button type="submit" class="btn-approve" title="Setujui Pendaftaran">
-                                                    Setuju
-                                                </button>
-
-                                            </form>
+                                    {{-- NAMA --}}
+                                    <td>
+                                        <strong>
+                                            {{ $member->name }}
+                                        </strong>
+                                    </td>
 
 
-                                            {{-- TOLAK --}}
+                                    {{-- EMAIL --}}
+                                    <td>
+                                        {{ $member->email ?? '-' }}
+                                    </td>
 
-                                            <form action="{{ route('members.reject', $member->id) }}" method="POST"
-                                                style="display:inline;"
-                                                onsubmit="return confirm('Yakin ingin menolak pendaftaran anggota ini?')">
 
-                                                @csrf
-                                                @method('DELETE')
+                                    {{-- DIVISI --}}
+                                    <td>
+                                        {{ $member->division ?? '-' }}
+                                    </td>
 
-                                                <button type="submit" class="btn-reject" title="Tolak Pendaftaran">
-                                                    Tolak
-                                                </button>
 
-                                            </form>
+                                    {{-- TELEPON --}}
+                                    <td>
+                                        {{ $member->phone ?? '-' }}
+                                    </td>
+
+
+                                    {{-- STATUS --}}
+                                    <td>
+
+                                        @if ($member->status === 'aktif')
+                                            <span class="status-active">
+                                                Aktif
+                                            </span>
                                         @else
-                                            {{-- EDIT --}}
+                                            <span class="status-inactive">
+                                                Nonaktif
+                                            </span>
+                                        @endif
 
-                                            <a href="{{ route('members.edit', $member->id) }}" class="btn-edit"
-                                                title="Edit Anggota" aria-label="Edit Anggota">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                    aria-hidden="true">
-                                                    <path d="M12 20h9" />
-                                                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                                                </svg>
-                                            </a>
+                                    </td>
 
 
-                                            {{-- HAPUS --}}
+                                    {{-- AKSI --}}
+                                    <td>
 
-                                            <form action="{{ route('members.destroy', $member->id) }}" method="POST"
-                                                class="delete-member-form">
+                                        <div class="action-buttons">
 
-                                                @csrf
-                                                @method('DELETE')
+                                            @if ($member->user?->role === 'guest')
+                                                {{-- SETUJUI --}}
+                                                <form action="{{ route('members.approve', $member->id) }}" method="POST"
+                                                    style="display:inline;">
 
-                                                <button type="button" class="btn-delete" title="Hapus Anggota"
-                                                    aria-label="Hapus Anggota" onclick="openMemberDeleteModal(this)">
+                                                    @csrf
+
+                                                    @method('PATCH')
+
+                                                    <button type="submit" class="btn-approve" title="Setujui Pendaftaran">
+                                                        Setuju
+                                                    </button>
+
+                                                </form>
+
+
+                                                {{-- TOLAK --}}
+                                                <form action="{{ route('members.reject', $member->id) }}" method="POST"
+                                                    style="display:inline;"
+                                                    onsubmit="return confirm('Yakin ingin menolak pendaftaran anggota ini?')">
+
+                                                    @csrf
+
+                                                    @method('DELETE')
+
+                                                    <button type="submit" class="btn-reject" title="Tolak Pendaftaran">
+                                                        Tolak
+                                                    </button>
+
+                                                </form>
+                                            @else
+                                                {{-- EDIT --}}
+                                                <a href="{{ route('members.edit', $member->id) }}" class="btn-edit"
+                                                    title="Edit Anggota" aria-label="Edit Anggota">
+
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                                         aria-hidden="true">
-                                                        <polyline points="3 6 5 6 21 6" />
-                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                                        <path d="M10 11v6" />
-                                                        <path d="M14 11v6" />
-                                                        <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                                                        <path d="M12 20h9" />
+                                                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
                                                     </svg>
-                                                </button>
 
-                                            </form>
-                                        @endif
+                                                </a>
 
-                                    </div>
 
-                                </td>
+                                                {{-- HAPUS --}}
+                                                <form action="{{ route('members.destroy', $member->id) }}" method="POST"
+                                                    class="delete-member-form">
 
-                            </tr>
+                                                    @csrf
 
-                        @empty
+                                                    @method('DELETE')
 
-                            <tr>
+                                                    <button type="button" class="btn-delete" title="Hapus Anggota"
+                                                        aria-label="Hapus Anggota" onclick="openMemberDeleteModal(this)">
 
-                                <td colspan="7" class="empty-data">
-                                    Belum ada data anggota.
-                                </td>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                            aria-hidden="true">
+                                                            <polyline points="3 6 5 6 21 6" />
+                                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                            <path d="M10 11v6" />
+                                                            <path d="M14 11v6" />
+                                                            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                                                        </svg>
 
-                            </tr>
-                        @endforelse
+                                                    </button>
 
-                    </tbody>
+                                                </form>
+                                            @endif
 
-                </table>
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            @empty
+
+                                <tr>
+
+                                    <td colspan="7" class="empty-data">
+                                        Belum ada data anggota.
+                                    </td>
+
+                                </tr>
+                            @endforelse
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                {{-- =================================================
+            PAGINATION AREA
+        ================================================== --}}
+
+                @if ($members instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator)
+                    <div class="member-pagination">
+
+                        <div class="member-pagination-links">
+
+                            {{ $members->onEachSide(1)->links() }}
+
+                        </div>
+
+                        <div class="member-pagination-info">
+
+                            Menampilkan
+
+                            <strong>
+                                {{ $members->firstItem() ?? 0 }}
+                            </strong>
+
+                            -
+
+                            <strong>
+                                {{ $members->lastItem() ?? 0 }}
+                            </strong>
+
+                            dari
+
+                            <strong>
+                                {{ $members->total() }}
+                            </strong>
+
+                            hasil
+
+                        </div>
+
+                    </div>
+                @endif
 
             </div>
 

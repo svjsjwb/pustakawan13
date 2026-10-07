@@ -8,28 +8,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const data = {
 
-        "Pendidikan": {
-            "SD": [],
-            "SMP": [],
-            "SMA": []
-        },
+    "Buku Pendidikan": {
+        "SD": [],
+        "SMP": [],
+        "SMA": []
+    },
 
-        "Anak-anak": {
-            "Fiksi": [],
-            "Non Fiksi": []
-        },
+    "Anak": {
+        "Fiksi": [],
+        "Non Fiksi": []
+    },
 
-        "Remaja": {
-            "Fiksi": [],
-            "Non Fiksi": []
-        },
+    "Remaja": {
+        "Fiksi": [],
+        "Non Fiksi": []
+    },
 
-        "Dewasa": {
-            "Fiksi": [],
-            "Non Fiksi": []
-        }
+    "Dewasa": {
+        "Fiksi": [],
+        "Non Fiksi": []
+    }
 
-    };
+};
 
     level1.addEventListener('change', function () {
 

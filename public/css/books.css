@@ -2332,6 +2332,59 @@
 
 }
 
+.books-content-card {
+    background: #ffffff;
+    border: 1px solid #e1ebeb;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.025);
+}
+
+.books-page {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.books-content-card {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.book-toolbar,
+.books-table-header,
+.books-pagination {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+.books-table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+}
+
+.books-table th,
+.books-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.books-table th:first-child,
+.books-table td:first-child {
+    width: 30%;
+}
 
 /* =========================================================
    RESPONSIVE

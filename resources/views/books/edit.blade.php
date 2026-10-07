@@ -104,7 +104,8 @@
                         <label for="subcategory_id">
                             Subkategori Buku
                         </label>
-                        <select id="subcategory_id" name="subcategory_id" class="input @error('subcategory_id') is-invalid @enderror">
+                        <select id="subcategory_id" name="subcategory_id"
+                            class="input @error('subcategory_id') is-invalid @enderror">
                             <option value="">-- Pilih Subkategori --</option>
                             @if ($book->category && $book->category->subcategories)
                                 @foreach ($book->category->subcategories as $sub)
@@ -116,6 +117,20 @@
                             @endif
                         </select>
                         @error('subcategory_id')
+                            <span class="form-error">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    {{-- SKU --}}
+                    <div class="book-form-group">
+                        <label for="sku">
+                            SKU <span class="required">*</span>
+                        </label>
+
+                        <input type="text" id="sku" name="sku" class="input @error('sku') is-invalid @enderror"
+                            value="{{ old('sku', $book->sku) }}" placeholder="Kode unik koleksi" required>
+
+                        @error('sku')
                             <span class="form-error">{{ $message }}</span>
                         @enderror
                     </div>
@@ -397,24 +412,45 @@
                 }
 
                 const subcategoryData = @json($subcategoryData ?? []);
+
                 const categorySelect = document.getElementById('category_id');
                 const subcategorySelect = document.getElementById('subcategory_id');
 
-                if (categorySelect && subcategorySelect) {
-                    categorySelect.addEventListener('change', function() {
-                        const catId = this.value;
-                        subcategorySelect.innerHTML = '<option value="">-- Pilih Subkategori --</option>';
+                const selectedCategory = @json(old('category_id', $book->category_id));
+                const selectedSubcategory = @json(old('subcategory_id', $book->subcategory_id));
 
-                        if (catId && subcategoryData[catId] && subcategoryData[catId].length > 0) {
-                            subcategorySelect.disabled = false;
-                            subcategoryData[catId].forEach(function(sub) {
-                                const opt = document.createElement('option');
-                                opt.value = sub.id;
-                                opt.textContent = sub.name;
-                                subcategorySelect.appendChild(opt);
-                            });
+                function populateSubcategories(categoryId, selectedSubcategoryId = '') {
+                    subcategorySelect.innerHTML =
+                        '<option value="">-- Pilih Subkategori --</option>';
+
+                    const items = subcategoryData[categoryId] || [];
+
+                    items.forEach(function(sub) {
+                        const option = document.createElement('option');
+
+                        option.value = sub.id;
+                        option.textContent = sub.name;
+
+                        if (String(sub.id) === String(selectedSubcategoryId)) {
+                            option.selected = true;
                         }
+
+                        subcategorySelect.appendChild(option);
                     });
+                }
+
+                if (categorySelect && subcategorySelect) {
+
+                    // Jika kategori diganti
+                    categorySelect.addEventListener('change', function() {
+                        populateSubcategories(this.value);
+                    });
+
+                    // Saat halaman Edit pertama kali dibuka
+                    populateSubcategories(
+                        selectedCategory,
+                        selectedSubcategory
+                    );
                 }
             });
         </script>

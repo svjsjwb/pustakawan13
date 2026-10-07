@@ -47,7 +47,7 @@ class BookController extends Controller
 
     public function create()
     {
-        $categoryOrder = ['Pendidikan', 'Anak', 'Remaja', 'Dewasa'];
+        $categoryOrder = ['Buku Pendidikan', 'Anak', 'Remaja', 'Dewasa'];
 
         $categories = Category::with('subcategories')
             ->whereIn('name', $categoryOrder)
@@ -166,7 +166,7 @@ class BookController extends Controller
 
         $mainCategory = $category->name;
         $subCategoryName = $subcategory?->name;
-        $educationLevel = $mainCategory === 'Pendidikan' ? $subCategoryName : null;
+        $educationLevel = $mainCategory === 'Buku Pendidikan' ? $subCategoryName : null;
 
         $coverPath = null;
         if ($request->hasFile('cover')) {
@@ -280,7 +280,7 @@ class BookController extends Controller
 
     public function edit(Book $book)
     {
-        $categoryOrder = ['Pendidikan', 'Anak', 'Remaja', 'Dewasa'];
+        $categoryOrder = ['Buku Pendidikan', 'Anak', 'Remaja', 'Dewasa'];
 
         $categories = Category::with('subcategories')
             ->whereIn('name', $categoryOrder)
@@ -391,7 +391,7 @@ class BookController extends Controller
 
         $mainCategory = $category->name;
         $subCategoryName = $subcategory?->name;
-        $educationLevel = $mainCategory === 'Pendidikan' ? $subCategoryName : null;
+        $educationLevel = $mainCategory === 'Buku Pendidikan' ? $subCategoryName : null;
 
         $coverPath = null;
         if ($request->hasFile('cover')) {

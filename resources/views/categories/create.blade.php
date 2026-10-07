@@ -22,8 +22,8 @@
 
             <select id="category_level_1">
                 <option value="">Pilih Kategori</option>
-                <option value="Pendidikan">Pendidikan</option>
-                <option value="Anak-anak">Anak-anak</option>
+                <option value="Buku Pendidikan">Buku Pendidikan</option>
+                <option value="Anak">Anak</option>
                 <option value="Remaja">Remaja</option>
                 <option value="Dewasa">Dewasa</option>
             </select>
