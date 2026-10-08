@@ -11,7 +11,7 @@ class SubcategorySeeder extends Seeder
     public function run(): void
     {
         $data = [
-            'Buku Pendidikan' => ['SD', 'SMP', 'SMA'],
+            'Buku Pendidikan' => ['TK', 'SD', 'SMP', 'SMA'],
             'Anak' => ['Fiksi', 'Non Fiksi'],
             'Remaja' => ['Fiksi', 'Non Fiksi'],
             'Dewasa' => ['Fiksi', 'Non Fiksi'],

@@ -56,7 +56,15 @@ class Category extends Model
         return $this->hasMany(
             Subcategory::class,
             'category_id'
-        );
+        )->orderByRaw("
+        CASE name
+            WHEN 'TK' THEN 1
+            WHEN 'SD' THEN 2
+            WHEN 'SMP' THEN 3
+            WHEN 'SMA' THEN 4
+            ELSE 999
+        END
+    ");
     }
 
 

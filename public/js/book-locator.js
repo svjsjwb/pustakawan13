@@ -111,11 +111,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const categories = {
 
             "Buku Pendidikan": {
-
+                "TK": [],
                 "SD": [],
-
                 "SMP": [],
-
                 "SMA": []
             },
 

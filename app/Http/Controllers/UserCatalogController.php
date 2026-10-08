@@ -14,6 +14,7 @@ class UserCatalogController extends Controller
 {
     private array $catalogHierarchy = [
         'Buku Pendidikan' => [
+            'TK'  => 'TK',
             'SD'  => 'SD',
             'SMP' => 'SMP',
             'SMA' => 'SMA',
