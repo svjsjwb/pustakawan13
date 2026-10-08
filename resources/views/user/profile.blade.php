@@ -8,6 +8,10 @@
 
 @section('content')
 
+@php
+    $memberStatusLabel = $user->isMember() ? 'Aktif' : 'Nonaktif';
+@endphp
+
 <div class="uprof-container">
 
     {{-- Tabs Header Bar --}}
@@ -52,7 +56,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
                         </svg>
-                        Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
+                        Anggota {{ $memberStatusLabel }} · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                     </div>
                     <div class="uprof-quick-stats">
                         <div class="uprof-qstat">
@@ -96,26 +100,67 @@
                         <div style="font-size: 11.5px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin: 18px 0 10px;">
                             Status Anggota Perpustakaan
                         </div>
-                        <div class="uprof-info-grid">
-                            <div class="uprof-info-box">
-                                <span>NOMOR ANGGOTA</span>
-                                <strong>#{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}</strong>
+                        @php
+                            $profileDivisions = [
+                                'Center Of Excellence',
+                                'Digital Business',
+                                'E-Publishing',
+                                'Finance',
+                                'General Trading',
+                                'HR & GA',
+                                'HSE',
+                                'IQA',
+                                'IT',
+                                'Marketing',
+                                'MTIS Perpuskita dan Tisera',
+                                'MTIS Planning and Development',
+                                'People Development Center',
+                                'Production',
+                                'School Book Sales',
+                                'School Book Publishing',
+                                'SCM',
+                                'TAX',
+                            ];
+                            $selectedDivision = old('division', $member->division);
+                            $selectedDivisionIsListed = in_array($selectedDivision, $profileDivisions, true);
+                        @endphp
+                        <div class="uprof-member-fields-grid">
+                            <div class="uprof-member-field">
+                                <label>NOMOR ANGGOTA</label>
+                                <div class="uprof-member-value"><strong>#{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}</strong></div>
                             </div>
-                            <div class="uprof-info-box">
-                                <span>STATUS KEANGGOTAAN</span>
-                                <strong style="color: var(--primary);">✓ {{ ucfirst($member->status) }}</strong>
+                            <div class="uprof-member-field">
+                                <label>STATUS KEANGGOTAAN</label>
+                                <div class="uprof-member-value"><strong style="color: var(--primary);">✓ {{ $memberStatusLabel }}</strong></div>
                             </div>
-                            <div class="uprof-info-box">
-                                <span>NOMOR TELEPON</span>
-                                <strong>{{ $member->phone ?? '-' }}</strong>
+                            <div class="uprof-member-field">
+                                <label for="profilePhone">NOMOR TELEPON</label>
+                                <div class="uprof-member-value uprof-member-control-value">
+                                    <input class="uprof-member-control" id="profilePhone" type="tel" name="phone" value="{{ old('phone', $member->phone) }}" placeholder="Masukkan nomor telepon" autocomplete="tel" inputmode="tel" pattern="[+]?[0-9][0-9(). -]{6,18}[0-9]" minlength="8" maxlength="20" required>
+                                </div>
+                                @error('phone')<small class="uprof-field-error">{{ $message }}</small>@enderror
                             </div>
-                            <div class="uprof-info-box">
-                                <span>TERDAFTAR SEJAK</span>
-                                <strong>{{ $stats['joinDate'] ?? '-' }}</strong>
+                            <div class="uprof-member-field">
+                                <label>TERDAFTAR SEJAK</label>
+                                <div class="uprof-member-value"><strong>{{ $stats['joinDate'] ?? '-' }}</strong></div>
                             </div>
-                            <div class="uprof-info-box" style="grid-column: 1 / -1;">
-                                <span>ALAMAT DOMISILI</span>
-                                <strong>{{ $member->address ?? '-' }}</strong>
+                            <div class="uprof-member-field uprof-member-field-full">
+                                <label for="profileDivisionTrigger">DIVISI</label>
+                                <div class="uprof-member-value uprof-member-control-value">
+                                    <div class="uprof-profile-select-wrap" id="profileDivisionWrap">
+                                        <input type="hidden" id="profileDivision" name="division" value="{{ $selectedDivisionIsListed ? $selectedDivision : '' }}">
+                                        <button type="button" class="uprof-member-control uprof-profile-select-trigger" id="profileDivisionTrigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="profileDivisionOptions" aria-labelledby="profileDivisionLabel">
+                                            <span id="profileDivisionLabel">{{ $selectedDivision ?: 'Pilih divisi' }}</span>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                                        </button>
+                                        <div class="uprof-profile-select-menu" id="profileDivisionOptions" role="listbox" aria-labelledby="profileDivisionLabel">
+                                            @foreach($profileDivisions as $division)
+                                                <button type="button" class="uprof-profile-select-option {{ $selectedDivision === $division ? 'is-selected' : '' }}" role="option" aria-selected="{{ $selectedDivision === $division ? 'true' : 'false' }}" data-value="{{ $division }}">{{ $division }}</button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="uprof-field-error" id="profileDivisionError" @if(!$errors->has('division')) hidden @endif>@error('division'){{ $message }}@enderror</small>
                             </div>
                         </div>
                         @else
@@ -155,7 +200,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
                         </svg>
-                        Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
+                        Anggota {{ $memberStatusLabel }} · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                     </div>
                     @endif
                 </div>
@@ -234,7 +279,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
                             </svg>
-                            Anggota Aktif · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
+                            Anggota {{ $memberStatusLabel }} · #{{ str_pad($member->id, 5, '0', STR_PAD_LEFT) }}
                         </div>
                         <div class="uprof-quick-stats">
                             <div class="uprof-qstat">
@@ -822,6 +867,75 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sync active density from input
     const initialDensity = document.getElementById('inputDensity')?.value || localStorage.getItem('lib_density') || 'normal';
     selectDensity(initialDensity);
+
+    const divisionWrap = document.getElementById('profileDivisionWrap');
+    const divisionTrigger = document.getElementById('profileDivisionTrigger');
+    const divisionInput = document.getElementById('profileDivision');
+    const divisionLabel = document.getElementById('profileDivisionLabel');
+    const divisionError = document.getElementById('profileDivisionError');
+    const divisionOptions = Array.from(document.querySelectorAll('.uprof-profile-select-option'));
+
+    function closeDivisionMenu(returnFocus = false) {
+        divisionWrap?.classList.remove('is-open');
+        divisionTrigger?.setAttribute('aria-expanded', 'false');
+        if (returnFocus) divisionTrigger?.focus();
+    }
+
+    function openDivisionMenu() {
+        if (!divisionWrap || !divisionTrigger) return;
+        divisionWrap.classList.add('is-open');
+        divisionTrigger.setAttribute('aria-expanded', 'true');
+        const selectedOption = divisionOptions.find(option => option.dataset.value === divisionInput.value);
+        (selectedOption || divisionOptions[0])?.focus();
+    }
+
+    divisionTrigger?.addEventListener('click', () => {
+        if (divisionWrap.classList.contains('is-open')) closeDivisionMenu();
+        else openDivisionMenu();
+    });
+
+    divisionOptions.forEach((option, index) => {
+        option.addEventListener('click', () => {
+            divisionInput.value = option.dataset.value;
+            divisionLabel.textContent = option.dataset.value;
+            divisionOptions.forEach(item => {
+                const selected = item === option;
+                item.classList.toggle('is-selected', selected);
+                item.setAttribute('aria-selected', String(selected));
+            });
+            if (divisionError) {
+                divisionError.hidden = true;
+                divisionError.textContent = '';
+            }
+            closeDivisionMenu(true);
+        });
+
+        option.addEventListener('keydown', event => {
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                const direction = event.key === 'ArrowDown' ? 1 : -1;
+                divisionOptions[(index + direction + divisionOptions.length) % divisionOptions.length]?.focus();
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                closeDivisionMenu(true);
+            }
+        });
+    });
+
+    document.addEventListener('click', event => {
+        if (divisionWrap && !divisionWrap.contains(event.target)) closeDivisionMenu();
+    });
+
+    document.querySelector('#paneInfo form')?.addEventListener('submit', event => {
+        if (divisionInput && !divisionInput.value) {
+            event.preventDefault();
+            if (divisionError) {
+                divisionError.textContent = 'Pilih divisi dari daftar.';
+                divisionError.hidden = false;
+            }
+            openDivisionMenu();
+        }
+    });
 });
 </script>
 <style>

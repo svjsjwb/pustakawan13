@@ -22,30 +22,35 @@
 .ext-picker-overlay.open { display: flex; }
 
 .ext-picker-card {
-    width: min(480px, 100%);
-    max-height: min(620px, calc(100vh - 32px));
+    display: flex;
+    flex-direction: column;
+    width: min(440px, 100%);
+    max-height: min(560px, calc(100dvh - 32px));
     overflow: hidden;
-    border: 1px solid #dce8e6;
-    border-radius: 18px;
+    border: 1px solid #e0eeec;
+    border-radius: 20px;
     background: #fff;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 22px 56px rgba(18, 67, 70, 0.18);
     animation: extSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .ext-picker-header {
-    padding: 20px 22px;
-    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+    min-height: 76px;
+    padding: 14px 18px;
+    background: linear-gradient(110deg, #0D7F82 0%, #18A39C 100%);
     color: #fff;
 }
 
-.ext-picker-header h3 { margin: 0 0 4px; font-size: 16px; font-weight: 800; }
-.ext-picker-header p { margin: 0; color: rgba(255,255,255,.82); font-size: 12px; }
+.ext-picker-header h3 { margin: 0 0 4px; font-size: 18px; line-height: 1.25; font-weight: 750; }
+.ext-picker-header p { margin: 0; color: rgba(255,255,255,.82); font-size: 13px; }
 
 .ext-picker-list {
     display: grid;
-    gap: 8px;
-    max-height: 430px;
-    padding: 14px;
+    flex: 1 1 auto;
+    gap: 10px;
+    min-height: 0;
+    max-height: min(360px, calc(100dvh - 220px));
+    padding: 12px 10px;
     overflow-y: auto;
 }
 
@@ -53,47 +58,103 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 10px;
     width: 100%;
-    padding: 13px 14px;
-    border: 1px solid #dce8e6;
-    border-radius: 12px;
+    min-height: 68px;
+    padding: 9px 14px;
+    border: 2px solid #C7E3E0;
+    border-radius: 16px;
     background: #fff;
-    color: #173c3b;
+    color: #1B4347;
     text-align: left;
-    cursor: pointer;
-    transition: border-color .18s ease, background .18s ease, transform .18s ease;
+    cursor: default;
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
 }
 
-.ext-picker-book:hover:not(:disabled) {
+.ext-picker-book:hover {
     transform: translateY(-1px);
-    border-color: #85c5bd;
-    background: #f2faf8;
+    border-color: #18A39C;
+    box-shadow: 0 4px 14px rgba(24, 163, 156, 0.1);
 }
 
-.ext-picker-book:disabled { background: #f5f7f7; color: #778684; cursor: not-allowed; }
-.ext-picker-book-title { display: block; font-size: 13px; font-weight: 750; }
-.ext-picker-book-meta { display: block; margin-top: 3px; color: #7a8c8a; font-size: 11px; }
-.ext-picker-book-status { flex-shrink: 0; color: #b86200; font-size: 11px; font-weight: 700; }
+.ext-picker-book > span { min-width: 0; }
+.ext-picker-book-title {
+    display: block;
+    font-size: 15px;
+    line-height: 1.3;
+    font-weight: 650;
+}
+.ext-picker-book-meta { display: block; margin-top: 3px; color: #829795; font-size: 12px; line-height: 1.3; overflow-wrap: anywhere; }
+.ext-picker-book-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: #EEF7F6;
+    color: #148A84;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.ext-picker-book-action {
+    border: 0;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform .22s ease, box-shadow .22s ease, background-color .22s ease, color .22s ease;
+}
+.ext-picker-book-action:hover {
+    transform: translateY(-1px);
+    background: #0D7F82;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(13, 127, 130, 0.22);
+}
+.ext-picker-book-action:focus-visible { outline: 3px solid rgba(24, 163, 156, 0.3); outline-offset: 2px; }
+.ext-picker-book-arrow {
+    display: inline-block;
+    margin-left: 3px;
+    transition: transform .22s ease;
+}
+.ext-picker-book-action:hover .ext-picker-book-arrow { transform: translateX(3px); }
+.ext-picker-book-status.is-pending { background: #edf1f0; color: #778684; }
 
 .ext-picker-footer {
     display: flex;
     justify-content: flex-end;
-    padding: 12px 14px 14px;
+    padding: 10px 12px 12px;
     border-top: 1px solid #e6efee;
 }
 
 .ext-picker-cancel {
-    min-height: 38px;
-    padding: 0 16px;
-    border: 1px solid #dce8e6;
-    border-radius: 10px;
-    background: #f7faf9;
-    color: #536d6b;
-    font: inherit;
-    font-size: 12px;
+    padding: 11px 22px;
+    border: 1.5px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    background: var(--background, #f8fafc);
+    color: var(--text-muted, #64748b);
+    font-family: inherit;
+    font-size: 13.5px;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.ext-picker-cancel:hover {
+    background: var(--border, #e2e8f0);
+    color: var(--text, #0f172a);
+}
+
+@media (max-width: 480px) {
+    .ext-picker-overlay { padding: 12px; }
+    .ext-picker-card { max-height: calc(100dvh - 24px); }
+    .ext-picker-header { padding: 13px 15px; }
+    .ext-picker-header h3 { font-size: 17px; }
+    .ext-picker-list { padding: 10px 9px; }
+    .ext-picker-book { gap: 8px; padding: 9px 10px; }
+    .ext-picker-book-title { font-size: 14px; }
+    .ext-picker-book-meta { font-size: 11px; }
+    .ext-picker-book-status { min-height: 30px; padding: 0 9px; font-size: 11px; }
 }
 
 .ext-modal-overlay {
@@ -489,6 +550,10 @@
     border-color: transparent !important;
 }
 
+.flatpickr-day:not(.flatpickr-disabled) {
+    transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+
 .flatpickr-months .flatpickr-month {
     position: relative !important;
     height: 52px !important;
@@ -719,6 +784,8 @@
     color: #cbd5e1 !important;
     background: transparent !important;
     text-decoration: line-through;
+    cursor: not-allowed !important;
+    opacity: .58;
 }
 </style>
 @endpush
@@ -734,7 +801,6 @@
 <section class="loans-hero">
     <div class="loans-hero-pattern"></div>
     <div class="loans-hero-copy">
-        <div class="loans-kicker"><span>📚</span> PEMINJAMAN BUKU</div>
         <h1>Daftar Peminjaman Buku</h1>
         <p>Kelola buku yang sedang Anda pinjam, pantau batas waktu pengembalian, dan perpanjang masa peminjaman dengan mudah.</p>
         <div class="loans-hero-stats">
@@ -983,26 +1049,26 @@
                         $pickerBookTitle = $detail->book?->title ?? 'Judul Tidak Diketahui';
                         $pickerPending = $borrowing->extension_status === 'menunggu';
                     @endphp
-                    <button type="button"
-                            class="ext-picker-book js-extension-picker-button"
-                            data-extension-url="{{ route('user.loans.extend', $borrowing->id) }}"
-                            data-book-title="{{ $pickerBookTitle }}"
-                            data-due-date="{{ $borrowing->due_at?->format('Y-m-d') }}"
-                            data-due-formatted="{{ $borrowing->due_at?->format('d M Y') }}"
-                            data-borrowed-formatted="{{ $borrowing->borrowed_at?->format('d M Y') }}"
-                            data-borrowed-date="{{ $borrowing->borrowed_at?->format('Y-m-d') }}"
-                            {{ $pickerPending ? 'disabled' : '' }}
-                            >
+                    <div class="ext-picker-book">
                         <span>
                             <span class="ext-picker-book-title">{{ $pickerBookTitle }}</span>
                             <span class="ext-picker-book-meta">Dipinjam {{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }} · Jatuh tempo {{ $borrowing->due_at?->format('d M Y') ?? '-' }}</span>
                         </span>
                         @if($pickerPending)
-                            <span class="ext-picker-book-status">Menunggu persetujuan</span>
+                            <span class="ext-picker-book-status is-pending">Menunggu persetujuan</span>
                         @else
-                            <span class="ext-picker-book-status" style="color:#0f766e">Pilih</span>
+                            <button type="button"
+                                    class="ext-picker-book-status ext-picker-book-action js-extension-picker-button"
+                                    data-extension-url="{{ route('user.loans.extend', $borrowing->id) }}"
+                                    data-book-title="{{ $pickerBookTitle }}"
+                                    data-due-date="{{ $borrowing->due_at?->format('Y-m-d') }}"
+                                    data-due-formatted="{{ $borrowing->due_at?->format('d M Y') }}"
+                                    data-borrowed-formatted="{{ $borrowing->borrowed_at?->format('d M Y') }}"
+                                    data-borrowed-date="{{ $borrowing->borrowed_at?->format('Y-m-d') }}">
+                                <span>Pilih Buku</span><span class="ext-picker-book-arrow" aria-hidden="true">→</span>
+                            </button>
                         @endif
-                    </button>
+                    </div>
                 @endforeach
             @empty
                 <p style="margin:8px;color:#718080;font-size:13px">Tidak ada buku yang sedang dipinjam.</p>
@@ -1175,19 +1241,13 @@ function updateExtensionMonthDropdown(instance) {
     const controls = instance.extensionCalendarControls;
     if (!controls) return;
 
-    const borrowedAt = new Date(EXT_BORROWED_AT_ISO + 'T00:00:00');
     controls.monthTrigger.textContent = instance.l10n.months.longhand[instance.currentMonth];
     controls.yearLabel.textContent = String(instance.currentYear);
-    controls.previousYearButton.disabled = instance.currentYear <= borrowedAt.getFullYear();
+    controls.previousYearButton.disabled = false;
+    instance.prevMonthNav?.classList.remove('flatpickr-disabled');
     controls.monthMenu.replaceChildren();
 
-    const borrowedMonth = borrowedAt.getMonth();
-    const firstMonth = instance.currentYear > borrowedAt.getFullYear()
-        ? 0
-        : borrowedMonth === 0 ? 0 : Math.min(borrowedMonth + 1, 11);
-
     instance.l10n.months.longhand.forEach((month, index) => {
-        if (index < firstMonth) return;
         controls.monthMenu.appendChild(createExtensionCalendarOption(
             month,
             index === instance.currentMonth,
@@ -1285,9 +1345,8 @@ function addExtensionCalendarDropdowns(instance) {
     const monthControl = createExtensionCalendarControl(instance, 'month', 'Bulan');
     if (!monthControl) return;
 
-    const borrowedAt = new Date(EXT_BORROWED_AT_ISO + 'T00:00:00');
-    const borrowedMonth = borrowedAt.getMonth();
-    const firstMonth = borrowedMonth === 0 ? 0 : Math.min(borrowedMonth + 1, 11);
+    const [dueYear, dueMonth, dueDay] = EXT_CURRENT_DUE_ISO.split('-').map(Number);
+    const currentDue = new Date(dueYear, dueMonth - 1, dueDay);
     const yearControl = document.createElement('div');
     yearControl.className = 'ext-calendar-year-control';
     const previousYearButton = document.createElement('button');
@@ -1312,11 +1371,7 @@ function addExtensionCalendarDropdowns(instance) {
     };
     previousYearButton.addEventListener('click', function(event) {
         event.stopPropagation();
-        if (instance.currentYear <= borrowedAt.getFullYear()) return;
         instance.changeYear(instance.currentYear - 1);
-        if (instance.currentYear === borrowedAt.getFullYear() && instance.currentMonth < firstMonth) {
-            instance.changeMonth(firstMonth, false);
-        }
     });
     nextYearButton.addEventListener('click', function(event) {
         event.stopPropagation();
@@ -1328,10 +1383,7 @@ function addExtensionCalendarDropdowns(instance) {
         }
     });
 
-    if (instance.currentYear < borrowedAt.getFullYear()
-        || (instance.currentYear === borrowedAt.getFullYear() && instance.currentMonth < firstMonth)) {
-        instance.jumpToDate(new Date(borrowedAt.getFullYear(), firstMonth, 1));
-    }
+    instance.jumpToDate(currentDue);
     updateExtensionMonthDropdown(instance);
 }
 

@@ -1,6 +1,7 @@
 @extends('layouts.user')
 
 @section('title', 'Beranda')
+@section('content_class', 'user-home-content')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/user-home.css') }}">
@@ -257,8 +258,8 @@
 
                 @if($latestRequest && !empty($latestRequest['link']))
                     <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #f2f6f6;">
-                        <a href="{{ $latestRequest['link'] }}" style="font-size: 11.5px; font-weight: 600; color: #287879; text-decoration: none;">
-                            Lihat Detail Permintaan →
+                        <a href="{{ $latestRequest['link'] }}" class="user-request-detail-link">
+                            Lihat Detail Permintaan <span aria-hidden="true">→</span>
                         </a>
                     </div>
                 @endif

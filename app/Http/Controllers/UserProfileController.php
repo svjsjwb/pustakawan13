@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserProfileController extends Controller
 {
@@ -67,13 +68,71 @@ class UserProfileController extends Controller
 
     public function update(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
         $user = Auth::user();
-        $user->name = $request->input('name');
+        $member = $user->member;
+        $divisionOptions = [
+            'Center Of Excellence',
+            'Digital Business',
+            'E-Publishing',
+            'Finance',
+            'General Trading',
+            'HR & GA',
+            'HSE',
+            'IQA',
+            'IT',
+            'Marketing',
+            'MTIS Perpuskita dan Tisera',
+            'MTIS Planning and Development',
+            'People Development Center',
+            'Production',
+            'School Book Sales',
+            'School Book Publishing',
+            'SCM',
+            'TAX',
+        ];
+
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+        ];
+        $messages = [
+            'name.required' => 'Nama pengguna wajib diisi.',
+        ];
+
+        if ($member) {
+            $rules['phone'] = [
+                'required',
+                'string',
+                'min:8',
+                'max:20',
+                'regex:/^\+?[0-9][0-9(). -]{6,18}[0-9]$/',
+            ];
+            $rules['division'] = [
+                'required',
+                'string',
+                'max:100',
+                Rule::in($divisionOptions),
+            ];
+            $messages += [
+                'phone.required' => 'Nomor telepon wajib diisi.',
+                'phone.min' => 'Nomor telepon minimal 8 karakter.',
+                'phone.max' => 'Nomor telepon maksimal 20 karakter.',
+                'phone.regex' => 'Format nomor telepon tidak valid.',
+                'division.required' => 'Divisi wajib dipilih.',
+                'division.in' => 'Divisi yang dipilih tidak valid.',
+            ];
+        }
+
+        $validated = $request->validate($rules, $messages);
+
+        $user->name = $validated['name'];
         $user->save();
+
+        if ($member) {
+            $member->update([
+                'phone' => $validated['phone'],
+                'division' => $validated['division'],
+            ]);
+        }
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }

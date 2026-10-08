@@ -152,6 +152,26 @@
                         <span class="pd-item-check"><span class="check-text">✓</span></span>
                         <span class="pd-category-count">{{ $groupTotal }}</span>
                     </button>
+                    @if ($groupName === 'Buku Pendidikan')
+                        @php
+                            $isTkActive = $isGroupActive && $subCategory === 'TK';
+                            $tkCount = $subCounts[$groupName . '::TK'] ?? 0;
+                        @endphp
+                        <button type="button"
+                                class="pd-item pd-category-option pd-subcat-btn {{ $isTkActive ? 'is-selected active-subcat' : '' }}"
+                                data-main="{{ $groupName }}"
+                                data-sub="TK"
+                                onclick="selectSubcategory('{{ $groupName }}', 'TK', event)">
+                            <span class="pd-item-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 6h16M4 12h16M4 18h10"></path>
+                                </svg>
+                            </span>
+                            <span class="pd-item-label">TK</span>
+                            <span class="pd-item-check"><span class="check-text">✓</span></span>
+                            <span class="pd-category-count">{{ $tkCount }}</span>
+                        </button>
+                    @endif
                     @foreach($subcategories as $subKey => $subLabel)
                         @php
                             $isItemActive = ($isGroupActive && $subCategory === $subKey);
@@ -1153,12 +1173,17 @@ document.getElementById('modalBorrowForm')?.addEventListener('submit', async fun
 });
 
 document.addEventListener('DOMContentLoaded', function() {
+    const url = new URL(window.location.href);
     const requestedBookId = new URLSearchParams(window.location.search).get('open_book');
     if (!requestedBookId) return;
 
     const matchingCard = Array.from(document.querySelectorAll('.saas-book-card'))
         .find(card => card.dataset.id === requestedBookId);
-    if (matchingCard) openCatalogModal(matchingCard);
+    if (matchingCard) {
+        openCatalogModal(matchingCard);
+        url.searchParams.delete('open_book');
+        window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+    }
 });
 </script>
 @endpush
