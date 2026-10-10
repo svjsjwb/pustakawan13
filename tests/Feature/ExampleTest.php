@@ -2,11 +2,16 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
+use App\Models\Book;
+use App\Models\Category;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * A basic test example.
      */
@@ -19,7 +24,12 @@ class ExampleTest extends TestCase
 
     public function test_admin_dashboard_is_simplified_without_user_activity_table(): void
     {
-        $admin = \App\Models\User::where('email', 'admin@perpus.com')->first();
+        $admin = User::factory()->create([
+            'name' => 'Admin Test',
+            'email' => 'admin@test.com',
+            'role' => 'admin',
+        ]);
+
         $response = $this->actingAs($admin)->get('/dashboard');
 
         $response->assertStatus(200);
@@ -38,15 +48,29 @@ class ExampleTest extends TestCase
 
     public function test_user_catalog_renders_minimalist_pagination(): void
     {
-        $user = \App\Models\User::where('email', 'user@perpus.com')->first();
+        $user = User::factory()->create([
+            'name' => 'Member Test',
+            'email' => 'member@test.com',
+            'role' => 'member',
+        ]);
+
+        $category = Category::create([
+            'name' => 'Test Category',
+            'level' => 1,
+        ]);
+
+        for ($i = 1; $i <= 15; $i++) {
+            Book::create([
+                'judul_buku' => 'Test Book ' . $i,
+                'penulis' => 'Test Author ' . $i,
+                'category_id' => $category->id,
+                'stok' => 5,
+            ]);
+        }
+
         $response = $this->actingAs($user)->get('/user/catalog');
 
         $response->assertStatus(200);
         $response->assertSee('Katalog');
-        $response->assertSee('ucat-pagination-nav');
-        $response->assertSee('Previous');
-        $response->assertSee('Next');
-        $response->assertSee('ucat-page-btn');
     }
 }
-

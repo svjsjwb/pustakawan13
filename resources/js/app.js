@@ -66,17 +66,9 @@ let reservations = [
  {id:3,memberId:4,bookId:7,date:daysFromNow(-6),status:'siap'},
 ];
 
-let events = [
- {id:1,date:daysFromNow(2),title:'Bedah Buku: Laut Bercerita',type:'Diskusi'},
- {id:2,date:daysFromNow(5),title:'Pelatihan Literasi Digital',type:'Workshop'},
- {id:3,date:daysFromNow(9),title:'Story Telling Anak',type:'Komunitas'},
- {id:4,date:daysFromNow(14),title:'Kunjungan Sekolah Dasar 02',type:'Kunjungan'},
-];
-
 let nextBookId = 19, nextMemberId = 11, nextLoanId = 13, nextResId = 4;
 let catalogView = 'grid';
 let loanFilter = '';
-let settingsTab = 'general';
 
 /* ============================= HELPERS ============================= */
 function loanStatus(loan){
@@ -106,11 +98,8 @@ const PAGE_META = {
   books:{title:'Manajemen Buku', eyebrow:'Koleksi'},
   circulation:{title:'Peminjaman', eyebrow:'Sirkulasi'},
   reservations:{title:'Reservasi', eyebrow:'Sirkulasi'},
-  fines:{title:'Denda & Pembayaran', eyebrow:'Sirkulasi'},
   members:{title:'Anggota', eyebrow:'Komunitas'},
-  calendar:{title:'Kegiatan Perpustakaan', eyebrow:'Komunitas'},
   reports:{title:'Laporan & Statistik', eyebrow:'Analitik'},
-  settings:{title:'Pengaturan', eyebrow:'Sistem'},
 };
 
 function nav(page){
@@ -147,11 +136,8 @@ function renderAll(){
   populateLoanForm();
   renderLoans();
   renderReservations();
-  renderFines();
   renderMembers();
-  renderCalendar();
   renderReports();
-  renderSettings();
 }
 
 /* ============================= RENDER: DASHBOARD ============================= */
@@ -505,46 +491,6 @@ function renderReservations(){
   }).join('') || `<tr><td colspan="6">${emptyRow('Belum ada reservasi.')}</td></tr>`;
 }
 
-/* ============================= RENDER: FINES ============================= */
-function renderFines(){
-  const q = (document.getElementById('fines-search').value||'').trim().toLowerCase();
-  const filter = document.getElementById('fines-filter').value;
-  let rows = loans.map(l=>({l, fine: calcFine(l)})).filter(x=>x.fine>0);
-  if(q) rows = rows.filter(x=> memberById(x.l.memberId).name.toLowerCase().startsWith(q));
-  if(filter==='belum') rows = rows.filter(x=>!x.l.finePaid);
-  if(filter==='lunas') rows = rows.filter(x=>x.l.finePaid);
-
-  const totalUnpaid = loans.reduce((s,l)=> s + (!l.finePaid ? calcFine(l):0), 0);
-  const totalPaid = loans.reduce((s,l)=> s + (l.finePaid ? calcFine(l):0), 0);
-  const countUnpaid = loans.filter(l=>!l.finePaid && calcFine(l)>0).length;
-  document.getElementById('fines-stats').innerHTML = [
-    {label:'Denda Belum Dibayar', num:rupiah(totalUnpaid), color:'var(--danger)', bg:'var(--danger-soft)'},
-    {label:'Denda Terkumpul', num:rupiah(totalPaid), color:'var(--success)', bg:'var(--success-soft)'},
-    {label:'Anggota Menunggak', num:countUnpaid, color:'#8f6524', bg:'var(--brass-soft)'},
-  ].map(s=>`<div class="card stat-card"><div class="stat-icon" style="background:${s.bg};color:${s.color};"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/></svg></div><div class="stat-num">${s.num}</div><div class="stat-label">${s.label}</div></div>`).join('');
-
-  document.getElementById('fines-table-body').innerHTML = rows.map(({l,fine})=>{
-    const m=memberById(l.memberId), b=bookById(l.bookId);
-    const late = diffDays(l.dueDate, l.returnDate||TODAY);
-    const badge = l.finePaid ? '<span class="status-badge kembali">Lunas</span>' : '<span class="status-badge terlambat">Belum Dibayar</span>';
-    const action = l.finePaid ? '' : `<button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="payFine(${l.id})">Tandai Lunas</button>`;
-    return `<tr>
-      <td><div class="cell-main">${m.name}</div><div class="cell-sub">${m.no}</div></td>
-      <td>${b.title}</td>
-      <td class="mono">${late} hari</td>
-      <td class="mono" style="font-weight:600;">${rupiah(fine)}</td>
-      <td>${badge}</td>
-      <td>${action}</td>
-    </tr>`;
-  }).join('') || `<tr><td colspan="6">${emptyRow('Tidak ada catatan denda.')}</td></tr>`;
-}
-function payFine(loanId){
-  const l = loans.find(x=>x.id===loanId);
-  l.finePaid = true;
-  toast('Pembayaran denda dicatat. Terima kasih!');
-  renderAll();
-}
-
 /* ============================= RENDER: MEMBERS ============================= */
 function renderMembers(){
   const q = document.getElementById('members-search').value.trim().toLowerCase();
@@ -616,34 +562,6 @@ function deleteMember(id){
   renderAll();
 }
 
-/* ============================= RENDER: CALENDAR ============================= */
-function renderCalendar(){
-  const now = new Date();
-  const monthNames=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-  document.getElementById('cal-month-label').textContent = monthNames[now.getMonth()]+' '+now.getFullYear();
-  document.getElementById('cal-dow-row').innerHTML = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
-  const eventDates = new Set(events.map(e=>new Date(e.date).getDate()+'-'+new Date(e.date).getMonth()));
-  let cells='';
-  for(let i=0;i<firstDay;i++) cells += `<div class="cal-day muted">${new Date(now.getFullYear(),now.getMonth(),0).getDate()-firstDay+i+1}</div>`;
-  for(let d=1; d<=daysInMonth; d++){
-    const isToday = d===now.getDate();
-    const hasEvent = eventDates.has(d+'-'+now.getMonth());
-    cells += `<div class="cal-day ${isToday?'today':''} ${hasEvent?'event':''}">${d}</div>`;
-  }
-  document.getElementById('cal-grid').innerHTML = cells;
-
-  document.getElementById('events-list').innerHTML = events.slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).map(e=>{
-    const d = new Date(e.date);
-    const mon = d.toLocaleDateString('id-ID',{month:'short'});
-    return `<div class="event-item">
-      <div class="event-date"><b>${d.getDate()}</b><span>${mon}</span></div>
-      <div><div style="font-size:12.8px;font-weight:600;">${e.title}</div><div class="cell-sub">${e.type}</div></div>
-    </div>`;
-  }).join('') || emptyRow('Belum ada kegiatan terjadwal.');
-}
-
 /* ============================= RENDER: REPORTS ============================= */
 function renderReports(){
   const totalLoansMonth = loans.length;
@@ -673,61 +591,6 @@ function renderReports(){
       <div class="mono" style="font-size:11.5px;color:var(--muted);">${count}x</div>
     </div>`;
   }).join('') || emptyRow('Belum ada data peminjaman.');
-}
-
-/* ============================= RENDER: SETTINGS ============================= */
-function setSettingsTab(tab, el){
-  settingsTab = tab;
-  document.querySelectorAll('#settings-nav button').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  renderSettings();
-}
-function renderSettings(){
-  const body = document.getElementById('settings-body');
-  if(settingsTab==='general'){
-    body.innerHTML = `
-      <h3 style="margin-top:0;font-size:15px;">Informasi Perpustakaan</h3>
-      <div class="field"><label>Nama Perpustakaan</label><input type="text" value="Perpustakaan Umum Lestari Pustaka"></div>
-      <div class="field-row">
-        <div class="field"><label>Kode Institusi</label><input type="text" value="LP-2024-001"></div>
-        <div class="field"><label>Zona Waktu</label><select><option>WIB (UTC+7)</option><option>WITA (UTC+8)</option><option>WIT (UTC+9)</option></select></div>
-      </div>
-      <div class="field"><label>Alamat</label><textarea rows="2">Jl. Pendidikan No. 45, Surakarta, Jawa Tengah</textarea></div>
-      <button class="btn btn-primary" onclick="toast('Pengaturan umum disimpan.')">Simpan Perubahan</button>`;
-  } else if(settingsTab==='policy'){
-    body.innerHTML = `
-      <h3 style="margin-top:0;font-size:15px;">Kebijakan Peminjaman</h3>
-      <div class="field-row">
-        <div class="field"><label>Maks. Buku Dipinjam / Anggota</label><input type="number" value="3"></div>
-        <div class="field"><label>Durasi Peminjaman (hari)</label><input type="number" value="14"></div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Denda per Hari Terlambat</label><input type="text" value="Rp2.000"></div>
-        <div class="field"><label>Maks. Perpanjangan</label><input type="number" value="2"></div>
-      </div>
-      <div class="set-row"><div><div class="t">Blokir peminjaman jika ada denda tertunggak</div><div class="d">Anggota tidak dapat meminjam sebelum melunasi denda.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-      <div class="set-row"><div><div class="t">Izinkan reservasi otomatis</div><div class="d">Anggota bisa mengantre buku yang sedang dipinjam.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-      <button class="btn btn-primary" style="margin-top:14px;" onclick="toast('Kebijakan peminjaman disimpan.')">Simpan Perubahan</button>`;
-  } else if(settingsTab==='notif'){
-    body.innerHTML = `
-      <h3 style="margin-top:0;font-size:15px;">Preferensi Notifikasi</h3>
-      <div class="set-row"><div><div class="t">Pengingat jatuh tempo (H-2)</div><div class="d">Kirim email ke anggota sebelum tanggal jatuh tempo.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-      <div class="set-row"><div><div class="t">Notifikasi keterlambatan</div><div class="d">Kirim pemberitahuan otomatis saat buku terlambat.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-      <div class="set-row"><div><div class="t">Notifikasi buku tersedia (reservasi)</div><div class="d">Beri tahu anggota saat buku yang diantre tersedia.</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-      <div class="set-row"><div><div class="t">Ringkasan mingguan untuk pustakawan</div><div class="d">Laporan aktivitas dikirim tiap Senin pagi.</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>`;
-  } else {
-    body.innerHTML = `
-      <h3 style="margin-top:0;font-size:15px;">Pengguna &amp; Peran</h3>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Nama</th><th>Peran</th><th>Email</th><th>Status</th></tr></thead>
-        <tbody>
-          <tr><td class="cell-main">Ayu Ratnasari</td><td>Administrator</td><td>ayu.r@perpustakaan.id</td><td><span class="status-badge aktif">Aktif</span></td></tr>
-          <tr><td class="cell-main">Budi Santoso</td><td>Pustakawan</td><td>budi.s@perpustakaan.id</td><td><span class="status-badge aktif">Aktif</span></td></tr>
-          <tr><td class="cell-main">Rina Wijaya</td><td>Staf Sirkulasi</td><td>rina.w@perpustakaan.id</td><td><span class="status-badge nonaktif">Nonaktif</span></td></tr>
-        </tbody>
-      </table></div>
-      <button class="btn btn-ghost" style="margin-top:14px;" onclick="toast('Fitur undang pengguna (contoh).')">+ Undang Pengguna</button>`;
-  }
 }
 
 /* ============================= MODALS / TOAST ============================= */
@@ -763,24 +626,12 @@ document.addEventListener('DOMContentLoaded', () => {
         renderReservations();
     }
 
-    if (document.getElementById('fines-table-body')) {
-        renderFines();
-    }
-
     if (document.getElementById('members-table-body')) {
         renderMembers();
     }
 
-    if (document.getElementById('cal-grid')) {
-        renderCalendar();
-    }
-
     if (document.getElementById('report-stats')) {
         renderReports();
-    }
-
-    if (document.getElementById('settings-body')) {
-        renderSettings();
     }
 
 });

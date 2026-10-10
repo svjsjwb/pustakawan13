@@ -17,6 +17,7 @@ class UserReservationAnomalyFixTest extends TestCase
 
     protected User $adminUser;
     protected User $regularUser;
+    protected Member $member;
     protected Category $category;
     protected Book $book;
     protected BookCopy $bookCopy;
@@ -25,23 +26,37 @@ class UserReservationAnomalyFixTest extends TestCase
     {
         parent::setUp();
 
+        // Admin User
         $this->adminUser = User::factory()->create([
-            'role' => 'admin',
-            'name' => 'Admin Perpustakaan',
+            'role'  => 'admin',
+            'name'  => 'Admin Perpustakaan',
             'email' => 'admin@pustakawan.test',
         ]);
 
+        // Regular Member User
         $this->regularUser = User::factory()->create([
-            'role' => 'user',
-            'name' => 'Budi Santoso',
+            'role'  => 'member',
+            'name'  => 'Budi Santoso',
             'email' => 'budi@pustakawan.test',
         ]);
 
+        // Member record untuk regular user
+        $this->member = Member::create([
+            'user_id'  => $this->regularUser->id,
+            'name'     => $this->regularUser->name,
+            'email'    => $this->regularUser->email,
+            'phone'    => '08123456789',
+            'division' => 'Anggota',
+            'status'   => 'Aktif',
+        ]);
+
+        // Category
         $this->category = Category::create([
             'name'  => 'Teknologi',
             'level' => 1,
         ]);
 
+        // Book
         $this->book = Book::create([
             'category_id' => $this->category->id,
             'judul_buku'  => 'Belajar Pemrograman Modern',
@@ -49,15 +64,17 @@ class UserReservationAnomalyFixTest extends TestCase
             'stok'        => 3,
         ]);
 
+        // Book Copy
         $this->bookCopy = BookCopy::create([
-            'book_id'     => $this->book->id,
-            'copy_code'   => 'CP-TEST-001',
-            'status'      => 'available',
+            'book_id'   => $this->book->id,
+            'copy_code' => 'CP-TEST-001',
+            'status'    => 'available',
         ]);
     }
 
     /**
-     * Test 1: Regular user reservation records their own user_id and member link.
+     * Test 1:
+     * Regular user reservation records their own user_id and member link.
      */
     public function test_regular_user_reservation_records_own_user_id_and_member(): void
     {
@@ -70,27 +87,30 @@ class UserReservationAnomalyFixTest extends TestCase
 
         $response->assertRedirect(route('user.reservations'));
 
-        // Check reservation is linked to regularUser
+        // Reservation harus terhubung ke regular user
         $this->assertDatabaseHas('reservations', [
-            'user_id' => $this->regularUser->id,
-            'book_id' => $this->book->id,
-            'status'  => 'menunggu',
+            'user_id'   => $this->regularUser->id,
+            'member_id' => $this->member->id,
+            'book_id'   => $this->book->id,
+            'status'    => 'menunggu',
         ]);
 
-        // Check member is linked to regularUser, not admin
+        // Member harus terhubung ke user yang benar
         $this->assertDatabaseHas('members', [
             'user_id' => $this->regularUser->id,
             'name'    => 'Budi Santoso',
             'email'   => 'budi@pustakawan.test',
         ]);
 
+        // Admin tidak boleh otomatis dibuat sebagai member
         $this->assertDatabaseMissing('members', [
             'user_id' => $this->adminUser->id,
         ]);
     }
 
     /**
-     * Test 2: Admin cannot submit user reservation endpoint.
+     * Test 2:
+     * Admin cannot submit user reservation endpoint.
      */
     public function test_admin_cannot_submit_user_reservation(): void
     {
@@ -101,30 +121,33 @@ class UserReservationAnomalyFixTest extends TestCase
             'reserved_at' => now()->toDateString(),
         ]);
 
-        $response->assertStatus(403);
-        $response->assertJson([
-            'success' => false,
-            'message' => 'Hanya pengguna umum (role user) yang dapat membuat reservasi.',
-        ]);
+        $response->assertRedirect('/catalog');
 
-        // No reservation created
+        $response->assertSessionHas(
+            'error',
+            'Akun Anda belum disetujui sebagai member.'
+        );
+
+        // Tidak ada reservation yang dibuat
         $this->assertDatabaseMissing('reservations', [
             'book_id' => $this->book->id,
         ]);
 
-        // No member record created for admin
+        // Admin tidak boleh dibuat sebagai member
         $this->assertDatabaseMissing('members', [
             'user_id' => $this->adminUser->id,
         ]);
     }
 
     /**
-     * Test 3: Admin dashboard correctly displays genuine user name even when member_id is null.
+     * Test 3:
+     * Admin dashboard correctly displays genuine user name
+     * even when member_id is null.
      */
     public function test_admin_dashboard_displays_user_name_when_member_is_null(): void
     {
-        // Create reservation with regular user and null member_id
-        $reservation = Reservation::create([
+        // Reservation dengan user_id valid tetapi member_id null
+        Reservation::create([
             'user_id'     => $this->regularUser->id,
             'member_id'   => null,
             'book_id'     => $this->book->id,
@@ -137,7 +160,8 @@ class UserReservationAnomalyFixTest extends TestCase
         $response = $this->get(route('dashboard'));
 
         $response->assertStatus(200);
-        // Should display the user's genuine name "Budi Santoso"
+
+        // Dashboard harus menampilkan nama asli user
         $response->assertSee('Budi Santoso');
     }
 }

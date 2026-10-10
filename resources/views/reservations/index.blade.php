@@ -756,25 +756,6 @@
                                                 </form>
                                             @endif
 
-
-                                            {{-- =================================
-                 3D LOCATOR tidak dilanjut
-            ================================== --}}
-
-                                            {{-- @if ($reservation->book_copy_id && $reservation->bookCopy?->shelf_id && in_array($reservation->status, ['menunggu', 'disetujui']))
-                                                <a href="{{ route('book-locator.show', $reservation) }}"
-                                                    class="btn btn-primary">
-
-                                                    📍 Temukan Buku
-
-                                                </a>
-                                            @endif --}}
-
-
-                                            {{-- =================================
-                 EMPTY ACTION
-            ================================== --}}
-
                                             @if (
                                                 $reservation->status !== 'menunggu' &&
                                                     !(

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\UserFavorite;
 use App\Models\Book;
 use App\Models\Borrowing;
 use App\Models\Reservation;
@@ -10,15 +11,7 @@ use Illuminate\Support\Collection;
 
 class RecommendationService
 {
-    /**
-     * Entry point utama rekomendasi.
-     *
-     * User yang sudah punya interaksi:
-     * -> personalized recommendation
-     *
-     * User baru / belum punya interaksi:
-     * -> cold start recommendation
-     */
+
     public function getForUser(?User $user, int $limit = 8): Collection
     {
         if (!$user) {
@@ -42,54 +35,30 @@ class RecommendationService
         );
     }
 
-    /**
-     * Mengambil data interaksi user.
-     *
-     * Sumber interaksi:
-     * - buku yang pernah dipinjam
-     * - buku yang pernah direservasi
-     * - buku favorit dari session
-     */
     protected function getUserInteractionData(User $user): array
     {
-        /*
-         * Buku yang pernah dipinjam user.
-         */
         $borrowedBookIds = Borrowing::query()
             ->where('user_id', $user->id)
             ->whereNotNull('book_id')
             ->pluck('book_id');
 
-        /*
-         * Buku yang pernah direservasi user.
-         */
         $reservedBookIds = Reservation::query()
             ->where('user_id', $user->id)
             ->whereNotNull('book_id')
             ->pluck('book_id');
 
-        /*
-         * Favorit saat ini masih menggunakan session
-         * pada branch Pandu.
-         */
-        $favoriteBookIds = collect(
-            session('user_favorites', [])
-        );
+        $favoriteBookIds = UserFavorite::query()
+            ->where('user_id', $user->id)
+            ->pluck('book_id');
 
-        /*
-         * Gabungkan seluruh interaksi.
-         */
         $bookIds = $borrowedBookIds
             ->merge($reservedBookIds)
             ->merge($favoriteBookIds)
             ->filter()
-            ->map(fn ($id) => (int) $id)
+            ->map(fn($id) => (int) $id)
             ->unique()
             ->values();
 
-        /*
-         * User belum mempunyai interaksi.
-         */
         if ($bookIds->isEmpty()) {
             return [
                 'book_ids' => collect(),

@@ -6,7 +6,6 @@ use App\Models\Book;
 use App\Models\Member;
 use App\Models\Borrowing;
 use App\Models\Reservation;
-use App\Models\BookProposal;
 use App\Models\Activity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

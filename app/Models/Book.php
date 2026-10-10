@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use App\Models\Borrowing;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -161,14 +162,5 @@ class Book extends Model
     public function favorites(): HasMany
     {
         return $this->hasMany(UserFavorite::class, 'book_id');
-    }
-
-    public function isFavoritedBy(?User $user): bool
-    {
-        if (!$user) {
-            return false;
-        }
-
-        return $this->favorites()->where('user_id', $user->id)->exists();
     }
 }

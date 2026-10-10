@@ -155,8 +155,4 @@ class User extends Authenticatable
         return $this->hasMany(AppNotification::class);
     }
 
-    public function bookProposals()
-    {
-        return $this->hasMany(BookProposal::class);
-    }
 }

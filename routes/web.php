@@ -1,22 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GoogleAuthController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CirculationController;
 use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\FineController;
 use App\Http\Controllers\MemberController;
-use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\BookCopyController;
 use App\Http\Controllers\UserHomeController;
 use App\Http\Controllers\UserCatalogController;
@@ -31,8 +24,6 @@ use App\Http\Controllers\UserNotificationController;
 use App\Http\Controllers\UserHelpController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ActivityController;
-use App\Http\Controllers\BookLocatorController;
-use App\Http\Controllers\AdminBroadcastController;
 
 // ============================================================
 // LANDING
@@ -110,9 +101,6 @@ Route::middleware('auth')->group(function () {
 // ============================================================
 Route::middleware(['auth', 'admin'])->group(function () {
 
-    // KATEGORI
-    Route::resource('categories', CategoryController::class);
-
     // BUKU
     // Lookup ISBN tetap dipertahankan dari backend admin lama.
     Route::get('/books/isbn-lookup', [
@@ -189,11 +177,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         'destroy'
     ])->name('reservations.destroy');
 
-    Route::get(
-        '/reservations/{reservation}/locator',
-        [ReservationController::class, 'locator']
-    )->name('reservations.locator');
-
     Route::get('/reservations-feed', [ReservationController::class, 'statusFeed'])
         ->name('reservations.statusFeed');
 
@@ -216,10 +199,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/laporan/{id}', [ReportController::class, 'destroy'])
         ->name('reports.destroy');
 
-    // DENDA
-    Route::get('/fines', [FineController::class, 'index'])
-        ->name('fines');
-
     // ANGGOTA
     Route::patch(
         '/members/{member}/approve',
@@ -233,38 +212,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::resource('members', MemberController::class);
 
-    // KALENDER
-    Route::get('/calendar', [CalendarController::class, 'index'])
-        ->name('calendar');
-
-    // PENGATURAN
-    Route::get('/settings', [SettingController::class, 'index'])
-        ->name('settings');
-
     // AKTIVITAS / PENGUMUMAN (dari Pandu — fitur baru)
     Route::prefix('activities')->name('activities.')->group(function () {
         Route::get('/', [ActivityController::class, 'index'])->name('index');
         Route::post('/', [ActivityController::class, 'store'])->name('store');
-        Route::get('/create', [ActivityController::class, 'create'])->name('create');
-        Route::get('/{activity}/edit', [ActivityController::class, 'edit'])->name('edit');
         Route::put('/{activity}', [ActivityController::class, 'update'])->name('update');
         Route::delete('/{activity}', [ActivityController::class, 'destroy'])->name('destroy');
         Route::patch('/{activity}/pin', [ActivityController::class, 'pin'])->name('pin');
         Route::post('/{activity}/read', [ActivityController::class, 'markAsRead'])->name('markAsRead');
-    });
-
-    // BOOK LOCATOR (dari Pandu — fitur baru)
-    Route::get('/book-locator', [BookLocatorController::class, 'index'])->name('book-locator.index');
-    Route::get('/book-locator/{reservation}', [BookLocatorController::class, 'show'])->name('book-locator.show');
-
-    // ============================================================
-    // BROADCAST EMAIL NOTIFICATION (admin only)
-    // ============================================================
-    Route::prefix('admin/broadcast')->name('admin.broadcast.')->group(function () {
-        Route::get('/',         [AdminBroadcastController::class, 'index'])->name('index');
-        Route::get('/preview',  [AdminBroadcastController::class, 'preview'])->name('preview');
-        Route::post('/',        [AdminBroadcastController::class, 'send'])->name('send');
-        Route::get('/history',  [AdminBroadcastController::class, 'history'])->name('history');
     });
 });
 
@@ -378,17 +333,5 @@ Route::prefix('email-preview')->group(function () {
             return (new \App\Mail\BorrowingReturnedMail($dummyBorrowing, $user))->render();
         }
         return (new \App\Mail\BorrowingReturnedMail($borrowing))->render();
-    });
-
-    // Preview AdminBroadcast
-    Route::get('/admin-broadcast', function () {
-        return (new \App\Mail\AdminBroadcastMail(
-            subjectText: 'Pengumuman: Perpustakaan Libur Nasional',
-            messageBody: "Kami ingin memberitahukan bahwa perpustakaan akan tutup pada tanggal 17 Agustus 2026 dalam rangka memperingati Hari Kemerdekaan Republik Indonesia.\n\nSilakan rencanakan kunjungan Anda sebelum atau sesudah tanggal tersebut.",
-            recipientName: 'Budi Santoso',
-            actionUrl: url('/home'),
-            actionLabel: 'Kunjungi Perpustakaan',
-            senderName: 'Admin Perpustakaan Tiga Serangkai',
-        ))->render();
     });
 });
