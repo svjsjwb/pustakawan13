@@ -4,6 +4,39 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/premium-dropdown.css') }}">
+<style>
+.reservation-reset-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color .2s ease;
+}
+.reservation-reset-link::after {
+    position: absolute;
+    right: 0;
+    bottom: -2px;
+    left: 0;
+    height: 1px;
+    background: currentColor;
+    content: "";
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .22s ease;
+}
+.reservation-reset-link span { display: inline-block; transition: transform .22s ease; }
+.reservation-reset-link:hover,
+.reservation-reset-link:focus-visible { color: #b91c1c; }
+.reservation-reset-link:hover::after,
+.reservation-reset-link:focus-visible::after { transform: scaleX(1); }
+.reservation-reset-link:hover span,
+.reservation-reset-link:focus-visible span { transform: rotate(90deg); }
+.reservation-reset-link:focus-visible { outline: 2px solid rgba(220, 38, 38, .24); outline-offset: 3px; border-radius: 3px; }
+</style>
 @endpush
 
 @section('content')
@@ -38,8 +71,17 @@
     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
 
         {{-- CUSTOM STATUS DROPDOWN --}}
+        @php
+            $statusTriggerClass = match(request('status')) {
+                'menunggu' => 'reservation-status-menunggu',
+                'disetujui' => 'reservation-status-disetujui',
+                'siap_diambil' => 'reservation-status-siap',
+                'ditolak' => 'reservation-status-ditolak',
+                default => '',
+            };
+        @endphp
         <div class="pd-select-wrapper" data-filter-key="status" data-form-id="reservationFilterForm">
-            <button type="button" class="pd-trigger {{ request('status') ? 'has-value' : '' }}" aria-haspopup="listbox" aria-expanded="false">
+            <button type="button" class="pd-trigger {{ request('status') ? 'has-value' : '' }} {{ $statusTriggerClass }}" aria-haspopup="listbox" aria-expanded="false">
                 <span class="pd-trigger-icon">
                     @if(request('status') === 'menunggu')
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -111,8 +153,8 @@
         </button>
 
         @if(request('search') || request('status'))
-            <a href="{{ route('user.reservations') }}" style="color: #dc2626; font-size: 13px; font-weight: 700; text-decoration: none;">
-                × Reset Filter
+            <a href="{{ route('user.reservations') }}" class="reservation-reset-link">
+                <span aria-hidden="true">&times;</span> Reset Filter
             </a>
         @endif
     </div>
