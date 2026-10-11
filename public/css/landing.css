@@ -1,139 +1,558 @@
-* {
+/* =========================================================
+   PERPUSTAKAAN TIGA SERANGKAI
+   PREMIUM LANDING PAGE
+   ========================================================= */
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
+
+
+/* =========================================================
+   DOCUMENT
+   ========================================================= */
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #020f10;
+}
+
 
 body {
-    font-family: Arial, sans-serif;
-    background: #fff;
+    font-family:
+        'Poppins',
+        'Inter',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    background: #020f10;
 }
+
+
+/* =========================================================
+   VIEWPORT WRAPPER
+   ========================================================= */
+
+.viewport-wrapper {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+    height: 100vh;
+    height: 100dvh;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   LANDING
+   ========================================================= */
 
 .landing {
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
+
     display: flex;
     flex-direction: column;
+
+    overflow: hidden;
 }
 
-/* HERO */
 
-.landing-image {
+/* =========================================================
+   FOOTER OVERRIDE
+   ========================================================= */
+
+.landing>.site-footer {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto;
+    contain: layout paint;
+}
+
+
+.landing>.site-footer .footer-brand-info,
+.landing>.site-footer .footer-col-body,
+.landing>.site-footer .footer-copyright {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto;
+}
+
+
+/* =========================================================
+   LANDING HERO
+   ========================================================= */
+
+.landing-hero {
     position: relative;
+
     flex: 1;
+    min-height: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   BACKGROUND PHOTO
+   ========================================================= */
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
 
     background-image: url('/images/bg-ts.jpeg');
     background-size: cover;
-    background-position: center;
+    background-position: center 35%;
+    background-repeat: no-repeat;
+
+    transform: scale(1.04);
 }
 
-.overlay {
+
+/* =========================================================
+   DARK CINEMATIC OVERLAY
+   ========================================================= */
+
+.hero-overlay-dark {
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.58);
+
+    background: rgba(3, 20, 22, 0.56);
+
+    z-index: 1;
 }
 
-.landing-content {
-    position: relative;
-    z-index: 2;
 
+/* =========================================================
+   TEAL COLOR GRADE
+   ========================================================= */
+
+.hero-overlay-teal {
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(162deg,
+            rgba(4, 55, 52, 0.62) 0%,
+            rgba(10, 82, 76, 0.22) 38%,
+            rgba(5, 42, 38, 0.55) 100%);
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   TEAL EDGE GLOW
+   ========================================================= */
+
+.hero-glow-edge {
+    position: absolute;
+    inset: 0;
+
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 100%,
+            rgba(20, 184, 166, 0.14) 0%,
+            transparent 65%),
+        radial-gradient(ellipse 35% 80% at 0% 50%,
+            rgba(20, 184, 166, 0.10) 0%,
+            transparent 60%),
+        radial-gradient(ellipse 35% 80% at 100% 50%,
+            rgba(20, 184, 166, 0.08) 0%,
+            transparent 60%);
+
+    z-index: 3;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   CORNER DECORATIONS
+   ========================================================= */
+
+.hero-decor {
+    position: absolute;
+    inset: 0;
+
+    z-index: 4;
+
+    pointer-events: none;
+}
+
+
+.decor-arc {
+    position: absolute;
+
+    width: 220px;
+    height: 220px;
+}
+
+
+.decor-arc--tl {
+    top: -2px;
+    left: -2px;
+}
+
+
+.decor-arc--br {
+    bottom: -2px;
+    right: -2px;
+}
+
+
+/* =========================================================
+   HERO CONTENT
+   ========================================================= */
+
+.hero-content {
+    position: relative;
+
+    z-index: 10;
 
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-
-    gap: 65px;
-}
-
-.landing-logo {
-    width: 220px;
-    height: auto;
-}
-
-.login-button {
-    width: 230px;
-    padding: 10px 20px;
-
-    background: #286f70;
-    color: white;
 
     text-align: center;
-    text-decoration: none;
 
-    font-size: 15spx;
-    font-weight: bold;
+    padding: 36px 24px 24px;
 
-    border-radius: 6px;
-
-    transition: 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-.login-button:hover {
-    background: #205d5e;
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.hero-logo-wrap {
+    margin-bottom: 16px;
+
+    animation:
+        fadeUp 1.6s cubic-bezier(.33, 1, .68, 1) both;
+
+    will-change: transform;
 }
 
-/* FOOTER */
 
-.landing-footer {
-    min-height: 88px;
-
-    background: #287879;
-    color: white;
-
-    display: grid;
-    grid-template-columns: 1.2fr 1fr 1.4fr 1fr;
-
-    align-items: center;
-
-    padding: 12px 25px;
-
-    gap: 30px;
-
-    font-size: 10px;
-}
-
-.landing-footer>div {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.landing-footer strong {
-    font-size: 13px;
-}
-
-.footer-brand {
-    flex-direction: row !important;
-    align-items: center;
-    gap: 12px !important;
-}
-
-.footer-brand img {
-    width: 42px;
+.hero-logo {
+    width: 140px;
     height: auto;
+
+    object-fit: contain;
+
+    filter:
+        drop-shadow(0 0 28px rgba(94, 234, 212, 0.38)) drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
 }
 
-.footer-brand span {
-    font-size: 13px;
-    font-weight: bold;
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+.hero-title-wrap {
+    margin-bottom: 12px;
+
+    animation:
+        fadeUp 1.6s 0.16s cubic-bezier(.33, 1, .68, 1) both;
+
+    will-change: transform;
 }
 
+
+.hero-subtitle-top {
+    font-family:
+        'Cinzel',
+        'Trajan Pro',
+        'Garamond',
+        Georgia,
+        serif;
+
+    font-size: clamp(12px, 1.4vw, 16px);
+
+    font-weight: 500;
+
+    letter-spacing:
+        clamp(6px, 1vw, 10px);
+
+    color: rgba(255, 255, 255, 0.82);
+
+    line-height: 1.4;
+
+    margin-bottom: 3px;
+
+    text-transform: uppercase;
+}
+
+
+.hero-title {
+    font-family:
+        'Cinzel',
+        'Trajan Pro',
+        'Garamond',
+        Georgia,
+        serif;
+
+    font-size:
+        clamp(28px, 5vw, 56px);
+
+    font-weight: 900;
+
+    letter-spacing:
+        clamp(3px, 0.7vw, 8px);
+
+    color: #ffffff;
+
+    line-height: 1.06;
+
+    text-shadow:
+        0 2px 32px rgba(0, 0, 0, 0.45),
+        0 0 50px rgba(94, 234, 212, 0.15);
+}
+
+
+/* =========================================================
+   TAGLINE
+   ========================================================= */
+
+.hero-tagline {
+    font-family:
+        'Poppins',
+        'Inter',
+        sans-serif;
+
+    font-size:
+        clamp(13px, 1.45vw, 15.5px);
+
+    font-style: italic;
+
+    font-weight: 300;
+
+    color:
+        rgba(255, 255, 255, 0.78);
+
+    line-height: 1.76;
+
+    margin-bottom: 30px;
+
+    animation:
+        fadeUp 1.6s 0.3s cubic-bezier(.33, 1, .68, 1) both;
+
+    will-change: transform;
+}
+
+
+/* =========================================================
+   ORNAMENT
+   ========================================================= */
+
+.hero-ornament {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    animation:
+        fadeUp 1.6s 0.58s cubic-bezier(.33, 1, .68, 1) both;
+
+    will-change: transform;
+
+    opacity: 1;
+}
+
+
+.orn-line {
+    display: block;
+
+    width: 72px;
+    height: 1px;
+
+    background: #ffffff;
+}
+
+
+.orn-book {
+    width: 20px;
+    height: 20px;
+
+    color:
+        rgba(255, 255, 255, 0.85);
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   ENTRANCE ANIMATION
+   ========================================================= */
+
+@keyframes fadeUp {
+
+    from {
+        opacity: 1;
+        transform:
+            translate3d(0, 8px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translate3d(0, 0, 0);
+    }
+}
+
+
+/* =========================================================
+   INTERACTIVE PORTAL
+   ========================================================= */
+
+#interactive-portal {
+    position: fixed;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+
+    z-index: 999999;
+
+    overflow: hidden;
+
+    display: none;
+}
+
+
+.portal-ring {
+    position: absolute;
+
+    width: 40px;
+    height: 40px;
+
+    margin-left: -20px;
+    margin-top: -20px;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    box-sizing: border-box;
+
+    will-change:
+        transform,
+        opacity;
+}
+
+
+#portal-ring-primary {
+    border:
+        2.5px solid rgba(94, 234, 212, 0.95);
+
+    box-shadow:
+        0 0 25px rgba(94, 234, 212, 0.9),
+        0 0 50px rgba(94, 234, 212, 0.5),
+        inset 0 0 15px rgba(94, 234, 212, 0.35);
+}
+
+
+#portal-ring-secondary {
+    border:
+        1.5px solid rgba(94, 234, 212, 0.45);
+
+    box-shadow:
+        0 0 20px rgba(94, 234, 212, 0.3);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .decor-arc {
+        width: 160px;
+        height: 160px;
+    }
+
+    .hero-logo {
+        width: 110px;
+    }
+
+}
 
 
 @media (max-width: 768px) {
 
-    .landing-footer {
-        grid-template-columns: 1fr 1fr;
+    .hero-logo {
+        width: 90px;
     }
 
-    .landing-content {
-        gap: 40px;
+    .hero-subtitle-top {
+        letter-spacing: 5px;
     }
 
-    .landing-logo {
-        width: 180px;
+    .orn-line {
+        width: 48px;
     }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .hero-content {
+        padding-top: 20px;
+    }
+
+    .hero-logo {
+        width: 76px;
+    }
+
+    .decor-arc {
+        width: 110px;
+        height: 110px;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .hero-logo-wrap,
+    .hero-title-wrap,
+    .hero-tagline,
+    .hero-ornament {
+        animation: none !important;
+    }
+
 }
