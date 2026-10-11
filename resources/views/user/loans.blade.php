@@ -301,8 +301,16 @@
                     <div class="loans-side-heading"><span>✦</span>
                         <h3>Aksi Cepat</h3>
                     </div>
-                    <a href="{{ $borrowings->first() ? route('user.loans') . '#loan-' . $borrowings->first()->id : route('user.catalog') }}"
-                        class="loans-side-action">↻ <span>Perpanjang Peminjaman</span></a>
+                    @if ($borrowings->isNotEmpty())
+                        <a href="#extensionPickerOverlay" class="loans-side-action"
+                            onclick="openExtendPicker(); return false;">
+                            ↪ <span>Perpanjang Peminjaman</span>
+                        </a>
+                    @else
+                        <a href="{{ route('user.catalog') }}" class="loans-side-action">
+                            ↪ <span>Perpanjang Peminjaman</span>
+                        </a>
+                    @endif
                     <a href="{{ route('user.history') }}" class="loans-side-action">◷ <span>Lihat Semua
                             Peminjaman</span></a>
                 </div>
@@ -320,6 +328,69 @@
             </aside>
         </div>
     @endif
+
+    <div class="ext-picker-overlay" id="extensionPickerOverlay" role="dialog" aria-modal="true"
+        aria-labelledby="extPickerTitle">
+        <div class="ext-picker-card">
+            <div class="ext-picker-header">
+                <h3 id="extPickerTitle">Pilih Buku untuk Diperpanjang</h3>
+                <p>Pilih judul buku yang ingin Anda perpanjang.</p>
+            </div>
+
+            <div class="ext-picker-list">
+                @forelse($borrowings as $borrowing)
+                    @foreach ($borrowing->details as $detail)
+                        @php
+                            $pickerBookTitle = $detail->book?->title ?? 'Judul Tidak Diketahui';
+                            $pickerPending = $borrowing->extension_status === 'menunggu';
+                        @endphp
+
+                        <div class="ext-picker-book">
+                            <span>
+                                <span class="ext-picker-book-title">
+                                    {{ $pickerBookTitle }}
+                                </span>
+
+                                <span class="ext-picker-book-meta">
+                                    Dipinjam {{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }}
+                                    ·
+                                    Jatuh tempo {{ $borrowing->due_at?->format('d M Y') ?? '-' }}
+                                </span>
+                            </span>
+
+                            @if ($pickerPending)
+                                <span class="ext-picker-book-status is-pending">
+                                    Menunggu persetujuan
+                                </span>
+                            @else
+                                <button type="button"
+                                    class="ext-picker-book-status ext-picker-book-action js-extension-picker-button"
+                                    data-extension-url="{{ route('user.loans.extend', $borrowing->id) }}"
+                                    data-book-title="{{ $pickerBookTitle }}"
+                                    data-due-date="{{ $borrowing->due_at?->format('Y-m-d') }}"
+                                    data-due-formatted="{{ $borrowing->due_at?->format('d M Y') }}"
+                                    data-borrowed-formatted="{{ $borrowing->borrowed_at?->format('d M Y') }}"
+                                    data-borrowed-date="{{ $borrowing->borrowed_at?->format('Y-m-d') }}">
+                                    <span>Pilih Buku</span>
+                                    <span class="ext-picker-book-arrow" aria-hidden="true">→</span>
+                                </button>
+                            @endif
+                        </div>
+                    @endforeach
+                @empty
+                    <p style="margin:8px;color:#718080;font-size:13px">
+                        Tidak ada buku yang sedang dipinjam.
+                    </p>
+                @endforelse
+            </div>
+
+            <div class="ext-picker-footer">
+                <button type="button" class="ext-picker-cancel" onclick="closeExtendPicker()">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
 
     {{-- ═══════════════════════════════════════════════════════════════════
      MODAL PERPANJANGAN PEMINJAMAN MODERN — DATE PICKER (Flatpickr)
@@ -495,6 +566,58 @@
             let EXT_PICKER = null;
 
             const MAX_EXTENSION_DAYS = 14;
+
+            function openExtendPicker() {
+                document.getElementById('extensionPickerOverlay')?.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeExtendPicker() {
+                document.getElementById('extensionPickerOverlay')?.classList.remove('open');
+
+                if (!document.getElementById('extendModalOverlay')?.classList.contains('open')) {
+                    document.body.style.overflow = '';
+                }
+            }
+
+            function openExtendModalFromButton(button) {
+                const data = button.dataset;
+
+                openExtendModal(
+                    data.extensionUrl,
+                    data.bookTitle,
+                    data.dueDate,
+                    data.dueFormatted,
+                    data.borrowedFormatted
+                );
+            }
+
+            function selectExtensionBookFromButton(button) {
+                closeExtendPicker();
+                openExtendModalFromButton(button);
+            }
+
+            document.querySelectorAll('.js-extension-picker-button:not(:disabled)').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    selectExtensionBookFromButton(button);
+                });
+            });
+
+            document.getElementById('extensionPickerOverlay')?.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeExtendPicker();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Escape') return;
+
+                if (document.getElementById('extendModalOverlay').classList.contains('open')) {
+                    closeExtendModal();
+                } else if (document.getElementById('extensionPickerOverlay')?.classList.contains('open')) {
+                    closeExtendPicker();
+                }
+            });
 
             function openExtendModal(actionUrl, bookTitle, dueDateISO, dueDateFormatted, borrowedAtFormatted) {
                 // Hitung batas
