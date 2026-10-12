@@ -92,7 +92,7 @@
 
     z-index: 1;
 
-    max-width: 750px;
+    max-width: 850px;
 
 }
 
@@ -2503,5 +2503,23 @@ input[type="number"] {
     .extension-request-btn {
         flex: 1;
         width: 100%;
+    }
+
+    .circulation-hero {
+        min-height: auto;
+        padding: 30px;
+    }
+
+    .circulation-hero-label {
+        font-size: 15px;
+    }
+
+    .circulation-hero h1 {
+        font-size: 30px;
+    }
+
+    .circulation-hero p {
+        font-size: 14px;
+        line-height: 1.55;
     }
 }

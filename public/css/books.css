@@ -3019,7 +3019,7 @@ svg {
 
     z-index: 2;
 
-    max-width: 900px;
+    max-width: 850px;
 }
 
 
@@ -3063,7 +3063,7 @@ svg {
 
     color: #0f2d42;
 
-    font-size: 32px;
+    font-size: 28px;
 
     line-height: 1.2;
 
@@ -3096,7 +3096,7 @@ svg {
 
 
 .books-page .books-hero-action .book-toolbar-add {
-    height: 50px;
+    height: 40px;
 
     display: inline-flex;
 
@@ -3105,20 +3105,20 @@ svg {
 
     gap: 8px;
 
-    padding: 0 22px;
+    padding: 0 18px;
 
     box-sizing: border-box;
 
-    border-radius: 10px;
+    border-radius: 8px;
 
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 
 .books-page .books-hero-action .book-toolbar-add svg {
-    width: 17px;
-    height: 17px;
+    width: 16px;
+    height: 16px;
 
     margin: 0;
 }
@@ -3138,7 +3138,7 @@ svg {
         align-items: flex-start;
         justify-content: center;
 
-        padding: 28px 30px;
+        padding: 28px 36px;
 
         gap: 16px;
     }
@@ -3156,22 +3156,27 @@ svg {
 }
 
 
-@media (max-width: 650px) {
+@media (max-width: 700px) {
 
     .books-page .books-hero {
-        min-height: 210px;
+        min-height: auto;
 
-        padding: 22px 20px;
+        padding: 30px;
     }
 
 
     .books-page .books-hero h1 {
-        font-size: 24px;
+        font-size: 30px;
     }
 
 
     .books-page .books-hero p {
-        font-size: 13px;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .books-page .books-hero-label {
+        font-size: 15px;
     }
 
 }

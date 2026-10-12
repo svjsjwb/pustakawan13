@@ -57,7 +57,7 @@
 .reservation-hero-content {
     position: relative;
     z-index: 1;
-    max-width: 750px;
+    max-width: 850px;
 }
 
 .reservation-hero-label {
@@ -1349,4 +1349,24 @@
         width: 100%;
     }
 
+}
+
+@media (max-width: 700px) {
+    .reservation-hero {
+        min-height: auto;
+        padding: 30px;
+    }
+
+    .reservation-hero-label {
+        font-size: 15px;
+    }
+
+    .reservation-hero h1 {
+        font-size: 30px;
+    }
+
+    .reservation-hero p {
+        font-size: 14px;
+        line-height: 1.55;
+    }
 }
