@@ -23,7 +23,7 @@
             height: 100dvh;
             overflow: hidden !important;
             overscroll-behavior: none;
-            background: #093033;
+            background: #020f10;
             font-family: Inter, "Segoe UI", Arial, sans-serif;
             /* TIDAK ADA opacity:0 / visibility:hidden / transition di sini */
             opacity: 1 !important;
@@ -106,18 +106,12 @@
             opacity: 0;
             visibility: hidden;
             transform: translate3d(0, 100%, 0);
-            background: radial-gradient(circle at 50% 30%, #114c4f 0%, #093033 60%, #041a1c 100%);
-            will-change: transform, opacity;
+            background: transparent;
+            will-change: transform;
         }
 
         #register-curtain .curtain-glow {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.8), #5eead4, rgba(94, 234, 212, 0.8), transparent);
-            box-shadow: 0 0 15px rgba(94, 234, 212, 0.9), 0 0 30px rgba(94, 234, 212, 0.5);
+            display: none;
         }
     </style>
 </head>
@@ -126,7 +120,7 @@
 
     {{-- Curtain Transition Layer (hanya aktif jika user berpindah dari Landing Page ke Register) --}}
     {{-- CSS default: display:none !important — TIDAK DIRENDER pada refresh / direct load --}}
-    <div id="register-curtain" aria-hidden="true" style="display: none;">
+    <div id="register-curtain" aria-hidden="true" style="display: none; opacity: 0; visibility: hidden; pointer-events: none;">
         <div class="curtain-glow"></div>
     </div>
 
@@ -156,14 +150,12 @@
                     <div class="carousel-viewport">
                         <div class="carousel-text carousel-slide is-active" id="carousel-slide-a">
                             <h1 id="carousel-title">
-                                Mulai perjalanan
-                                <span>membacamu.</span>
+                                Siap Menjelajahi<br>
+                                <span>Dunia Buku?</span>
                             </h1>
 
                             <p id="carousel-desc">
-                                Buat akun untuk menemukan koleksi buku,
-                                melakukan reservasi, dan melihat riwayat
-                                peminjamanmu dengan lebih mudah.
+                                Jelajahi koleksi menarik dan temukan inspirasi baru untuk membaca lebih maksimal.
                             </p>
                         </div>
                         <div class="carousel-text carousel-slide is-entering" id="carousel-slide-b" aria-hidden="true"></div>
@@ -596,19 +588,55 @@
     (function () {
         'use strict';
 
-        var shouldAnimate = false;
+        var landingMarkerAt = 0;
+        var navigationEntry = window.performance && performance.getEntriesByType
+            ? performance.getEntriesByType('navigation')[0]
+            : null;
+        var navigationType = navigationEntry ? navigationEntry.type : null;
+
+        if (!navigationEntry && window.performance && performance.navigation && performance.navigation.type === 1) {
+            navigationType = 'reload';
+        } else if (!navigationEntry && window.performance && performance.navigation && performance.navigation.type === 0) {
+            navigationType = 'navigate';
+        }
+
         try {
-            shouldAnimate = sessionStorage.getItem('landingToRegisterTransition') === 'true';
-            // HAPUS SEGERA — agar refresh tidak memicu ulang
+            landingMarkerAt = Number(sessionStorage.getItem('landingToRegisterTransition')) || 0;
             sessionStorage.removeItem('landingToRegisterTransition');
         } catch (e) {
-            shouldAnimate = false;
+            landingMarkerAt = 0;
         }
 
         var curtain    = document.getElementById('register-curtain');
         var container  = document.querySelector('.login-container');
         var loginCard  = document.querySelector('.login-card');
         var loginIntro = document.querySelector('.intro-content');
+        var isReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var markerIsFresh = landingMarkerAt > 0
+            && Date.now() >= landingMarkerAt
+            && Date.now() - landingMarkerAt <= 10000;
+        var shouldAnimate = markerIsFresh
+            && navigationType === 'navigate'
+            && !isReduced
+            && typeof window.gsap !== 'undefined';
+
+        window.addEventListener('pageshow', function (event) {
+            if (!event.persisted || !curtain) return;
+
+            if (typeof window.gsap !== 'undefined') {
+                gsap.killTweensOf([curtain, container, loginCard, loginIntro].filter(Boolean));
+            }
+            curtain.style.setProperty('display', 'none', 'important');
+            curtain.style.opacity = '0';
+            curtain.style.visibility = 'hidden';
+            curtain.style.pointerEvents = 'none';
+            curtain.style.transform = 'translate3d(0, 100%, 0)';
+            [container, loginCard, loginIntro].filter(Boolean).forEach(function (element) {
+                element.style.opacity = '';
+                element.style.transform = '';
+                element.style.transition = '';
+            });
+        });
 
         // ── FLOW 2 / 3: Direct load, Refresh, Direct URL ──
         // Jangan jalankan animasi APAPUN. Register langsung tampil normal.
@@ -619,9 +647,7 @@
         // ── FLOW 1: Landing/Login → Register ──
         // Jalankan cinematic curtain hanya jika shouldAnimate === true
 
-        var isReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        if (!curtain || isReduced) {
+        if (!curtain) {
             // Fallback: tampil langsung tanpa animasi
             return;
         }
@@ -638,7 +664,7 @@
         }
 
         function runReveal() {
-            if (typeof gsap !== 'undefined') {
+            try {
                 var tl = gsap.timeline({
                     onComplete: function () {
                         // Setelah animasi selesai: sembunyikan curtain dan reset
@@ -680,26 +706,16 @@
                         0.35
                     );
                 }
-            } else {
-                // Fallback tanpa GSAP
-                curtain.style.transition = 'transform 0.45s ease-in-out, opacity 0.45s ease';
-                curtain.style.transform  = 'translateY(-100%)';
-                curtain.style.opacity    = '0';
-                if (container) {
-                    container.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-                    container.style.opacity    = '1';
-                    container.style.transform  = 'translateY(0)';
-                }
-                setTimeout(function () {
-                    curtain.style.display      = 'none';
-                    curtain.style.visibility   = 'hidden';
-                    curtain.style.pointerEvents = 'none';
-                    if (container) {
-                        container.style.transition = '';
-                        container.style.opacity    = '';
-                        container.style.transform  = '';
-                    }
-                }, 500);
+            } catch (e) {
+                curtain.style.setProperty('display', 'none', 'important');
+                curtain.style.opacity = '0';
+                curtain.style.visibility = 'hidden';
+                curtain.style.pointerEvents = 'none';
+                [container, loginCard, loginIntro].filter(Boolean).forEach(function (element) {
+                    element.style.opacity = '';
+                    element.style.transform = '';
+                    element.style.transition = '';
+                });
             }
         }
 
@@ -708,6 +724,7 @@
         } else {
             requestAnimationFrame(runReveal);
         }
+
     })();
     </script>
 
@@ -717,91 +734,168 @@
         (function () {
             var slides = [
                 {
-                    title: 'Mulai perjalanan <span>membacamu.</span>',
-                    desc: 'Buat akun untuk menemukan koleksi buku, melakukan reservasi, dan melihat riwayat peminjamanmu dengan lebih mudah.'
+                    title: 'Siap Menjelajahi<br><span>Dunia Buku?</span>',
+                    desc: 'Jelajahi koleksi menarik dan temukan inspirasi baru untuk membaca lebih maksimal.'
                 },
                 {
-                    title: 'Jelajahi dunia <span>pengetahuan.</span>',
-                    desc: 'Temukan berbagai koleksi buku pilihan dan nikmati pengalaman membaca yang lebih praktis.'
+                    title: 'Yuk, Temukan <span>Buku Favoritmu!</span>',
+                    desc: 'Temukan bacaan yang sesuai kebutuhan, minat, dan gaya hidupmu.'
                 },
                 {
-                    title: 'Temukan cerita <span>favoritmu.</span>',
-                    desc: 'Cari, reservasi, dan kelola aktivitas peminjaman buku dalam satu tempat.'
+                    title: 'Kira-Kira Ada <span class="carousel-title-nowrap">Buku Apa Aja, Ya?</span>',
+                    desc: 'Cek katalog dan reservasi buku dengan mudah kapan saja, di mana saja.'
                 }
             ];
 
-            var current = 0;
             var slidesEl = [
                 document.getElementById('carousel-slide-a'),
                 document.getElementById('carousel-slide-b')
             ];
-            var dots    = document.querySelectorAll('.intro-decoration span');
-            var transition = 'transform .7s cubic-bezier(.22, 1, .36, 1), opacity .7s ease-in-out';
-            var activeLayer = 0;
+            if (!slidesEl[0] || !slidesEl[1]) return;
 
-            slidesEl.forEach(function (element) {
-                element.style.transition = 'none';
-            });
+            var dots = document.querySelectorAll('.intro-decoration span');
+            var current = 0;
+            var activeLayer = 0;
+            var isAnimating = false;
+            var autoTimer = null;
+            var transitionDuration = 500;
+            var transitionStyle = 'transform 500ms cubic-bezier(.22, 1, .36, 1), opacity 500ms ease';
+
+            slidesEl.forEach(function (el) { el.style.transition = 'none'; });
             slidesEl[0].style.transform = 'translateX(0)';
             slidesEl[0].style.opacity = '1';
-            slidesEl[1].style.transform = 'translateX(100%)';
+            slidesEl[0].style.zIndex = '2';
+            slidesEl[1].style.transform = 'translateX(28px)';
             slidesEl[1].style.opacity = '0';
+            slidesEl[1].style.zIndex = '1';
             void slidesEl[0].offsetWidth;
-            slidesEl.forEach(function (element) {
-                element.style.transition = '';
-            });
 
             function renderSlide(element, slide) {
                 element.innerHTML = '<h1>' + slide.title + '</h1><p>' + slide.desc + '</p>';
             }
 
-            function goToSlide(index) {
-                var active = slidesEl[activeLayer];
-                var incoming = slidesEl[1 - activeLayer];
+            function updateDots(index) {
+                dots.forEach(function (dot, i) {
+                    if (i === index) {
+                        dot.classList.add('active');
+                        dot.setAttribute('aria-selected', 'true');
+                    } else {
+                        dot.classList.remove('active');
+                        dot.setAttribute('aria-selected', 'false');
+                    }
+                });
+            }
 
-                renderSlide(incoming, slides[index]);
-                incoming.setAttribute('aria-hidden', 'false');
-                active.setAttribute('aria-hidden', 'true');
+            function goToSlide(targetIndex, direction) {
+                if (targetIndex === current || isAnimating) return;
+                isAnimating = true;
 
-                dots.forEach(function (dot) { dot.classList.remove('active'); });
-                if (dots[index]) dots[index].classList.add('active');
+                if (!direction) {
+                    direction = targetIndex > current ? 'next' : 'prev';
+                }
 
-                /* Every transition starts from exactly the same two positions. */
-                active.style.transition = 'none';
-                active.style.transform = 'translateX(0)';
-                active.style.opacity = '1';
-                incoming.style.transition = 'none';
-                incoming.style.transform = 'translateX(100%)';
-                incoming.style.opacity = '0';
-                void incoming.offsetWidth;
+                var activeEl = slidesEl[activeLayer];
+                var incomingEl = slidesEl[1 - activeLayer];
 
-                /* Move both layers together using the same transition every time. */
+                renderSlide(incomingEl, slides[targetIndex]);
+                incomingEl.setAttribute('aria-hidden', 'false');
+                activeEl.setAttribute('aria-hidden', 'true');
+
+                updateDots(targetIndex);
+
+                var startOffset = direction === 'next' ? '28px' : '-28px';
+                var exitOffset  = direction === 'next' ? '-28px' : '28px';
+
+                incomingEl.style.transition = 'none';
+                incomingEl.style.transform = 'translateX(' + startOffset + ')';
+                incomingEl.style.opacity = '0';
+                incomingEl.style.zIndex = '2';
+
+                activeEl.style.transition = 'none';
+                activeEl.style.transform = 'translateX(0)';
+                activeEl.style.opacity = '1';
+                activeEl.style.zIndex = '1';
+
+                void incomingEl.offsetWidth;
+
                 requestAnimationFrame(function () {
-                    active.style.transition = transition;
-                    active.style.transform = 'translateX(-100%)';
-                    active.style.opacity = '0';
-                    incoming.style.transition = transition;
-                    incoming.style.transform = 'translateX(0)';
-                    incoming.style.opacity = '1';
+                    activeEl.style.transition = transitionStyle;
+                    activeEl.style.transform = 'translateX(' + exitOffset + ')';
+                    activeEl.style.opacity = '0';
+
+                    incomingEl.style.transition = transitionStyle;
+                    incomingEl.style.transform = 'translateX(0)';
+                    incomingEl.style.opacity = '1';
                 });
 
                 setTimeout(function () {
-                    active.style.transition = 'none';
-                    active.style.transform = 'translateX(100%)';
-                    active.style.opacity = '0';
-                    void active.offsetWidth;
-                    active.style.transition = '';
-                }, 700);
+                    activeEl.style.transition = 'none';
+                    activeEl.style.transform = 'translateX(' + startOffset + ')';
+                    activeEl.style.opacity = '0';
+                    void activeEl.offsetWidth;
 
-                activeLayer = 1 - activeLayer;
+                    current = targetIndex;
+                    activeLayer = 1 - activeLayer;
+                    isAnimating = false;
+                }, transitionDuration + 30);
             }
 
-            function next() {
-                current = (current + 1) % slides.length;
-                goToSlide(current);
+            function startAutoplay() {
+                stopAutoplay();
+                autoTimer = setInterval(function () {
+                    var nextIndex = (current + 1) % slides.length;
+                    goToSlide(nextIndex, 'next');
+                }, 3000);
             }
 
-            setInterval(next, 3000);
+            function stopAutoplay() {
+                if (autoTimer) {
+                    clearInterval(autoTimer);
+                    autoTimer = null;
+                }
+            }
+
+            dots.forEach(function (dot, index) {
+                dot.setAttribute('role', 'button');
+                dot.setAttribute('tabindex', '0');
+                dot.setAttribute('aria-label', 'Slide ' + (index + 1));
+                dot.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+
+                function trigger() {
+                    if (index === current || isAnimating) return;
+                    stopAutoplay();
+                    var dir = index > current ? 'next' : 'prev';
+                    goToSlide(index, dir);
+                    startAutoplay();
+                }
+
+                dot.addEventListener('click', trigger);
+                dot.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        trigger();
+                    }
+                });
+            });
+
+            startAutoplay();
+        })();
+    </script>
+
+    <script>
+        (function () {
+            var background = document.querySelector('.login-background');
+            if (!background) return;
+
+            var image = new Image();
+            image.onload = function () {
+                background.classList.add('is-image-ready');
+            };
+            image.src = @json(asset('images/bg-ts.jpeg'));
+
+            if (image.complete && image.naturalWidth > 0) {
+                background.classList.add('is-image-ready');
+            }
         })();
     </script>
 

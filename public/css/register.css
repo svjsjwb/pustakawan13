@@ -19,7 +19,7 @@ body {
     padding: 0;
     width: 100%;
     min-height: 100%;
-    background: #093033;
+    background: #020f10;
 }
 
 body {
@@ -30,7 +30,7 @@ body {
         sans-serif;
 
     color: #102f32;
-    background: #093033;
+    background: #020f10;
 }
 
 
@@ -74,13 +74,9 @@ body {
 .login-background {
     position: fixed;
     inset: 0;
+    background-color: #020f10;
 
-    background-image:
-        linear-gradient(90deg,
-            rgba(9, 48, 51, .72),
-            rgba(9, 48, 51, .35) 45%,
-            rgba(9, 48, 51, .15)),
-        url("/images/bg-ts.jpeg");
+    background-image: url("/images/bg-ts.jpeg");
 
     background-size: cover;
     background-position: center;
@@ -90,6 +86,23 @@ body {
     transform: scale(1.02);
 
     /* Cinematic dissolve-in removed to prevent green flash on refresh */
+}
+
+.login-background::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+        rgba(9, 48, 51, .72),
+        rgba(9, 48, 51, .35) 45%,
+        rgba(9, 48, 51, .15));
+    opacity: 0;
+    pointer-events: none;
+}
+
+.login-background.is-image-ready::before,
+.login-background.is-image-ready::after {
+    opacity: 1;
 }
 
 
@@ -111,6 +124,7 @@ body {
             rgba(115, 218, 210, .16),
             transparent 35%);
 
+    opacity: 0;
     pointer-events: none;
 }
 
@@ -168,7 +182,8 @@ body {
 
 
 .intro-content {
-    width: min(520px, 100%);
+    width: 100%;
+    max-width: 520px;
 }
 
 
@@ -214,17 +229,17 @@ body {
 
 .intro-content h1 {
     margin: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: 132px;
 
-    max-width: 520px;
-    min-height: 2.08em;
+    font-size: clamp(36px, 3.9vw, 64px);
 
-    font-size: clamp(38px, 5vw, 62px);
-
-    line-height: 1.04;
+    line-height: 1.06;
 
     font-weight: 800;
 
-    letter-spacing: -2px;
+    letter-spacing: -1.7px;
 
     text-shadow:
         0 4px 20px rgba(0, 0, 0, .15);
@@ -237,19 +252,23 @@ body {
     color: #91e5df;
 }
 
+.intro-content h1 span.carousel-title-nowrap {
+    white-space: nowrap;
+    font-size: clamp(32px, 3.6vw, 56px);
+}
+
 
 .intro-content p {
-    max-width: 470px;
-    min-height: 5.1em;
-
-    margin: 24px 0 0;
+    max-width: 430px;
+    min-height: 48px;
+    margin: 0;
 
     color:
         rgba(255, 255, 255, .82);
 
     font-size: 15px;
 
-    line-height: 1.7;
+    line-height: 1.6;
 }
 
 
@@ -259,37 +278,54 @@ body {
 
 .intro-decoration {
     display: flex;
-
     align-items: center;
-
-    gap: 7px;
-
+    gap: 8px;
     margin-top: 24px;
 }
 
-
 .intro-decoration span {
+    position: relative;
     display: block;
-
     height: 4px;
-
     border-radius: 999px;
-
     background: #8fe2dc;
-
     opacity: .35;
-
     width: 12px;
-
+    cursor: pointer;
+    border: none;
+    outline: none;
+    padding: 0;
     transition:
-        width .4s ease,
-        opacity .4s ease;
+        width .4s cubic-bezier(.22, 1, .36, 1),
+        opacity .3s ease,
+        background-color .3s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
+/* Hitbox klik nyaman tanpa memperbesar visual garis */
+.intro-decoration span::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    bottom: -10px;
+    left: -4px;
+    right: -4px;
+}
+
+.intro-decoration span:hover {
+    opacity: .75;
+}
 
 .intro-decoration span.active {
     width: 32px;
     opacity: 1;
+    cursor: default;
+}
+
+.intro-decoration span:focus-visible {
+    outline: 2px solid rgba(143, 226, 220, 0.7);
+    outline-offset: 3px;
 }
 
 
@@ -300,6 +336,13 @@ body {
 .carousel-text {
     width: 100%;
     min-width: 0;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 14px;
+    padding-top: 2px;
+    overflow: hidden;
     transition:
         opacity .7s ease-in-out,
         transform .7s cubic-bezier(.22, 1, .36, 1);
@@ -329,6 +372,7 @@ body {
 .carousel-viewport {
     width: 100%;
     min-width: 0;
+    height: 220px;
     overflow: hidden;
     display: grid;
     grid-template-columns: minmax(0, 1fr);

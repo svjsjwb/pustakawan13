@@ -151,8 +151,9 @@ body {
 /* ── Logo ── */
 .hero-logo-wrap {
     margin-bottom: 16px;
-    animation: fadeUp 1.6s cubic-bezier(.33,1,.68,1) both;
-    will-change: transform;
+    /* animation: none — GSAP mengontrol penuh entrance & exit */
+    will-change: opacity, transform;
+    opacity: 0; /* GSAP akan fade-in ini */
 }
 
 .hero-logo {
@@ -167,8 +168,9 @@ body {
 /* ── Title ── */
 .hero-title-wrap {
     margin-bottom: 12px;
-    animation: fadeUp 1.6s 0.16s cubic-bezier(.33,1,.68,1) both;
-    will-change: transform;
+    /* animation: none — GSAP mengontrol penuh */
+    will-change: opacity, transform;
+    opacity: 0; /* GSAP akan fade-in ini */
 }
 
 .hero-subtitle-top {
@@ -203,8 +205,9 @@ body {
     color: rgba(255,255,255,0.78);
     line-height: 1.76;
     margin-bottom: 30px;
-    animation: fadeUp 1.6s 0.3s cubic-bezier(.33,1,.68,1) both;
-    will-change: transform;
+    /* animation: none — GSAP mengontrol penuh */
+    will-change: opacity, transform;
+    opacity: 0; /* GSAP akan fade-in ini */
 }
 
 /* =========================================================
@@ -301,9 +304,9 @@ body {
     display: flex;
     align-items: center;
     gap: 14px;
-    animation: fadeUp 1.6s 0.58s cubic-bezier(.33,1,.68,1) both;
-    will-change: transform;
-    opacity: 1;
+    /* animation: none — GSAP mengontrol penuh */
+    will-change: opacity, transform;
+    opacity: 0; /* GSAP akan fade-in ini */
 }
 
 .orn-line {
@@ -324,10 +327,7 @@ body {
    KEYFRAMES — Entrance
    ========================================================= */
 
-@keyframes fadeUp {
-    from { opacity: 1; transform: translate3d(0, 8px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
-}
+/* @keyframes fadeUp — dihapus, GSAP mengontrol penuh semua animasi landing */
 
 /* =========================================================
    CINEMATIC TRANSITION — OVERLAY + PARTICLES

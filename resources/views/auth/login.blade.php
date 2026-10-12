@@ -23,7 +23,7 @@
             height: 100dvh;
             overflow: hidden !important;
             overscroll-behavior: none;
-            background: #093033;
+            background: #020f10;
             font-family: Inter, "Segoe UI", Arial, sans-serif;
             /* TIDAK ADA opacity:0 / visibility:hidden / transition di sini */
             opacity: 1 !important;
@@ -86,30 +86,6 @@
             .login-header h2 { font-size: 22px !important; }
             .form-group { margin-bottom: 7px !important; }
         }
-
-        /* Cinematic Curtain — Default strictly display: none */
-        #cinematic-curtain {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 999999;
-            pointer-events: none;
-            display: none;
-            background: radial-gradient(circle at 50% 30%, #114c4f 0%, #093033 60%, #041a1c 100%);
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.7);
-            transform: translateY(0%);
-            will-change: transform;
-        }
-        #cinematic-curtain .curtain-glow {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.8), #5eead4, rgba(94, 234, 212, 0.8), transparent);
-            box-shadow: 0 0 15px rgba(94, 234, 212, 0.9), 0 0 30px rgba(94, 234, 212, 0.5);
-        }
     </style>
     <link rel="stylesheet" href="{{ asset('css/register.css') }}?v={{ time() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,11 +94,6 @@
 </head>
 
 <body>
-
-{{-- Curtain Transition Layer (hanya aktif jika user berpindah dari Landing Page) --}}
-<div id="cinematic-curtain" aria-hidden="true" style="display: none;">
-    <div class="curtain-glow"></div>
-</div>
 
 <main class="login-page">
 
@@ -146,14 +117,12 @@
                 <div class="carousel-viewport">
                     <div class="carousel-text carousel-slide is-active" id="carousel-slide-a">
                         <h1 id="carousel-title">
-                            Mulai perjalanan
-                            <span>membacamu.</span>
+                            Siap Menjelajahi<br>
+                            <span>Dunia Buku?</span>
                         </h1>
 
                         <p id="carousel-desc">
-                            Buat akun untuk menemukan koleksi buku,
-                            melakukan reservasi, dan melihat riwayat
-                            peminjamanmu dengan lebih mudah.
+                            Jelajahi koleksi menarik dan temukan inspirasi baru untuk membaca lebih maksimal.
                         </p>
                     </div>
                     <div class="carousel-text carousel-slide is-entering" id="carousel-slide-b" aria-hidden="true"></div>
@@ -311,183 +280,266 @@ function togglePwd() {
 </script>
 
 <script>
+    /* ── Login Intro Carousel (Interactive Indicators + Slide+Fade) ── */
     (function () {
-        var slides = [
-            {
-                title: 'Mulai perjalanan <span>membacamu.</span>',
-                desc: 'Buat akun untuk menemukan koleksi buku, melakukan reservasi, dan melihat riwayat peminjamanmu dengan lebih mudah.'
-            },
-            {
-                title: 'Jelajahi dunia <span>pengetahuan.</span>',
-                desc: 'Temukan berbagai koleksi buku pilihan dan nikmati pengalaman membaca yang lebih praktis.'
-            },
-            {
-                title: 'Temukan cerita <span>favoritmu.</span>',
-                desc: 'Cari, reservasi, dan kelola aktivitas peminjaman buku dalam satu tempat.'
-            }
-        ];
-
-        var current = 0;
-        var slidesEl = [
-            document.getElementById('carousel-slide-a'),
-            document.getElementById('carousel-slide-b')
-        ];
-        var dots = document.querySelectorAll('.intro-decoration span');
-        var transition = 'transform .7s cubic-bezier(.22, 1, .36, 1), opacity .7s ease-in-out';
-        var activeLayer = 0;
-
-        slidesEl.forEach(function (element) {
-            element.style.transition = 'none';
-        });
-        slidesEl[0].style.transform = 'translateX(0)';
-        slidesEl[0].style.opacity = '1';
-        slidesEl[1].style.transform = 'translateX(100%)';
-        slidesEl[1].style.opacity = '0';
-        void slidesEl[0].offsetWidth;
-        slidesEl.forEach(function (element) {
-            element.style.transition = '';
-        });
-
         function renderSlide(element, slide) {
             element.innerHTML = '<h1>' + slide.title + '</h1><p>' + slide.desc + '</p>';
         }
 
-        function goToSlide(index) {
-            var active = slidesEl[activeLayer];
-            var incoming = slidesEl[1 - activeLayer];
+        function updateDots(index) {
+            var dots = document.querySelectorAll('.intro-decoration span');
+            dots.forEach(function (dot, i) {
+                if (i === index) {
+                    dot.classList.add('active');
+                    dot.setAttribute('aria-selected', 'true');
+                } else {
+                    dot.classList.remove('active');
+                    dot.setAttribute('aria-selected', 'false');
+                }
+            });
+        }
 
-            renderSlide(incoming, slides[index]);
-            incoming.setAttribute('aria-hidden', 'false');
-            active.setAttribute('aria-hidden', 'true');
+        var slides = [
+            {
+                title: 'Siap Menjelajahi<br><span>Dunia Buku?</span>',
+                desc: 'Jelajahi koleksi menarik dan temukan inspirasi baru untuk membaca lebih maksimal.'
+            },
+            {
+                title: 'Yuk, Temukan <span>Buku Favoritmu!</span>',
+                desc: 'Temukan bacaan yang sesuai kebutuhan, minat, dan gaya hidupmu.'
+            },
+            {
+                title: 'Kira-Kira Ada <span class="carousel-title-nowrap">Buku Apa Aja, Ya?</span>',
+                desc: 'Cek katalog dan reservasi buku dengan mudah kapan saja, di mana saja.'
+            }
+        ];
 
-            dots.forEach(function (dot) { dot.classList.remove('active'); });
-            if (dots[index]) dots[index].classList.add('active');
+        var slidesEl = [
+            document.getElementById('carousel-slide-a'),
+            document.getElementById('carousel-slide-b')
+        ];
+        if (!slidesEl[0] || !slidesEl[1]) return;
 
-            active.style.transition = 'none';
-            active.style.transform = 'translateX(0)';
-            active.style.opacity = '1';
-            incoming.style.transition = 'none';
-            incoming.style.transform = 'translateX(100%)';
-            incoming.style.opacity = '0';
-            void incoming.offsetWidth;
+        try {
+            var isFromLanding = sessionStorage.getItem('canva_trans_from_landing') === 'true';
+            sessionStorage.removeItem('canva_trans_from_landing');
+
+            if (isFromLanding) {
+                slidesEl[0].innerHTML = '<h1>' + slides[0].title + '</h1><p>' + slides[0].desc + '</p>';
+                slidesEl[1].innerHTML = '';
+            }
+        } catch (e) {
+            // Ignore storage issues; keep the default slide state.
+        }
+
+        var dots = document.querySelectorAll('.intro-decoration span');
+        var current = 0;
+        var activeLayer = 0;
+        var isAnimating = false;
+        var autoTimer = null;
+        var transitionDuration = 500;
+        var transitionStyle = 'transform 500ms cubic-bezier(.22, 1, .36, 1), opacity 500ms ease';
+
+        slidesEl.forEach(function (el) { el.style.transition = 'none'; });
+        slidesEl[0].style.transform = 'translateX(0)';
+        slidesEl[0].style.opacity = '1';
+        slidesEl[0].style.zIndex = '2';
+        slidesEl[1].style.transform = 'translateX(28px)';
+        slidesEl[1].style.opacity = '0';
+        slidesEl[1].style.zIndex = '1';
+        void slidesEl[0].offsetWidth;
+
+        renderSlide(slidesEl[0], slides[0]);
+        updateDots(0);
+
+        function goToSlide(targetIndex, direction) {
+            if (targetIndex === current || isAnimating) return;
+            isAnimating = true;
+
+            if (!direction) {
+                direction = targetIndex > current ? 'next' : 'prev';
+            }
+
+            var activeEl = slidesEl[activeLayer];
+            var incomingEl = slidesEl[1 - activeLayer];
+
+            renderSlide(incomingEl, slides[targetIndex]);
+            incomingEl.setAttribute('aria-hidden', 'false');
+            activeEl.setAttribute('aria-hidden', 'true');
+
+            updateDots(targetIndex);
+
+            var startOffset = direction === 'next' ? '28px' : '-28px';
+            var exitOffset  = direction === 'next' ? '-28px' : '28px';
+
+            incomingEl.style.transition = 'none';
+            incomingEl.style.transform = 'translateX(' + startOffset + ')';
+            incomingEl.style.opacity = '0';
+            incomingEl.style.zIndex = '2';
+
+            activeEl.style.transition = 'none';
+            activeEl.style.transform = 'translateX(0)';
+            activeEl.style.opacity = '1';
+            activeEl.style.zIndex = '1';
+
+            void incomingEl.offsetWidth;
 
             requestAnimationFrame(function () {
-                active.style.transition = transition;
-                active.style.transform = 'translateX(-100%)';
-                active.style.opacity = '0';
-                incoming.style.transition = transition;
-                incoming.style.transform = 'translateX(0)';
-                incoming.style.opacity = '1';
+                activeEl.style.transition = transitionStyle;
+                activeEl.style.transform = 'translateX(' + exitOffset + ')';
+                activeEl.style.opacity = '0';
+
+                incomingEl.style.transition = transitionStyle;
+                incomingEl.style.transform = 'translateX(0)';
+                incomingEl.style.opacity = '1';
             });
 
             setTimeout(function () {
-                active.style.transition = 'none';
-                active.style.transform = 'translateX(100%)';
-                active.style.opacity = '0';
-                void active.offsetWidth;
-                active.style.transition = '';
-            }, 700);
+                activeEl.style.transition = 'none';
+                activeEl.style.transform = 'translateX(' + startOffset + ')';
+                activeEl.style.opacity = '0';
+                void activeEl.offsetWidth;
 
-            activeLayer = 1 - activeLayer;
+                current = targetIndex;
+                activeLayer = 1 - activeLayer;
+                isAnimating = false;
+            }, transitionDuration + 30);
         }
 
-        setInterval(function () {
-            current = (current + 1) % slides.length;
-            goToSlide(current);
-        }, 3000);
+        function startAutoplay() {
+            stopAutoplay();
+            autoTimer = window.setInterval(function () {
+                if (isAnimating) return;
+                goToSlide((current + 1) % slides.length, 'next');
+            }, 3000);
+        }
+
+        function stopAutoplay() {
+            if (autoTimer !== null) {
+                window.clearInterval(autoTimer);
+                autoTimer = null;
+            }
+        }
+
+        dots.forEach(function (dot, index) {
+            dot.setAttribute('role', 'button');
+            dot.setAttribute('tabindex', '0');
+            dot.setAttribute('aria-label', 'Slide ' + (index + 1));
+            dot.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+
+            function trigger() {
+                if (index === current || isAnimating) return;
+                stopAutoplay();
+                var dir = index > current ? 'next' : 'prev';
+                goToSlide(index, dir);
+                startAutoplay();
+            }
+
+            dot.addEventListener('click', trigger);
+            dot.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    trigger();
+                }
+            });
+        });
+
+        startAutoplay();
+
     })();
 </script>
 
 <script src="{{ asset('js/gsap.min.js') }}"></script>
 <script>
+/* ── CANVA PRESENTATION: SLIDE + FADE LOGIN REVEAL (350–500 ms) ── */
 (function () {
-    var hasTransition = false;
+    'use strict';
+
+    // Periksa apakah navigasi berasal dari Landing Page (penanda sementara sekali pakai)
+    var isFromLanding = false;
     try {
-        hasTransition = sessionStorage.getItem('transition_from_landing') === 'true';
-        // HAPUS SEGERA flag ini agar jika user merefresh / reload di login page,
-        // transisi curtain TIDAK PERNAH aktif kembali!
-        sessionStorage.removeItem('transition_from_landing');
+        isFromLanding = sessionStorage.getItem('canva_trans_from_landing') === 'true';
+        // Hapus seketika agar saat refresh / URL langsung tidak memutar animasi ulang
+        sessionStorage.removeItem('canva_trans_from_landing');
     } catch (e) {
-        hasTransition = false;
+        isFromLanding = false;
     }
 
-    // Cek apakah ada notifikasi error/flash dari server (login gagal, validasi, dsb)
-    var hasServerAlerts = {{ ($errors->any() || session('error') || session('success')) ? 'true' : 'false' }};
-
-    // JIKA BUKAN DARI TRANSISI LANDING PAGE ATAU ADA ERROR:
-    // Jangan pernah tampilkan curtain! Halaman tampil 100% normal dan instan tanpa flicker.
-    if (!hasTransition || hasServerAlerts) {
+    // Jika bukan dari Landing Page, refresh, URL langsung, atau reduced motion: tampilkan normal langsung tanpa animasi
+    var isReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!isFromLanding || isReducedMotion || typeof gsap === 'undefined') {
         return;
     }
 
-    // JIKA DATANG RESMI DARI LANDING PAGE:
-    var curtain = document.getElementById('cinematic-curtain');
-    var container = document.querySelector('.login-container');
-    if (!curtain) return;
+    var loginIntro = document.querySelector('.login-intro');
+    var loginCard  = document.querySelector('.login-card');
+    var isMobile   = window.innerWidth <= 900;
+    var introVisible = loginIntro && window.getComputedStyle(loginIntro).display !== 'none';
 
-    curtain.style.display = 'block';
-    curtain.style.transform = 'translateY(0%)';
-
-    if (container) {
-        container.style.opacity = '0';
-        container.style.transform = 'translateY(16px)';
-    }
-
-    function runReveal() {
-        var isReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        if (typeof gsap !== 'undefined' && !isReduced) {
-            var tl = gsap.timeline({
-                onComplete: function () {
-                    curtain.style.display = 'none';
-                    if (container) {
-                        container.style.opacity = '';
-                        container.style.transform = '';
-                    }
-                }
-            });
-
-            // Curtain menyapu ke atas (sweep out)
-            tl.to(curtain, {
-                y: '-100%',
-                duration: 0.65,
-                ease: 'power3.inOut'
-            }, 0.05);
-
-            // Login card meluncur halus ke posisinya
-            if (container) {
-                tl.to(container, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.55,
-                    ease: 'power2.out'
-                }, 0.20);
+    function runSlideFadeEntrance() {
+        var tl = gsap.timeline({
+            defaults: {
+                ease: 'power2.out',
+                force3D: true
+            },
+            onComplete: function () {
+                gsap.set([loginIntro, loginCard].filter(Boolean), {
+                    clearProps: 'transform,opacity,willChange'
+                });
             }
-        } else {
-            // Fallback animasi tanpa GSAP
-            curtain.style.transition = 'transform 0.45s ease-in-out';
-            curtain.style.transform = 'translateY(-100%)';
-            if (container) {
-                container.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-                container.style.opacity = '1';
-                container.style.transform = 'translateY(0)';
-            }
-            setTimeout(function () {
-                curtain.style.display = 'none';
-                if (container) {
-                    container.style.opacity = '';
-                    container.style.transform = '';
-                }
-            }, 500);
+        });
+
+        // Panel informasi transparan di kiri: muncul secara bertahap (slide horizontal + fade-in, 350–500 ms)
+        if (introVisible) {
+            tl.fromTo(loginIntro, {
+                opacity: 0,
+                x: -24
+            }, {
+                opacity: 1,
+                x: 0,
+                duration: 0.46
+            }, 0);
+        }
+
+        // Form login putih di kanan: muncul dengan opacity dan pergeseran horizontal sangat ringan (350–500 ms)
+        // Stagger pendek antara panel kiri dan form kanan
+        if (loginCard) {
+            tl.fromTo(loginCard, {
+                opacity: 0,
+                x: isMobile ? 0 : 20,
+                y: isMobile ? 16 : 0
+            }, {
+                opacity: 1,
+                x: 0,
+                y: 0,
+                duration: 0.46
+            }, 0.06);
         }
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', runReveal);
+        document.addEventListener('DOMContentLoaded', runSlideFadeEntrance);
     } else {
-        requestAnimationFrame(runReveal);
+        requestAnimationFrame(runSlideFadeEntrance);
     }
 })();
+</script>
+
+<script>
+    (function () {
+        var background = document.querySelector('.login-background');
+        if (!background) return;
+
+        var image = new Image();
+        image.onload = function () {
+            background.classList.add('is-image-ready');
+        };
+        image.src = @json(asset('images/bg-ts.jpeg'));
+
+        if (image.complete && image.naturalWidth > 0) {
+            background.classList.add('is-image-ready');
+        }
+    })();
 </script>
 
 </body>
