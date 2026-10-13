@@ -478,6 +478,73 @@ class EmailNotificationSystemTest extends TestCase
         );
     }
 
+    public function test_new_registration_is_visible_in_admin_notification_feed(): void
+    {
+        $email = 'registered_' . uniqid() . '@example.com';
+
+        $response = $this->post(route('register.store'), [
+            'name' => 'Registered Member',
+            'email' => $email,
+            'division' => 'IT',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertRedirect(route('login'));
+
+        Borrowing::create([
+            'member_id' => $this->member->id,
+            'user_id' => $this->user->id,
+            'borrowed_at' => now(),
+            'due_at' => now()->addDays(14),
+            'status' => 'menunggu',
+        ]);
+        Reservation::create([
+            'member_id' => $this->member->id,
+            'book_id' => $this->book->id,
+            'book_copy_id' => $this->copy->id,
+            'reserved_at' => now(),
+            'expires_at' => now()->addDays(3),
+            'status' => 'menunggu',
+        ]);
+
+        $notification = AppNotification::where('role', 'admin')
+            ->where('type', 'user_registered')
+            ->where('message', 'like', "%{$email}%")
+            ->firstOrFail();
+
+        $feed = $this->actingAs($this->admin)
+            ->getJson(route('notifications.index'));
+        $unreadCount = AppNotification::where('role', 'admin')
+            ->where('is_read', false)
+            ->count();
+        $pendingMembersCount = Member::whereHas('user', function ($query) {
+            $query->where('role', 'guest');
+        })->count();
+        $pendingBorrowingsCount = Borrowing::where(function ($query) {
+            $query->where('status', 'menunggu')
+                ->orWhere('extension_status', 'menunggu');
+        })->count();
+        $pendingReservationsCount = Reservation::where('status', 'menunggu')->count();
+
+        $feed->assertOk()
+            ->assertJsonFragment(['id' => $notification->id])
+            ->assertJsonPath('unread_count', $unreadCount)
+            ->assertJsonPath('pending_members_count', $pendingMembersCount)
+            ->assertJsonPath('pending_borrowings_count', $pendingBorrowingsCount)
+            ->assertJsonPath('pending_reservations_count', $pendingReservationsCount);
+        $this->assertStringContainsString(
+            'no-store',
+            $feed->headers->get('Cache-Control')
+        );
+        $this->actingAs($this->admin)
+            ->get(route('members.index'))
+            ->assertOk()
+            ->assertSee('id="navMembersBadge"', false)
+            ->assertSee('id="navBorrowingsBadge"', false)
+            ->assertSee('id="navReservationsBadge"', false);
+    }
+
     public function test_first_login_queues_first_login_mail(): void
     {
         NotificationService::firstLogin($this->user, '127.0.0.1', 'PHPUnit');
