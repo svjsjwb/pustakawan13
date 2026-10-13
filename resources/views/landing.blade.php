@@ -439,8 +439,8 @@ function initCarousel() {
             desc: 'Temukan bacaan yang sesuai kebutuhan, minat, dan gaya hidupmu.'
         },
         {
-            title: 'Kira-Kira Ada <span class="carousel-title-nowrap">Buku Apa Aja, Ya?</span>',
-            desc: 'Cek katalog dan reservasi buku dengan mudah kapan saja, di mana saja.'
+            title: 'Penasaran Ada <span class="carousel-title-nowrap">Buku Apa Aja?!</span>',
+            desc: 'Nikmati kemudahan mencari dan melakukan reservasi buku kapan pun kamu butuhkan.'
         }
     ];
 
