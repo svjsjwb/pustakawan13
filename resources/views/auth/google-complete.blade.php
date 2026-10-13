@@ -263,6 +263,9 @@
 
         .division-select-trigger.is-placeholder {
             color: #718096;
+            font-family: Inter, "Segoe UI Variable", system-ui, sans-serif;
+            font-weight: 500;
+            letter-spacing: 0.1px;
         }
 
         .division-select-trigger:hover,
