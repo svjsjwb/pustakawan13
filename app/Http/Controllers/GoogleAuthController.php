@@ -215,7 +215,12 @@ class GoogleAuthController extends Controller
         */
 
         $validated = $request->validate([
-            'division' => [
+        'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+        'division' => [
                 'required',
                 'string',
                 'max:100',
@@ -268,7 +273,7 @@ class GoogleAuthController extends Controller
             $validated
         ) {
             $user = User::create([
-                'name'      => $googleRegistration['name'],
+                'name'      => $validated['name'],
                 'email'     => $googleRegistration['email'],
                 'google_id' => $googleRegistration['google_id'],
                 'password'  => null,
@@ -277,7 +282,7 @@ class GoogleAuthController extends Controller
 
             Member::create([
                 'user_id'       => $user->id,
-                'name'          => $googleRegistration['name'],
+                'name'          => $validated['name'],
                 'email'         => $googleRegistration['email'],
                 'division'      => $validated['division'],
                 'phone'         => null,
