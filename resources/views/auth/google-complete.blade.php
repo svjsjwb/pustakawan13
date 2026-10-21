@@ -626,8 +626,14 @@
                         Nama
                     </label>
 
-                    <input type="text" id="name" class="form-control" value="{{ $googleRegistration['name'] }}"
-                        readonly>
+                    <input
+    type="text"
+    id="name"
+    name="name"
+    class="form-control"
+    value="{{ old('name', $googleRegistration['name']) }}"
+    required
+>
 
                 </div>
 

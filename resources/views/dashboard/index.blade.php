@@ -60,9 +60,9 @@
 
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                            <path d="M9 7h6M9 11h6"/>
+                            <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/>
+                            <path d="M4 7h16M8 2v5M13 2v5"/>
+                            <path d="M8 12h8M8 16h5"/>
 
                         </svg>
 
@@ -103,9 +103,9 @@
 
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                            <path d="M12 6v6l3-2 3 2V6"/>
+                            <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/>
+                            <path d="M8 2v20"/>
+                            <path d="M12 8h5M15 5l3 3-3 3"/>
 
                         </svg>
 
@@ -146,10 +146,9 @@
 
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            <circle cx="9" cy="8" r="4"/>
+                            <path d="M3 21v-2a6 6 0 0 1 12 0v2"/>
+                            <path d="m16 11 2 2 4-4"/>
 
                         </svg>
 
@@ -190,8 +189,8 @@
 
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <circle cx="12" cy="12" r="9"/>
-                            <polyline points="12 7 12 12 14.5 14.5"/>
+                            <path d="M12 3 22 20H2L12 3z"/>
+                            <path d="M12 9v5M12 17h.01"/>
 
                         </svg>
 
@@ -245,10 +244,9 @@
 
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                                <line x1="18" y1="20" x2="18" y2="10"/>
-                                <line x1="12" y1="20" x2="12" y2="4"/>
-                                <line x1="6" y1="20" x2="6" y2="14"/>
-                                <line x1="3" y1="20" x2="21" y2="20"/>
+                                <path d="M3 3v18h18"/>
+                                <path d="m7 14 4-4 4 4 6-7"/>
+                                <path d="M17 7h4v4"/>
 
                             </svg>
 
@@ -379,9 +377,9 @@
 
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                                <polygon points="12 6 13.5 9 17 9.5 14.5 12 15 15.5 12 14 9 15.5 9.5 12 7 9.5 10.5 9 12 6"/>
+                                <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/>
+                                <path d="M4 7h16"/>
+                                <path d="m13 10 1.2 2.4 2.7.4-1.95 1.9.46 2.7L13 16.1l-2.41 1.27.46-2.7-1.95-1.9 2.7-.4L13 10z"/>
 
                             </svg>
 
@@ -462,7 +460,9 @@
 
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                <circle cx="12" cy="12" r="9"/>
+                                <path d="M12 7v5l3 2"/>
+                                <path d="M5 5 3 7"/>
 
                             </svg>
 
@@ -652,11 +652,10 @@
 
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                            <line x1="16" y1="2" x2="16" y2="6"/>
-                            <line x1="8" y1="2" x2="8" y2="6"/>
-                            <line x1="3" y1="10" x2="21" y2="10"/>
-                            <polyline points="9 16 11 18 15 14"/>
+                            <rect x="3" y="4" width="18" height="17" rx="2"/>
+                            <path d="M8 2v4M16 2v4M3 9h18"/>
+                            <path d="M8 14h3M8 17h2"/>
+                            <path d="m15 15 1.5 1.5L20 13"/>
 
                         </svg>
 
