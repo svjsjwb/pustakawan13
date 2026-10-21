@@ -31,4 +31,12 @@ class Activity extends Model
             ->withPivot('read_at')
             ->withTimestamps();
     }
+
+    /**
+     * Alias untuk relasi readers.
+     */
+    public function reads(): BelongsToMany
+    {
+        return $this->readers();
+    }
 }

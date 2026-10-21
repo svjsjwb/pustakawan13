@@ -34,9 +34,10 @@ class ForgotPasswordController extends Controller
         $email = strtolower(trim($data['email']));
         $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
-        // Jangan membocorkan apakah sebuah email terdaftar.
         if (!$user) {
-            return back()->with('success', 'Jika email tersebut terdaftar, kode OTP sudah dikirim. Silakan cek inbox/spam.');
+            return back()
+                ->withErrors(['email' => 'Email tersebut tidak terdaftar dalam sistem.'])
+                ->withInput();
         }
 
         $otp = (string) random_int(100000, 999999);
@@ -50,11 +51,18 @@ class ForgotPasswordController extends Controller
             'expires_at' => now()->addMinutes(self::OTP_TTL_MINUTES),
         ]);
 
-        $this->otpMailService->sendPasswordResetOtp(
-            $email,
-            $otp,
-            self::OTP_TTL_MINUTES
-        );
+        try {
+            $this->otpMailService->sendPasswordResetOtp(
+                $email,
+                $otp,
+                self::OTP_TTL_MINUTES
+            );
+        } catch (\Throwable $e) {
+            report($e);
+            return back()
+                ->withErrors(['email' => 'Gagal mengirim email OTP. Silakan periksa koneksi internet atau coba sesaat lagi.'])
+                ->withInput();
+        }
 
         $request->session()->put('password_reset_email', $email);
         $request->session()->forget('password_reset_verified');
@@ -144,11 +152,16 @@ class ForgotPasswordController extends Controller
             'expires_at' => now()->addMinutes(self::OTP_TTL_MINUTES),
         ]);
 
-        $this->otpMailService->sendPasswordResetOtp(
-            $email,
-            $otp,
-            self::OTP_TTL_MINUTES
-        );
+        try {
+            $this->otpMailService->sendPasswordResetOtp(
+                $email,
+                $otp,
+                self::OTP_TTL_MINUTES
+            );
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withErrors(['otp' => 'Gagal mengirim ulang OTP. Silakan coba sesaat lagi.']);
+        }
 
         $request->session()->forget('password_reset_verified');
 
@@ -188,8 +201,8 @@ class ForgotPasswordController extends Controller
             ]);
         }
 
-        // User model memakai cast 'hashed', jadi password akan di-hash otomatis.
-        $user->password = $data['password'];
+        // Simpan password baru ter-hash
+        $user->password = Hash::make($data['password']);
         $user->save();
 
         PasswordResetOtp::where('email', $email)->delete();

@@ -4,7 +4,7 @@
 
 .member-page {
     width: 100%;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 10px 0 40px;
     box-sizing: border-box;
@@ -60,7 +60,7 @@
 .member-hero-content {
     position: relative;
     z-index: 1;
-    max-width: 750px;
+    max-width: 850px;
 }
 
 .member-hero-label {
@@ -213,7 +213,7 @@
 .alert-success {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 
     background: #f0fdf4;
 
@@ -271,17 +271,11 @@
 .member-card {
     width: 100%;
     box-sizing: border-box;
-
-    background: #ffffff;
-
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-
-    box-shadow:
-        0 4px 16px rgba(27, 42, 58, 0.04),
-        0 1px 3px rgba(27, 42, 58, 0.02);
-
-    overflow: hidden;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
 }
 
 
@@ -1307,7 +1301,7 @@
     max-width: 100%;
     box-sizing: border-box;
     background: #fff;
-    border: 1px solid #e2ebeb;
+    border: 1px solid #e1ebeb;
     border-radius: 10px;
     padding: 14px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.025);
@@ -1323,7 +1317,7 @@
     align-items: center;
     gap: 10px;
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 22px;
     box-sizing: border-box;
 }
 
@@ -1335,37 +1329,161 @@
 
 .member-search input {
     width: 100%;
-    height: 38px;
+    height: 42px;
     box-sizing: border-box;
-    padding: 0 12px 0 36px;
+    padding: 0 16px 0 42px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #19364f;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .member-search-icon {
     position: absolute;
-    left: 12px;
+    left: 14px;
     top: 50%;
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     transform: translateY(-50%);
+    color: #64748b;
     pointer-events: none;
 }
 
+.member-search::before,
+.member-search::after {
+    display: none;
+}
+
+.member-search input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.member-search input:focus {
+    border-color: #287f80;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(40, 127, 128, 0.12);
+}
+
 .member-status-filter {
+    position: relative;
     flex: 0 0 auto;
-    height: 38px;
+    height: 42px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 0 13px;
-    border: 0;
-    border-radius: 6px;
+    gap: 9px;
+    padding: 0 16px;
+    border: 1px solid #287f80;
+    border-radius: 22px;
+    background: #287f80;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.member-status-filter:hover,
+.member-status-filter[aria-expanded="true"] {
+    background: #236f70;
+    border-color: #236f70;
+    box-shadow: 0 4px 10px rgba(40, 127, 128, 0.18);
+}
+
+.member-status-filter:hover {
+    transform: translateY(-1px);
 }
 
 .member-status-filter svg {
-    width: 14px;
-    height: 14px;
+    width: 17px;
+    height: 17px;
+}
+
+.member-status-chevron {
+    width: 15px !important;
+    height: 15px !important;
+    transition: transform 0.2s ease;
+}
+
+.member-status-filter[aria-expanded="true"] .member-status-chevron {
+    transform: rotate(180deg);
+}
+
+.member-status-dropdown {
+    position: relative;
+    flex: 0 0 auto;
+    z-index: 50;
+}
+
+.member-status-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px;
+    max-width: calc(100vw - 32px);
+    padding: 14px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 14px 35px rgba(27, 42, 58, 0.12), 0 3px 10px rgba(27, 42, 58, 0.05);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+}
+
+.member-status-menu.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.member-status-option {
+    width: 100%;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    margin: 0 0 8px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    border: 1px solid #e2e8f0;
+    border-radius: 22px;
+    background: #ffffff;
+    color: #334155;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.member-status-option:last-child {
+    margin-bottom: 0;
+}
+
+.member-status-option:hover {
+    background: #eef8f7;
+    border-color: #b9dcdc;
+    color: #236f70;
+}
+
+.member-status-option.active,
+.member-status-option.active:hover {
+    background: #287f80;
+    border-color: #287f80;
+    color: #ffffff;
 }
 
 
@@ -1473,7 +1591,7 @@
     }
 
     .member-hero {
-        padding: 23px 24px;
+        padding: 28px 36px;
     }
 
     .member-toolbar {
@@ -1607,6 +1725,48 @@
 .action-buttons .btn-delete svg {
     display: block;
     flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+    .member-hero {
+        min-height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 30px;
+        margin-bottom: 24px;
+    }
+
+    .member-hero-label {
+        font-size: 15px;
+    }
+
+    .member-hero h1 {
+        font-size: 30px;
+    }
+
+    .member-hero p {
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .member-hero-action,
+    .member-hero-action .btn-add-top {
+        width: 100%;
+    }
+
+    .member-filter-row {
+        flex-wrap: wrap;
+    }
+
+    .member-search {
+        flex: 1 1 100%;
+    }
+
+    .member-status-dropdown,
+    .member-status-filter {
+        width: 100%;
+    }
 }
 
 .action-buttons .btn-edit svg {

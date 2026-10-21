@@ -371,6 +371,7 @@
         opacity: 0;
         transform: translateY(-46%) scale(0.96);
     }
+
     100% {
         opacity: 1;
         transform: translateY(-50%) scale(1);
@@ -415,17 +416,24 @@
     height: 200px;
     transform-style: preserve-3d;
     will-change: transform, opacity, filter;
-    transition: transform 0.65s cubic-bezier(0.25, 1, 0.35, 1),
-                opacity 0.65s ease,
-                filter 0.65s ease,
-                box-shadow 0.65s ease;
+    transition: none;
     cursor: pointer;
+}
+
+/* Aktifkan transisi hanya setelah halaman selesai di-render (mencegah animasi berulang saat refresh) */
+.user-coverflow-stage.is-ready .user-coverflow-card {
+    transition: transform 0.65s cubic-bezier(0.25, 1, 0.35, 1),
+        opacity 0.65s ease,
+        visibility 0.65s ease,
+        filter 0.65s ease,
+        box-shadow 0.65s ease;
 }
 
 /* 3D Coverflow State Transforms - Centered, Compact & Perfectly Contained */
 .user-coverflow-card.is-active {
     transform: translateX(0) translateZ(65px) rotateY(0deg) scale(1.08);
     opacity: 1;
+    visibility: visible;
     z-index: 10;
     filter: brightness(1);
     pointer-events: auto;
@@ -434,6 +442,7 @@
 .user-coverflow-card.is-left-1 {
     transform: translateX(-92px) translateZ(-30px) rotateY(36deg) scale(0.85);
     opacity: 0.75;
+    visibility: visible;
     z-index: 6;
     filter: brightness(0.82);
     pointer-events: auto;
@@ -442,6 +451,7 @@
 .user-coverflow-card.is-right-1 {
     transform: translateX(92px) translateZ(-30px) rotateY(-36deg) scale(0.85);
     opacity: 0.75;
+    visibility: visible;
     z-index: 6;
     filter: brightness(0.82);
     pointer-events: auto;
@@ -450,6 +460,7 @@
 .user-coverflow-card.is-left-2 {
     transform: translateX(-150px) translateZ(-90px) rotateY(46deg) scale(0.70);
     opacity: 0.38;
+    visibility: visible;
     z-index: 3;
     filter: brightness(0.65);
     pointer-events: auto;
@@ -458,6 +469,7 @@
 .user-coverflow-card.is-right-2 {
     transform: translateX(150px) translateZ(-90px) rotateY(-46deg) scale(0.70);
     opacity: 0.38;
+    visibility: visible;
     z-index: 3;
     filter: brightness(0.65);
     pointer-events: auto;
@@ -466,6 +478,7 @@
 .user-coverflow-card.is-hidden-left {
     transform: translateX(-200px) translateZ(-180px) rotateY(52deg) scale(0.55);
     opacity: 0;
+    visibility: hidden;
     z-index: 1;
     pointer-events: none;
 }
@@ -473,6 +486,7 @@
 .user-coverflow-card.is-hidden-right {
     transform: translateX(200px) translateZ(-180px) rotateY(-52deg) scale(0.55);
     opacity: 0;
+    visibility: hidden;
     z-index: 1;
     pointer-events: none;
 }
@@ -524,13 +538,11 @@
     width: 151px;
     border-radius: 3px 8px 8px 3px;
     background:
-        repeating-linear-gradient(
-            to bottom,
+        repeating-linear-gradient(to bottom,
             #f0f0e8 0,
             #f0f0e8 1px,
             #d5d8cf 1px,
-            #d5d8cf 2px
-        );
+            #d5d8cf 2px);
     box-shadow:
         3px 5px 9px rgba(8, 28, 28, 0.25),
         inset -4px 0 5px rgba(104, 115, 103, 0.16);
@@ -557,14 +569,17 @@
 .user-coverflow-card.is-active .coverflow-card-inner {
     animation: coverflowActiveFloat 3.8s ease-in-out infinite;
     box-shadow: 0 20px 38px -6px rgba(9, 28, 27, 0.65),
-                0 0 20px rgba(40, 124, 124, 0.35),
-                0 0 0 1.5px rgba(168, 213, 209, 0.45);
+        0 0 20px rgba(40, 124, 124, 0.35),
+        0 0 0 1.5px rgba(168, 213, 209, 0.45);
 }
 
 @keyframes coverflowActiveFloat {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-4px);
     }
@@ -624,7 +639,7 @@
 .fallback-spine {
     width: 11px;
     height: 100%;
-    background: linear-gradient(90deg, rgba(0,0,0,0.3) 0%, rgba(255,255,255,0.12) 50%, rgba(0,0,0,0.2) 100%);
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.3) 0%, rgba(255, 255, 255, 0.12) 50%, rgba(0, 0, 0, 0.2) 100%);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
 }
@@ -684,7 +699,7 @@
     inset: 0;
     pointer-events: none;
     z-index: 3;
-    background: linear-gradient(130deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.04) 40%, transparent 60%);
+    background: linear-gradient(130deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.04) 40%, transparent 60%);
 }
 
 /* Card Info Overlay */
@@ -764,7 +779,8 @@
 }
 
 .user-coverflow-card:not(.is-active) .coverflow-author {
-    display: none; /* Sembunyikan detail penulis untuk buku samping */
+    display: none;
+    /* Sembunyikan detail penulis untuk buku samping */
 }
 
 /* Realistic Ground Reflection */
@@ -1216,7 +1232,8 @@
     filter: none;
     transform-origin: center center;
     transform-style: preserve-3d;
-    pointer-events: none !important; /* Default for all side cards */
+    pointer-events: none !important;
+    /* Default for all side cards */
 }
 
 /* Transitions ONLY activate after carousel is properly initialized */
@@ -1230,9 +1247,9 @@
 /* Fast transitions for manual user navigation (click/swipe) */
 .user-book-carousel-viewport.is-ready.is-fast .motion-book-card {
     transition:
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 420ms ease,
-    filter 420ms ease !important;
+        transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 420ms ease,
+        filter 420ms ease !important;
 }
 
 .user-book-carousel-viewport .motion-book-card.no-transition,
@@ -1281,7 +1298,8 @@
     opacity: 1 !important;
     filter: brightness(1) !important;
     transform: translate3d(0, -18px, 45px) rotateY(0deg) scale(1.10) !important;
-    pointer-events: auto !important; /* HANYA center card yang menerima klik dan hover */
+    pointer-events: auto !important;
+    /* HANYA center card yang menerima klik dan hover */
     cursor: pointer;
 }
 
@@ -1312,7 +1330,8 @@
     filter: brightness(0.88) !important;
     transform: translate3d(-240px, 0px, -25px) rotateY(24deg) scale(0.94) !important;
     transform-origin: right center;
-    pointer-events: none !important; /* Diam saat mouse di center */
+    pointer-events: none !important;
+    /* Diam saat mouse di center */
 }
 
 .user-book-carousel-viewport .motion-book-card.book-carousel-slot-1 .user-book-cover,
@@ -1330,7 +1349,8 @@
     filter: brightness(0.88) !important;
     transform: translate3d(240px, 0px, -25px) rotateY(-24deg) scale(0.94) !important;
     transform-origin: left center;
-    pointer-events: none !important; /* Diam saat mouse di center */
+    pointer-events: none !important;
+    /* Diam saat mouse di center */
 }
 
 .user-book-carousel-viewport .motion-book-card.book-carousel-slot-3 .user-book-cover,
@@ -1408,25 +1428,31 @@
         width: 170px !important;
         margin-left: -85px !important;
     }
+
     .user-book-carousel-viewport .motion-book-card.book-carousel-slot-1,
     .user-book-carousel-viewport .motion-book-card.book-carousel-previous {
         transform: translate3d(-155px, 0px, -20px) rotateY(22deg) scale(0.88) !important;
     }
+
     .user-book-carousel-viewport .motion-book-card.book-carousel-slot-3,
     .user-book-carousel-viewport .motion-book-card.book-carousel-next {
         transform: translate3d(155px, 0px, -20px) rotateY(-22deg) scale(0.88) !important;
     }
+
     .user-book-carousel-viewport .motion-book-card.book-carousel-slot-0 {
         transform: translate3d(-290px, 6px, -60px) rotateY(32deg) scale(0.72) !important;
         opacity: 0.35 !important;
     }
+
     .user-book-carousel-viewport .motion-book-card.book-carousel-slot-4 {
         transform: translate3d(290px, 6px, -60px) rotateY(-32deg) scale(0.72) !important;
         opacity: 0.35 !important;
     }
+
     .user-book-carousel-viewport .motion-book-card.book-carousel-slot-exit {
         transform: translate3d(-420px, 10px, -100px) scale(0.5) !important;
     }
+
     .user-book-carousel-viewport .motion-book-card.book-carousel-slot-entry {
         transform: translate3d(420px, 10px, -100px) scale(0.5) !important;
     }
@@ -3587,8 +3613,7 @@
     border-radius: 16px;
 
     box-shadow:
-        0 24px 50px
-        rgba(13, 34, 34, 0.28);
+        0 24px 50px rgba(13, 34, 34, 0.28);
 
     box-sizing: border-box;
 
@@ -3678,8 +3703,7 @@
     cursor: pointer;
 
     box-shadow:
-        0 3px 10px
-        rgba(40, 123, 123, 0.20);
+        0 3px 10px rgba(40, 123, 123, 0.20);
 
     transition:
         background 0.15s ease,
@@ -3786,7 +3810,7 @@
     padding: 36px 32px;
 }
 
-.user-book-detail > .user-book-category {
+.user-book-detail>.user-book-category {
     align-self: flex-start;
     margin-bottom: 12px;
     padding: 4px 12px;
@@ -3843,7 +3867,7 @@
     margin-bottom: 18px;
 }
 
-.user-book-synopsis > span {
+.user-book-synopsis>span {
     margin-bottom: 6px;
     color: #849392;
     font-size: 12px;

@@ -98,6 +98,88 @@ body.dark-theme {
     box-shadow: 0 2px 10px rgba(15, 118, 110, 0.14);
 }
 
+.pd-trigger.filter-status-green {
+    color: #14532d;
+    background: rgba(22, 163, 74, 0.10);
+    border-color: rgba(22, 163, 74, 0.28);
+    box-shadow: 0 2px 10px rgba(22, 163, 74, 0.12);
+}
+
+.pd-trigger.filter-status-green:hover,
+.pd-trigger.filter-status-green.is-open {
+    color: #14532d;
+    background: rgba(22, 163, 74, 0.18);
+    border-color: rgba(22, 163, 74, 0.28);
+}
+
+.pd-trigger.filter-status-red {
+    color: #7f1d1d;
+    background: rgba(220, 38, 38, 0.10);
+    border-color: rgba(220, 38, 38, 0.28);
+    box-shadow: 0 2px 10px rgba(220, 38, 38, 0.12);
+}
+
+.pd-trigger.filter-status-red:hover,
+.pd-trigger.filter-status-red.is-open {
+    color: #7f1d1d;
+    background: rgba(220, 38, 38, 0.18);
+    border-color: rgba(220, 38, 38, 0.28);
+}
+
+.pd-trigger.filter-status-green .pd-trigger-icon,
+.pd-trigger.filter-status-green .pd-trigger-arrow,
+.pd-trigger.filter-status-red .pd-trigger-icon,
+.pd-trigger.filter-status-red .pd-trigger-arrow {
+    color: inherit;
+}
+
+.pd-trigger.reservation-status-menunggu {
+    --status-trigger-color: #92400e;
+    --status-trigger-bg: rgba(245, 158, 11, 0.10);
+    --status-trigger-hover-bg: rgba(245, 158, 11, 0.18);
+    --status-trigger-border: rgba(245, 158, 11, 0.28);
+}
+
+.pd-trigger.reservation-status-disetujui {
+    --status-trigger-color: #14532d;
+    --status-trigger-bg: rgba(22, 163, 74, 0.10);
+    --status-trigger-hover-bg: rgba(22, 163, 74, 0.18);
+    --status-trigger-border: rgba(22, 163, 74, 0.28);
+}
+
+.pd-trigger.reservation-status-siap {
+    --status-trigger-color: #0f4940;
+    --status-trigger-bg: rgba(15, 118, 110, 0.10);
+    --status-trigger-hover-bg: rgba(15, 118, 110, 0.18);
+    --status-trigger-border: rgba(15, 118, 110, 0.28);
+}
+
+.pd-trigger.reservation-status-ditolak {
+    --status-trigger-color: #7f1d1d;
+    --status-trigger-bg: rgba(220, 38, 38, 0.10);
+    --status-trigger-hover-bg: rgba(220, 38, 38, 0.18);
+    --status-trigger-border: rgba(220, 38, 38, 0.28);
+}
+
+.pd-trigger[class*="reservation-status-"] {
+    color: var(--status-trigger-color);
+    background: var(--status-trigger-bg);
+    border-color: var(--status-trigger-border);
+    box-shadow: 0 2px 10px var(--status-trigger-border);
+}
+
+.pd-trigger[class*="reservation-status-"]:hover,
+.pd-trigger[class*="reservation-status-"].is-open {
+    color: var(--status-trigger-color);
+    background: var(--status-trigger-hover-bg);
+    border-color: var(--status-trigger-border);
+}
+
+.pd-trigger[class*="reservation-status-"] .pd-trigger-icon,
+.pd-trigger[class*="reservation-status-"] .pd-trigger-arrow {
+    color: inherit;
+}
+
 /* Trigger Icon */
 .pd-trigger-icon {
     display: flex;

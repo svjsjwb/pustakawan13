@@ -11,6 +11,8 @@ use App\Mail\ExtensionStatusMail;
 use App\Mail\FirstLoginMail;
 use App\Mail\ReservationStatusMail;
 use App\Mail\ReservationSubmittedMail;
+use App\Mail\UserApprovedMail;
+use App\Mail\UserRejectedMail;
 use App\Mail\WelcomeMail;
 use App\Models\AppNotification;
 use App\Models\Borrowing;
@@ -122,6 +124,36 @@ class NotificationService
             actionUrl: url('/members'),
             actionLabel: 'Kelola Anggota'
         ));
+    }
+
+    /**
+     * Pendaftaran user disetujui oleh admin.
+     */
+    public static function userApproved(User $user): void
+    {
+        // 1. In-app notification ke User
+        AppNotification::notifyUser(
+            $user->id,
+            'user_approved',
+            'Pendaftaran Akun Disetujui!',
+            'Selamat! Akun Anda telah disetujui oleh Admin. Anda kini dapat meminjam dan mereservasi buku.',
+            ['user_id' => $user->id]
+        );
+
+        // 2. Email notification ke User
+        if ($user->email) {
+            self::queueMailSafely($user->email, new UserApprovedMail($user), 'user_approved', $user->id, 'Akun Anda Telah Disetujui');
+        }
+    }
+
+    /**
+     * Pendaftaran user ditolak oleh admin.
+     */
+    public static function userRejected(string $name, string $email, ?string $reason = null): void
+    {
+        if ($email) {
+            self::queueMailSafely($email, new UserRejectedMail($name, $email, $reason), 'user_rejected', null, 'Informasi Status Pendaftaran');
+        }
     }
 
     /**

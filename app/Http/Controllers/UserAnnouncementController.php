@@ -2,12 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
+use Illuminate\Support\Facades\Schema;
+
 class UserAnnouncementController extends Controller
 {
     public function index()
     {
-        // Pengumuman statis yang realistis untuk perpustakaan perusahaan
-        $announcements = collect([
+        $dbAnnouncements = collect();
+
+        if (Schema::hasTable('activities')) {
+            $dbAnnouncements = Activity::orderByDesc('pinned_at')
+                ->latest()
+                ->get()
+                ->map(function ($act) {
+                    return [
+                        'id'       => $act->id,
+                        'type'     => $act->pinned_at ? 'reminder' : 'info',
+                        'category' => $act->pinned_at ? 'Pemberitahuan Penting' : 'Pengumuman Resmi',
+                        'title'    => $act->title,
+                        'content'  => $act->description ?? 'Tidak ada rincian tambahan.',
+                        'date'     => $act->created_at ? $act->created_at->format('Y-m-d') : now()->format('Y-m-d'),
+                        'pinned'   => (bool) $act->pinned_at,
+                        'author'   => 'Admin Perpustakaan',
+                    ];
+                });
+        }
+
+        // Pengumuman umum perpustakaan perusahaan
+        $defaultAnnouncements = collect([
             [
                 'id'       => 1,
                 'type'     => 'info',
@@ -69,6 +92,8 @@ class UserAnnouncementController extends Controller
                 'author'   => 'Tim IT',
             ],
         ]);
+
+        $announcements = $dbAnnouncements->merge($defaultAnnouncements);
 
         return view('user.announcements', compact('announcements'));
     }

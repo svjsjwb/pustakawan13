@@ -54,6 +54,10 @@
                 href="{{ route('members.index') }}"
                 class="{{ request()->routeIs('members.*') ? 'active' : '' }}">
                 Anggota
+                @if (Auth::check() && Auth::user()->role === 'admin')
+                    <span id="navMembersBadge" class="nav-count-badge"
+                        aria-label="Pendaftar anggota menunggu persetujuan"></span>
+                @endif
             </a>
 
 
@@ -63,6 +67,10 @@
                 href="{{ route('borrowings.index') }}"
                 class="{{ request()->routeIs('borrowings.*') ? 'active' : '' }}">
                 Peminjaman Buku
+                @if (Auth::check() && Auth::user()->role === 'admin')
+                    <span id="navBorrowingsBadge" class="nav-count-badge"
+                        aria-label="Peminjaman menunggu diproses"></span>
+                @endif
             </a>
 
 
@@ -72,6 +80,10 @@
                 href="{{ route('reservations.index') }}"
                 class="{{ request()->routeIs('reservations.*') ? 'active' : '' }}">
                 Reservasi Buku
+                @if (Auth::check() && Auth::user()->role === 'admin')
+                    <span id="navReservationsBadge" class="nav-count-badge"
+                        aria-label="Reservasi menunggu diproses"></span>
+                @endif
             </a>
 
 
@@ -92,14 +104,12 @@
             {{-- NOTIFIKASI DROPDOWN --}}
             @auth
             <div class="nav-notif-container" style="position: relative;">
-                <button type="button" id="navNotifBtn" title="Notifikasi"
-                    style="background:none; border:none; color:#fff; cursor:pointer; position:relative; padding:6px; display:flex; align-items:center; justify-content:center; opacity: 0.85;"
-                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.85'">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:19px;height:19px;">
+                <button type="button" id="navNotifBtn" class="admin-notif-button" title="Notifikasi">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                     </svg>
-                    <span id="navNotifBadge" style="display:none; position:absolute; top:1px; right:1px; background:#e05252; color:#fff; font-size:10px; font-weight:800; min-width:15px; height:15px; border-radius:8px; line-height:15px; text-align:center; padding:0 3px;"></span>
+                    <span id="navNotifBadge" class="admin-notif-badge" style="display:none;"></span>
                 </button>
 
                 <div id="navNotifDropdown" style="display:none; position:absolute; right:0; top:calc(100% + 12px); width:320px; background:#fff; border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.18); border:1px solid #e2eeee; z-index:9999; overflow:hidden; color:#1e3d3d;">
@@ -117,20 +127,17 @@
             {{-- PROFILE DROPDOWN --}}
             <div id="adminProfileDropdown" style="position:relative;">
                 {{-- Trigger: avatar + nama + chevron --}}
-                <button type="button" id="adminProfileBtn"
-                    style="display:flex;align-items:center;gap:9px;background:transparent;border:none;padding:4px 8px;border-radius:8px;cursor:pointer;transition:background 0.2s;"
-                    onmouseover="this.style.background='rgba(255,255,255,0.12)'"
-                    onmouseout="if(!document.getElementById('adminProfileMenu').classList.contains('open'))this.style.background='transparent'">
-                    <div style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#d7e5e5;color:#287b7b;font-size:15px;font-weight:700;flex-shrink:0;">
+                <button type="button" id="adminProfileBtn" class="admin-profile-button">
+                    <div class="admin-profile-avatar">
                         {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
                     </div>
-                    <div style="display:flex;flex-direction:column;line-height:1.2;text-align:left;">
-                        <span style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;">{{ Auth::user()->name ?? 'Admin' }}</span>
-                        <span style="font-size:11px;color:rgba(255,255,255,0.8);white-space:nowrap;">{{ (Auth::check() && Auth::user()->role === 'admin') ? 'Admin Perpustakaan' : 'Anggota' }}</span>
+                    <div class="admin-profile-meta">
+                        <span class="admin-profile-name">{{ Auth::user()->name ?? 'Admin' }}</span>
+                        <span class="admin-profile-role">{{ (Auth::check() && Auth::user()->role === 'admin') ? 'Admin Perpustakaan' : 'Anggota' }}</span>
                     </div>
                     {{-- Chevron --}}
                     <svg id="adminProfileChevron" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-                        style="width:14px;height:14px;margin-left:2px;transition:transform 0.2s;flex-shrink:0;">
+                        class="admin-profile-chevron">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </button>
@@ -180,15 +187,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const btn = document.getElementById('navNotifBtn');
     const dropdown = document.getElementById('navNotifDropdown');
     const badge = document.getElementById('navNotifBadge');
+    const membersBadge = document.getElementById('navMembersBadge');
+    const borrowingsBadge = document.getElementById('navBorrowingsBadge');
+    const reservationsBadge = document.getElementById('navReservationsBadge');
     const list = document.getElementById('navNotifList');
 
     if (btn && dropdown) {
+        function updateCountBadge(element, count) {
+            if (!element) return;
+            element.style.display = count > 0 ? 'inline-flex' : 'none';
+            element.textContent = count > 99 ? '99+' : count;
+        }
+
         function fetchNotifications() {
-            fetch('{{ route("notifications.index") }}')
-                .then(res => res.json())
+            fetch('{{ route("notifications.index") }}', { cache: 'no-store' })
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`Gagal memuat notifikasi (${res.status})`);
+                    }
+                    return res.json();
+                })
                 .then(data => {
+                    updateCountBadge(membersBadge, data.pending_members_count || 0);
+                    updateCountBadge(borrowingsBadge, data.pending_borrowings_count || 0);
+                    updateCountBadge(reservationsBadge, data.pending_reservations_count || 0);
+
                     if (data.unread_count > 0) {
-                        badge.style.display = 'inline-block';
+                        badge.style.display = 'inline-flex';
                         badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
                     } else {
                         badge.style.display = 'none';
@@ -211,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         list.innerHTML = '<div style="padding:20px; text-align:center; color:#8fa6a6;">Tidak ada notifikasi</div>';
                     }
                 })
-                .catch(() => {});
+                .catch(error => console.error('Pembaruan notifikasi navbar gagal:', error));
         }
 
         btn.addEventListener('click', function (e) {

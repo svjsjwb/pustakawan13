@@ -1768,8 +1768,7 @@
     border-color: #287f80;
 
     box-shadow:
-        0 0 0 3px
-        rgba(40, 127, 128, .12);
+        0 0 0 3px rgba(40, 127, 128, .12);
 
 }
 
@@ -1833,8 +1832,7 @@
     color: #ffffff;
 
     box-shadow:
-        0 3px 8px
-        rgba(40, 127, 128, .20);
+        0 3px 8px rgba(40, 127, 128, .20);
 
     transform: translateY(-1px);
 
@@ -2014,8 +2012,7 @@
     border-color: #287f80;
 
     box-shadow:
-        0 0 0 3px
-        rgba(40, 127, 128, .12);
+        0 0 0 3px rgba(40, 127, 128, .12);
 
 }
 
@@ -2072,8 +2069,7 @@
     border-radius: 10px;
 
     box-shadow:
-        0 2px 8px
-        rgba(27, 42, 58, .025);
+        0 2px 8px rgba(27, 42, 58, .025);
 
 }
 
@@ -2975,12 +2971,10 @@ svg {
     overflow: hidden;
 
     background:
-        linear-gradient(
-            110deg,
+        linear-gradient(110deg,
             #eef8f7 0%,
             #f5fbfb 55%,
-            #ffffff 100%
-        );
+            #ffffff 100%);
 
     border: 1px solid #d9ebea;
     border-radius: 16px;
@@ -3491,18 +3485,20 @@ svg {
         flex-wrap: wrap;
         justify-content: center;
     }
-@media (max-width: 650px) {
 
-    .books-pagination {
-        min-height: auto;
+    @media (max-width: 650px) {
 
-        flex-direction: column;
+        .books-pagination {
+            min-height: auto;
 
-        align-items: stretch;
+            flex-direction: column;
 
-        padding: 16px;
+            align-items: stretch;
+
+            padding: 16px;
+        }
     }
-}}
+}
 
 
 /* =========================================================
@@ -3578,8 +3574,7 @@ svg {
     transition: transform .2s ease;
 }
 
-.books-page .books-category-trigger.is-open
-.books-category-trigger-chevron {
+.books-page .books-category-trigger.is-open .books-category-trigger-chevron {
     transform: rotate(180deg);
 }
 
@@ -3730,8 +3725,7 @@ svg {
     font-weight: 700;
 }
 
-.books-page .books-category-option.active
-.books-category-count {
+.books-page .books-category-option.active .books-category-count {
     background: rgba(255, 255, 255, .22);
     color: #ffffff;
 }

@@ -116,6 +116,138 @@
     white-space: nowrap;
 }
 
+.nav-count-badge {
+    position: absolute;
+    top: calc(50% - 17px);
+    right: -9px;
+    box-sizing: border-box;
+    width: 13px;
+    height: 13px;
+    padding: 0;
+    border: 1px solid #287b7b;
+    border-radius: 50%;
+    background: #e05252;
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.admin-notif-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1.5px solid rgba(255, 255, 255, 0.72);
+    border-radius: 13px;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-notif-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.admin-notif-button:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.admin-profile-button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 9px 3px 4px;
+    border: 1.5px solid rgba(255, 255, 255, 0.72);
+    border-radius: 9999px;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #d7e5e5;
+    color: #287b7b;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.admin-profile-meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    text-align: left;
+}
+
+.admin-profile-name {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-profile-role {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.admin-profile-chevron {
+    width: 12px;
+    height: 12px;
+    margin-left: 1px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.admin-profile-button:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.admin-notif-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border: 2px solid #fff;
+    border-radius: 9999px;
+    background: #DC2626;
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.45);
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    z-index: 2;
+}
+
 
 .main-nav a:hover {
     color: #fff;
@@ -354,6 +486,10 @@
 
     .main-nav a {
         height: 40px;
+    }
+
+    .nav-count-badge {
+        top: -2px;
     }
 
 }

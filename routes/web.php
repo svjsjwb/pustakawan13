@@ -43,6 +43,7 @@ Route::middleware('guest')->group(function () {
 
     // Proses login (email + password → redirect berdasarkan role)
     Route::post('/login', [LoginController::class, 'login'])
+        ->middleware('throttle:5,1')
         ->name('login.store');
 
     // Lupa password dengan OTP email
@@ -68,6 +69,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'create'])
         ->name('register');
     Route::post('/register', [RegisterController::class, 'store'])
+        ->middleware('throttle:10,1')
         ->name('register.store');
 
     // Google OAuth
@@ -94,6 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/borrowings', [RoleAwareNavigationController::class, 'borrowings'])->name('borrowings.index');
     Route::get('/history', [RoleAwareNavigationController::class, 'history'])->name('history');
     Route::patch('/borrowings/{borrowing}/extend', [UserBorrowingController::class, 'extend'])->name('borrowings.extend');
+    Route::post('/activities/{activity}/read', [ActivityController::class, 'markAsRead'])->name('activities.markAsRead');
 });
 
 // ============================================================
@@ -240,9 +243,6 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     Route::post('/user/loans/request', [UserBorrowingController::class, 'store'])->name('user.loans.store');
     Route::patch('/user/loans/{borrowing}/extend', [UserBorrowingController::class, 'requestExtension'])->name('user.loans.extend');
 
-    // RIWAYAT
-    Route::get('/user/history', [UserHistoryController::class, 'index'])->name('user.history');
-
     // FAVORIT
     Route::get('/user/favorites',         [UserFavoriteController::class, 'index'])->name('user.favorites');
     Route::post('/user/favorites/toggle', [UserFavoriteController::class, 'toggle'])->name('user.favorites.toggle');
@@ -267,6 +267,9 @@ Route::middleware(['auth', 'role.user'])->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+
+    // RIWAYAT — bisa diakses semua user terautentikasi (member, guest, admin)
+    Route::get('/user/history', [UserHistoryController::class, 'index'])->name('user.history');
 
     // PROFIL — bisa diakses guest maupun member
     Route::get('/user/profile', [UserProfileController::class, 'index'])

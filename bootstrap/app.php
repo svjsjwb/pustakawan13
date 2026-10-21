@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('library:send-due-reminders')->dailyAt('07:00');
     })
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            \App\Http\Middleware\PreventBackHistory::class,
+        ]);
+
         // Alias middleware untuk proteksi role
         $middleware->alias([
             'admin'     => \App\Http\Middleware\AdminMiddleware::class,

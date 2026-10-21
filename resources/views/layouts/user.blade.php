@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="{{ asset('css/user-theme.css') }}">
     <link rel="stylesheet" href="{{ asset('css/premium-dropdown.css') }}">
     <link rel="stylesheet" href="{{ asset('css/guest-approval.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/activity-popup.css') }}?v={{ time() }}">
 
     {{-- Anti-flash dark mode & layout density initializer --}}
     <script>
@@ -71,7 +72,7 @@
     {{-- Guest Approval Popup --}}
     @auth
         @if (Auth::user()->role === 'guest')
-            <div class="guest-approval-overlay" id="guestApprovalPopup">
+            <div class="guest-approval-overlay" id="guestApprovalPopup" data-user-id="{{ Auth::id() }}">
                 <div class="guest-approval-modal">
 
                     <button type="button" class="guest-approval-close" onclick="closeGuestApprovalPopup()"
@@ -105,11 +106,14 @@
         @endif
     @endauth
 
+    {{-- Shopee-Style Activity / Announcement Popup --}}
+    @include('partials.activity-popup')
+
     {{-- Toast container --}}
     <div id="ulToastContainer"></div>
 
     <script src="{{ asset('js/app.js') }}"></script>
-    <script src="{{ asset('js/guest-approval.js') }}"></script>
+    <script src="{{ asset('js/guest-approval.js') }}?v={{ time() }}"></script>
     <script>
         // ── Auto-hide flash ───────────────────────────────────────
         setTimeout(() => {

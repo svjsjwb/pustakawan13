@@ -1,45 +1,63 @@
-<!DOCTYPE html>
-<html lang="id">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Peminjaman Disetujui</title></head>
-<body style="margin:0;padding:0;background:#f0f4f8;font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;line-height:1.7;">
-<div style="max-width:600px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);">
-  <div style="background:linear-gradient(135deg,#166534,#15803d);padding:32px 24px;text-align:center;">
-    <div style="display:inline-block;padding:6px 18px;background:rgba(255,255,255,0.18);border-radius:9999px;color:#ffffff;font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;">
-      📚 Perpustakaan Tiga Serangkai
-    </div>
-    <div style="text-align:center;">
-      @php
-        $logoPath = public_path('images/logo-tiga-serangkai.png');
-        $logoSrc = (isset($message) && is_object($message) && method_exists($message, 'embed') && file_exists($logoPath)) ? $message->embed($logoPath) : asset('images/logo-tiga-serangkai.png');
-      @endphp
-      <div style="display:inline-block;background:#ffffff;padding:10px 18px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
-        <img src="{{ $logoSrc }}" alt="Logo Tiga Serangkai" style="height:56px;max-width:200px;width:auto;display:block;margin:0 auto;border:0;outline:none;text-decoration:none;">
-      </div>
-    </div>
+@extends('emails.layout')
+
+@section('content')
+@php
+  $book = $borrowing->details->first()?->book;
+  $bookTitle = $book?->judul_buku ?? 'Koleksi Perpustakaan';
+  $author = $book?->penulis ?? '-';
+  $borrowDate = $borrowing->borrowed_at ? \Carbon\Carbon::parse($borrowing->borrowed_at)->translatedFormat('d F Y') : now()->translatedFormat('d F Y');
+  $dueDate = $borrowing->due_at ? \Carbon\Carbon::parse($borrowing->due_at)->translatedFormat('l, d F Y') : '-';
+@endphp
+
+<div style="text-align:center;margin-bottom:28px;">
+  <div style="display:inline-block;width:64px;height:64px;line-height:64px;border-radius:50%;background:#ecfdf5;font-size:32px;margin-bottom:14px;border:2px solid #a7f3d0;">
+    🎉
   </div>
-  <div style="padding:32px 28px;">
-    <h2 style="margin:0 0 8px;font-size:20px;color:#166534;">✅ Peminjaman Buku Disetujui</h2>
-    <p style="margin:0 0 20px;color:#64748b;font-size:14px;">{{ now()->format('d M Y, H:i') }} WIB</p>
-    <p>Halo <strong>{{ $user->name }}</strong>,</p>
-    <p>Selamat! Peminjaman buku Anda telah <strong>disetujui</strong> oleh petugas perpustakaan. Silakan ambil buku di meja sirkulasi.</p>
-    @php $book = $borrowing->details->first()?->book; @endphp
-    <div style="background:#f0fdf4;border-left:4px solid #22c55e;border-radius:8px;padding:18px 20px;margin:20px 0;">
-      <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <tr><td style="color:#64748b;padding:4px 0;width:150px;">Judul Buku</td><td style="font-weight:600;">{{ $book?->judul_buku ?? 'Buku' }}</td></tr>
-        <tr><td style="color:#64748b;padding:4px 0;">Penulis</td><td>{{ $book?->penulis ?? '-' }}</td></tr>
-        <tr><td style="color:#64748b;padding:4px 0;">Tanggal Pinjam</td><td>{{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }}</td></tr>
-        <tr><td style="color:#64748b;padding:4px 0;">Batas Kembali</td><td><strong style="color:#dc2626;">{{ $borrowing->due_at?->format('d M Y') ?? '-' }}</strong></td></tr>
-        <tr><td style="color:#64748b;padding:4px 0;">Status</td><td><span style="background:#dcfce7;color:#166534;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600;">Disetujui</span></td></tr>
-      </table>
-    </div>
-    <p>Pastikan buku dikembalikan tepat waktu sebelum <strong>{{ $borrowing->due_at?->format('d M Y') }}</strong> untuk menghindari denda keterlambatan.</p>
-    <div style="text-align:center;margin:28px 0;">
-      <a href="{{ config('app.url') }}/user/loans" style="background:#15803d;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;display:inline-block;">Lihat Detail Peminjaman</a>
-    </div>
-    <p style="margin-bottom:0;">Terima kasih,<br><strong>Tim Perpustakaan Tiga Serangkai</strong></p>
-  </div>
-  <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 28px;text-align:center;">
-    <p style="margin:0;font-size:12px;color:#94a3b8;">Email ini dikirim otomatis. Jangan membalas email ini.<br>&copy; {{ date('Y') }} Perpustakaan Tiga Serangkai.</p>
-  </div>
+  <h2 class="header-title" style="margin:0 0 8px 0;color:#065f46;font-size:22px;font-weight:800;letter-spacing:-0.3px;">Peminjaman Buku Disetujui!</h2>
+  <p style="margin:0;color:#64748b;font-size:15px;line-height:1.5;">Kabar gembira untuk <strong>{{ $user->name }}</strong>! Pengajuan peminjaman buku Anda telah disetujui.</p>
 </div>
-</body></html>
+
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:22px 24px;margin-bottom:24px;">
+  <div style="margin-bottom:14px;border-bottom:1px solid #e2e8f0;padding-bottom:10px;">
+    <span style="font-size:12px;color:#059669;text-transform:uppercase;letter-spacing:1px;font-weight:700;">📚 Detail Buku & Pengambilan</span>
+  </div>
+  <table role="presentation" class="info-table" style="width:100%;border-collapse:collapse;font-size:14px;">
+    <tr>
+      <td style="padding:6px 0;color:#64748b;width:38%;">Judul Buku:</td>
+      <td style="padding:6px 0;color:#0f172a;font-weight:700;">{{ $bookTitle }}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;color:#64748b;">Penulis:</td>
+      <td style="padding:6px 0;color:#334155;font-weight:600;">{{ $author }}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;color:#64748b;">Status:</td>
+      <td style="padding:6px 0;">
+        <span style="display:inline-block;background:#d1fae5;color:#065f46;font-size:12px;font-weight:700;padding:3px 10px;border-radius:9999px;">
+          ✓ Disetujui (Siap Diambil)
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;color:#64748b;">Tanggal Pinjam:</td>
+      <td style="padding:6px 0;color:#334155;">{{ $borrowDate }}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;color:#64748b;">Batas Pengembalian:</td>
+      <td style="padding:6px 0;color:#dc2626;font-weight:800;font-size:15px;">{{ $dueDate }}</td>
+    </tr>
+  </table>
+</div>
+
+<div style="background:#eff9f9;border-left:4px solid #278889;border-radius:8px;padding:16px 20px;margin-bottom:26px;">
+  <p style="margin:0;color:#1e5e60;font-size:13px;line-height:1.6;">
+    📍 <strong>Lokasi Pengambilan:</strong> Silakan tunjukkan nama atau email Anda ke petugas di <strong>Meja Layanan Sirkulasi Perpustakaan</strong> untuk mengambil buku fisik.
+  </p>
+</div>
+
+<div style="text-align:center;margin-bottom:20px;">
+  <a href="{{ route('user.loans') }}" class="btn-primary" style="display:inline-block;background:linear-gradient(135deg,#059669,#10b981);color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 34px;border-radius:10px;box-shadow:0 6px 18px rgba(16,185,129,0.25);">
+    Buka Rincian Peminjaman &rarr;
+  </a>
+</div>
+@endsection

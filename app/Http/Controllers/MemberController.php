@@ -8,6 +8,7 @@ use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Reservation;
 use App\Services\MemberStatusService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class MemberController extends Controller
@@ -174,6 +175,11 @@ class MemberController extends Controller
             ]);
         });
 
+        // Kirim email notifikasi persetujuan akun ke user
+        if ($member->user) {
+            NotificationService::userApproved($member->user);
+        }
+
         return redirect()
             ->route('members.index')
             ->with(
@@ -207,6 +213,9 @@ class MemberController extends Controller
             );
         }
 
+        $userName = $member->name ?? $member->user?->name ?? 'Pengguna';
+        $userEmail = $member->email ?? $member->user?->email;
+
         DB::transaction(function () use ($member) {
 
             $user = $member->user;
@@ -229,6 +238,11 @@ class MemberController extends Controller
                 $user->delete();
             }
         });
+
+        // Kirim email notifikasi penolakan ke email pendaftar
+        if ($userEmail) {
+            NotificationService::userRejected($userName, $userEmail);
+        }
 
         return redirect()
             ->route('members.index')

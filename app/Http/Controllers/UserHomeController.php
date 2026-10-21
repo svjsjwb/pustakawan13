@@ -76,9 +76,15 @@ class UserHomeController extends Controller
             $latestRequest = $requests->sortByDesc('date')->first();
         }
 
-        // Buku populer
-        $popularBooks = Book::with('category')
-            ->where('stok', '>', 0)
+        // Buku populer (prioritaskan buku yang memiliki cover jika kolom cover ada)
+        $popularBooksQuery = Book::with('category')
+            ->where('stok', '>', 0);
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('books', 'cover')) {
+            $popularBooksQuery->orderByRaw('CASE WHEN cover IS NOT NULL AND cover != "" THEN 0 ELSE 1 END');
+        }
+
+        $popularBooks = $popularBooksQuery
             ->orderByDesc('stok')
             ->take(10)
             ->get();
@@ -104,6 +110,8 @@ class UserHomeController extends Controller
             return method_exists($activity, 'reads') && !$activity->reads()->where('user_id', $user?->id)->exists();
         })->values();
 
+        $unreadAnnouncement = $unreadAnnouncements->first();
+
         return view('user.home', compact(
             'popularBooks',
             'recommendations',
@@ -115,7 +123,8 @@ class UserHomeController extends Controller
             'historyCount',
             'latestRequest',
             'announcements',
-            'unreadAnnouncements'
+            'unreadAnnouncements',
+            'unreadAnnouncement'
         ));
     }
 

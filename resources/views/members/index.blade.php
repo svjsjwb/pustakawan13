@@ -120,14 +120,30 @@
 
 
                     {{-- FILTER STATUS --}}
-                    <button type="button" class="member-status-filter" id="memberStatusFilter">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                        </svg>
-
-                        <span>Semua Status</span>
-                    </button>
+                    <div class="member-status-dropdown" id="memberStatusDropdown">
+                        <button type="button" class="member-status-filter" id="memberStatusFilter"
+                            aria-expanded="false" aria-haspopup="listbox">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                            </svg>
+                            <span id="memberStatusLabel">Semua Status</span>
+                            <svg class="member-status-chevron" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </button>
+                        <div class="member-status-menu" id="memberStatusMenu" role="group"
+                            aria-label="Filter status anggota">
+                            <button type="button" class="member-status-option active" data-status=""
+                                data-label="Semua Status">Semua Status</button>
+                            <button type="button" class="member-status-option" data-status="aktif"
+                                data-label="Aktif">Aktif</button>
+                            <button type="button" class="member-status-option" data-status="nonaktif"
+                                data-label="Nonaktif">Nonaktif</button>
+                        </div>
+                    </div>
 
                 </div>
 
@@ -480,60 +496,73 @@
             |--------------------------------------------------------------------------
             */
 
-            const searchInput =
-                document.getElementById('memberSearch');
+            const searchInput = document.getElementById('memberSearch');
+            const table = document.getElementById('memberTable');
+            const statusDropdown = document.getElementById('memberStatusDropdown');
+            const statusFilter = document.getElementById('memberStatusFilter');
+            const statusMenu = document.getElementById('memberStatusMenu');
+            const statusLabel = document.getElementById('memberStatusLabel');
+            let selectedStatus = '';
 
-            const table =
-                document.getElementById('memberTable');
+            function filterMemberRows() {
+                if (!table) {
+                    return;
+                }
 
+                const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
+                const rows = table.querySelectorAll('tbody tr');
+
+                rows.forEach(function(row) {
+                    if (row.querySelector('.empty-data')) {
+                        return;
+                    }
+
+                    const rowText = row.innerText.toLowerCase();
+                    const statusBadge = row.querySelector('.status-active, .status-inactive');
+                    const matchesSearch = rowText.includes(keyword);
+                    const matchesStatus = !selectedStatus || (
+                        selectedStatus === 'aktif'
+                            ? statusBadge && statusBadge.classList.contains('status-active')
+                            : statusBadge && statusBadge.classList.contains('status-inactive')
+                    );
+
+                    row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+                });
+            }
 
             if (searchInput && table) {
+                searchInput.addEventListener('input', filterMemberRows);
+            }
 
-                searchInput.addEventListener(
-                    'input',
-                    function() {
+            if (statusFilter && statusMenu && statusLabel) {
+                statusFilter.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const isOpen = statusMenu.classList.toggle('is-open');
+                    statusFilter.setAttribute('aria-expanded', String(isOpen));
+                });
 
-                        const keyword =
-                            this.value
-                            .toLowerCase()
-                            .trim();
-
-
-                        const rows =
-                            table.querySelectorAll(
-                                'tbody tr'
-                            );
-
-
-                        rows.forEach(function(row) {
-
-                            /*
-                            | Jangan sembunyikan
-                            | baris empty state.
-                            */
-
-                            if (
-                                row.querySelector('.empty-data')
-                            ) {
-                                return;
-                            }
-
-
-                            const rowText =
-                                row.innerText
-                                .toLowerCase();
-
-
-                            row.style.display =
-                                rowText.includes(keyword) ?
-                                '' :
-                                'none';
-
-                        });
-
+                statusMenu.addEventListener('click', function(event) {
+                    const option = event.target.closest('.member-status-option');
+                    if (!option) {
+                        return;
                     }
-                );
 
+                    selectedStatus = option.dataset.status || '';
+                    statusLabel.textContent = option.dataset.label || 'Semua Status';
+                    statusMenu.querySelectorAll('.member-status-option').forEach(function(item) {
+                        item.classList.toggle('active', item === option);
+                    });
+                    statusMenu.classList.remove('is-open');
+                    statusFilter.setAttribute('aria-expanded', 'false');
+                    filterMemberRows();
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (statusDropdown && !statusDropdown.contains(event.target)) {
+                        statusMenu.classList.remove('is-open');
+                        statusFilter.setAttribute('aria-expanded', 'false');
+                    }
+                });
             }
 
 

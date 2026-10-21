@@ -31,18 +31,20 @@ class LoginController extends Controller
         */
 
         $credentials = $request->validate([
-            'email'    => ['required', 'string', 'email'],
+            'email'    => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
         /*
         |--------------------------------------------------------------------------
-        | Cari user (case-insensitive email)
+        | Cari user (email atau nama, case-insensitive)
         |--------------------------------------------------------------------------
         */
 
-        $credentials['email'] = strtolower(trim($credentials['email']));
-        $user = \App\Models\User::whereRaw('LOWER(email) = ?', [$credentials['email']])->first();
+        $loginInput = trim($credentials['email']);
+        $user = \App\Models\User::whereRaw('LOWER(email) = ?', [strtolower($loginInput)])
+            ->orWhereRaw('LOWER(name) = ?', [strtolower($loginInput)])
+            ->first();
 
         if (!$user || !$user->password || !Hash::check($credentials['password'], $user->password)) {
             return back()
@@ -62,6 +64,8 @@ class LoginController extends Controller
 
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
+        $request->session()->flash('just_logged_in', true);
+        $request->session()->put('just_logged_in', true);
 
         if ($isFirstLogin) {
             \App\Services\NotificationService::firstLogin($user, $request->ip(), $request->userAgent());
@@ -80,11 +84,11 @@ class LoginController extends Controller
         }
 
         if ($user->role === 'member') {
-            return redirect()->intended(route('user.home'));
+            return redirect()->intended(route('dashboard'));
         }
 
         if ($user->role === 'guest') {
-            return redirect()->intended(route('catalog'))
+            return redirect()->intended(route('dashboard'))
                 ->with(
                     'info',
                     'Akun Anda masih menunggu persetujuan Admin. Anda belum dapat melakukan reservasi atau peminjaman buku.'
@@ -103,6 +107,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()->route('landing');
     }
 }

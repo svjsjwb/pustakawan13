@@ -330,6 +330,8 @@ class GoogleAuthController extends Controller
         Auth::login($user);
 
         request()->session()->regenerate();
+        request()->session()->flash('just_logged_in', true);
+        request()->session()->put('just_logged_in', true);
 
         /*
         |--------------------------------------------------------------------------
@@ -355,12 +357,12 @@ class GoogleAuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | GOOGLE USER BARU → CATALOG
+        | GOOGLE USER BARU → DASHBOARD
         |--------------------------------------------------------------------------
         */
 
         return redirect()
-            ->route('catalog')
+            ->route('dashboard')
             ->with(
                 'success',
                 'Pendaftaran berhasil. Akun Anda sedang menunggu persetujuan Admin.'
@@ -377,6 +379,8 @@ class GoogleAuthController extends Controller
         Auth::login($user);
 
         request()->session()->regenerate();
+        request()->session()->flash('just_logged_in', true);
+        request()->session()->put('just_logged_in', true);
 
         /*
         |--------------------------------------------------------------------------
@@ -419,7 +423,7 @@ class GoogleAuthController extends Controller
 
         if ($user->role === 'guest') {
             return redirect()
-                ->route('catalog')
+                ->route('dashboard')
                 ->with(
                     'success',
                     'Login berhasil. Akun Anda sedang menunggu persetujuan Admin.'
@@ -427,7 +431,7 @@ class GoogleAuthController extends Controller
         }
 
         return redirect()
-            ->route('user.home')
+            ->route('dashboard')
             ->with(
                 'success',
                 'Login berhasil.'

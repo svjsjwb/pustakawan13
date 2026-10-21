@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppNotification;
+use App\Models\Borrowing;
+use App\Models\Member;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,11 +33,28 @@ class NotificationController extends Controller
 
             $unreadCount = (clone $query)->where('is_read', false)->count();
             $notifications = $query->take(15)->get();
+            $pendingMembersCount = $user->isAdmin()
+                ? Member::whereHas('user', function ($query) {
+                    $query->where('role', 'guest');
+                })->count()
+                : 0;
+            $pendingBorrowingsCount = $user->isAdmin()
+                ? Borrowing::where(function ($query) {
+                    $query->where('status', 'menunggu')
+                        ->orWhere('extension_status', 'menunggu');
+                })->count()
+                : 0;
+            $pendingReservationsCount = $user->isAdmin()
+                ? Reservation::where('status', 'menunggu')->count()
+                : 0;
 
             return response()->json([
                 'unread_count' => $unreadCount,
                 'notifications' => $notifications,
-            ]);
+                'pending_members_count' => $pendingMembersCount,
+                'pending_borrowings_count' => $pendingBorrowingsCount,
+                'pending_reservations_count' => $pendingReservationsCount,
+            ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }
 
         // Halaman web user notifications

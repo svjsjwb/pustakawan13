@@ -1,0 +1,334 @@
+/* ============================================================
+   SHOPEE-STYLE ACTIVITY & ANNOUNCEMENT POPUP MODAL
+   Style terinspirasi dari banner popup Shopee yang menarik,
+   elegan, dan disesuaikan dengan tema perpustakaan (Teal).
+   ============================================================ */
+
+.shopee-popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.68);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shopee-popup-overlay.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.shopee-popup-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.25s ease-out;
+}
+
+.shopee-popup-overlay.active .shopee-popup-wrapper {
+    transform: scale(1) translateY(0) !important;
+    opacity: 1 !important;
+}
+
+/* Floating Shopee-style Circular Close Button */
+.shopee-popup-close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    z-index: 30;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    color: #475569;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25),
+                0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.shopee-popup-close:hover {
+    color: #0f172a;
+    background: #f8fafc;
+    transform: scale(1.12) rotate(90deg);
+    border-color: #cbd5e1;
+}
+
+.shopee-popup-close:active {
+    transform: scale(0.95);
+}
+
+/* Modal Card */
+.shopee-popup-card {
+    position: relative;
+    background: #ffffff;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35),
+                0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+}
+
+/* Header Banner */
+.shopee-popup-header {
+    position: relative;
+    padding: 28px 24px 22px;
+    background: linear-gradient(135deg, #1b5e5f 0%, #217475 45%, #2aa6a8 100%);
+    color: #ffffff;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Glowing Decorative Elements */
+.shopee-glow-orb-1 {
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+}
+
+.shopee-glow-orb-2 {
+    position: absolute;
+    bottom: -30px;
+    left: -30px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(42, 166, 168, 0.4) 0%, rgba(42, 166, 168, 0) 70%);
+    pointer-events: none;
+}
+
+/* Badge Pill */
+.shopee-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 12px;
+}
+
+.shopee-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 8px #34d399;
+    animation: shopeePulse 2s infinite;
+}
+
+@keyframes shopeePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* Floating 3D Megaphone Badge */
+.shopee-icon-box {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 12px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.1) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18),
+                inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    animation: shopeeFloat 3.5s ease-in-out infinite;
+}
+
+@keyframes shopeeFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.shopee-header-title {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    word-break: break-word;
+}
+
+/* Modal Body */
+.shopee-popup-body {
+    padding: 22px 24px 20px;
+    background: #ffffff;
+}
+
+.shopee-desc-box {
+    position: relative;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 16px 18px;
+    max-height: 180px;
+    overflow-y: auto;
+    color: #334155;
+    font-size: 13.5px;
+    line-height: 1.65;
+    word-break: break-word;
+    text-align: left;
+}
+
+.shopee-desc-box::-webkit-scrollbar {
+    width: 5px;
+}
+.shopee-desc-box::-webkit-scrollbar-track {
+    background: transparent;
+}
+.shopee-desc-box::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+.shopee-desc-box::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Multiple activities carousel navigation */
+.shopee-carousel-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.shopee-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.shopee-dot.active {
+    width: 24px;
+    background: #217475;
+}
+
+/* Primary Action Button (Shopee Style) */
+.shopee-btn-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #217475 0%, #278889 100%);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    box-shadow: 0 10px 24px -4px rgba(33, 116, 117, 0.4),
+                0 4px 8px -2px rgba(33, 116, 117, 0.2);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shopee-btn-submit:hover {
+    background: linear-gradient(135deg, #1b5e5f 0%, #217475 100%);
+    box-shadow: 0 14px 28px -4px rgba(33, 116, 117, 0.5),
+                0 6px 12px -2px rgba(33, 116, 117, 0.25);
+    transform: translateY(-1px);
+}
+
+.shopee-btn-submit:active {
+    transform: translateY(1px);
+    box-shadow: 0 6px 16px -2px rgba(33, 116, 117, 0.35);
+}
+
+/* Footer checkbox option */
+.shopee-popup-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: #64748b;
+    user-select: none;
+    cursor: pointer;
+}
+
+.shopee-popup-footer input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: #217475;
+    cursor: pointer;
+}
+
+.shopee-popup-footer:hover {
+    color: #334155;
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .shopee-popup-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+[data-theme="dark"] .shopee-popup-body {
+    background: #1e293b;
+}
+
+[data-theme="dark"] .shopee-desc-box {
+    background: #0f172a;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .shopee-popup-close {
+    background: #1e293b;
+    border-color: #475569;
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .shopee-popup-close:hover {
+    background: #334155;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .shopee-popup-footer {
+    color: #94a3b8;
+}

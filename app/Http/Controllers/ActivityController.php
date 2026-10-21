@@ -49,6 +49,37 @@ class ActivityController extends Controller
 
 
     /**
+     * Hapus aktivitas manual.
+     */
+    public function destroy(Activity $activity)
+    {
+        $activity->delete();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Aktivitas berhasil dihapus.');
+    }
+
+
+    /**
+     * Pin atau lepas pin aktivitas manual.
+     */
+    public function pin(Activity $activity)
+    {
+        $newPinnedAt = $activity->pinned_at ? null : now();
+        $activity->update([
+            'pinned_at' => $newPinnedAt,
+        ]);
+
+        $message = $newPinnedAt ? 'Aktivitas berhasil disematkan.' : 'Sematkan aktivitas berhasil dilepas.';
+
+        return redirect()
+            ->back()
+            ->with('success', $message);
+    }
+
+
+    /**
      * Tandai announcement sebagai sudah dibaca oleh user.
      */
     public function markAsRead(
@@ -335,76 +366,5 @@ class ActivityController extends Controller
                 'perPage'
             )
         );
-    }
-
-
-    /**
-     * Hapus aktivitas manual.
-     */
-    public function destroy(Activity $activity)
-    {
-        $activity->delete();
-
-        return redirect()
-            ->back()
-            ->with(
-                'success',
-                'Aktivitas berhasil dihapus.'
-            );
-    }
-
-
-    /**
-     * Pin / lepas pin aktivitas manual.
-     */
-    public function pin(Activity $activity)
-    {
-        /*
-        |--------------------------------------------------------------------------
-        | Simpan status sebelum diubah
-        |--------------------------------------------------------------------------
-        */
-
-        $isPinned = !empty(
-            $activity->pinned_at
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Toggle PIN
-        |--------------------------------------------------------------------------
-        */
-
-        $activity->update([
-            'pinned_at' => $isPinned
-                ? null
-                : now(),
-        ]);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Pesan
-        |--------------------------------------------------------------------------
-        */
-
-        $message = $isPinned
-            ? 'Pin aktivitas dilepas.'
-            : 'Aktivitas berhasil dipin.';
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Kembali ke halaman asal
-        |--------------------------------------------------------------------------
-        */
-
-        return redirect()
-            ->back()
-            ->with(
-                'success',
-                $message
-            );
     }
 }

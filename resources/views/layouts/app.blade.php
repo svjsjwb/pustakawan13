@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
 
     <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/activity-popup.css') }}">
 
     {{-- Pastikan admin tidak mewarisi preferensi tema atau density user dari localStorage --}}
     <script>
@@ -64,6 +65,8 @@
 
 </div>
 
+{{-- Shopee-Style Activity / Announcement Popup --}}
+@include('partials.activity-popup')
 
 {{-- =====================================================
      GLOBAL JAVASCRIPT

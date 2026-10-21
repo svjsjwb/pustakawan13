@@ -769,6 +769,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let activeIndex = 0;
         let autoplayTimer = null;
         let isHovered = false;
+        let isHeroInView = true;
         let isDragging = false;
         let startX = 0;
         let currentX = 0;
@@ -776,20 +777,27 @@ document.addEventListener('DOMContentLoaded', function () {
         const SWIPE_THRESHOLD = 35;
         const AUTOPLAY_DELAY = 3000;
 
-        // Build pagination dots
+        // Build / bind pagination dots (memanfaatkan dot dari render Blade agar tidak jump)
         if (pagination) {
-            pagination.innerHTML = '';
-            for (let i = 0; i < total; i++) {
-                const dot = document.createElement('button');
-                dot.type = 'button';
-                dot.className = 'coverflow-dot' + (i === 0 ? ' is-active' : '');
-                dot.setAttribute('aria-label', `Buku ${i + 1} dari ${total}`);
+            let existingDots = Array.from(pagination.querySelectorAll('.coverflow-dot'));
+            if (existingDots.length !== total) {
+                pagination.innerHTML = '';
+                for (let i = 0; i < total; i++) {
+                    const dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.className = 'coverflow-dot' + (i === 0 ? ' is-active' : '');
+                    dot.setAttribute('aria-label', `Buku ${i + 1} dari ${total}`);
+                    pagination.appendChild(dot);
+                }
+                existingDots = Array.from(pagination.querySelectorAll('.coverflow-dot'));
+            }
+
+            existingDots.forEach((dot, i) => {
                 dot.addEventListener('click', (e) => {
                     e.stopPropagation();
                     goTo(i);
                 });
-                pagination.appendChild(dot);
-            }
+            });
         }
 
         const dots = pagination ? Array.from(pagination.querySelectorAll('.coverflow-dot')) : [];
@@ -859,7 +867,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function startAutoplay() {
             stopAutoplay();
-            if (total > 1 && !isHovered && !isSearchHovered) {
+            if (total > 1 && !isHovered && !isSearchHovered && isHeroInView) {
                 autoplayTimer = setInterval(() => {
                     goNext();
                 }, AUTOPLAY_DELAY);
@@ -1017,7 +1025,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         updateCoverflow();
-        startAutoplay();
+
+        // Aktifkan transisi setelah render posisi awal selesai digambar browser (mencegah animasi berulang saat refresh)
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                stage.classList.add('is-ready');
+            });
+        });
+
+        // IntersectionObserver agar autoplay tidak membebani komputasi saat hero di luar layar
+        if ('IntersectionObserver' in window) {
+            const heroObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    isHeroInView = entry.isIntersecting;
+                    if (isHeroInView) {
+                        startAutoplay();
+                    } else {
+                        stopAutoplay();
+                    }
+                });
+            }, { threshold: 0.1 });
+            heroObserver.observe(wrap);
+        } else {
+            startAutoplay();
+        }
     }
 
     initHeroCoverflow();

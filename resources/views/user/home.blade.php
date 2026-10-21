@@ -76,15 +76,40 @@
         ================================================== --}}
 
         @if($popularBooks->isNotEmpty())
+        @php
+            $heroBooks = $popularBooks->take(8);
+            $totalHeroBooks = $heroBooks->count();
+        @endphp
 
         <div class="user-hero-coverflow-wrap" id="heroCoverflowWrap">
             <div class="user-hero-coverflow" id="heroCoverflow">
                 <div class="user-coverflow-stage" id="coverflowStage">
-                    @foreach($popularBooks->take(8) as $index => $book)
-                        <div class="user-coverflow-card"
+                    @foreach($heroBooks as $index => $book)
+                        @php
+                            $diff = $index;
+                            if ($diff > $totalHeroBooks / 2) {
+                                $diff -= $totalHeroBooks;
+                            }
+                            if ($diff < -$totalHeroBooks / 2) {
+                                $diff += $totalHeroBooks;
+                            }
+
+                            $initialCardClass = match(true) {
+                                $diff === 0 => 'is-active',
+                                $diff === -1 => 'is-left-1',
+                                $diff === 1 => 'is-right-1',
+                                $diff === -2 => 'is-left-2',
+                                $diff === 2 => 'is-right-2',
+                                $diff < -2 => 'is-hidden-left',
+                                default => 'is-hidden-right',
+                            };
+                            $initialAriaHidden = ($diff === 0) ? 'false' : 'true';
+                        @endphp
+                        <div class="user-coverflow-card {{ $initialCardClass }}"
                              data-index="{{ $index }}"
                              data-book-id="{{ $book->id }}"
                              role="group"
+                             aria-hidden="{{ $initialAriaHidden }}"
                              aria-label="Buku {{ $book->title }}"
                              data-title="{{ $book->title }}"
                              data-author="{{ $book->author ?? '-' }}"
@@ -147,7 +172,11 @@
                         <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
                 </button>
-                <div class="coverflow-pagination" id="coverflowPagination" role="tablist" aria-label="Indikator halaman buku"></div>
+                <div class="coverflow-pagination" id="coverflowPagination" role="tablist" aria-label="Indikator halaman buku">
+                    @for($i = 0; $i < $totalHeroBooks; $i++)
+                        <button type="button" class="coverflow-dot {{ $i === 0 ? 'is-active' : '' }}" aria-label="Buku {{ $i + 1 }} dari {{ $totalHeroBooks }}"></button>
+                    @endfor
+                </div>
                 <button type="button" class="coverflow-nav-btn next" id="coverflowNext" aria-label="Buku selanjutnya" title="Selanjutnya">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="9 18 15 12 9 6"></polyline>
@@ -389,53 +418,7 @@
 </div>
 
 
-{{-- =========================================================
-     PENGUMUMAN (ANNOUNCEMENT) POPUP
-     Hanya muncul jika ada aktivitas MANUAL yang belum dibaca.
-========================================================= --}}
 
-@if(isset($unreadAnnouncement) && $unreadAnnouncement)
-
-<div
-    class="announcement-modal"
-    id="announcementModal"
-    aria-hidden="false"
-    data-announcement-id="{{ $unreadAnnouncement->id }}">
-
-    <div class="announcement-modal-overlay"></div>
-
-    <div class="announcement-modal-box">
-
-        <div class="announcement-modal-header">
-            📢 Pengumuman
-        </div>
-
-        <div class="announcement-modal-body">
-
-            <h2>
-                {{ $unreadAnnouncement->title }}
-            </h2>
-
-            <p>
-                {{ $unreadAnnouncement->description ?? '' }}
-            </p>
-
-        </div>
-
-        <button
-            type="button"
-            class="announcement-close-btn"
-            id="announcementCloseBtn">
-
-            Tutup
-
-        </button>
-
-    </div>
-
-</div>
-
-@endif
 
 
 {{-- =========================================================
@@ -693,65 +676,7 @@
     src="{{ asset('js/userBook3d.js') }}">
 </script>
 
-<script>
-    (function () {
 
-        const announcementModal =
-            document.getElementById('announcementModal');
-
-        if (!announcementModal) {
-            return;
-        }
-
-        const closeBtn =
-            document.getElementById('announcementCloseBtn');
-
-        const activityId =
-            announcementModal.getAttribute('data-announcement-id');
-
-        const markAsReadUrl =
-            '{{ route('activities.markAsRead', ['activity' => '__ID__']) }}'
-            .replace('__ID__', activityId);
-
-
-        function closeAnnouncement() {
-
-            // Simpan status "sudah dibaca" ke database
-            // agar popup tidak muncul lagi pada refresh berikutnya.
-            fetch(markAsReadUrl, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN':
-                        document.querySelector(
-                            'meta[name="csrf-token"]'
-                        )?.getAttribute('content') ?? '',
-                    'Content-Type': 'application/json'
-                }
-            }).catch(function () {
-                // Abaikan error jaringan agar popup tetap bisa ditutup.
-            });
-
-            announcementModal.classList.add('hidden');
-            announcementModal.setAttribute('aria-hidden', 'true');
-        }
-
-
-        if (closeBtn) {
-            closeBtn.addEventListener('click', closeAnnouncement);
-        }
-
-
-        // Tutup juga saat klik overlay
-        const overlay = announcementModal.querySelector(
-            '.announcement-modal-overlay'
-        );
-
-        if (overlay) {
-            overlay.addEventListener('click', closeAnnouncement);
-        }
-
-    })();
-</script>
 
 @endpush
 

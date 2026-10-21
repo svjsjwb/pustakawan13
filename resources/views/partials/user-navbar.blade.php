@@ -185,7 +185,7 @@
                         {{-- 4. Riwayat Aktivitas --}}
                         <li>
                             <a href="{{ route('user.history') }}"
-                                class="eg-drop-menu-item {{ request()->routeIs('user.history') ? 'active' : '' }}">
+                                class="eg-drop-menu-item {{ request()->routeIs('history', 'user.history') ? 'active' : '' }}">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"

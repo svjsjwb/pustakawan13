@@ -15,7 +15,7 @@ class UserMiddleware
             return redirect('/login');
         }
 
-        if (Auth::user()->role !== 'member') {
+        if (Auth::user()->role !== 'member' && Auth::user()->role !== 'admin') {
             return redirect('/catalog')
                 ->with(
                     'error',

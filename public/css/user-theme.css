@@ -289,9 +289,20 @@ body {
 }
 
 @keyframes egNotifPop {
-    0%   { transform: scale(0); opacity: 0; }
-    80%  { transform: scale(1.15); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    80% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* Dropdown Notifikasi Card Panel (SaaS 2026 Grade) */
@@ -469,10 +480,12 @@ body {
 .eg-notif-item.status-disetujui {
     border-left-color: #16A34A;
 }
+
 .eg-notif-item.status-disetujui .eg-notif-item-icon {
     background: rgba(22, 163, 74, 0.12);
     color: #16A34A;
 }
+
 .eg-notif-item.status-disetujui .eg-notif-item-dot {
     background: #16A34A;
     box-shadow: 0 0 6px rgba(22, 163, 74, 0.5);
@@ -482,10 +495,12 @@ body {
 .eg-notif-item.status-menunggu {
     border-left-color: #F59E0B;
 }
+
 .eg-notif-item.status-menunggu .eg-notif-item-icon {
     background: rgba(245, 158, 11, 0.12);
     color: #D97706;
 }
+
 .eg-notif-item.status-menunggu .eg-notif-item-dot {
     background: #F59E0B;
     box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
@@ -495,10 +510,12 @@ body {
 .eg-notif-item.status-siap_diambil {
     border-left-color: #0F766E;
 }
+
 .eg-notif-item.status-siap_diambil .eg-notif-item-icon {
     background: rgba(15, 118, 110, 0.12);
     color: #0F766E;
 }
+
 .eg-notif-item.status-siap_diambil .eg-notif-item-dot {
     background: #0F766E;
     box-shadow: 0 0 6px rgba(15, 118, 110, 0.5);
@@ -508,10 +525,12 @@ body {
 .eg-notif-item.status-ditolak {
     border-left-color: #DC2626;
 }
+
 .eg-notif-item.status-ditolak .eg-notif-item-icon {
     background: rgba(220, 38, 38, 0.12);
     color: #DC2626;
 }
+
 .eg-notif-item.status-ditolak .eg-notif-item-dot {
     background: #DC2626;
     box-shadow: 0 0 6px rgba(220, 38, 38, 0.5);
@@ -521,10 +540,12 @@ body {
 .eg-notif-item.status-dikembalikan {
     border-left-color: #16A34A;
 }
+
 .eg-notif-item.status-dikembalikan .eg-notif-item-icon {
     background: rgba(22, 163, 74, 0.12);
     color: #16A34A;
 }
+
 .eg-notif-item.status-dikembalikan .eg-notif-item-dot {
     background: #16A34A;
     box-shadow: 0 0 6px rgba(22, 163, 74, 0.5);
@@ -534,10 +555,12 @@ body {
 .eg-notif-item.status-terlambat {
     border-left-color: #EA580C;
 }
+
 .eg-notif-item.status-terlambat .eg-notif-item-icon {
     background: rgba(234, 88, 12, 0.12);
     color: #EA580C;
 }
+
 .eg-notif-item.status-terlambat .eg-notif-item-dot {
     background: #EA580C;
     box-shadow: 0 0 6px rgba(234, 88, 12, 0.5);
@@ -745,6 +768,7 @@ body {
         opacity: 0;
         transform: translateY(-8px) scale(0.97);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -942,7 +966,8 @@ body {
     height: 42px;
     padding: 0 36px 0 18px;
     border: 1.5px solid var(--border);
-    border-radius: 9999px; /* Pill Shape */
+    border-radius: 9999px;
+    /* Pill Shape */
     background: var(--surface);
     color: var(--text);
     font-size: 13px;
@@ -1227,6 +1252,7 @@ body {
     border: 1px solid rgba(245, 158, 11, 0.28);
     box-shadow: 0 2px 6px rgba(245, 158, 11, 0.12);
 }
+
 .status-menunggu:hover {
     background: rgba(245, 158, 11, 0.18);
     box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
@@ -1239,6 +1265,7 @@ body {
     border: 1px solid rgba(16, 185, 129, 0.28);
     box-shadow: 0 2px 6px rgba(16, 185, 129, 0.12);
 }
+
 .status-disetujui:hover {
     background: rgba(16, 185, 129, 0.18);
     box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
@@ -1251,6 +1278,7 @@ body {
     border: 1px solid rgba(15, 118, 110, 0.32);
     box-shadow: 0 2px 6px rgba(15, 118, 110, 0.15);
 }
+
 .status-siap_diambil:hover {
     background: rgba(15, 118, 110, 0.2);
     box-shadow: 0 4px 10px rgba(15, 118, 110, 0.25);
@@ -1263,6 +1291,7 @@ body {
     border: 1px solid rgba(239, 68, 68, 0.28);
     box-shadow: 0 2px 6px rgba(239, 68, 68, 0.12);
 }
+
 .status-ditolak:hover {
     background: rgba(239, 68, 68, 0.18);
     box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
@@ -1275,6 +1304,7 @@ body {
     border: 1px solid rgba(15, 118, 110, 0.28);
     box-shadow: 0 2px 6px rgba(15, 118, 110, 0.12);
 }
+
 .status-dipinjam:hover {
     background: rgba(15, 118, 110, 0.18);
     box-shadow: 0 4px 10px rgba(15, 118, 110, 0.2);
@@ -1288,6 +1318,7 @@ body {
     border: 1px solid rgba(2, 132, 199, 0.28);
     box-shadow: 0 2px 6px rgba(2, 132, 199, 0.12);
 }
+
 .status-selesai:hover,
 .status-dikembalikan:hover {
     background: rgba(2, 132, 199, 0.18);
@@ -1301,6 +1332,7 @@ body {
     border: 1px solid rgba(220, 38, 38, 0.28);
     box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);
 }
+
 .status-terlambat:hover {
     background: rgba(220, 38, 38, 0.18);
     box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
@@ -1403,7 +1435,9 @@ body {
     transition: opacity 0.2s;
 }
 
-.ul-flash button:hover { opacity: 1; }
+.ul-flash button:hover {
+    opacity: 1;
+}
 
 .ul-flash-success {
     background: var(--primary-subtle);
@@ -1446,15 +1480,38 @@ body {
 }
 
 @keyframes toastSlideIn {
-    from { opacity: 0; transform: translateX(30px); }
-    to   { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
-.ul-toast svg { width: 18px; height: 18px; flex-shrink: 0; }
-.ul-toast-success svg { color: var(--primary); }
-.ul-toast-error svg   { color: #dc2626; }
-.ul-toast-info svg    { color: var(--primary); }
-.ul-toast-warning svg { color: #b45309; }
+.ul-toast svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.ul-toast-success svg {
+    color: var(--primary);
+}
+
+.ul-toast-error svg {
+    color: #dc2626;
+}
+
+.ul-toast-info svg {
+    color: var(--primary);
+}
+
+.ul-toast-warning svg {
+    color: #b45309;
+}
 
 /* ==========================================================================
    PAGINATION (BERANDA TEAL)
@@ -1520,8 +1577,13 @@ body {
 
 /* Responsive */
 @media (max-width: 900px) {
-    .eg-stats-grid { grid-template-columns: 1fr; }
-    .eg-nav-menu { display: none; }
+    .eg-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .eg-nav-menu {
+        display: none;
+    }
 }
 
 /* ==========================================================================
@@ -1532,9 +1594,11 @@ body {
     --density-scale: 0.93;
     --density-pad: 8px 12px;
 }
+
 [data-density="compact"] .eg-navbar-inner {
     height: 64px;
 }
+
 [data-density="compact"] .loan-card,
 [data-density="compact"] .uprof-section-card,
 [data-density="compact"] .ucat-card,
@@ -1542,11 +1606,13 @@ body {
 [data-density="compact"] .saas-table-card {
     padding: 14px 16px !important;
 }
+
 [data-density="compact"] table th,
 [data-density="compact"] table td {
     padding: 7px 10px !important;
     font-size: 12.5px !important;
 }
+
 [data-density="compact"] .loans-list,
 [data-density="compact"] .ucat-grid {
     gap: 12px !important;
@@ -1561,9 +1627,11 @@ body {
     --density-scale: 1.05;
     --density-pad: 16px 22px;
 }
+
 [data-density="comfortable"] .eg-navbar-inner {
     height: 82px;
 }
+
 [data-density="comfortable"] .loan-card,
 [data-density="comfortable"] .uprof-section-card,
 [data-density="comfortable"] .ucat-card,
@@ -1571,11 +1639,13 @@ body {
 [data-density="comfortable"] .saas-table-card {
     padding: 26px 28px !important;
 }
+
 [data-density="comfortable"] table th,
 [data-density="comfortable"] table td {
     padding: 15px 18px !important;
     font-size: 14.5px !important;
 }
+
 [data-density="comfortable"] .loans-list,
 [data-density="comfortable"] .ucat-grid {
     gap: 24px !important;
@@ -1602,7 +1672,7 @@ body {
     inset: 0;
     pointer-events: none;
     opacity: .8;
-    background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px), radial-gradient(circle at 80% 20%, rgba(168,213,209,.18), transparent 32%);
+    background-image: linear-gradient(rgba(255, 255, 255, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .045) 1px, transparent 1px), radial-gradient(circle at 80% 20%, rgba(168, 213, 209, .18), transparent 32%);
     background-size: 38px 38px, 38px 38px, 100% 100%;
 }
 
@@ -1618,10 +1688,10 @@ body {
     gap: 8px;
     margin-bottom: 14px;
     padding: 7px 13px;
-    border: 1px solid rgba(168,213,209,.3);
+    border: 1px solid rgba(168, 213, 209, .3);
     border-radius: 999px;
     color: #bde5e0;
-    background: rgba(255,255,255,.1);
+    background: rgba(255, 255, 255, .1);
     font-size: 10.5px;
     font-weight: 800;
     letter-spacing: .1em;
@@ -1639,7 +1709,7 @@ body {
 .user-page-hero p {
     max-width: 600px;
     margin: 0;
-    color: rgba(255,255,255,.82);
+    color: rgba(255, 255, 255, .82);
     font-size: 14.5px;
     line-height: 1.6;
 }
@@ -1656,9 +1726,9 @@ body {
     min-width: 0;
     flex: 1;
     padding: 14px 16px;
-    border: 1px solid rgba(168,213,209,.3);
+    border: 1px solid rgba(168, 213, 209, .3);
     border-radius: 16px;
-    background: rgba(255,255,255,.1);
+    background: rgba(255, 255, 255, .1);
     backdrop-filter: blur(10px);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -1685,7 +1755,9 @@ body {
     line-height: 1;
 }
 
-.user-page-hero-stats small { margin-top: 5px; }
+.user-page-hero-stats small {
+    margin-top: 5px;
+}
 
 @media (max-width: 760px) {
     .user-page-hero {
@@ -1697,15 +1769,34 @@ body {
         padding: 30px 23px;
     }
 
-    .user-page-hero-copy { max-width: 100%; }
-    .user-page-hero-stats { width: 100%; }
-    .user-page-hero-stats div { padding: 11px 12px; }
+    .user-page-hero-copy {
+        max-width: 100%;
+    }
+
+    .user-page-hero-stats {
+        width: 100%;
+    }
+
+    .user-page-hero-stats div {
+        padding: 11px 12px;
+    }
+
     .user-page-hero-stats span,
-    .user-page-hero-stats small { font-size: 9.5px; }
+    .user-page-hero-stats small {
+        font-size: 9.5px;
+    }
 }
 
 @media (max-width: 420px) {
-    .user-page-hero-stats { gap: 8px; }
-    .user-page-hero-stats div { padding: 10px 9px; }
-    .user-page-hero-stats strong { font-size: 22px; }
+    .user-page-hero-stats {
+        gap: 8px;
+    }
+
+    .user-page-hero-stats div {
+        padding: 10px 9px;
+    }
+
+    .user-page-hero-stats strong {
+        font-size: 22px;
+    }
 }

@@ -1,0 +1,667 @@
+/* =========================================================
+   BOOK LOCATOR
+   ========================================================= */
+
+.locator-page {
+    width: 100%;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.locator-header {
+    margin-bottom: 24px;
+}
+
+.locator-header h1 {
+    margin: 0 0 6px;
+}
+
+.locator-header p {
+    margin: 0;
+    color: #666;
+}
+
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+
+.locator-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+}
+
+
+/* =========================================================
+   INFORMASI BUKU
+   ========================================================= */
+
+.locator-info {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.locator-info h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.locator-detail {
+    margin-bottom: 14px;
+}
+
+.locator-detail span {
+    display: block;
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 3px;
+}
+
+.locator-detail strong {
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   AREA PETA
+   ========================================================= */
+
+.locator-map-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.locator-map-title {
+    margin: 0 0 16px;
+}
+
+.locator-map {
+    position: relative;
+
+    width: 100%;
+    min-height: 500px;
+
+    background: #f4f4f4;
+
+    border: 1px solid #ddd;
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   RAK FISIK 2D
+   ========================================================= */
+
+.locator-physical-rack {
+    position: absolute;
+
+    background: #fff;
+
+    border: 2px solid #999;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    min-width: 0;
+    min-height: 0;
+
+    font-weight: 600;
+    font-size: 13px;
+
+    overflow: visible;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* =========================================================
+   RAK TARGET
+   ========================================================= */
+
+.locator-physical-rack.target-rack {
+    border: 3px solid #d6a800;
+
+    box-shadow:
+        0 0 0 4px rgba(214, 168, 0, 0.15);
+}
+
+
+/* =========================================================
+   SECTION RAK
+   ========================================================= */
+
+.locator-shelf-section {
+    position: relative;
+
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    background: #fff;
+
+    box-sizing: border-box;
+
+    overflow: visible;
+}
+
+
+/* =========================================================
+   KODE SECTION
+   ========================================================= */
+
+.locator-shelf-code {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    z-index: 3;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    pointer-events: none;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   GRID BUKU
+   ========================================================= */
+
+.locator-shelf-grid {
+    position: absolute;
+
+    left: 8px;
+    right: 8px;
+
+    top: 8px;
+    bottom: 8px;
+
+    width: auto;
+    height: auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(var(--columns),
+            minmax(0, 1fr));
+
+    grid-template-rows:
+        repeat(var(--rows),
+            minmax(0, 1fr));
+
+    gap: 2px;
+
+    min-width: 0;
+    min-height: 0;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    z-index: 1;
+}
+
+
+/* =========================================================
+   SLOT BUKU
+   ========================================================= */
+
+.locator-book-slot {
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    box-sizing: border-box;
+
+    background: #f7f7f7;
+
+    border: 1px solid #ddd;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 8px;
+
+    color: #999;
+
+    overflow: hidden;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+
+/* =========================================================
+   SLOT TERISI
+   ========================================================= */
+
+.locator-book-slot.occupied {
+    background: #f5f5f5;
+
+    border-color: #ccc;
+}
+
+
+/* =========================================================
+   SLOT KOSONG
+   ========================================================= */
+
+.locator-book-slot.empty {
+    background: #fafafa;
+
+    cursor: default;
+}
+
+
+/* =========================================================
+   HOVER SLOT
+   ========================================================= */
+
+.locator-book-slot.occupied:hover {
+    background: #eeeeee;
+
+    border-color: #aaa;
+
+    transform: scale(1.05);
+
+    z-index: 4;
+}
+
+
+/* =========================================================
+   BUKU TARGET
+   ========================================================= */
+
+.locator-book-slot.target-book {
+    background: #ffd84d;
+
+    border: 2px solid #d6a800;
+
+    color: #222;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 0 0 2px rgba(214, 168, 0, 0.25);
+
+    z-index: 5;
+}
+
+
+/* =========================================================
+   SEKAT TENGAH RAK
+   ========================================================= */
+
+.locator-rack-divider {
+    position: relative;
+
+    flex: 0 0 10px;
+
+    width: 10px;
+
+    background: #777;
+
+    border-left: 2px solid #666;
+    border-right: 2px solid #666;
+
+    box-sizing: border-box;
+
+    z-index: 5;
+}
+
+
+/* =========================================================
+   LABEL RAK
+   ========================================================= */
+
+.locator-physical-rack-label {
+    position: absolute;
+
+    left: 50%;
+    bottom: -36px;
+
+    transform:
+        translateX(-50%);
+
+    padding: 5px 10px;
+
+    background: #fff;
+
+    border: 1px solid #aaa;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    z-index: 10;
+}
+
+
+/* =========================================================
+   3D LOCATOR - THREE.JS
+   ========================================================= */
+.locator-3d {
+    width: 100%;
+    height: 700px;
+    min-height: 700px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #f1f1f1;
+}
+
+.locator-3d canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* =========================================================
+   MODAL DETAIL EKSEMPLAR
+   ========================================================= */
+
+.locator-modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 9999;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+}
+
+.locator-modal[hidden] {
+    display: none;
+}
+
+
+/* =========================================================
+   MODAL OVERLAY
+   ========================================================= */
+
+.locator-modal-overlay {
+    position: absolute;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================================================
+   MODAL CARD
+   ========================================================= */
+
+.locator-modal-card {
+    position: relative;
+
+    z-index: 2;
+
+    width: min(420px, 100%);
+
+    background: #fff;
+
+    border-radius: 14px;
+
+    padding: 24px;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+
+/* =========================================================
+   MODAL TITLE
+   ========================================================= */
+
+.locator-modal-card h2 {
+    margin: 0 0 24px;
+}
+
+
+/* =========================================================
+   MODAL EYEBROW
+   ========================================================= */
+
+.locator-modal-eyebrow {
+    margin-bottom: 6px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+
+    color: #999;
+}
+
+
+/* =========================================================
+   MODAL CLOSE
+   ========================================================= */
+
+.locator-modal-close {
+    position: absolute;
+
+    top: 12px;
+    right: 14px;
+
+    width: 34px;
+    height: 34px;
+
+    border: none;
+
+    background: transparent;
+
+    font-size: 26px;
+
+    cursor: pointer;
+
+    color: #666;
+
+    border-radius: 6px;
+}
+
+.locator-modal-close:hover {
+    background: #f3f3f3;
+}
+
+
+/* =========================================================
+   MODAL DETAIL
+   ========================================================= */
+
+.locator-modal-detail {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #eee;
+}
+
+.locator-modal-detail:last-child {
+    border-bottom: none;
+}
+
+.locator-modal-detail span {
+    color: #777;
+
+    font-size: 13px;
+}
+
+.locator-modal-detail strong {
+    text-align: right;
+
+    font-size: 14px;
+}
+
+#locator3d {
+    position: relative;
+}
+
+.locator-crosshair {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%,
+            -50%);
+
+    z-index: 500;
+
+    color: white;
+
+    font-size: 24px;
+
+    font-weight: 400;
+
+    line-height: 1;
+
+    pointer-events: none;
+
+    text-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.8);
+
+    user-select: none;
+}
+
+/* =========================================================
+   FPS MODE - HIDE REAL MOUSE CURSOR
+========================================================= */
+
+#locator3d.fps-mode,
+#locator3d.fps-mode *,
+#locator3d.fps-mode canvas {
+    cursor: none !important;
+}
+
+.locator-modal-hint {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+}
+
+.locator-3d.modal-active,
+.locator-3d.modal-active canvas {
+    cursor: default !important;
+}
+
+.locator-modal-close {
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.locator-modal-close:hover {
+    background-color: #dedede;
+    color: #1f2937;
+    transform: scale(1.08);
+}
+
+.locator-modal-close:active {
+    transform: scale(0.96);
+}
+
+.locator-modal-close {
+    cursor: pointer;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .locator-layout {
+        grid-template-columns: 1fr;
+    }
+
+
+    .locator-map {
+        min-height: 450px;
+    }
+
+
+    .locator-3d {
+        height: 450px;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .locator-info {
+        padding: 16px;
+    }
+
+
+    .locator-map-card {
+        padding: 14px;
+    }
+
+
+    .locator-map {
+        min-height: 400px;
+    }
+
+
+    .locator-3d {
+        height: 400px;
+    }
+
+
+    .locator-modal-card {
+        padding: 20px;
+    }
+
+}

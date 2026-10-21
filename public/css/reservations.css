@@ -27,12 +27,10 @@
     overflow: hidden;
 
     background:
-        linear-gradient(
-            110deg,
+        linear-gradient(110deg,
             #eef8f7 0%,
             #f5fbfb 55%,
-            #ffffff 100%
-        );
+            #ffffff 100%);
 
     border: 1px solid #d9ebea;
     border-radius: 16px;
