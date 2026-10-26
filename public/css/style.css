@@ -155,6 +155,20 @@ button {
   }
 }
 
+input::selection,
+textarea::selection,
+[contenteditable="true"]::selection {
+    background: #0078d4 !important;
+    color: #ffffff !important;
+}
+
+input::-moz-selection,
+textarea::-moz-selection,
+[contenteditable="true"]::-moz-selection {
+    background: #0078d4 !important;
+    color: #ffffff !important;
+}
+
 /* ===== Reusable ===== */
 .grid {
   display: grid;

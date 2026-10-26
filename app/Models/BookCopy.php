@@ -39,4 +39,21 @@ class BookCopy extends Model
     {
         return $this->hasOne(Reservation::class);
     }
+
+    public function syncStatus(): void
+    {
+        if ($this->condition === 'rusak') {
+            $this->updateQuietly([
+                'status' => 'maintenance',
+            ]);
+
+            return;
+        }
+
+        if ($this->status === 'maintenance') {
+            $this->updateQuietly([
+                'status' => 'available',
+            ]);
+        }
+    }
 }

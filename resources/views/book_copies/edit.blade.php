@@ -144,73 +144,16 @@
 
 
                     {{-- =================================================
-                     STATUS
-                ================================================== --}}
-                    <div class="book-form-group">
-
-                        <label for="status">
-
-                            Status
-
-                            <span class="required">
-                                *
-                            </span>
-
-                        </label>
-
-                        <select id="status" name="status" required class="@error('status') is-invalid @enderror">
-
-                            <option value="available" @selected(old('status', $copy->status) === 'available')>
-                                Tersedia
-                            </option>
-
-                            <option value="reserved" @selected(old('status', $copy->status) === 'reserved')>
-                                Direservasi
-                            </option>
-
-                            <option value="borrowed" @selected(old('status', $copy->status) === 'borrowed')>
-                                Dipinjam
-                            </option>
-
-                            <option value="lost" @selected(old('status', $copy->status) === 'lost')>
-                                Hilang
-                            </option>
-
-                            <option value="damaged" @selected(old('status', $copy->status) === 'damaged')>
-                                Rusak
-                            </option>
-
-                            <option value="maintenance" @selected(old('status', $copy->status) === 'maintenance')>
-                                Maintenance
-                            </option>
-
-                        </select>
-
-                        @error('status')
-                            <span class="form-error">
-                                {{ $message }}
-                            </span>
-                        @enderror
-
-                    </div>
-
-                    {{-- =================================================
-     KONDISI FISIK
+ KONDISI FISIK
 ================================================== --}}
                     <div class="book-form-group">
 
                         <label for="condition">
-
                             Kondisi Fisik
-
-                            <span class="required">
-                                *
-                            </span>
-
+                            <span class="required">*</span>
                         </label>
 
                         <select id="condition" name="condition" required class="@error('condition') is-invalid @enderror">
-
                             <option value="baik" @selected(old('condition', $copy->condition ?? 'baik') === 'baik')>
                                 Baik
                             </option>
@@ -218,13 +161,10 @@
                             <option value="rusak" @selected(old('condition', $copy->condition ?? 'baik') === 'rusak')>
                                 Rusak
                             </option>
-
                         </select>
 
                         @error('condition')
-                            <span class="form-error">
-                                {{ $message }}
-                            </span>
+                            <span class="form-error">{{ $message }}</span>
                         @enderror
 
                     </div>
@@ -283,13 +223,6 @@
                             @endforeach
 
                         </select>
-
-                        <small class="form-help">
-                            Posisi section, muka rak, baris, dan kolom
-                            akan ditentukan otomatis oleh sistem.
-                            Jika rak tidak diubah, posisi buku tetap pada
-                            posisi sebelumnya.
-                        </small>
 
                         @error('shelf_id')
                             <span class="form-error">

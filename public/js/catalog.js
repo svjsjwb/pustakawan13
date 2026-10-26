@@ -6,22 +6,29 @@
 
     function initCatalog() {
 
-        /* =========================================================
-           ANTI SELECT / ANTI DRAG
-        ========================================================= */
-
         document.addEventListener('selectstart', function (e) {
-            e.preventDefault();
+            const target = e.target;
+
+            const isFormField =
+                target.matches('input, textarea, select, [contenteditable="true"]') ||
+                target.closest('input, textarea, select, [contenteditable="true"]');
+
+            if (!isFormField) {
+                e.preventDefault();
+            }
         });
 
         document.addEventListener('dragstart', function (e) {
-            e.preventDefault();
+            const target = e.target;
+
+            const isFormField =
+                target.matches('input, textarea, select, [contenteditable="true"]') ||
+                target.closest('input, textarea, select, [contenteditable="true"]');
+
+            if (!isFormField) {
+                e.preventDefault();
+            }
         });
-
-
-        /* =========================================================
-           ELEMENT
-        ========================================================= */
 
         const modal = document.getElementById('book-modal');
 
@@ -170,7 +177,7 @@
             if (modalDescription) modalDescription.textContent = description;
 
 
-            
+
             /* =================================================
             COVER MODAL
             ================================================= */
