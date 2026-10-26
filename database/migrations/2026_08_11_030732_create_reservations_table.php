@@ -12,18 +12,37 @@ return new class extends Migration
 
             $table->id();
 
-            $table->foreignId('member_id')
-                ->constrained('members')
-                ->cascadeOnDelete();
+            // Relasi user
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
+            // Relasi anggota
+            $table->foreignId('member_id')
+                ->nullable()
+                ->constrained('members')
+                ->nullOnDelete();
+
+            // Relasi buku
             $table->foreignId('book_id')
                 ->constrained('books')
                 ->cascadeOnDelete();
 
-            $table->date('reserved_at');
+            // Copy buku
+            $table->unsignedBigInteger('book_copy_id')->nullable();
 
+            // Peminjaman
+            $table->unsignedBigInteger('borrowing_id')->nullable();
+
+            // Waktu reservasi
+            $table->date('reserved_at');
             $table->date('expires_at')->nullable();
 
+            // Nomor tempat duduk
+            $table->string('seat_number', 10)->nullable();
+
+            // Status
             $table->enum('status', [
                 'menunggu',
                 'disetujui',
@@ -31,6 +50,9 @@ return new class extends Migration
                 'dibatalkan',
                 'selesai'
             ])->default('menunggu');
+
+            // Alasan penolakan
+            $table->text('rejection_reason')->nullable();
 
             $table->timestamps();
         });
