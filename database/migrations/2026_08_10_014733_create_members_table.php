@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -12,32 +11,42 @@ return new class extends Migration {
             Schema::create('members', function (Blueprint $table) {
                 $table->id();
 
+                // Relasi ke user
+                $table->foreignId('user_id')
+                    ->nullable()
+                    ->constrained('users')
+                    ->nullOnDelete();
+
+                // Identitas anggota
                 $table->string('member_number')->unique();
                 $table->string('name');
 
                 $table->string('division')->nullable();
-
                 $table->string('nis_nip')->nullable();
 
-                $table
-                    ->enum('gender', ['Laki-laki', 'Perempuan'])
-                    ->nullable();
+                $table->enum('gender', [
+                    'Laki-laki',
+                    'Perempuan'
+                ])->nullable();
 
                 $table->string('class')->nullable();
-
                 $table->text('address')->nullable();
-
                 $table->string('phone')->nullable();
-
                 $table->string('email')->nullable();
-
                 $table->date('registered_at')->nullable();
 
-                $table
-                    ->enum('status', ['Aktif', 'Tidak Aktif'])
-                    ->default('Aktif');
+                // Pertahankan enum yang digunakan aplikasi
+                $table->enum('status', [
+                    'aktif',
+                    'nonaktif'
+                ])->default('nonaktif');
 
                 $table->timestamps();
+
+                // Index
+                $table->index('user_id');
+                $table->index('email');
+                $table->index('status');
             });
         }
     }

@@ -76,6 +76,7 @@ return new class extends Migration
             $table->timestamp('withdrawn_at');
 
             $table->timestamps();
+            $table->index(['type', 'withdrawn_at']);
         });
     }
 

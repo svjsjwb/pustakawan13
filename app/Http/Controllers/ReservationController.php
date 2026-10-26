@@ -669,20 +669,32 @@ class ReservationController extends Controller
             if ($newStatus === 'disetujui') {
                 // Pastikan atau cari BookCopy untuk peminjaman
                 $bookCopy = null;
+
                 if ($reservation->book_copy_id) {
-                    $bookCopy = BookCopy::lockForUpdate()->find($reservation->book_copy_id);
-                }
-                if (!$bookCopy) {
-                    $bookCopy = BookCopy::where('book_id', $reservation->book_id)
-                        ->whereIn('status', ['available', 'reserved'])
+                    $bookCopy = BookCopy::where('id', $reservation->book_copy_id)
+                        ->where('book_id', $reservation->book_id)
+                        ->where('status', 'reserved')
                         ->lockForUpdate()
                         ->first();
+                }
+
+                if (!$bookCopy) {
+                    $bookCopy = BookCopy::where('book_id', $reservation->book_id)
+                        ->where('status', 'available')
+                        ->lockForUpdate()
+                        ->first();
+
                     if ($bookCopy) {
-                        $reservation->update(['book_copy_id' => $bookCopy->id]);
+                        $reservation->update([
+                            'book_copy_id' => $bookCopy->id
+                        ]);
                     }
                 }
+
                 if ($bookCopy) {
-                    $bookCopy->update(['status' => 'borrowed']);
+                    $bookCopy->update([
+                        'status' => 'borrowed'
+                    ]);
                 }
 
                 // Cari atau sinkronkan Member jika belum terhubung

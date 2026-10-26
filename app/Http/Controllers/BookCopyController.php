@@ -357,26 +357,6 @@ class BookCopyController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | STATUS
-                |--------------------------------------------------------------------------
-                */
-
-                'status' => [
-                    'required',
-
-                    Rule::in([
-                        'available',
-                        'reserved',
-                        'borrowed',
-                        'lost',
-                        'damaged',
-                        'maintenance',
-                    ]),
-                ],
-
-
-                /*
-                |--------------------------------------------------------------------------
                 | CONDITION
                 |--------------------------------------------------------------------------
                 */
@@ -406,6 +386,10 @@ class BookCopyController extends Controller
             ]);
 
 
+        $status = $validated['condition'] === 'rusak'
+            ? 'maintenance'
+            : 'available';
+
         $position =
             $this->findAutomaticPosition(
                 (int) $validated['shelf_id'],
@@ -430,34 +414,26 @@ class BookCopyController extends Controller
             function () use (
                 $book,
                 $validated,
-                $position
+                $position,
+                $status
             ) {
-
                 $book->copies()->create([
 
-                    'barcode' =>
-                    $validated['barcode'],
+                    'barcode' => $validated['barcode'],
 
-                    'status' =>
-                    $validated['status'],
+                    'status' => $status,
 
-                    'condition' =>
-                    $validated['condition'],
+                    'condition' => $validated['condition'],
 
-                    'shelf_id' =>
-                    $validated['shelf_id'],
+                    'shelf_id' => $validated['shelf_id'],
 
-                    'section' =>
-                    $position['section'],
+                    'section' => $position['section'],
 
-                    'side' =>
-                    $position['side'],
+                    'side' => $position['side'],
 
-                    'row' =>
-                    $position['row'],
+                    'row' => $position['row'],
 
-                    'column' =>
-                    $position['column'],
+                    'column' => $position['column'],
 
                 ]);
 
@@ -562,26 +538,6 @@ class BookCopyController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | STATUS
-                |--------------------------------------------------------------------------
-                */
-
-                'status' => [
-                    'required',
-
-                    Rule::in([
-                        'available',
-                        'reserved',
-                        'borrowed',
-                        'lost',
-                        'damaged',
-                        'maintenance',
-                    ]),
-                ],
-
-
-                /*
-                |--------------------------------------------------------------------------
                 | CONDITION
                 |--------------------------------------------------------------------------
                 */
@@ -620,20 +576,32 @@ class BookCopyController extends Controller
         $newShelfId =
             (int) $validated['shelf_id'];
 
+        $status = $copy->status;
+
+        if ($validated['condition'] === 'rusak') {
+            if (in_array($copy->status, ['borrowed', 'reserved'])) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'condition' =>
+                        'Eksemplar yang sedang dipinjam atau direservasi tidak dapat diubah menjadi rusak. Kondisi rusak ditentukan saat proses pengembalian.',
+                    ]);
+            }
+
+            $status = 'maintenance';
+        } elseif ($copy->status === 'maintenance') {
+            $status = 'available';
+        }
 
         $updateData = [
 
-            'barcode' =>
-            $validated['barcode'],
+            'barcode' => $validated['barcode'],
 
-            'status' =>
-            $validated['status'],
+            'status' => $status,
 
-            'condition' =>
-            $validated['condition'],
+            'condition' => $validated['condition'],
 
-            'shelf_id' =>
-            $newShelfId,
+            'shelf_id' => $newShelfId,
 
         ];
 
