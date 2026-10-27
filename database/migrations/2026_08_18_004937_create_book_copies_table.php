@@ -45,8 +45,6 @@ return new class extends Migration
                 'available',
                 'reserved',
                 'borrowed',
-                'lost',
-                'damaged',
                 'maintenance',
             ])->default('available');
 

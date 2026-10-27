@@ -23,8 +23,10 @@
 
             <div class="member-form-card">
 
-                <h2>Data Anggota</h2>
-                <p>Perbarui informasi Anggota dengan lengkap.</p>
+                <div class="form-header">
+                    <h2>Data Anggota</h2>
+                    <p>Perbarui informasi Anggota dengan lengkap.</p>
+                </div>
 
                 @if ($errors->any())
                     <div class="alert-error">
@@ -40,36 +42,37 @@
                     @csrf
                     @method('PUT')
 
-                    {{-- NAMA --}}
-                    <div class="form-group">
-                        <label for="name">
-                            Nama
-                        </label>
+                    <div class="form-grid">
+                        {{-- NAMA --}}
+                        <div class="form-group">
+                            <label for="name">
+                                Nama
+                            </label>
 
-                        <input type="text" name="name" id="name" value="{{ old('name', $member->name) }}"
-                            placeholder="Masukkan nama Anggota" required>
-                    </div>
+                            <input type="text" name="name" id="name" value="{{ old('name', $member->name) }}"
+                                placeholder="Masukkan nama Anggota" required>
+                        </div>
 
-                    {{-- EMAIL --}}
-                    <div class="form-group">
-                        <label for="email">
-                            Email
-                        </label>
+                        {{-- EMAIL --}}
+                        <div class="form-group">
+                            <label for="email">
+                                Email
+                            </label>
 
-                        <input type="email" name="email" id="email" value="{{ old('email', $member->email) }}"
-                            placeholder="Contoh: nama@email.com">
-                    </div>
+                            <input type="email" name="email" id="email" value="{{ old('email', $member->email) }}"
+                                placeholder="Contoh: nama@email.com">
+                        </div>
 
-                    {{-- DIVISI --}}
-                    <div class="form-group">
-                        <label for="division">
-                            Divisi
-                        </label>
+                        {{-- DIVISI --}}
+                        <div class="form-group">
+                            <label for="division">
+                                Divisi
+                            </label>
 
-                        <select name="division" id="division" required>
-                            <option value="">
-                                -- Pilih Divisi --
-                            </option>
+                            <select name="division" id="division" required>
+                                <option value="">
+                                    -- Pilih Divisi --
+                                </option>
 
                             <option value="Center Of Excellence"
                                 {{ old('division', $member->division) == 'Center Of Excellence' ? 'selected' : '' }}>
@@ -154,17 +157,18 @@
                             <option value="TAX" {{ old('division', $member->division) == 'TAX' ? 'selected' : '' }}>
                                 TAX
                             </option>
-                        </select>
-                    </div>
+                            </select>
+                        </div>
 
-                    {{-- NO TELEPON --}}
-                    <div class="form-group">
-                        <label for="phone">
-                            No. Telepon
-                        </label>
+                        {{-- NO TELEPON --}}
+                        <div class="form-group">
+                            <label for="phone">
+                                No. Telepon
+                            </label>
 
-                        <input type="text" name="phone" id="phone" value="{{ old('phone', $member->phone) }}"
-                            placeholder="Contoh: 081234567890">
+                            <input type="text" name="phone" id="phone" value="{{ old('phone', $member->phone) }}"
+                                placeholder="Contoh: 081234567890">
+                        </div>
                     </div>
 
                     {{-- STATUS --}}

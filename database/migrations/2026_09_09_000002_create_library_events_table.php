@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('description');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->index('event_date');
         });
     }
 

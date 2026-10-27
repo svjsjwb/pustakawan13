@@ -220,6 +220,23 @@
     box-shadow: 0 0 0 3px rgba(40, 127, 128, 0.1);
 }
 
+.catalog-search input {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+
+.catalog-search input::selection {
+    background: #0078d4 !important;
+    color: #ffffff !important;
+}
+
+.catalog-search input::-moz-selection {
+    background: #0078d4 !important;
+    color: #ffffff !important;
+}
+
 .catalog-search-icon {
     position: absolute;
     left: 16px;
@@ -250,6 +267,22 @@
 .catalog-dropdown-wrapper {
     position: relative;
     flex-shrink: 0;
+}
+
+.catalog-category-filter {
+    width: 200px;
+    flex: 0 0 200px;
+}
+
+#catalog-status-wrapper {
+    width: 200px;
+    flex: 0 0 200px;
+}
+
+.catalog-category-filter .catalog-filter-btn,
+#catalog-status-wrapper .catalog-filter-btn {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .catalog-filter-btn {
@@ -402,10 +435,7 @@
     display: block;
 
     animation:
-        catalogDropdownFadeIn
-        0.18s
-        cubic-bezier(0.16, 1, 0.3, 1)
-        forwards;
+        catalogDropdownFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes catalogDropdownFadeIn {
@@ -840,7 +870,8 @@
 ========================= */
 
 .book-cover {
-    height: 175px;
+    width: 100%;
+    aspect-ratio: 3 / 4.2;
 
     margin: 0;
 
@@ -849,7 +880,6 @@
     justify-content: center;
 
     position: relative;
-
     overflow: hidden;
 
     background:
@@ -858,7 +888,6 @@
             #2b7a78 100%);
 
     color: #fff;
-
     font-size: 11px;
 }
 
@@ -944,6 +973,7 @@
     height: 100%;
 
     object-fit: cover;
+    object-position: center;
 
     display: block;
 

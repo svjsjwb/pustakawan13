@@ -8,6 +8,7 @@
 
 @section('content')
 
+<div class="member-form-page">
 <div class="page-header">
     <div>
         <h1>Tambah Anggota</h1>
@@ -40,88 +41,90 @@
 
         @csrf
 
-        {{-- NAMA --}}
-        <div class="form-group">
-            <label for="name">Nama</label>
+        <div class="form-grid">
+            {{-- NAMA --}}
+            <div class="form-group">
+                <label for="name">Nama</label>
 
-            <input
-                type="text"
-                id="name"
-                name="name"
-                value="{{ old('name') }}"
-                placeholder="Masukkan nama Anggota"
-                required
-            >
-        </div>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ old('name') }}"
+                    placeholder="Masukkan nama Anggota"
+                    required
+                >
+            </div>
 
-        {{-- EMAIL --}}
-        <div class="form-group">
-            <label for="email">Email</label>
+            {{-- EMAIL --}}
+            <div class="form-group">
+                <label for="email">Email</label>
 
-            <input
-                type="email"
-                id="email"
-                name="email"
-                value="{{ old('email') }}"
-                placeholder="Contoh: nama@email.com"
-            >
-        </div>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    placeholder="Contoh: nama@email.com"
+                >
+            </div>
 
-        {{-- DIVISI --}}
-        <div class="form-group">
-            <label for="division">Divisi</label>
+            {{-- DIVISI --}}
+            <div class="form-group">
+                <label for="division">Divisi</label>
 
-            <select
-                id="division"
-                name="division"
-                required
-            >
-                <option value="">-- Pilih Divisi --</option>
+                <select
+                    id="division"
+                    name="division"
+                    required
+                >
+                    <option value="">-- Pilih Divisi --</option>
 
-                <option value="CEO"
-                    {{ old('division') == 'CEO' ? 'selected' : '' }}>
-                    CEO
-                </option>
+                    <option value="CEO"
+                        {{ old('division') == 'CEO' ? 'selected' : '' }}>
+                        CEO
+                    </option>
 
-                <option value="COO"
-                    {{ old('division') == 'COO' ? 'selected' : '' }}>
-                    COO
-                </option>
+                    <option value="COO"
+                        {{ old('division') == 'COO' ? 'selected' : '' }}>
+                        COO
+                    </option>
 
-                <option value="CFO"
-                    {{ old('division') == 'CFO' ? 'selected' : '' }}>
-                    CFO
-                </option>
+                    <option value="CFO"
+                        {{ old('division') == 'CFO' ? 'selected' : '' }}>
+                        CFO
+                    </option>
 
-                <option value="Finance Director"
-                    {{ old('division') == 'Finance Director' ? 'selected' : '' }}>
-                    Finance Director
-                </option>
+                    <option value="Finance Director"
+                        {{ old('division') == 'Finance Director' ? 'selected' : '' }}>
+                        Finance Director
+                    </option>
 
-                <option value="HROD Director"
-                    {{ old('division') == 'HROD Director' ? 'selected' : '' }}>
-                    HROD Director
-                </option>
+                    <option value="HROD Director"
+                        {{ old('division') == 'HROD Director' ? 'selected' : '' }}>
+                        HROD Director
+                    </option>
 
-                <option value="PDC"
-                    {{ old('division') == 'PDC' ? 'selected' : '' }}>
-                    PDC
-                </option>
-            </select>
-        </div>
+                    <option value="PDC"
+                        {{ old('division') == 'PDC' ? 'selected' : '' }}>
+                        PDC
+                    </option>
+                </select>
+            </div>
 
-        {{-- NO TELEPON --}}
-        <div class="form-group">
-            <label for="phone">No. Telepon</label>
+            {{-- NO TELEPON --}}
+            <div class="form-group">
+                <label for="phone">No. Telepon</label>
 
-            <input
-                type="text"
-                id="phone"
-                name="phone"
-                value="{{ old('phone') }}"
-                placeholder="Contoh: 081234567890"
-                required
-            >
+                <input
+                    type="text"
+                    id="phone"
+                    name="phone"
+                    value="{{ old('phone') }}"
+                    placeholder="Contoh: 081234567890"
+                    required
+                >
+            </div>
         </div>
 
         {{-- STATUS --}}
@@ -149,6 +152,7 @@
 
     </form>
 
+</div>
 </div>
 
 @endsection

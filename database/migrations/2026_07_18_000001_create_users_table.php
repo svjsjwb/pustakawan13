@@ -21,10 +21,15 @@ return new class extends Migration
             // Role & profile
             $table->enum('role', ['admin', 'guest', 'member'])->default('guest');
             $table->string('phone')->nullable();
-            $table->string('theme')->nullable();
-            $table->string('layout_density')->nullable();
+            $table->string('location')->nullable();
+            $table->string('avatar')->nullable();
+
+            // User appearance / preferences
+            $table->string('theme', 20)->default('light');
+            $table->string('layout_density', 20)->default('normal');
 
             // Notification preferences
+            $table->boolean('is_notification_enabled')->default(true);
             $table->boolean('allow_notifications')->default(true);
             $table->boolean('email_notifications')->default(true);
             $table->boolean('reservation_notifications')->default(true);
@@ -37,7 +42,7 @@ return new class extends Migration
             // User preferences
             $table->json('favorite_categories')->nullable();
             $table->json('favorite_genres')->nullable();
-            $table->string('last_theme_used')->nullable();
+            $table->string('last_theme_used', 20)->default('light');
             $table->timestamp('last_login_at')->nullable();
 
             // Google authentication
@@ -46,6 +51,12 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('role');
+        });
+        
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
         });
     }
 

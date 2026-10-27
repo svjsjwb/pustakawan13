@@ -21,6 +21,7 @@ return new class extends Migration
             $table->enum('status', ['menunggu', 'disetujui', 'ditolak'])->default('menunggu');
             $table->text('admin_notes')->nullable();
             $table->timestamps();
+            $table->index(['user_id', 'status']);
         });
     }
 

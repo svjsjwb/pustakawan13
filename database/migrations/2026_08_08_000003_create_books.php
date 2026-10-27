@@ -51,6 +51,7 @@ return new class extends Migration
             $table->index('no_iventaris');
             $table->index('kode_buku');
             $table->index('ddc');
+            $table->index('status');
         });
     }
 
