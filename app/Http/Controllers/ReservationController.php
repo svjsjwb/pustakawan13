@@ -725,12 +725,15 @@ class ReservationController extends Controller
                 $dueAt      = now()->addDays(14)->toDateString();
 
                 // Pindahkan data ke tabel peminjaman buku (borrowings & borrowing_details)
-                $borrowing = Borrowing::where('reservation_id', $reservation->id)->first();
+                $borrowing = null;
+
+                if ($reservation->borrowing_id) {
+                    $borrowing = Borrowing::find($reservation->borrowing_id);
+                }
                 if (!$borrowing) {
                     $borrowing = Borrowing::create([
                         'user_id'        => $userId,
                         'member_id'      => $memberId,
-                        'reservation_id' => $reservation->id,
                         'book_id'        => $reservation->book_id,
                         'seat_number'    => $reservation->seat_number,
                         'borrowed_at'    => $borrowedAt,
@@ -763,7 +766,13 @@ class ReservationController extends Controller
                 NotificationService::reservationApproved($reservation);
                 NotificationService::borrowingApproved($borrowing);
             } elseif (in_array($newStatus, ['ditolak', 'dibatalkan'])) {
-                $existingBorrowing = Borrowing::where('reservation_id', $reservation->id)->first();
+                $existingBorrowing = null;
+
+                if ($reservation->borrowing_id) {
+                    $existingBorrowing = Borrowing::find(
+                        $reservation->borrowing_id
+                    );
+                }
                 if ($existingBorrowing && $existingBorrowing->status === 'dipinjam') {
                     $existingBorrowing->update(['status' => 'ditolak']);
                 }

@@ -11,10 +11,8 @@ class SubcategorySeeder extends Seeder
     public function run(): void
     {
         $data = [
-            'Buku Pendidikan' => ['TK', 'SD', 'SMP', 'SMA'],
-            'Anak' => ['Fiksi', 'Non Fiksi'],
-            'Remaja' => ['Fiksi', 'Non Fiksi'],
-            'Dewasa' => ['Fiksi', 'Non Fiksi'],
+            'Buku Pelajaran' => ['TK', 'SD/MI', 'SMP/MTs', 'SMA/SMK/MA/SMAK/MAK', 'Referensi'],
+            'Buku Umum' => ['Agama', 'Majalah', 'Peta', 'Referensi', 'Buku Anak', 'Buku Remaja', 'Buku Dewasa', 'Ilmu Sosial', 'Ilmu Murni/Sains',  'Bahasa/Sastra', 'Ilmu Terapan'],
         ];
 
         foreach ($data as $categoryName => $subcategories) {

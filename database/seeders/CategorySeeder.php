@@ -10,10 +10,8 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Buku Pendidikan', 'level' => 1],
-            ['name' => 'Anak', 'level' => 1],
-            ['name' => 'Remaja', 'level' => 1],
-            ['name' => 'Dewasa', 'level' => 1],
+            ['name' => 'Buku Pelajaran', 'level' => 1],
+            ['name' => 'Buku Umum', 'level' => 1],
         ];
 
         foreach ($categories as $category) {

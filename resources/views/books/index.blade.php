@@ -21,32 +21,48 @@
                     <span class="books-hero-dot"></span>
                     Pusat Perpustakaan
                 </div>
+
                 <h1>Manajemen Buku</h1>
-                <p>Tambahkan, ubah, atau hapus data buku dalam koleksi perpustakaan.</p>
+
+                <p>
+                    Tambahkan, ubah, atau hapus data buku dalam koleksi perpustakaan.
+                </p>
             </div>
+
             <div class="books-hero-action">
                 <a href="{{ route('books.create') }}" class="book-toolbar-btn book-toolbar-add">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
+
                     </svg>
+
                     Tambah Buku Baru
                 </a>
             </div>
         </section>
 
+
         {{-- ALERT NOTIFIKASI --}}
         @if (session('success'))
             <div class="alert-success">
+
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                     stroke-linejoin="round">
+
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                     <polyline points="22 4 12 14.01 9 11.01" />
+
                 </svg>
+
                 <span>{{ session('success') }}</span>
+
             </div>
         @endif
+
 
         <div class="books-content-card">
 
@@ -54,32 +70,46 @@
             <div class="book-toolbar">
 
                 <div class="book-search-wrapper">
+
                     <svg class="book-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
+
                         <circle cx="11" cy="11" r="8" />
                         <line x1="21" y1="21" x2="16.65" y2="16.65" />
+
                     </svg>
 
                     <input type="text" id="books-search" class="book-search-input"
                         placeholder="Cari buku berdasarkan judul, pengarang, ISBN..." autocomplete="off">
+
                 </div>
+
 
                 {{-- FILTER KATEGORI --}}
                 <div class="books-category-dropdown" id="books-category-dropdown">
 
                     <button type="button" class="books-category-trigger" id="books-category-trigger" aria-expanded="false">
+
                         <svg class="books-category-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
                             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+
                         </svg>
 
-                        <span id="books-category-label">Semua Kategori</span>
+                        <span id="books-category-label">
+                            Semua Kategori
+                        </span>
 
                         <svg class="books-category-trigger-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
                             <polyline points="6 9 12 15 18 9"></polyline>
+
                         </svg>
+
                     </button>
+
 
                     <div class="books-category-menu" id="books-category-menu">
 
@@ -87,380 +117,362 @@
                             PILIH KATEGORI
                         </div>
 
+
                         <button type="button" class="books-category-option active" data-value="">
+
                             <span>Semua Kategori</span>
+
                             <span class="books-category-count">
                                 {{ $books->count() }}
                             </span>
+
                         </button>
 
-                        @foreach (
-    $books->pluck('category')
-        ->filter()
-        ->unique('id')
-        ->sortBy(function ($category) {
-            return match ($category->name) {
-                'Buku Pendidikan' => 1,
-                'Anak' => 2,
-                'Remaja' => 3,
-                'Dewasa' => 4,
-            };
-        })
-    as $category
-)
-    @php
-        $categoryCount = $books->where('category_id', $category->id)->count();
-    @endphp
 
-    <button type="button" class="books-category-option" data-value="{{ $category->id }}">
-        <span>{{ $category->name }}</span>
+                        @foreach ($books->pluck('category')->filter()->unique('id')->sortBy(function ($category) {
+                return match ($category->name) {
+                    'Buku Pelajaran' => 1,
+                    'Buku Umum' => 2,
+                    default => 99,
+                };
+            }) as $category)
+                            @php
+                                $categoryCount = $books->where('category_id', $category->id)->count();
+                            @endphp
 
-        <span class="books-category-count">
-            {{ $categoryCount }}
-        </span>
-    </button>
-@endforeach
+                            <button type="button" class="books-category-option" data-value="{{ $category->id }}">
+
+                                <span>
+                                    {{ $category->name }}
+                                </span>
+
+                                <span class="books-category-count">
+                                    {{ $categoryCount }}
+                                </span>
+
+                            </button>
+                        @endforeach
 
                     </div>
+
 
                     {{-- Hidden select tetap dipakai JavaScript sebagai sumber filter --}}
                     <select id="books-filter-kategori" class="books-category-filter books-category-hidden-select"
                         aria-hidden="true" tabindex="-1">
-                        <option value="">Semua Kategori</option>
+
+                        <option value="">
+                            Semua Kategori
+                        </option>
 
                         @foreach ($books->pluck('category')->filter()->unique('id')->sortBy('name') as $category)
                             <option value="{{ $category->id }}">
                                 {{ $category->name }}
                             </option>
                         @endforeach
+
                     </select>
 
                 </div>
 
             </div>
 
+
             {{-- TABLE HEADER --}}
             <div class="books-table-header">
+
                 <div class="books-table-title">
                     <h2>Daftar Koleksi Buku</h2>
                 </div>
 
                 <div class="books-table-controls">
+
                     <span class="book-total" id="books-total">
+
                         Total: {{ $books->count() }} Buku
+
                     </span>
+
                 </div>
+
             </div>
+
 
             {{-- DATA TABLE --}}
             <div class="table-wrapper">
+
                 <table class="books-table">
+
                     <thead>
                         <tr>
+
                             <th>Judul</th>
                             <th>Penulis</th>
                             <th>ISBN</th>
                             <th>Kategori</th>
                             <th>Stok</th>
                             <th>Aksi</th>
+
                         </tr>
                     </thead>
+
+
                     <tbody id="books-table-body">
+
                         @forelse($books as $book)
                             <tr data-category="{{ $book->category_id }}"
                                 data-search="{{ strtolower(($book->title ?? '') . ' ' . ($book->author ?? '') . ' ' . ($book->isbn ?? '') . ' ' . ($book->category->name ?? '')) }}">
-                                <td><strong>{{ $book->title }}</strong></td>
-                                <td>{{ $book->author ?? '-' }}</td>
-                                <td>{{ $book->isbn ?? '-' }}</td>
-                                <td>{{ $book->category->name ?? '-' }}</td>
-                                <td>{{ $book->available_stock ?? 0 }}</td>
+
                                 <td>
+                                    <strong>
+                                        {{ $book->title }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    {{ $book->author ?? '-' }}
+                                </td>
+
+                                <td>
+                                    {{ $book->isbn ?? '-' }}
+                                </td>
+
+                                <td>
+                                    {{ $book->category->name ?? '-' }}
+                                </td>
+
+                                <td>
+                                    {{ $book->available_stock ?? 0 }}
+                                </td>
+
+
+                                {{-- AKSI --}}
+                                <td>
+
                                     <div class="book-actions">
+
+                                        {{-- EDIT --}}
                                         <a href="{{ route('books.edit', $book) }}" class="action-edit" title="Edit Buku"
                                             aria-label="Edit Buku">
+
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
                                                 <path d="M12 20h9" />
+
                                                 <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+
                                             </svg>
+
                                         </a>
+
+
+                                        {{-- HAPUS --}}
                                         <form action="{{ route('books.destroy', $book) }}" method="POST"
-                                            class="delete-book-form" onsubmit="return confirmDeleteBook()">
+                                            class="delete-book-form">
+
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="book-action-btn delete" title="Hapus Buku"
-                                                aria-label="Hapus Buku">
+
+                                            <button type="button" class="book-action-btn delete" title="Hapus Buku"
+                                                aria-label="Hapus Buku" onclick="openBookDeleteModal(this)">
+
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
                                                     <polyline points="3 6 5 6 21 6" />
+
                                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+
                                                     <path d="M10 11v6" />
                                                     <path d="M14 11v6" />
+
                                                     <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+
                                                 </svg>
+
                                             </button>
+
                                         </form>
+
                                     </div>
+
                                 </td>
+
                             </tr>
+
                         @empty
+
                             <tr>
-                                <td colspan="6" class="empty-books">Belum ada data buku.</td>
+
+                                <td colspan="6" class="empty-books">
+
+                                    Belum ada data buku.
+
+                                </td>
+
                             </tr>
                         @endforelse
+
+
+                        {{-- HASIL PENCARIAN KOSONG --}}
                         <tr id="no-search-results" style="display:none;">
-                            <td colspan="6" class="empty-books">Tidak ada buku yang sesuai dengan pencarian atau
-                                filter.
+
+                            <td colspan="6" class="empty-books">
+
+                                Tidak ada buku yang sesuai dengan pencarian atau filter.
+
                             </td>
+
                         </tr>
+
                     </tbody>
+
                 </table>
+
             </div>
+
 
             {{-- PAGINASI CLIENT-SIDE --}}
             <div class="books-pagination" id="books-pagination">
-                <div class="books-pagination-links" id="books-pagination-links"></div>
-                <div class="books-pagination-info" id="books-pagination-info"></div>
+
+                <div class="books-pagination-links" id="books-pagination-links">
+                </div>
+
+                <div class="books-pagination-info" id="books-pagination-info">
+                </div>
+
             </div>
+
         </div>
 
     </div>
 
-    {{-- SCRIPT PENCARIAN & PAGINASI --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('books-search');
-            const searchButton = document.getElementById('books-search-button');
-            const categoryFilter = document.getElementById('books-filter-kategori');
-            const totalElement = document.getElementById('books-total');
-            const noResults = document.getElementById('no-search-results');
-            const pagination = document.getElementById('books-pagination');
-            const paginationLinks = document.getElementById('books-pagination-links');
-            const paginationInfo = document.getElementById('books-pagination-info');
-            const rows = Array.from(document.querySelectorAll('#books-table-body tr[data-category]'));
 
-            const categoryDropdown = document.getElementById('books-category-dropdown');
-            const categoryTrigger = document.getElementById('books-category-trigger');
-            const categoryMenu = document.getElementById('books-category-menu');
-            const categoryLabel = document.getElementById('books-category-label');
-            const categoryOptions = Array.from(
-                document.querySelectorAll('.books-category-option')
-            );
+    {{-- =========================================================
+         MODAL HAPUS BUKU
+    ========================================================== --}}
 
-            const BOOKS_PER_PAGE = 25;
+    <div id="bookDeleteModal" class="book-delete-modal-overlay" aria-hidden="true">
 
-            /* =========================================================
-               CUSTOM CATEGORY DROPDOWN
-            ========================================================= */
+        <div class="book-delete-modal" role="dialog" aria-modal="true" aria-labelledby="bookDeleteModalTitle">
 
-            if (categoryTrigger && categoryMenu && categoryDropdown) {
 
-                categoryTrigger.addEventListener('click', function(event) {
-                    event.stopPropagation();
+            {{-- ICON --}}
+            <div class="book-delete-modal-icon">
 
-                    const isOpen = categoryMenu.classList.contains('is-open');
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
 
-                    categoryMenu.classList.toggle('is-open', !isOpen);
-                    categoryTrigger.classList.toggle('is-open', !isOpen);
+                    <polyline points="3 6 5 6 21 6" />
 
-                    categoryTrigger.setAttribute(
-                        'aria-expanded',
-                        !isOpen ? 'true' : 'false'
-                    );
-                });
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
 
-                categoryOptions.forEach(function(option) {
+                    <path d="M10 11v6" />
+                    <path d="M14 11v6" />
 
-                    option.addEventListener('click', function() {
+                    <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
 
-                        const value = option.dataset.value || '';
-                        const textElement = option.querySelector('span:first-child');
-                        const text = textElement ?
-                            textElement.textContent.trim() :
-                            'Semua Kategori';
+                </svg>
 
-                        /* Update hidden select */
-                        if (categoryFilter) {
-                            categoryFilter.value = value;
-                        }
+            </div>
 
-                        /* Update tulisan tombol */
-                        if (categoryLabel) {
-                            categoryLabel.textContent = text;
-                        }
 
-                        /* Update active state */
-                        categoryOptions.forEach(function(item) {
-                            item.classList.remove('active');
-                        });
+            {{-- LABEL --}}
+            <div class="book-delete-modal-label">
+                KONFIRMASI PENARIKAN
+            </div>
 
-                        option.classList.add('active');
 
-                        /* Tutup dropdown */
-                        categoryMenu.classList.remove('is-open');
-                        categoryTrigger.classList.remove('is-open');
+            {{-- TITLE --}}
+            <h3 id="bookDeleteModalTitle" class="book-delete-modal-title">
 
-                        categoryTrigger.setAttribute(
-                            'aria-expanded',
-                            'false'
-                        );
+                Tarik Buku dari Koleksi
 
-                        /* Reset pagination + render */
-                        resetAndRender();
-                    });
-                });
+            </h3>
 
-                /* Klik di luar dropdown */
-                document.addEventListener('click', function(event) {
 
-                    if (!categoryDropdown.contains(event.target)) {
+            {{-- DESCRIPTION --}}
+            <p class="book-delete-modal-description">
 
-                        categoryMenu.classList.remove('is-open');
-                        categoryTrigger.classList.remove('is-open');
+                Buku ini akan dihapus dari koleksi aktif.
+                <br>
+                Masukkan alasan penarikan sebelum melanjutkan.
 
-                        categoryTrigger.setAttribute(
-                            'aria-expanded',
-                            'false'
-                        );
-                    }
-                });
-            }
-            let currentPage = 1;
-            let filteredRows = [...rows];
+            </p>
 
-            function getFilteredRows() {
-                const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
-                const selectedCategory = categoryFilter ? categoryFilter.value : '';
 
-                return rows.filter(function(row) {
-                    const category = row.dataset.category || '';
-                    const searchData = row.dataset.search || '';
-                    const matchSearch = keyword === '' || searchData.includes(keyword);
-                    const matchCategory = selectedCategory === '' || category === selectedCategory;
+            {{-- BOOK INFO --}}
+            <div class="book-delete-modal-info">
 
-                    return matchSearch && matchCategory;
-                });
-            }
+                <div>
 
-            function getPageNumbers(current, last) {
-                if (last <= 0) return [];
-                const start = Math.max(1, current - 2);
-                const end = Math.min(last, current + 2);
-                const pages = [];
-                for (let page = start; page <= end; page++) {
-                    pages.push(page);
-                }
-                return pages;
-            }
+                    <span>JUDUL BUKU</span>
 
-            function renderPagination() {
-                const total = filteredRows.length;
-                const lastPage = Math.max(1, Math.ceil(total / BOOKS_PER_PAGE));
+                    <strong id="deleteBookName">
+                        -
+                    </strong>
 
-                if (currentPage > lastPage) currentPage = lastPage;
-                paginationLinks.innerHTML = '';
+                </div>
 
-                if (total === 0) {
-                    paginationInfo.innerHTML =
-                        'Menampilkan <strong>0</strong> - <strong>0</strong> dari <strong>0</strong> hasil';
-                    pagination.style.display = 'none';
-                    return;
-                }
 
-                pagination.style.display = 'flex';
+                <div>
 
-                // Prev Button
-                const prevButton = document.createElement('button');
-                prevButton.type = 'button';
-                prevButton.className = 'books-page-btn' + (currentPage === 1 ? ' disabled' : '');
-                prevButton.innerHTML = '&laquo; Prev';
-                if (currentPage > 1) {
-                    prevButton.addEventListener('click', function() {
-                        currentPage--;
-                        renderBooks();
-                    });
-                }
-                paginationLinks.appendChild(prevButton);
+                    <span>JUMLAH EKSEMPLAR</span>
 
-                // Page Number Buttons
-                getPageNumbers(currentPage, lastPage).forEach(function(page) {
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.className = 'books-page-btn' + (page === currentPage ? ' active' : '');
-                    button.textContent = page;
-                    button.addEventListener('click', function() {
-                        currentPage = page;
-                        renderBooks();
-                    });
-                    paginationLinks.appendChild(button);
-                });
+                    <strong id="deleteBookStock">
+                        -
+                    </strong>
 
-                // Next Button
-                const nextButton = document.createElement('button');
-                nextButton.type = 'button';
-                nextButton.className = 'books-page-btn' + (currentPage === lastPage ? ' disabled' : '');
-                nextButton.innerHTML = 'Next &raquo;';
-                if (currentPage < lastPage) {
-                    nextButton.addEventListener('click', function() {
-                        currentPage++;
-                        renderBooks();
-                    });
-                }
-                paginationLinks.appendChild(nextButton);
+                </div>
 
-                const first = ((currentPage - 1) * BOOKS_PER_PAGE) + 1;
-                const last = Math.min(currentPage * BOOKS_PER_PAGE, total);
-                paginationInfo.innerHTML = 'Menampilkan <strong>' + first + '</strong> - <strong>' + last +
-                    '</strong> dari <strong>' + total + '</strong> hasil';
-            }
+            </div>
 
-            function renderBooks() {
-                filteredRows = getFilteredRows();
-                const total = filteredRows.length;
-                const lastPage = Math.max(1, Math.ceil(total / BOOKS_PER_PAGE));
 
-                if (currentPage > lastPage) currentPage = lastPage;
+            {{-- REASON --}}
+            <div class="book-delete-modal-reason">
 
-                rows.forEach(function(row) {
-                    row.style.display = 'none';
-                });
+                <label for="bookDeleteReason">
 
-                const start = (currentPage - 1) * BOOKS_PER_PAGE;
-                const end = start + BOOKS_PER_PAGE;
-                filteredRows.slice(start, end).forEach(function(row) {
-                    row.style.display = '';
-                });
+                    Alasan Penarikan
 
-                if (totalElement) totalElement.textContent = 'Total: ' + total + ' Buku';
-                if (noResults) noResults.style.display = total === 0 ? '' : 'none';
+                    <span class="required">
+                        *
+                    </span>
 
-                renderPagination();
-            }
+                </label>
 
-            function resetAndRender() {
-                currentPage = 1;
-                renderBooks();
-            }
 
-            if (searchInput) {
-                searchInput.addEventListener('input', resetAndRender);
-                searchInput.addEventListener('keydown', function(event) {
-                    if (event.key === 'Enter') {
-                        event.preventDefault();
-                        resetAndRender();
-                    }
-                });
-            }
+                <textarea id="bookDeleteReason" maxlength="500"
+                    placeholder="Contoh: Buku rusak berat, hilang, atau ditarik dari koleksi." required></textarea>
 
-            if (searchButton) searchButton.addEventListener('click', resetAndRender);
-            if (categoryFilter) categoryFilter.addEventListener('change', resetAndRender);
 
-            renderBooks();
-        });
+                <small>
+                    Maksimal 500 karakter.
+                </small>
 
-        function confirmDeleteBook() {
-            return confirm('Yakin ingin menghapus buku ini dari koleksi perpustakaan?');
-        }
-    </script>
+            </div>
+
+
+            {{-- ACTIONS --}}
+            <div class="book-delete-modal-actions">
+
+                <button type="button" class="book-delete-modal-cancel" onclick="closeBookDeleteModal()">
+
+                    Batal
+
+                </button>
+
+
+                <button type="button" class="book-delete-modal-confirm" onclick="confirmBookDelete()">
+
+                    Tarik Buku
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
 
 @endsection

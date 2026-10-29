@@ -11,21 +11,17 @@ class CatalogController extends Controller
     public function index(Request $request)
     {
         $categoryOrder = [
-            'Buku Pendidikan',
-            'Anak',
-            'Remaja',
-            'Dewasa',
+            'Buku Pelajaran',
+            'Buku Umum',
         ];
 
         $categories = Category::whereIn('name', $categoryOrder)
             ->with('subcategories')
             ->orderByRaw("
                 CASE name
-                    WHEN 'Buku Pendidikan' THEN 1
-                    WHEN 'Anak' THEN 2
-                    WHEN 'Remaja' THEN 3
-                    WHEN 'Dewasa' THEN 4
-                    ELSE 5
+                    WHEN 'Buku Pelajaran' THEN 1
+                    WHEN 'Buku Umum' THEN 2
+                    ELSE 3
                 END
             ")
             ->get();

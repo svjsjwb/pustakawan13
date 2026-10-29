@@ -44,15 +44,30 @@ class UserHomeController extends Controller
                 ->where('member_id', $member->id)
                 ->latest()
                 ->first();
+
             if ($lastBorrow) {
                 $bookTitle = $lastBorrow->details->first()?->book?->title ?? 'Buku';
+
                 $requests->push([
-                    'type'       => $lastBorrow->extension_status === 'menunggu' ? 'Perpanjangan Peminjaman' : 'Peminjaman Buku',
+                    'type'       => $lastBorrow->extension_status === 'menunggu'
+                        ? 'Perpanjangan Peminjaman'
+                        : 'Peminjaman Buku',
+
                     'title'      => $bookTitle,
-                    'status'     => $lastBorrow->extension_status === 'menunggu' ? 'Menunggu Persetujuan' : $lastBorrow->display_status,
-                    'status_raw' => $lastBorrow->extension_status === 'menunggu' ? 'menunggu' : $lastBorrow->status,
+
+                    'status'     => $lastBorrow->extension_status === 'menunggu'
+                        ? 'Menunggu Persetujuan'
+                        : $lastBorrow->display_status,
+
+                    'status_raw' => $lastBorrow->extension_status === 'menunggu'
+                        ? 'menunggu'
+                        : $lastBorrow->status,
+
                     'date'       => $lastBorrow->created_at,
-                    'notes'      => $lastBorrow->rejection_reason ?? ($lastBorrow->extension_reason ?? null),
+
+                    'notes'      => $lastBorrow->rejection_reason
+                        ?? ($lastBorrow->extension_reason ?? null),
+
                     'link'       => route('borrowings.index'),
                 ]);
             }
@@ -61,6 +76,7 @@ class UserHomeController extends Controller
                 ->where('member_id', $member->id)
                 ->latest()
                 ->first();
+
             if ($lastReserve) {
                 $requests->push([
                     'type'       => 'Reservasi Buku',
@@ -69,19 +85,27 @@ class UserHomeController extends Controller
                     'status_raw' => $lastReserve->status,
                     'date'       => $lastReserve->created_at,
                     'notes'      => $lastReserve->rejection_reason,
-                    'link'       => route('user.reservations.show', $lastReserve->id),
+                    'link'       => route(
+                        'user.reservations.show',
+                        $lastReserve->id
+                    ),
                 ]);
             }
 
-            $latestRequest = $requests->sortByDesc('date')->first();
+            $latestRequest = $requests
+                ->sortByDesc('date')
+                ->first();
         }
 
-        // Buku populer (prioritaskan buku yang memiliki cover jika kolom cover ada)
+        // Buku populer
+        // Prioritaskan buku yang memiliki cover jika kolom cover ada
         $popularBooksQuery = Book::with('category')
             ->where('stok', '>', 0);
 
         if (\Illuminate\Support\Facades\Schema::hasColumn('books', 'cover')) {
-            $popularBooksQuery->orderByRaw('CASE WHEN cover IS NOT NULL AND cover != "" THEN 0 ELSE 1 END');
+            $popularBooksQuery->orderByRaw(
+                'CASE WHEN cover IS NOT NULL AND cover != "" THEN 0 ELSE 1 END'
+            );
         }
 
         $popularBooks = $popularBooksQuery
@@ -93,22 +117,39 @@ class UserHomeController extends Controller
         $recommendations = app(RecommendationService::class)
             ->getForUser($user, 8);
 
-        // Kategori
-        $categoryOrder = ['Buku Pendidikan', 'Anak', 'Remaja', 'Dewasa'];
-        $categories    = Category::whereIn('name', $categoryOrder)
+        // ── Kategori ────────────────────────────────────────────
+        $categoryOrder = [
+            'Buku Pelajaran',
+            'Buku Umum',
+        ];
+
+        $categories = Category::whereIn('name', $categoryOrder)
             ->get()
-            ->sortBy(fn($category) => array_search($category->name, $categoryOrder, true))
+            ->sortBy(
+                fn($category) =>
+                array_search(
+                    $category->name,
+                    $categoryOrder,
+                    true
+                )
+            )
             ->values();
 
-        // Aktivitas / Pengumuman (dari Pandu — popup announcement)
+        // Aktivitas / Pengumuman
+        // dari Pandu — popup announcement
         $announcements = \Illuminate\Support\Facades\Schema::hasTable('activities')
             ? Activity::latest()->get()
             : collect();
 
         // Aktivitas yang belum dibaca oleh user ini
-        $unreadAnnouncements = $announcements->filter(function ($activity) use ($user) {
-            return method_exists($activity, 'reads') && !$activity->reads()->where('user_id', $user?->id)->exists();
-        })->values();
+        $unreadAnnouncements = $announcements
+            ->filter(function ($activity) use ($user) {
+                return method_exists($activity, 'reads')
+                    && !$activity->reads()
+                        ->where('user_id', $user?->id)
+                        ->exists();
+            })
+            ->values();
 
         $unreadAnnouncement = $unreadAnnouncements->first();
 
@@ -133,11 +174,16 @@ class UserHomeController extends Controller
         $keyword = trim((string) $request->input('q', ''));
 
         if ($keyword === '') {
-            return response()->json(['books' => []]);
+            return response()->json([
+                'books' => []
+            ]);
         }
 
         $books = Book::with('category')
-            ->whereRaw('LOWER(judul_buku) LIKE ?', [mb_strtolower($keyword) . '%'])
+            ->whereRaw(
+                'LOWER(judul_buku) LIKE ?',
+                [mb_strtolower($keyword) . '%']
+            )
             ->orderBy('judul_buku')
             ->take(8)
             ->get()
@@ -145,10 +191,17 @@ class UserHomeController extends Controller
                 'title'    => $book->title,
                 'author'   => $book->author ?: 'Penulis tidak diketahui',
                 'category' => $book->category?->name ?: 'Koleksi',
-                'cover'    => $book->cover ? asset('storage/' . $book->cover) : null,
-                'url'      => route('user.catalog', ['search' => $book->title]),
+                'cover'    => $book->cover
+                    ? asset('storage/' . $book->cover)
+                    : null,
+                'url'      => route(
+                    'user.catalog',
+                    ['search' => $book->title]
+                ),
             ]);
 
-        return response()->json(['books' => $books]);
+        return response()->json([
+            'books' => $books
+        ]);
     }
 }

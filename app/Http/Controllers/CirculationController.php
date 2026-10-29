@@ -192,7 +192,6 @@ class CirculationController extends Controller
             $createdBorrowing = Borrowing::create([
                 'user_id'        => $reservation?->user_id ?? $member->user_id,
                 'member_id'      => $validated['member_id'],
-                'reservation_id' => $reservation?->id,
                 'book_id'        => $book->id,
                 'borrowed_at'    => $validated['borrowed_at'],
                 'due_at'         => $validated['due_at'],
@@ -297,10 +296,14 @@ class CirculationController extends Controller
             /*
              * Update status reservasi terkait menjadi selesai jika ada.
              */
-            if ($borrowing->reservation_id) {
-                Reservation::where('id', $borrowing->reservation_id)
-                    ->whereNotIn('status', ['ditolak', 'dibatalkan'])
-                    ->update(['status' => 'selesai']);
+            $reservation = Reservation::where('borrowing_id', $borrowing->id)
+                ->whereNotIn('status', ['ditolak', 'dibatalkan'])
+                ->first();
+
+            if ($reservation) {
+                $reservation->update([
+                    'status' => 'selesai',
+                ]);
             }
 
             /*

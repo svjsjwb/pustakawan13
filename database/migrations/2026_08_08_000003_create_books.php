@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('publisher')->nullable();
             $table->unsignedSmallInteger('publication_year')->nullable();
             $table->string('edition', 100)->nullable();
-            $table->string('call_number', 100)->nullable();
             $table->string('ddc', 30)->nullable();
             $table->text('description')->nullable();
             $table->string('cover')->nullable();

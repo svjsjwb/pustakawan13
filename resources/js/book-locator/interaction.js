@@ -356,8 +356,8 @@ export function createBookInteraction({
             'Buku';
 
 
-        const barcode =
-            copy.barcode ??
+        const copyNumber =
+            copy.copyx ??
             '-';
 
 
@@ -464,7 +464,7 @@ export function createBookInteraction({
         if (barcodeElement) {
 
             barcodeElement.textContent =
-                barcode;
+                copyNumber;
 
         }
 

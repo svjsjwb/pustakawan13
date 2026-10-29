@@ -102,7 +102,14 @@ class MemberSeeder extends Seeder
             ],
         ];
 
-        foreach ($members as $data) {
+        foreach ($members as $index => $data) {
+            $data['member_number'] = 'MEM' . str_pad(
+                $index + 1,
+                4,
+                '0',
+                STR_PAD_LEFT
+            );
+
             Member::updateOrCreate(
                 ['phone' => $data['phone']],
                 $data

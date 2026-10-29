@@ -53,7 +53,7 @@
         </span>
 
         <span>
-            <strong>Edit Eksemplar</strong>
+            <strong>Kelola Eksemplar</strong>
             <small>Kelola salinan fisik buku</small>
         </span>
 

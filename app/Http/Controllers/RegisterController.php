@@ -68,6 +68,21 @@ class RegisterController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | BUAT NOMOR ANGGOTA OTOMATIS
+        |--------------------------------------------------------------------------
+        */
+
+        $nextMemberId = (Member::max('id') ?? 0) + 1;
+
+        $memberNumber = 'MEM' . str_pad(
+            $nextMemberId,
+            4,
+            '0',
+            STR_PAD_LEFT
+        );
+
+        /*
+        |--------------------------------------------------------------------------
         | BUAT DATA PENDAFTAR DI MEMBERS
         |--------------------------------------------------------------------------
         |
@@ -78,6 +93,7 @@ class RegisterController extends Controller
 
         Member::create([
             'user_id' => $user->id,
+            'member_number' => $memberNumber,
             'name' => $validated['name'],
             'email' => $user->email,
             'division' => $validated['division'],

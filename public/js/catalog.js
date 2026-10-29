@@ -67,7 +67,7 @@
         const modalStatusDetail = document.getElementById('modal-status-detail');
         const modalPublisher = document.getElementById('modal-publisher');
         const modalYear = document.getElementById('modal-year');
-        const modalCallNumber = document.getElementById('modal-call-number');
+        const modalDdc = document.getElementById('modal-ddc');
         const modalIsbn = document.getElementById('modal-isbn');
         const modalCoverImage = document.getElementById('modal-cover-image');
         const modalBookBox = document.getElementById('modal-book-box');
@@ -158,7 +158,7 @@
             const cover = card.dataset.cover || '';
             const publisher = card.dataset.publisher || '-';
             const year = card.dataset.year || '-';
-            const callNumber = card.dataset.callNumber || '-';
+            const ddc = card.dataset.ddc || '-';
             const isbn = card.dataset.isbn || '-';
 
 
@@ -172,7 +172,7 @@
             if (modalStatusDetail) modalStatusDetail.textContent = status;
             if (modalPublisher) modalPublisher.textContent = publisher;
             if (modalYear) modalYear.textContent = year;
-            if (modalCallNumber) modalCallNumber.textContent = callNumber;
+            if (modalDdc) modalDdc.textContent = ddc;
             if (modalIsbn) modalIsbn.textContent = isbn;
             if (modalDescription) modalDescription.textContent = description;
 

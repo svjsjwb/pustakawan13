@@ -148,20 +148,6 @@
                         @enderror
                     </div>
 
-                    {{-- No. Panggil --}}
-                    <div class="book-form-group">
-                        <label for="call_number">
-                            No. Panggil (Call Number) <span class="required">*</span>
-                        </label>
-                        <input type="text" id="call_number" name="call_number"
-                            class="input @error('call_number') is-invalid @enderror"
-                            value="{{ old('call_number', $book->call_number) }}" required>
-                        @error('call_number')
-                            <span class="form-error">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-
                     {{-- SECTION 2: PENERBITAN & STOK --}}
                     <div class="form-section-heading">
                         <div class="form-section-icon">2</div>
@@ -198,7 +184,7 @@
                     {{-- Jumlah Stok --}}
                     <div class="book-form-group">
                         <label for="stock">
-                            Jumlah Total Stok Buku <span class="required">*</span>
+                            Jumlah Stok Tersedia <span class="required">*</span>
                         </label>
                         <input type="number" id="stock" name="stock"
                             class="input @error('stock') is-invalid @enderror" min="1"
@@ -249,22 +235,54 @@
 
                     {{-- Rak --}}
                     <div class="book-form-group">
-                        <label for="rak">
-                            Rak <span class="required">*</span>
+
+                        <label for="shelf_id">
+
+                            Rak
+
+                            <span class="required">
+                                *
+                            </span>
+
                         </label>
-                        <select id="rak" name="rak" class="input @error('rak') is-invalid @enderror" required>
-                            <option value="" disabled {{ old('rak', $book->rak) ? '' : 'selected' }}>-- Pilih Rak --
+
+                        <select id="shelf_id" name="shelf_id" class="input @error('shelf_id') is-invalid @enderror"
+                            required>
+
+                            <option value="">
+                                -- Pilih Rak --
                             </option>
-                            @foreach ($racks as $rack)
-                                <option value="{{ $rack->code }}"
-                                    {{ old('rak', $book->rak) == $rack->code ? 'selected' : '' }}>
-                                    {{ $rack->code }} – {{ $rack->name }}
-                                </option>
+
+                            @foreach ($floors as $floor)
+                                @foreach ($floor->zones as $zone)
+                                    <optgroup label="{{ $floor->name }} — {{ $zone->name }}">
+
+                                        @foreach ($zone->shelves as $shelf)
+                                            <option value="{{ $shelf->id }}" @selected(old('shelf_id', $book->copies->first()?->shelf_id) == $shelf->id)>
+
+                                                {{ $shelf->name }}
+
+                                            </option>
+                                        @endforeach
+
+                                    </optgroup>
+                                @endforeach
                             @endforeach
+
                         </select>
-                        @error('rak')
-                            <span class="form-error">{{ $message }}</span>
+
+                        <small style="font-size:11px;color:#64747b;">
+                            Rak merupakan lokasi utama seluruh eksemplar buku.
+                            Jika Rak diubah, seluruh eksemplar buku akan dipindahkan
+                            ke Rak baru dan posisi fisiknya akan dihitung ulang secara otomatis.
+                        </small>
+
+                        @error('shelf_id')
+                            <span class="form-error">
+                                {{ $message }}
+                            </span>
                         @enderror
+
                     </div>
 
                     {{-- Edisi --}}

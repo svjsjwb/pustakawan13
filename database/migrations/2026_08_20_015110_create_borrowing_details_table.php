@@ -19,9 +19,18 @@ return new class extends Migration
                 ->constrained('books')
                 ->cascadeOnDelete();
 
+            $table->foreignId('book_copy_id')
+                ->nullable()
+                ->constrained('book_copies')
+                ->nullOnDelete();
+
             $table->unsignedInteger('quantity')->default(1);
 
             $table->timestamps();
+
+            // Index
+            $table->index(['borrowing_id', 'book_id']);
+            $table->index('book_copy_id');
         });
     }
 

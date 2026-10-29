@@ -181,25 +181,24 @@ class BookLocatorController extends Controller
                     return [
 
                         'id' =>
-                            (int) $shelf->id,
+                        (int) $shelf->id,
 
                         'code' =>
-                            $shelf->code,
+                        $shelf->code,
 
                         'row_count' =>
-                            (int) (
-                                $shelf->row_count
-                                ?? 3
-                            ),
+                        (int) (
+                            $shelf->row_count
+                            ?? 3
+                        ),
 
                         'column_count' =>
-                            (int) (
-                                $shelf->column_count
-                                ?? 30
-                            ),
+                        (int) (
+                            $shelf->column_count
+                            ?? 30
+                        ),
 
                     ];
-
                 }
             )
             ->values()
@@ -230,50 +229,48 @@ class BookLocatorController extends Controller
                                 return [
 
                                     'id' =>
-                                        $copy->id,
+                                    $copy->id,
 
                                     'book_id' =>
-                                        $copy->book_id,
+                                    $copy->book_id,
 
-                                    'title' =>
-                                        $copy->book?->title
-                                        ??
-                                        'Buku',
+                                    'title' => $copy->book?->judul_buku ?? 'Buku',
 
-                                    'barcode' =>
-                                        $copy->barcode,
+                                    'copy' =>
+                                    $copy->copy,
 
                                     'status' =>
-                                        $copy->status,
+                                    $copy->status,
+
+                                    'condition' =>
+                                    $copy->condition,
 
                                     'shelf_id' =>
-                                        $shelf->id,
+                                    $shelf->id,
 
                                     'shelf' =>
-                                        $shelf->code,
+                                    $shelf->code,
 
                                     'section' =>
-                                        (int)
-                                        $copy->section,
+                                    (int)
+                                    $copy->section,
 
                                     'row' =>
-                                        (int)
-                                        $copy->row,
+                                    (int)
+                                    $copy->row,
 
                                     'column' =>
-                                        (int)
-                                        $copy->column,
+                                    (int)
+                                    $copy->column,
 
                                     'is_target' =>
-                                        $copy->id ===
+                                    $copy->id ===
                                         $reservation
-                                            ->book_copy_id,
+                                        ->book_copy_id,
 
                                 ];
-
                             }
                         );
-
                 }
             )
             ->values()
@@ -291,28 +288,28 @@ class BookLocatorController extends Controller
             [
 
                 'reservation' =>
-                    $reservation,
+                $reservation,
 
                 'targetCopy' =>
-                    $targetCopy,
+                $targetCopy,
 
                 'targetShelf' =>
-                    $targetShelf,
+                $targetShelf,
 
                 'targetZone' =>
-                    $targetZone,
+                $targetZone,
 
                 'targetFloor' =>
-                    $targetFloor,
+                $targetFloor,
 
                 'shelves' =>
-                    $shelves,
+                $shelves,
 
                 'shelves3d' =>
-                    $shelves3d,
+                $shelves3d,
 
                 'bookCopies' =>
-                    $bookCopies,
+                $bookCopies,
 
             ]
         );

@@ -39,16 +39,6 @@ class BookCopySeeder extends Seeder
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | 2. Ambil maksimal 200 judul yang memiliki eksemplar
-        |--------------------------------------------------------------------------
-        |
-        | Tetap menyimpan seluruh judul buku di database.
-        | Hanya 200 judul yang akan mempunyai BookCopy.
-        |
-        */
-
         $booksWithCopies = Book::orderBy('id')
             ->take(170)
             ->get();
@@ -72,8 +62,8 @@ class BookCopySeeder extends Seeder
         if (count($slots) < $totalCopiesNeeded) {
             throw new \RuntimeException(
                 'Kapasitas slot rak (' . count($slots) .
-                ') tidak mencukupi untuk jumlah eksemplar (' .
-                $totalCopiesNeeded . ').'
+                    ') tidak mencukupi untuk jumlah eksemplar (' .
+                    $totalCopiesNeeded . ').'
             );
         }
 
@@ -93,29 +83,15 @@ class BookCopySeeder extends Seeder
             })
             ->flip();
 
-        /*
-        |--------------------------------------------------------------------------
-        | 6. Buat BookCopy untuk 200 judul
-        |--------------------------------------------------------------------------
-        */
-
         foreach ($booksWithCopies as $book) {
 
             for ($copyNumber = 1; $copyNumber <= $copiesPerBook; $copyNumber++) {
 
-                $barcode = sprintf(
-                    'BC-%05d-%03d',
-                    $book->id,
-                    $copyNumber
-                );
+                $copy = 'c.' . $copyNumber;
 
-                /*
-                |--------------------------------------------------------------------------
-                | Kalau barcode sudah ada, jangan buat ulang.
-                |--------------------------------------------------------------------------
-                */
-
-                $existingCopy = BookCopy::where('barcode', $barcode)->first();
+                $existingCopy = BookCopy::where('book_id', $book->id)
+                    ->where('copy', $copy)
+                    ->first();
 
                 if ($existingCopy) {
                     continue;
@@ -170,7 +146,7 @@ class BookCopySeeder extends Seeder
 
                 BookCopy::create([
                     'book_id' => $book->id,
-                    'barcode' => $barcode,
+                    'copy' => $copy,
                     'shelf_id' => $slot['shelf_id'],
                     'section' => 1,
                     'side' => 'front',
@@ -218,7 +194,7 @@ class BookCopySeeder extends Seeder
         );
 
         $this->command->info(
-            "Target: maksimal 200 judul dengan 2 eksemplar per judul."
+            "Target: maksimal 170 judul dengan 3 eksemplar per judul."
         );
     }
 }

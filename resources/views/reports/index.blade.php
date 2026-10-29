@@ -220,7 +220,7 @@
                             </div>
 
                             <div class="collection-summary-item">
-                                <span>DITARIK</span>
+                                <span>BUKU DIHAPUS</span>
                                 <strong>{{ $collectionWithdrawnCount ?? 0 }}</strong>
                             </div>
 
@@ -232,6 +232,11 @@
                             <div class="collection-summary-item">
                                 <span>RUSAK</span>
                                 <strong>{{ $collectionDamagedCount ?? 0 }}</strong>
+                            </div>
+
+                            <div class="collection-summary-item">
+                                <span>HILANG</span>
+                                <strong>{{ $collectionLostCount ?? 0 }}</strong>
                             </div>
                         </div>
                     @endif
@@ -399,10 +404,10 @@
 
     <script>
         /*
-            |--------------------------------------------------------------------------
-            | DATE PICKER
-            |--------------------------------------------------------------------------
-            */
+                |--------------------------------------------------------------------------
+                | DATE PICKER
+                |--------------------------------------------------------------------------
+                */
         document.addEventListener('DOMContentLoaded', function() {
 
             const startDateInput = document.getElementById('start_date');

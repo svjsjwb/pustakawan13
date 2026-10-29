@@ -101,7 +101,7 @@
         {{-- Dropdowns for Pendidikan, Anak-Anak, Remaja, Dewasa --}}
         @foreach($catalogHierarchy as $groupName => $subcategories)
             @php
-                $groupLabel = $groupName === 'Anak' ? 'Anak-Anak' : $groupName;
+                $groupLabel = $groupName;
                 $isGroupActive = ($mainCategory === $groupName);
                 $activeSubName = $isGroupActive ? $subCategory : '';
                 $groupTotal = $mainCounts[$groupName] ?? 0;
