@@ -15,6 +15,34 @@ use Illuminate\Support\Facades\Hash;
 
 class GoogleAuthController extends Controller
 {
+    private function generateMemberNumber(): string
+    {
+        $lastNumber = Member::where('member_number', 'like', 'MBR-%')
+            ->orderByDesc('id')
+            ->value('member_number');
+
+        if ($lastNumber && preg_match('/^MBR-(\d+)$/', $lastNumber, $matches)) {
+            $nextNumber = ((int) $matches[1]) + 1;
+        } else {
+            $nextNumber = 1;
+        }
+
+        do {
+            $memberNumber = 'MBR-' . str_pad(
+                (string) $nextNumber,
+                6,
+                '0',
+                STR_PAD_LEFT
+            );
+
+            $nextNumber++;
+        } while (
+            Member::where('member_number', $memberNumber)->exists()
+        );
+
+        return $memberNumber;
+    }
+
     /**
      * Redirect user ke halaman login Google.
      */
@@ -140,7 +168,8 @@ class GoogleAuthController extends Controller
         }
 
         if (!$member) {
-            Member::create([
+            Member::forceCreate([
+                'member_number' => $this->generateMemberNumber(),
                 'user_id'       => $user->id,
                 'name'          => $googleName,
                 'email'         => $googleEmail,
@@ -215,12 +244,12 @@ class GoogleAuthController extends Controller
         */
 
         $validated = $request->validate([
-        'name' => [
+            'name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-        'division' => [
+            'division' => [
                 'required',
                 'string',
                 'max:100',
@@ -280,7 +309,8 @@ class GoogleAuthController extends Controller
                 'role'      => 'guest',
             ]);
 
-            Member::create([
+            Member::forceCreate([
+                'member_number' => $this->generateMemberNumber(),
                 'user_id'       => $user->id,
                 'name'          => $validated['name'],
                 'email'         => $googleRegistration['email'],
