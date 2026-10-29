@@ -67,49 +67,11 @@ class DashboardController extends Controller
             ->get();
 
 
-        /*
-         * ========================================================
-         * BUKU TERPOPULER
-         * ========================================================
-         *
-         * Popularitas dihitung dari dua aktivitas:
-         *
-         * 1. PEMINJAMAN LANGSUNG
-         *    +1
-         *
-         * 2. RESERVASI YANG DISETUJUI
-         *    +1
-         *
-         * Tidak dihitung:
-         *
-         * - Reservasi menunggu
-         * - Reservasi ditolak
-         * - Reservasi dibatalkan
-         *
-         * Peminjaman yang berasal dari reservasi
-         * tidak dihitung lagi karena reservasinya
-         * sudah memberikan +1.
-         *
-         * Tujuannya mencegah satu transaksi dihitung 2x.
-         * ========================================================
-         */
-
-
-        /*
-         * ========================================================
-         * 1. PEMINJAMAN LANGSUNG
-         * ========================================================
-         *
-         * reservation_id NULL =
-         * peminjaman tidak berasal dari reservasi.
-         */
-
+        // tabel buku populer
+        
         $borrowingCounts = collect();
 
-        $allBorrowings = Borrowing::with('details')
-            ->whereNull('reservation_id')
-            ->get();
-
+        $allBorrowings = Borrowing::with('details')->get();
 
         foreach ($allBorrowings as $borrowing) {
 
@@ -117,7 +79,7 @@ class DashboardController extends Controller
 
                 $bookId = $detail->book_id;
 
-                $quantity = $detail->quantity ?? 1;
+                $quantity = (int) ($detail->quantity ?? 1);
 
                 $borrowingCounts[$bookId] =
                     ($borrowingCounts[$bookId] ?? 0)
@@ -126,136 +88,49 @@ class DashboardController extends Controller
         }
 
 
-        /*
-         * ========================================================
-         * 2. RESERVASI YANG DISETUJUI
-         * ========================================================
-         *
-         * Hanya status "disetujui" yang memberikan +1.
-         */
-
-        $reservationCounts = Reservation::whereIn('status', [
-            'disetujui',
-            'selesai',
-        ])
-            ->selectRaw('book_id, COUNT(*) as total')
-            ->groupBy('book_id')
-            ->pluck('total', 'book_id');
-
-
-        /*
-         * ========================================================
-         * GABUNGKAN ID BUKU
-         * ========================================================
-         */
-
         $popularBookIds = $borrowingCounts
             ->keys()
-            ->merge(
-                $reservationCounts->keys()
-            )
-            ->unique()
             ->values();
 
-
-        /*
-         * ========================================================
-         * BENTUK DATA BUKU POPULER
-         * ========================================================
-         */
 
         $popularBooks = Book::whereIn(
             'id',
             $popularBookIds
         )
             ->get()
-            ->map(
-                function ($book) use (
-                    $borrowingCounts,
-                    $reservationCounts
-                ) {
+            ->map(function ($book) use ($borrowingCounts) {
 
-                    $borrowingTotal =
-                        (int) (
-                            $borrowingCounts[$book->id] ?? 0
-                        );
+                $borrowingTotal =
+                    (int) (
+                        $borrowingCounts[$book->id] ?? 0
+                    );
 
+                return [
+                    'book_id' =>
+                    $book->id,
 
-                    $reservationTotal =
-                        (int) (
-                            $reservationCounts[$book->id] ?? 0
-                        );
+                    'title' =>
+                    $book->title ?? '-',
 
+                    'borrowing_total' =>
+                    $borrowingTotal,
 
-                    return [
-                        'book_id' =>
-                        $book->id,
+                    'reservation_total' =>
+                    0,
 
-                        'title' =>
-                        $book->title ?? '-',
+                    'total' =>
+                    $borrowingTotal,
+                ];
+            })
+            ->sort(function ($a, $b) {
 
-                        'borrowing_total' =>
-                        $borrowingTotal,
-
-                        'reservation_total' =>
-                        $reservationTotal,
-
-                        'total' =>
-                        $borrowingTotal
-                            + $reservationTotal,
-                    ];
-                }
-            )
-            ->sort(
-                function ($a, $b) {
-
-                    /*
-                     * TOTAL TERBESAR
-                     */
-
-                    if (
-                        $a['total'] !==
-                        $b['total']
-                    ) {
-
-                        return
-                            $b['total']
-                            <=>
-                            $a['total'];
-                    }
-
-
-                    /*
-                     * JIKA TOTAL SAMA,
-                     * PEMINJAMAN JADI PEMBEDA
-                     */
-
-                    if (
-                        $a['borrowing_total'] !==
-                        $b['borrowing_total']
-                    ) {
-
-                        return
-                            $b['borrowing_total']
-                            <=>
-                            $a['borrowing_total'];
-                    }
-
-
-                    /*
-                     * JIKA MASIH SAMA,
-                     * RESERVASI JADI PEMBEDA
-                     */
-
-                    return
-                        $b['reservation_total']
-                        <=>
-                        $a['reservation_total'];
-                }
-            )
+                /*
+         * Popularitas terbesar di atas.
+         */
+                return $b['total'] <=> $a['total'];
+            })
             ->take(5)
             ->values();
-
 
         /*
          * ========================================================

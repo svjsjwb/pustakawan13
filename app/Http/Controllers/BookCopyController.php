@@ -49,11 +49,22 @@ class BookCopyController extends Controller
             ->orderBy('floor_number')
             ->get();
 
+        $nextCopyNumber = (int) (
+            $book->copies()
+            ->where('copy', 'like', 'c.%')
+            ->get()
+            ->map(function ($copy) {
+                return (int) str_replace('c.', '', $copy->copy);
+            })
+            ->max() ?? 0
+        ) + 1;
+
         return view(
             'book_copies.create',
             compact(
                 'book',
-                'floors'
+                'floors',
+                'nextCopyNumber'
             )
         );
     }
@@ -325,7 +336,19 @@ class BookCopyController extends Controller
         ]);
     }
 
+    // auto-generate copy number
+    private function generateCopyNumber(Book $book): string
+    {
+        $lastNumber = $book->copies()
+            ->where('copy', 'like', 'c.%')
+            ->get()
+            ->map(function ($copy) {
+                return (int) str_replace('c.', '', $copy->copy);
+            })
+            ->max();
 
+        return 'c.' . (($lastNumber ?? 0) + 1);
+    }
     /*
     |--------------------------------------------------------------------------
     | STORE
@@ -336,71 +359,29 @@ class BookCopyController extends Controller
         Request $request,
         Book $book
     ) {
+        $validated = $request->validate([
+            'condition' => [
+                'required',
+                Rule::in([
+                    'baik',
+                    'rusak',
+                    'hilang',
+                ]),
+            ],
 
-        $validated =
-            $request->validate([
+            'shelf_id' => [
+                'required',
+                'integer',
+                'exists:shelves,id',
+            ],
+        ]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | BARCODE
-                |--------------------------------------------------------------------------
-                */
+        $position = $this->findAutomaticPosition(
+            (int) $validated['shelf_id'],
+            (int) $book->id
+        );
 
-                'barcode' => [
-                    'required',
-                    'string',
-                    'max:100',
-
-                    'unique:book_copies,barcode',
-                ],
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | CONDITION
-                |--------------------------------------------------------------------------
-                */
-
-                'condition' => [
-                    'required',
-
-                    Rule::in([
-                        'baik',
-                        'rusak',
-                    ]),
-                ],
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | RAK
-                |--------------------------------------------------------------------------
-                */
-
-                'shelf_id' => [
-                    'required',
-                    'integer',
-                    'exists:shelves,id',
-                ],
-
-            ]);
-
-
-        $status = $validated['condition'] === 'rusak'
-            ? 'maintenance'
-            : 'available';
-
-        $position =
-            $this->findAutomaticPosition(
-                (int) $validated['shelf_id'],
-                (int) $book->id
-            );
-
-
-        if (
-            $position === null
-        ) {
-
+        if ($position === null) {
             return back()
                 ->withInput()
                 ->withErrors([
@@ -409,41 +390,38 @@ class BookCopyController extends Controller
                 ]);
         }
 
+        $copyNumber = $this->generateCopyNumber($book);
 
-        DB::transaction(
-            function () use (
-                $book,
-                $validated,
-                $position,
-                $status
-            ) {
-                $book->copies()->create([
+        DB::transaction(function () use (
+            $book,
+            $validated,
+            $position,
+            $copyNumber
+        ) {
+            $copy = $book->copies()->create([
+                'copy' => $copyNumber,
 
-                    'barcode' => $validated['barcode'],
+                'status' => 'available',
 
-                    'status' => $status,
+                'condition' => $validated['condition'],
 
-                    'condition' => $validated['condition'],
+                'shelf_id' => $validated['shelf_id'],
 
-                    'shelf_id' => $validated['shelf_id'],
+                'section' => $position['section'],
 
-                    'section' => $position['section'],
+                'side' => $position['side'],
 
-                    'side' => $position['side'],
+                'row' => $position['row'],
 
-                    'row' => $position['row'],
+                'column' => $position['column'],
+            ]);
 
-                    'column' => $position['column'],
+            // Sinkronkan status berdasarkan kondisi fisik
+            $copy->syncStatus();
 
-                ]);
-
-
-                $this->syncBookStock(
-                    $book
-                );
-            }
-        );
-
+            // Sinkronkan stok buku
+            $this->syncBookStock($book);
+        });
 
         return redirect()
             ->route(
@@ -452,7 +430,7 @@ class BookCopyController extends Controller
             )
             ->with(
                 'success',
-                'Eksemplar buku berhasil ditambahkan.'
+                "Eksemplar {$copyNumber} berhasil ditambahkan."
             );
     }
 
@@ -513,58 +491,22 @@ class BookCopyController extends Controller
         );
 
 
-        $validated =
-            $request->validate([
+        $validated = $request->validate([
+            'condition' => [
+                'required',
+                Rule::in([
+                    'baik',
+                    'rusak',
+                    'hilang',
+                ]),
+            ],
 
-                /*
-                |--------------------------------------------------------------------------
-                | BARCODE
-                |--------------------------------------------------------------------------
-                */
-
-                'barcode' => [
-                    'required',
-                    'string',
-                    'max:100',
-
-                    Rule::unique(
-                        'book_copies',
-                        'barcode'
-                    )->ignore(
-                        $copy->id
-                    ),
-                ],
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | CONDITION
-                |--------------------------------------------------------------------------
-                */
-
-                'condition' => [
-                    'required',
-
-                    Rule::in([
-                        'baik',
-                        'rusak',
-                    ]),
-                ],
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | RAK
-                |--------------------------------------------------------------------------
-                */
-
-                'shelf_id' => [
-                    'required',
-                    'integer',
-                    'exists:shelves,id',
-                ],
-
-            ]);
+            'shelf_id' => [
+                'required',
+                'integer',
+                'exists:shelves,id',
+            ],
+        ]);
 
 
         $oldShelfId =
@@ -576,33 +518,24 @@ class BookCopyController extends Controller
         $newShelfId =
             (int) $validated['shelf_id'];
 
-        $status = $copy->status;
-
-        if ($validated['condition'] === 'rusak') {
-            if (in_array($copy->status, ['borrowed', 'reserved'])) {
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'condition' =>
-                        'Eksemplar yang sedang dipinjam atau direservasi tidak dapat diubah menjadi rusak. Kondisi rusak ditentukan saat proses pengembalian.',
-                    ]);
-            }
-
-            $status = 'maintenance';
-        } elseif ($copy->status === 'maintenance') {
-            $status = 'available';
+        if (
+            in_array(
+                $copy->status,
+                ['borrowed', 'reserved']
+            ) &&
+            $validated['condition'] !== $copy->condition
+        ) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'condition' =>
+                    'Eksemplar yang sedang dipinjam atau direservasi tidak dapat diubah kondisinya.',
+                ]);
         }
 
         $updateData = [
-
-            'barcode' => $validated['barcode'],
-
-            'status' => $status,
-
             'condition' => $validated['condition'],
-
             'shelf_id' => $newShelfId,
-
         ];
 
 
@@ -653,14 +586,11 @@ class BookCopyController extends Controller
                 $updateData
             ) {
 
-                $copy->update(
-                    $updateData
-                );
+                $copy->update($updateData);
 
+                $copy->syncStatus();
 
-                $this->syncBookStock(
-                    $book
-                );
+                $this->syncBookStock($book);
             }
         );
 
@@ -758,22 +688,42 @@ class BookCopyController extends Controller
 
         /*
     |--------------------------------------------------------------------------
-    | SIMPAN DATA HISTORI SEBELUM COPY DIHAPUS
+    | HAPUS EKSEMPLAR
     |--------------------------------------------------------------------------
     |
-    | book_title dan barcode disimpan sebagai snapshot.
+    | Aturan laporan:
     |
-    | Jadi meskipun BookCopy sudah dihapus,
-    | laporan tetap mengetahui eksemplar yang pernah ditarik.
+    | 1. Hapus 1 eksemplar dari buku yang masih punya copy lain:
+    |    - Eksemplar dihapus +1
+    |    - Buku dihapus +0
     |
+    | 2. Hapus eksemplar terakhir:
+    |    - Eksemplar dihapus +1
+    |    - Buku dihapus +1
+    |    - Buku ikut dihapus karena sudah tidak memiliki eksemplar.
+    |
+    | Record withdrawal dibuat SEBELUM data induk dihapus agar
+    | informasi buku dan eksemplar tetap dapat dicatat di laporan.
     */
 
-        DB::transaction(
+        $bookDeleted = DB::transaction(
             function () use (
                 $book,
                 $copy,
                 $validated
-            ) {
+            ): bool {
+
+                // Hitung copy lain sebelum copy ini dihapus.
+                $remainingCopyCount = $book->copies()
+                    ->where('id', '!=', $copy->id)
+                    ->count();
+
+
+                /*
+            |------------------------------------------------------------------
+            | CATAT EKSEMPLAR YANG DIHAPUS
+            |------------------------------------------------------------------
+            */
 
                 CollectionWithdrawal::create([
 
@@ -787,10 +737,10 @@ class BookCopyController extends Controller
                     $copy->id,
 
                     'book_title' =>
-                    $book->title,
+                    $book->judul_buku,
 
-                    'barcode' =>
-                    $copy->barcode,
+                    'copy' =>
+                    $copy->copy,
 
                     'quantity' =>
                     1,
@@ -805,23 +755,70 @@ class BookCopyController extends Controller
 
 
                 /*
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
             | HAPUS COPY
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
             */
 
                 $copy->delete();
 
 
                 /*
-            |--------------------------------------------------------------------------
-            | HITUNG ULANG STOCK
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
+            | JIKA INI COPY TERAKHIR, HAPUS BUKUNYA JUGA
+            |------------------------------------------------------------------
+            */
+
+                if ($remainingCopyCount === 0) {
+
+                    CollectionWithdrawal::create([
+
+                        'type' =>
+                        'book',
+
+                        'book_id' =>
+                        $book->id,
+
+                        'book_copy_id' =>
+                        null,
+
+                        'book_title' =>
+                        $book->judul_buku,
+
+                        'copy' =>
+                        null,
+
+                        'quantity' =>
+                        1,
+
+                        'reason' =>
+                        $validated['reason'],
+
+                        'withdrawn_at' =>
+                        now(),
+
+                    ]);
+
+
+                    $book->delete();
+
+
+                    // Menandakan bahwa redirect harus kembali ke daftar buku.
+                    return true;
+                }
+
+
+                /*
+            |------------------------------------------------------------------
+            | MASIH ADA COPY LAIN → SYNC STOCK
+            |------------------------------------------------------------------
             */
 
                 $this->syncBookStock(
                     $book
                 );
+
+                return false;
             }
         );
 
@@ -831,6 +828,19 @@ class BookCopyController extends Controller
     | REDIRECT
     |--------------------------------------------------------------------------
     */
+
+        if ($bookDeleted) {
+
+            return redirect()
+                ->route(
+                    'books.index'
+                )
+                ->with(
+                    'success',
+                    'Eksemplar terakhir berhasil dihapus dan buku ikut dihapus dari koleksi.'
+                );
+        }
+
 
         return redirect()
             ->route(

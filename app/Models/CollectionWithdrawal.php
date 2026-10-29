@@ -12,7 +12,7 @@ class CollectionWithdrawal extends Model
         'book_id',
         'book_copy_id',
         'book_title',
-        'barcode',
+        'copy',
         'quantity',
         'reason',
         'withdrawn_at',

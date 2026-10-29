@@ -30,10 +30,16 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             // Copy buku
-            $table->unsignedBigInteger('book_copy_id')->nullable();
+            $table->foreignId('book_copy_id')
+                ->nullable()
+                ->constrained('book_copies')
+                ->nullOnDelete();
 
             // Peminjaman
-            $table->unsignedBigInteger('borrowing_id')->nullable();
+            $table->foreignId('borrowing_id')
+                ->nullable()
+                ->constrained('borrowings')
+                ->nullOnDelete();
 
             // Waktu reservasi
             $table->date('reserved_at');
@@ -55,6 +61,13 @@ return new class extends Migration
             $table->text('rejection_reason')->nullable();
 
             $table->timestamps();
+
+            // Index
+            $table->index(['member_id', 'status']);
+            $table->index(['user_id', 'status']);
+            $table->index(['book_id', 'status']);
+            $table->index(['book_copy_id', 'status']);
+            $table->index('expires_at');
         });
     }
 

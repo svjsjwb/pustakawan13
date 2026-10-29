@@ -21,7 +21,6 @@ class Book extends Model
         'publisher',
         'publication_year',
         'edition',
-        'call_number',
         'ddc',
         'description',
         'cover',

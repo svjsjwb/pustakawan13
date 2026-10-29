@@ -349,7 +349,7 @@ class ReportController extends Controller
             );
 
 
-      
+
         $collectionReportData =
             $this->getCollectionReportData(
                 $startDate,
@@ -386,20 +386,13 @@ class ReportController extends Controller
 
         $collectionWithdrawnCount =
             $collectionReportData
-            ->where(
-                'type',
-                'withdrawn'
-            )
+            ->where('type', 'withdrawn')
             ->sum('quantity');
-
 
         $collectionDeletedCopyCount =
             $collectionReportData
-            ->where(
-                'type',
-                'copy_withdrawn'
-            )
-            ->count();
+            ->where('type', 'copy_withdrawn')
+            ->sum('quantity');
 
 
         $collectionDamagedCount =
@@ -407,6 +400,14 @@ class ReportController extends Controller
             ->where(
                 'type',
                 'damaged'
+            )
+            ->count();
+
+        $collectionLostCount =
+            $collectionReportData
+            ->where(
+                'type',
+                'lost'
             )
             ->count();
 
@@ -1000,6 +1001,7 @@ class ReportController extends Controller
                 'collectionWithdrawnCount',
                 'collectionDeletedCopyCount',
                 'collectionDamagedCount',
+                'collectionLostCount',
                 'totalCollectionChanges',
 
                 'totalBorrowed',
@@ -1094,7 +1096,7 @@ class ReportController extends Controller
                 'judul_buku' =>
                 $book->judul_buku,
 
-                'barcode' =>
+                'copy' =>
                 null,
 
                 'quantity' =>
@@ -1178,14 +1180,14 @@ class ReportController extends Controller
                 $copy->book->judul_buku
                     ?? 'Buku',
 
-                'barcode' =>
-                $copy->barcode,
+                'copy' =>
+                $copy->copy,
 
                 'quantity' =>
                 1,
 
                 'display_quantity' =>
-                $copy->barcode
+                $copy->copy
                     ?? '1 eksemplar',
 
                 'reason' =>
@@ -1222,39 +1224,27 @@ class ReportController extends Controller
             ->get();
 
 
-        foreach (
-            $withdrawnBooks
-            as $withdrawal
-        ) {
+        foreach ($withdrawnBooks as $withdrawal) {
 
             $data->push([
-                'type' =>
-                'withdrawn',
+                'type' => 'withdrawn',
 
-                'label' =>
-                'Buku Ditarik',
+                'label' => 'Buku Dihapus',
 
-                'date' =>
-                $withdrawal->withdrawn_at,
+                'date' => $withdrawal->withdrawn_at,
 
-                'judul_buku' =>
-                $withdrawal->book_title,
+                'judul_buku' => $withdrawal->book_title,
 
-                'barcode' =>
-                null,
+                'copy' => null,
 
-                'quantity' =>
-                $withdrawal->quantity,
+                // 1 record type=book = 1 buku dihapus
+                'quantity' => 1,
 
-                'display_quantity' =>
-                $withdrawal->quantity
-                    . ' eksemplar',
+                'display_quantity' => '1 buku',
 
-                'reason' =>
-                $withdrawal->reason,
+                'reason' => $withdrawal->reason,
 
-                'sort_date' =>
-                $withdrawal->withdrawn_at,
+                'sort_date' => $withdrawal->withdrawn_at,
             ]);
         }
 
@@ -1295,12 +1285,17 @@ class ReportController extends Controller
             as $withdrawal
         ) {
 
+            $quantity = (int) (
+                $withdrawal->quantity
+                ?? 1
+            );
+
             $data->push([
                 'type' =>
                 'copy_withdrawn',
 
                 'label' =>
-                'Eksemplar Ditarik',
+                'Eksemplar Dihapus',
 
                 'date' =>
                 $withdrawal->withdrawn_at,
@@ -1308,15 +1303,19 @@ class ReportController extends Controller
                 'judul_buku' =>
                 $withdrawal->book_title,
 
-                'barcode' =>
-                $withdrawal->barcode,
+                'copy' =>
+                $withdrawal->copy,
 
+                // Jumlah eksemplar yang benar-benar dihapus.
+                // Untuk hapus 1 copy: 1.
+                // Untuk hapus seluruh buku: jumlah seluruh copy.
                 'quantity' =>
-                1,
+                $quantity,
 
                 'display_quantity' =>
-                $withdrawal->barcode
-                    ?? '1 eksemplar',
+                $withdrawal->copy
+                    ? $withdrawal->copy
+                    : $quantity . ' eksemplar',
 
                 'reason' =>
                 $withdrawal->reason,
@@ -1374,14 +1373,14 @@ class ReportController extends Controller
                 $copy->book->judul_buku
                     ?? 'Buku',
 
-                'barcode' =>
-                $copy->barcode,
+                'copy' =>
+                $copy->copy,
 
                 'quantity' =>
                 1,
 
                 'display_quantity' =>
-                $copy->barcode
+                $copy->copy
                     ?? '1 eksemplar',
 
                 'reason' =>
@@ -1393,6 +1392,70 @@ class ReportController extends Controller
             ]);
         }
 
+        /*
+ * ========================================================
+ * 6. KONDISI HILANG
+ * ========================================================
+ *
+ * Database saat ini menyimpan kondisi terakhir.
+ *
+ * Jadi bagian ini menampilkan eksemplar yang sekarang
+ * mempunyai condition = hilang.
+ *
+ * Bukan histori perubahan kondisi.
+ */
+        $lostCopies =
+            BookCopy::with([
+                'book'
+            ])
+            ->where(
+                'condition',
+                'hilang'
+            )
+            ->orderBy(
+                'updated_at',
+                'desc'
+            )
+            ->get();
+
+
+        foreach (
+            $lostCopies
+            as $copy
+        ) {
+            $data->push([
+                'type' =>
+                'lost',
+
+                'label' =>
+                'Kondisi Hilang',
+
+                'date' =>
+                $copy->updated_at
+                    ?? $copy->created_at,
+
+                'judul_buku' =>
+                $copy->book->judul_buku
+                    ?? 'Buku',
+
+                'copy' =>
+                $copy->copy,
+
+                'quantity' =>
+                1,
+
+                'display_quantity' =>
+                $copy->copy
+                    ?? '1 eksemplar',
+
+                'reason' =>
+                'Eksemplar hilang',
+
+                'sort_date' =>
+                $copy->updated_at
+                    ?? $copy->created_at,
+            ]);
+        }
 
         return $data
             ->sortByDesc(
@@ -1930,7 +1993,7 @@ class ReportController extends Controller
         $endDate,
         $type
     ) {
-        
+
         $data =
             $this->getCollectionReportData(
                 $startDate,

@@ -2676,6 +2676,352 @@
     color: #ffffff !important;
 }
 
+/* =========================================================
+   MODAL HAPUS BUKU
+========================================================= */
+
+.book-delete-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(4px);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+        opacity .2s ease,
+        visibility .2s ease;
+
+    box-sizing: border-box;
+}
+
+.book-delete-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* CARD */
+
+.book-delete-modal {
+    width: 100%;
+    max-width: 470px;
+
+    padding: 28px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.20);
+
+    box-sizing: border-box;
+
+    transform: translateY(8px) scale(.98);
+
+    transition:
+        transform .2s ease;
+}
+
+.book-delete-modal-overlay.show .book-delete-modal {
+    transform: translateY(0) scale(1);
+}
+
+
+/* ICON */
+
+.book-delete-modal-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 14px;
+
+    border-radius: 50%;
+
+    background: #fff1f1;
+    color: #d95353;
+}
+
+.book-delete-modal-icon svg {
+    width: 23px;
+    height: 23px;
+}
+
+
+/* LABEL */
+
+.book-delete-modal-label {
+    margin-bottom: 5px;
+
+    text-align: center;
+
+    color: #287f80;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: .8px;
+}
+
+
+/* TITLE */
+
+.book-delete-modal-title {
+    margin: 0;
+
+    text-align: center;
+
+    color: #173b52;
+
+    font-size: 21px;
+    font-weight: 750;
+}
+
+
+/* DESCRIPTION */
+
+.book-delete-modal-description {
+    margin: 9px 0 18px;
+
+    text-align: center;
+
+    color: #718091;
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* INFO */
+
+.book-delete-modal-info {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-bottom: 17px;
+}
+
+.book-delete-modal-info>div {
+    min-width: 0;
+
+    padding: 11px 13px;
+
+    background: #f7fbfb;
+
+    border: 1px solid #e0eceb;
+
+    border-radius: 10px;
+}
+
+.book-delete-modal-info span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #7b8a96;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: .4px;
+}
+
+.book-delete-modal-info strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #173b52;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+/* REASON */
+
+.book-delete-modal-reason {
+    width: 100%;
+
+    margin-bottom: 21px;
+
+    text-align: left;
+}
+
+.book-delete-modal-reason label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #173b52;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.book-delete-modal-reason .required {
+    color: #e84d4d;
+}
+
+.book-delete-modal-reason textarea {
+    display: block;
+
+    width: 100%;
+    min-height: 92px;
+
+    padding: 12px 14px;
+
+    box-sizing: border-box;
+
+    resize: vertical;
+
+    border: 1px solid #d4dfe5;
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    color: #173b52;
+
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+
+    outline: none;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.book-delete-modal-reason textarea:focus {
+    border-color: #287f80;
+
+    box-shadow:
+        0 0 0 3px rgba(40, 127, 128, .10);
+}
+
+.book-delete-modal-reason textarea::placeholder {
+    color: #9aa8b4;
+}
+
+.book-delete-modal-reason small {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #718091;
+
+    font-size: 11px;
+}
+
+
+/* ACTIONS */
+
+.book-delete-modal-actions {
+    display: flex;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 10px;
+}
+
+.book-delete-modal-cancel,
+.book-delete-modal-confirm {
+    min-width: 120px;
+
+    padding: 10px 16px;
+
+    border-radius: 9px;
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .15s ease;
+}
+
+.book-delete-modal-cancel {
+    border: 1px solid #d8e1e5;
+
+    background: #ffffff;
+
+    color: #52616d;
+}
+
+.book-delete-modal-cancel:hover {
+    background: #f7fafa;
+}
+
+.book-delete-modal-confirm {
+    border: 1px solid #d95353;
+
+    background: #d95353;
+
+    color: #ffffff;
+}
+
+.book-delete-modal-confirm:hover {
+    background: #c74646;
+    border-color: #c74646;
+}
+
+.book-delete-modal-cancel:active,
+.book-delete-modal-confirm:active {
+    transform: scale(.98);
+}
+
+
+/* MOBILE */
+
+@media (max-width: 520px) {
+
+    .book-delete-modal {
+        padding: 22px;
+    }
+
+    .book-delete-modal-info {
+        grid-template-columns: 1fr;
+    }
+
+    .book-delete-modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .book-delete-modal-cancel,
+    .book-delete-modal-confirm {
+        width: 100%;
+    }
+
+}
+
 @media(max-width:700px) {
     .isbn-search-row {
         flex-direction: column

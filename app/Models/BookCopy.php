@@ -15,7 +15,7 @@ class BookCopy extends Model
         'row',
         'column',
         'side',
-        'barcode',
+        'copy',
         'status',
         'condition',
     ];
@@ -42,6 +42,14 @@ class BookCopy extends Model
 
     public function syncStatus(): void
     {
+        if ($this->condition === 'hilang') {
+            $this->updateQuietly([
+                'status' => 'lost',
+            ]);
+
+            return;
+        }
+
         if ($this->condition === 'rusak') {
             $this->updateQuietly([
                 'status' => 'maintenance',
@@ -50,7 +58,12 @@ class BookCopy extends Model
             return;
         }
 
-        if ($this->status === 'maintenance') {
+        if (
+            in_array(
+                $this->status,
+                ['maintenance', 'lost']
+            )
+        ) {
             $this->updateQuietly([
                 'status' => 'available',
             ]);

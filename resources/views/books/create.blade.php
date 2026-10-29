@@ -211,18 +211,50 @@
                         @enderror
                     </div>
 
+                    {{-- Rak --}}
                     <div class="book-form-group">
-                        <label for="rak">Rak <span class="required">*</span></label>
-                        <select id="rak" name="rak" class="input @error('rak') is-invalid @enderror" required>
-                            <option value="">-- Pilih Rak --</option>
-                            @foreach ($racks as $rack)
-                                <option value="{{ $rack->code }}" {{ old('rak') == $rack->code ? 'selected' : '' }}>
-                                    {{ $rack->code }} – {{ $rack->name }}</option>
+
+                        <label for="shelf_id">
+
+                            Rak
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <select id="shelf_id" name="shelf_id" class="input @error('shelf_id') is-invalid @enderror"
+                            required>
+
+                            <option value="">
+                                -- Pilih Rak --
+                            </option>
+
+                            @foreach ($floors as $floor)
+                                @foreach ($floor->zones as $zone)
+                                    <optgroup label="{{ $floor->name }} — {{ $zone->name }}">
+
+                                        @foreach ($zone->shelves as $shelf)
+                                            <option value="{{ $shelf->id }}" @selected(old('shelf_id') == $shelf->id)>
+
+                                                {{ $shelf->name }}
+
+                                            </option>
+                                        @endforeach
+
+                                    </optgroup>
+                                @endforeach
                             @endforeach
+
                         </select>
-                        @error('rak')
-                            <span class="form-error">{{ $message }}</span>
+
+                        @error('shelf_id')
+                            <span class="form-error">
+                                {{ $message }}
+                            </span>
                         @enderror
+
                     </div>
 
                     <div class="book-form-group">

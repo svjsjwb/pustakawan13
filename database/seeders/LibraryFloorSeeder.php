@@ -13,7 +13,7 @@ class LibraryFloorSeeder extends Seeder
             ['floor_number' => 1],
             [
                 'name' => 'Lantai 1',
-                'description' => 'Lantai koleksi utama',
+                'description' => 'Lantai koleksi TSSO',
             ]
         );
 
@@ -22,6 +22,14 @@ class LibraryFloorSeeder extends Seeder
             [
                 'name' => 'Lantai 2',
                 'description' => 'Lantai koleksi lanjutan',
+            ]
+        );
+
+        LibraryFloor::updateOrCreate(
+            ['floor_number' => 3],
+            [
+                'name' => 'Lantai 3',
+                'description' => 'Lantai koleksi TSPM',
             ]
         );
     }

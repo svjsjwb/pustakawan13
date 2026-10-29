@@ -53,7 +53,15 @@ return new class extends Migration
              */
             $table->string('book_title');
 
-            $table->string('barcode')
+            /*
+             * Nomor eksemplar.
+             *
+             * Contoh:
+             * c.1
+             * c.2
+             * c.3
+             */
+            $table->string('copy', 20)
                 ->nullable();
 
             /*
@@ -76,6 +84,7 @@ return new class extends Migration
             $table->timestamp('withdrawn_at');
 
             $table->timestamps();
+
             $table->index(['type', 'withdrawn_at']);
         });
     }

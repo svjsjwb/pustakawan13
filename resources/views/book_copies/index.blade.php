@@ -152,26 +152,41 @@
 
                         <tr>
 
-                            <th width="60">
-                                #
-                            </th>
-
+                            {{-- =================================================
+                                 COPY
+                            ================================================== --}}
                             <th>
-                                Barcode
+                                Copy
                             </th>
 
+
+                            {{-- =================================================
+                                 STATUS
+                            ================================================== --}}
                             <th>
                                 Status
                             </th>
 
+
+                            {{-- =================================================
+                                 KONDISI
+                            ================================================== --}}
                             <th>
                                 Kondisi
                             </th>
 
+
+                            {{-- =================================================
+                                 LOKASI
+                            ================================================== --}}
                             <th>
                                 Lokasi
                             </th>
 
+
+                            {{-- =================================================
+                                 AKSI
+                            ================================================== --}}
                             <th width="210">
                                 Aksi
                             </th>
@@ -210,24 +225,12 @@
                             <tr>
 
                                 {{-- =================================================
-                                     NOMOR
-                                ================================================== --}}
-                                <td class="copy-number">
-
-                                    {{ $loop->iteration }}
-
-                                </td>
-
-
-                                {{-- =================================================
-                                     BARCODE
+                                     COPY
                                 ================================================== --}}
                                 <td>
 
                                     <strong class="copy-barcode">
-
-                                        {{ $copy->barcode ?? '-' }}
-
+                                        {{ $copy->copy }}
                                     </strong>
 
                                 </td>
@@ -260,6 +263,10 @@
                                         <span class="copy-status danger">
                                             Rusak
                                         </span>
+                                    @elseif($copy->condition === 'hilang')
+                                        <span class="copy-status danger">
+                                            Hilang
+                                        </span>
                                     @else
                                         <span class="copy-status">
                                             -
@@ -284,7 +291,9 @@
                                             <span>
 
                                                 {{ $copy->shelf->zone->floor->name }}
+
                                                 /
+
                                                 {{ $copy->shelf->zone->name }}
 
                                             </span>
@@ -313,9 +322,7 @@
                                         </div>
                                     @else
                                         <span class="copy-no-location">
-
                                             Lokasi belum diatur
-
                                         </span>
                                     @endif
 
@@ -398,7 +405,7 @@
 
                             <tr>
 
-                                <td colspan="6" class="copy-empty">
+                                <td colspan="5" class="copy-empty">
 
                                     <div>
 
@@ -451,7 +458,6 @@
         <div class="copy-delete-modal" role="dialog" aria-modal="true" aria-labelledby="copyDeleteModalTitle">
 
             {{-- ICON --}}
-
             <div class="copy-delete-modal-icon">
 
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -473,21 +479,20 @@
 
 
             {{-- LABEL --}}
-
             <div class="copy-delete-modal-label">
                 KONFIRMASI PENGHAPUSAN
             </div>
 
 
             {{-- TITLE --}}
-
             <h3 id="copyDeleteModalTitle" class="copy-delete-modal-title">
+
                 Hapus Eksemplar
+
             </h3>
 
 
             {{-- DESCRIPTION --}}
-
             <p class="copy-delete-modal-description">
 
                 Eksemplar ini akan dihapus dari koleksi aktif.
@@ -500,7 +505,6 @@
 
 
             {{-- COPY INFO --}}
-
             <div class="copy-delete-modal-info">
 
                 <div>
@@ -519,10 +523,10 @@
                 <div>
 
                     <span>
-                        BARCODE
+                        COPY
                     </span>
 
-                    <strong id="deleteCopyBarcode">
+                    <strong id="deleteCopyNumber">
                         -
                     </strong>
 
@@ -532,7 +536,6 @@
 
 
             {{-- ALASAN --}}
-
             <div class="copy-delete-modal-reason">
 
                 <label for="copyDeleteReason">
@@ -556,16 +559,19 @@
 
 
             {{-- ACTIONS --}}
-
             <div class="copy-delete-modal-actions">
 
                 <button type="button" class="copy-delete-modal-cancel" onclick="closeCopyDeleteModal()">
+
                     Batal
+
                 </button>
 
 
                 <button type="button" class="copy-delete-modal-confirm" onclick="confirmCopyDelete()">
+
                     Hapus Eksemplar
+
                 </button>
 
             </div>
@@ -583,326 +589,219 @@
             position: fixed;
             inset: 0;
             z-index: 9999;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
             padding: 20px;
-
             background: rgba(15, 23, 42, 0.48);
-
             backdrop-filter: blur(4px);
-
             opacity: 0;
             visibility: hidden;
-
             transition:
                 opacity .2s ease,
                 visibility .2s ease;
-
             box-sizing: border-box;
         }
-
 
         .copy-delete-modal-overlay.show {
             opacity: 1;
             visibility: visible;
         }
 
-
         .copy-delete-modal {
             width: 100%;
             max-width: 470px;
-
             padding: 28px;
-
             background: #ffffff;
-
             border: 1px solid #e2e8f0;
-
             border-radius: 16px;
-
-            box-shadow:
-                0 24px 60px rgba(15, 23, 42, 0.20);
-
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.20);
             box-sizing: border-box;
-
             transform: translateY(8px) scale(.98);
-
-            transition:
-                transform .2s ease;
+            transition: transform .2s ease;
         }
-
 
         .copy-delete-modal-overlay.show .copy-delete-modal {
             transform: translateY(0) scale(1);
         }
 
-
         .copy-delete-modal-icon {
             width: 48px;
             height: 48px;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
             margin: 0 auto 14px;
-
             border-radius: 50%;
-
             background: #fff1f1;
-
             color: #d95353;
         }
-
 
         .copy-delete-modal-icon svg {
             width: 23px;
             height: 23px;
         }
 
-
         .copy-delete-modal-label {
             text-align: center;
-
             margin-bottom: 5px;
-
             color: #287f80;
-
             font-size: 10px;
             font-weight: 800;
-
             letter-spacing: .8px;
         }
 
-
         .copy-delete-modal-title {
             margin: 0;
-
             text-align: center;
-
             color: #173b52;
-
             font-size: 21px;
             font-weight: 750;
         }
 
-
         .copy-delete-modal-description {
             margin: 9px 0 18px;
-
             text-align: center;
-
             color: #718091;
-
             font-size: 12px;
             line-height: 1.6;
         }
 
-
         .copy-delete-modal-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
-
             gap: 10px;
-
             margin-bottom: 17px;
         }
 
-
         .copy-delete-modal-info>div {
             min-width: 0;
-
             padding: 11px 13px;
-
             background: #f7fbfb;
-
             border: 1px solid #e0eceb;
-
             border-radius: 10px;
         }
 
-
         .copy-delete-modal-info span {
             display: block;
-
             margin-bottom: 4px;
-
             color: #7b8a96;
-
             font-size: 9px;
             font-weight: 700;
-
             letter-spacing: .4px;
         }
 
-
         .copy-delete-modal-info strong {
             display: block;
-
             overflow: hidden;
-
             color: #173b52;
-
             font-size: 12px;
             font-weight: 700;
-
             white-space: nowrap;
             text-overflow: ellipsis;
         }
 
-
         .copy-delete-modal-reason {
             width: 100%;
-
             margin-bottom: 21px;
-
             text-align: left;
         }
 
-
         .copy-delete-modal-reason label {
             display: block;
-
             margin-bottom: 7px;
-
             color: #173b52;
-
             font-size: 13px;
             font-weight: 700;
         }
-
 
         .copy-delete-modal-reason .required {
             color: #e84d4d;
         }
 
-
         .copy-delete-modal-reason textarea {
             display: block;
-
             width: 100%;
             min-height: 92px;
-
             padding: 12px 14px;
-
             box-sizing: border-box;
-
             resize: vertical;
-
             border: 1px solid #d4dfe5;
             border-radius: 10px;
-
             background: #ffffff;
-
             color: #173b52;
-
             font-family: inherit;
             font-size: 13px;
             line-height: 1.5;
-
             outline: none;
-
             transition:
                 border-color .2s ease,
                 box-shadow .2s ease;
         }
 
-
         .copy-delete-modal-reason textarea:focus {
             border-color: #287f80;
-
-            box-shadow:
-                0 0 0 3px rgba(40, 127, 128, .10);
+            box-shadow: 0 0 0 3px rgba(40, 127, 128, .10);
         }
-
 
         .copy-delete-modal-reason textarea::placeholder {
             color: #9aa8b4;
         }
 
-
         .copy-delete-modal-reason small {
             display: block;
-
             margin-top: 6px;
-
             color: #718091;
-
             font-size: 11px;
         }
 
-
         .copy-delete-modal-actions {
             display: flex;
-
             align-items: center;
-
             justify-content: flex-end;
-
             gap: 10px;
         }
-
 
         .copy-delete-modal-cancel,
         .copy-delete-modal-confirm {
             min-width: 120px;
-
             padding: 10px 16px;
-
             border-radius: 9px;
-
             font-family: inherit;
-
             font-size: 12px;
             font-weight: 700;
-
             cursor: pointer;
-
             transition:
                 background .2s ease,
                 border-color .2s ease,
                 transform .15s ease;
         }
 
-
         .copy-delete-modal-cancel {
             border: 1px solid #d8e1e5;
-
             background: #ffffff;
-
             color: #52616d;
         }
-
 
         .copy-delete-modal-cancel:hover {
             background: #f7fafa;
         }
 
-
         .copy-delete-modal-confirm {
             border: 1px solid #d95353;
-
             background: #d95353;
-
             color: #ffffff;
         }
 
-
         .copy-delete-modal-confirm:hover {
             background: #c74646;
-
             border-color: #c74646;
         }
-
 
         .copy-delete-modal-cancel:active,
         .copy-delete-modal-confirm:active {
             transform: scale(.98);
         }
-
 
         @media (max-width: 520px) {
 
@@ -910,16 +809,13 @@
                 padding: 22px;
             }
 
-
             .copy-delete-modal-info {
                 grid-template-columns: 1fr;
             }
 
-
             .copy-delete-modal-actions {
                 flex-direction: column-reverse;
             }
-
 
             .copy-delete-modal-cancel,
             .copy-delete-modal-confirm {
@@ -952,9 +848,7 @@
         function openCopyDeleteModal(button) {
 
             copyDeleteForm =
-                button.closest(
-                    '.copy-delete-form'
-                );
+                button.closest('.copy-delete-form');
 
 
             if (!copyDeleteForm) {
@@ -974,21 +868,19 @@
 
             /*
             |--------------------------------------------------------------------------
-            | AMBIL BARCODE
+            | AMBIL COPY
             |--------------------------------------------------------------------------
             */
 
-            const barcodeElement =
+            const copyElement =
                 row ?
-                row.querySelector(
-                    '.copy-barcode'
-                ) :
+                row.querySelector('.copy-barcode') :
                 null;
 
 
-            const barcode =
-                barcodeElement ?
-                barcodeElement.textContent.trim() :
+            const copy =
+                copyElement ?
+                copyElement.textContent.trim() :
                 '-';
 
 
@@ -1014,9 +906,9 @@
                 );
 
 
-            const barcodeTarget =
+            const copyTarget =
                 document.getElementById(
-                    'deleteCopyBarcode'
+                    'deleteCopyNumber'
                 );
 
 
@@ -1028,10 +920,10 @@
             }
 
 
-            if (barcodeTarget) {
+            if (copyTarget) {
 
-                barcodeTarget.textContent =
-                    barcode;
+                copyTarget.textContent =
+                    copy;
 
             }
 

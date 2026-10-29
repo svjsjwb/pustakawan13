@@ -12,7 +12,7 @@
 
         {{-- =========================================================
          BREADCRUMB
-    ========================================================== --}}
+        ========================================================== --}}
         <nav class="book-breadcrumb">
 
             <a href="{{ route('books.index') }}">
@@ -36,18 +36,18 @@
 
         {{-- =========================================================
          NAVIGASI EDIT
-    ========================================================== --}}
+        ========================================================== --}}
         @include('books._edit_navigation')
 
 
         {{-- =========================================================
          FORM CARD
-    ========================================================== --}}
+        ========================================================== --}}
         <div class="book-form-card">
 
             {{-- =====================================================
              HEADER
-        ====================================================== --}}
+            ====================================================== --}}
             <div class="book-form-header">
 
                 <h2>
@@ -64,7 +64,7 @@
 
             {{-- =====================================================
              ERROR
-        ====================================================== --}}
+            ====================================================== --}}
             @if ($errors->any())
 
                 <div class="form-alert-error">
@@ -76,9 +76,11 @@
                     <ul>
 
                         @foreach ($errors->all() as $error)
+
                             <li>
                                 {{ $error }}
                             </li>
+
                         @endforeach
 
                     </ul>
@@ -90,8 +92,10 @@
 
             {{-- =====================================================
              FORM
-        ====================================================== --}}
-            <form action="{{ route('books.copies.update', [$book, $copy]) }}" method="POST">
+            ====================================================== --}}
+            <form
+                action="{{ route('books.copies.update', [$book, $copy]) }}"
+                method="POST">
 
                 @csrf
                 @method('PUT')
@@ -101,7 +105,7 @@
 
                     {{-- =================================================
                      SECTION 1
-                ================================================== --}}
+                    ================================================== --}}
                     <div class="form-section-heading">
 
                         <span class="form-section-icon">
@@ -116,13 +120,32 @@
 
 
                     {{-- =================================================
-                     BARCODE
-                ================================================== --}}
+                     COPY
+                    ================================================== --}}
                     <div class="book-form-group">
 
-                        <label for="barcode">
+                        <label for="copy">
+                            Copy
+                        </label>
 
-                            Barcode
+                        <input
+                            type="text"
+                            id="copy"
+                            value="{{ $copy->copy }}"
+                            readonly
+                            class="copy-readonly">
+
+                    </div>
+
+
+                    {{-- =================================================
+                     KONDISI FISIK
+                    ================================================== --}}
+                    <div class="book-form-group">
+
+                        <label for="condition">
+
+                            Kondisi Fisik
 
                             <span class="required">
                                 *
@@ -130,48 +153,52 @@
 
                         </label>
 
-                        <input type="text" id="barcode" name="barcode" value="{{ old('barcode', $copy->barcode) }}"
-                            placeholder="cth. BK-00001-001" autocomplete="off" required
-                            class="@error('barcode') is-invalid @enderror">
+                        <select
+                            id="condition"
+                            name="condition"
+                            required
+                            class="@error('condition') is-invalid @enderror">
 
-                        @error('barcode')
-                            <span class="form-error">
-                                {{ $message }}
-                            </span>
-                        @enderror
+                            <option
+                                value="baik"
+                                @selected(old('condition', $copy->condition ?? 'baik') === 'baik')>
 
-                    </div>
-
-
-                    {{-- =================================================
- KONDISI FISIK
-================================================== --}}
-                    <div class="book-form-group">
-
-                        <label for="condition">
-                            Kondisi Fisik
-                            <span class="required">*</span>
-                        </label>
-
-                        <select id="condition" name="condition" required class="@error('condition') is-invalid @enderror">
-                            <option value="baik" @selected(old('condition', $copy->condition ?? 'baik') === 'baik')>
                                 Baik
+
                             </option>
 
-                            <option value="rusak" @selected(old('condition', $copy->condition ?? 'baik') === 'rusak')>
+                            <option
+                                value="rusak"
+                                @selected(old('condition', $copy->condition ?? 'baik') === 'rusak')>
+
                                 Rusak
+
                             </option>
+
+                            <option
+                                value="hilang"
+                                @selected(old('condition', $copy->condition ?? 'baik') === 'hilang')>
+
+                                Hilang
+
+                            </option>
+
                         </select>
 
                         @error('condition')
-                            <span class="form-error">{{ $message }}</span>
+
+                            <span class="form-error">
+                                {{ $message }}
+                            </span>
+
                         @enderror
 
                     </div>
 
+
                     {{-- =================================================
                      SECTION 2
-                ================================================== --}}
+                    ================================================== --}}
                     <div class="form-section-heading">
 
                         <span class="form-section-icon">
@@ -186,49 +213,25 @@
 
 
                     {{-- =================================================
-                     RAK
-                ================================================== --}}
+                     RAK READONLY
+                    ================================================== --}}
                     <div class="book-form-group">
 
-                        <label for="shelf_id">
-
+                        <label for="shelf_display">
                             Rak
-
-                            <span class="required">
-                                *
-                            </span>
-
                         </label>
 
-                        <select id="shelf_id" name="shelf_id" required class="@error('shelf_id') is-invalid @enderror">
+                        <input
+                            type="text"
+                            id="shelf_display"
+                            value="{{ $copy->shelf?->name ?? 'Rak belum ditentukan' }}"
+                            readonly
+                            class="copy-readonly">
 
-                            <option value="">
-                                -- Pilih Rak --
-                            </option>
-
-                            @foreach ($floors as $floor)
-                                @foreach ($floor->zones as $zone)
-                                    <optgroup label="{{ $floor->name }} — {{ $zone->name }}">
-
-                                        @foreach ($zone->shelves as $shelf)
-                                            <option value="{{ $shelf->id }}" @selected(old('shelf_id', $copy->shelf_id) == $shelf->id)>
-
-                                                {{ $shelf->code }}
-
-                                            </option>
-                                        @endforeach
-
-                                    </optgroup>
-                                @endforeach
-                            @endforeach
-
-                        </select>
-
-                        @error('shelf_id')
-                            <span class="form-error">
-                                {{ $message }}
-                            </span>
-                        @enderror
+                        <small style="display: block; margin-top: 6px; color: #777;">
+                            Rak tidak dapat diubah dari Edit Eksemplar.
+                            Untuk memindahkan buku, gunakan menu <strong>Edit Buku</strong>.
+                        </small>
 
                     </div>
 
@@ -237,22 +240,31 @@
 
                 {{-- =====================================================
                  ACTION
-            ====================================================== --}}
+                ====================================================== --}}
                 <div class="book-form-actions">
 
-                    <a href="{{ route('books.copies.index', $book) }}" class="book-btn-cancel">
+                    <a
+                        href="{{ route('books.copies.index', $book) }}"
+                        class="book-btn-cancel">
 
                         Batal
 
                     </a>
 
 
-                    <button type="submit" class="book-btn-save">
+                    <button
+                        type="submit"
+                        class="book-btn-save">
 
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
 
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2-2Z" />
 
                             <polyline points="17 21 17 13 7 13 7 21" />
 

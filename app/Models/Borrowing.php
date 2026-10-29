@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Borrowing extends Model
 {
     protected $fillable = [
         'user_id',
         'member_id',
-        'reservation_id',
         'book_id',
         'borrowed_at',
         'due_at',
@@ -46,14 +46,17 @@ class Borrowing extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function reservation(): BelongsTo
-    {
-        return $this->belongsTo(Reservation::class);
-    }
-
     public function details(): HasMany
     {
         return $this->hasMany(BorrowingDetail::class);
+    }
+
+    public function reservation(): HasOne
+    {
+        return $this->hasOne(
+            Reservation::class,
+            'borrowing_id'
+        );
     }
 
     public function getDisplayStatusAttribute(): string
