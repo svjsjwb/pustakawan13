@@ -30,7 +30,7 @@ class CirculationController extends Controller
             ->where('extension_status', 'menunggu')
             ->latest()
             ->get();
-            
+
         /*
          * Semua buku tetap ditampilkan,
          * termasuk yang stok tersedia = 0.
@@ -161,13 +161,15 @@ class CirculationController extends Controller
                 $reservation = Reservation::lockForUpdate()->find($validated['reservation_id']);
             }
 
-            // Jika ada reservasi terkait, gunakan bookCopy yang sudah di-reserve
             $bookCopy = null;
             if ($reservation && $reservation->book_copy_id) {
-                $bookCopy = BookCopy::lockForUpdate()->find($reservation->book_copy_id);
+                $bookCopy = BookCopy::where('id', $reservation->book_copy_id)
+                    ->where('book_id', $book->id)
+                    ->where('status', 'reserved')
+                    ->lockForUpdate()
+                    ->first();
             }
 
-            // Jika belum ada copy dari reservasi, cari satu copy available
             if (!$bookCopy) {
                 $bookCopy = BookCopy::where('book_id', $book->id)
                     ->where('status', 'available')
@@ -241,9 +243,6 @@ class CirculationController extends Controller
     }
 
 
-    /**
-     * PENGEMBALIAN BUKU
-     */
     public function returnBook(Borrowing $borrowing)
     {
         if ($borrowing->status === 'dikembalikan') {
@@ -252,42 +251,34 @@ class CirculationController extends Controller
 
         DB::transaction(function () use ($borrowing) {
 
-            /*
-             * Ambil detail peminjaman.
-             */
             $borrowing->load('details');
 
             foreach ($borrowing->details as $detail) {
 
-                /*
-                 * Kalau book_copy_id tersedia,
-                 * kembalikan copy fisik tersebut.
-                 */
                 if ($detail->book_copy_id) {
 
                     $bookCopy = BookCopy::lockForUpdate()
                         ->find($detail->book_copy_id);
 
                     if ($bookCopy) {
-                        $bookCopy->update(['status' => 'available']);
+
+                        $newStatus = $bookCopy->condition === 'rusak'
+                            ? 'maintenance'
+                            : 'available';
+
+                        $bookCopy->update([
+                            'status' => $newStatus,
+                        ]);
+
+                        if ($newStatus === 'available') {
+                            $book = Book::lockForUpdate()
+                                ->findOrFail($detail->book_id);
+
+                            $book->increment('stok', $detail->quantity);
+                        }
                     }
                 } else {
 
-                    /*
-                     * Data lama belum memiliki book_copy_id.
-                     * Tetap gunakan sistem stok lama.
-                     */
-                    $book = Book::lockForUpdate()
-                        ->findOrFail($detail->book_id);
-
-                    $book->increment('stok', $detail->quantity);
-                }
-
-                /*
-                 * Untuk peminjaman baru,
-                 * stok lama juga harus dikembalikan.
-                 */
-                if ($detail->book_copy_id) {
                     $book = Book::lockForUpdate()
                         ->findOrFail($detail->book_id);
 

@@ -143,57 +143,6 @@
 
 
                     {{-- =================================================
-                     STATUS
-                ================================================== --}}
-                    <div class="book-form-group">
-
-                        <label for="status">
-
-                            Status
-
-                            <span class="required">
-                                *
-                            </span>
-
-                        </label>
-
-                        <select id="status" name="status" required class="@error('status') is-invalid @enderror">
-
-                            <option value="available" @selected(old('status', 'available') === 'available')>
-                                Tersedia
-                            </option>
-
-                            <option value="reserved" @selected(old('status') === 'reserved')>
-                                Direservasi
-                            </option>
-
-                            <option value="borrowed" @selected(old('status') === 'borrowed')>
-                                Dipinjam
-                            </option>
-
-                            <option value="lost" @selected(old('status') === 'lost')>
-                                Hilang
-                            </option>
-
-                            <option value="damaged" @selected(old('status') === 'damaged')>
-                                Rusak
-                            </option>
-
-                            <option value="maintenance" @selected(old('status') === 'maintenance')>
-                                Maintenance
-                            </option>
-
-                        </select>
-
-                        @error('status')
-                            <span class="form-error">
-                                {{ $message }}
-                            </span>
-                        @enderror
-
-                    </div>
-
-                    {{-- =================================================
      KONDISI FISIK
 ================================================== --}}
                     <div class="book-form-group">
@@ -282,11 +231,6 @@
                             @endforeach
 
                         </select>
-
-                        <small class="form-help">
-                            Posisi section, muka rak, baris, dan kolom
-                            akan ditentukan otomatis oleh sistem.
-                        </small>
 
                         @error('shelf_id')
                             <span class="form-error">
