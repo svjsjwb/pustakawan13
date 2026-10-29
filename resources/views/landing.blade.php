@@ -15,7 +15,7 @@
 
     <link rel="preload" as="image" href="{{ asset('images/bg-ts.jpeg') }}" fetchpriority="high">
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/footer.css') }}?v={{ file_exists(public_path('css/footer.css')) ? filemtime(public_path('css/footer.css')) : time() }}">
     <link rel="stylesheet" href="{{ asset('css/register.css') }}?v={{ time() }}">
 
     <style>
@@ -146,10 +146,10 @@
             #login-stage .login-logo { width: 70px !important; height: 70px !important; margin-bottom: 10px !important; }
             #login-stage .login-panel { padding: 18px 24px !important; }
             #login-stage .login-header h2 { font-size: 24px !important; }
-            #login-stage .form-group { margin-bottom: 8px !important; }
-        }
-
-        @media (max-width: 900px) {
+                #login-stage .login-container { width: calc(100% - 12px) !important; max-width: 300px !important; border-radius: 15px !important; }
+                #login-stage .login-panel { padding: 7px !important; }
+                #login-stage .login-card { padding: 12px 10px 10px !important; }
+                #login-stage .login-header h2 { font-size: 19px !important; }
             #login-stage .login-page { height: 100vh !important; height: 100dvh !important; overflow: hidden !important; }
             #login-stage .login-container { grid-template-columns: 1fr !important; max-width: 430px !important; }
             #login-stage .login-intro { display: none !important; }
@@ -158,10 +158,21 @@
 
         @media (max-width: 480px) {
             #login-stage .login-page { height: 100vh !important; height: 100dvh !important; overflow: hidden !important; padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important; }
-            #login-stage .login-container { border-radius: 18px !important; }
-            #login-stage .login-panel { padding: 18px 16px !important; }
-            #login-stage .login-header h2 { font-size: 22px !important; }
-            #login-stage .form-group { margin-bottom: 7px !important; }
+            #login-stage .login-container { width: calc(100% - 12px) !important; max-width: 310px !important; border-radius: 16px !important; }
+            #login-stage .login-panel { padding: 8px !important; }
+            #login-stage .login-card { padding: 14px 12px 12px !important; }
+            #login-stage .login-header { margin-bottom: 12px !important; }
+            #login-stage .login-header h2 { font-size: 20px !important; }
+            #login-stage .login-header p { font-size: 12px !important; }
+            #login-stage .form-group { margin-bottom: 4px !important; }
+            #login-stage .form-group label { margin-bottom: 4px !important; font-size: 12px !important; }
+            #login-stage .form-group input { height: 42px !important; padding-right: 42px !important; }
+                #login-stage .form-group input { height: 40px !important; padding-right: 42px !important; }
+            #login-stage .forgot-wrap { margin: 2px 0 10px !important; }
+            #login-stage .login-button { height: 40px !important; min-height: 40px !important; }
+            #login-stage .login-divider { margin: 9px 0 8px !important; }
+            #login-stage .google-button { height: 40px !important; min-height: 40px !important; }
+            #login-stage .register-text { margin-top: 10px !important; }
         }
 
         body.is-login-active #landing-stage {
@@ -255,7 +266,7 @@
             </div>
 
             {{-- FOOTER --}}
-            @include('partials.footer')
+            @include('partials.footer', ['footerClass' => 'landing-footer'])
         </div>
     </div>
 

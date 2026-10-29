@@ -19,6 +19,15 @@
 .uann-footer { display:flex; align-items:center; gap:12px; font-size:11.5px; color:var(--muted); }
 .uann-pin { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:var(--primary); }
 .uann-date-col { text-align:right; font-size:12px; color:var(--muted); white-space:nowrap; line-height:1.4; }
+@media (max-width: 640px) {
+    .uann-card { grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 15px 14px; }
+    .uann-card > :first-child { min-width: 0; }
+    .uann-title, .uann-content { overflow-wrap: anywhere; }
+    .uann-title { font-size: 15px; }
+    .uann-content { font-size: 13px; }
+    .uann-date-col { font-size: 10.5px; }
+    .uann-footer { flex-wrap: wrap; gap: 6px; }
+}
 </style>
 @endpush
 

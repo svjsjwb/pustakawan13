@@ -509,7 +509,9 @@
     function toggleEgMobileNav() {
         const drawer = document.getElementById('egMobileDrawer');
         if (drawer) {
-            drawer.style.display = drawer.style.display === 'none' ? 'flex' : 'none';
+            const isOpen = drawer.style.display === 'none';
+            drawer.style.display = isOpen ? 'flex' : 'none';
+            document.getElementById('egMobileNavBtn')?.setAttribute('aria-expanded', String(isOpen));
         }
     }
 

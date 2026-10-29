@@ -1527,6 +1527,9 @@ body {
 @media (max-width: 1050px) {
     .eg-stats-grid { grid-template-columns: 1fr; }
     .eg-nav-menu { display: none; }
+    #egMobileNavBtn { display: flex !important; }
+    #egMobileDrawer { padding-bottom: max(16px, env(safe-area-inset-bottom)) !important; }
+    #egMobileDrawer .eg-nav-link { min-height: 44px; }
 }
 
 /* ==========================================================================

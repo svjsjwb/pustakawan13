@@ -21,6 +21,14 @@
 .uhelp-contact-icon svg { width:16px; height:16px; }
 .uhelp-guide-item { display:flex; align-items:flex-start; gap:10px; padding:8px 0; font-size:13px; color:var(--ink-soft); line-height:1.5; }
 .uhelp-guide-num { width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+@media (max-width: 680px) {
+    .uhelp-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .uhelp-sidebar-card { min-width: 0; padding: 16px; }
+    .uhelp-contact-item { align-items: flex-start; gap: 10px; overflow-wrap: anywhere; }
+    .uhelp-contact-item > div:last-child { min-width: 0; overflow-wrap: anywhere; }
+    .uhelp-faq-q { min-height: 48px; padding: 13px 14px; }
+    .uhelp-faq-a { padding: 12px 14px 14px; }
+}
 </style>
 @endpush
 

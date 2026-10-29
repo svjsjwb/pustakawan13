@@ -72,7 +72,8 @@
 
         /* Responsive: tablet */
         @media (max-width: 900px) {
-            .login-page { height: 100vh !important; height: 100dvh !important; overflow: hidden !important; }
+            html, body { height: auto !important; min-height: 100%; overflow-x: hidden !important; overflow-y: auto !important; }
+            .login-page { min-height: 100vh !important; min-height: 100dvh !important; height: auto !important; overflow-x: hidden !important; overflow-y: visible !important; }
             .login-container { grid-template-columns: 1fr !important; max-width: 430px !important; }
             .login-intro { display: none !important; }
             .login-panel { padding: 24px 20px !important; border-left: none !important; }
@@ -80,11 +81,21 @@
 
         /* Responsive: mobile */
         @media (max-width: 480px) {
-            .login-page { height: 100vh !important; height: 100dvh !important; overflow: hidden !important; padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important; }
-            .login-container { border-radius: 18px !important; }
-            .login-panel { padding: 18px 16px !important; }
-            .login-header h2 { font-size: 22px !important; }
-            .form-group { margin-bottom: 7px !important; }
+            .login-page { padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important; }
+            .login-container { width: calc(100% - 12px) !important; max-width: 300px !important; border-radius: 15px !important; }
+            .login-panel { padding: 7px !important; }
+            .login-card { padding: 12px 10px 10px !important; }
+            .login-header { margin-bottom: 12px !important; }
+            .login-header h2 { font-size: 19px !important; }
+            .login-header p { font-size: 12px !important; }
+            .form-group { margin-bottom: 4px !important; }
+            .form-group label { margin-bottom: 4px !important; font-size: 12px !important; }
+            .form-group input { height: 40px !important; padding-right: 42px !important; }
+            .forgot-wrap { margin: 2px 0 10px !important; }
+            .login-button { height: 40px !important; min-height: 40px !important; }
+            .login-divider { margin: 9px 0 8px !important; }
+            .google-button { height: 40px !important; min-height: 40px !important; }
+            .register-text { margin-top: 10px !important; }
         }
     </style>
     <link rel="stylesheet" href="{{ asset('css/register.css') }}?v={{ time() }}">

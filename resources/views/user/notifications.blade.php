@@ -386,6 +386,29 @@
 .notif-back-btn:hover span:first-child {
     transform: translateX(-3px);
 }
+@media (max-width: 680px) {
+    .notif-page-container { width: 100%; max-width: 100%; padding: 16px 12px 32px; }
+    .notif-page-header { align-items: stretch; flex-direction: column; gap: 12px; margin-bottom: 18px; padding-bottom: 15px; }
+    .notif-header-title-group h1 { font-size: 21px; }
+    .notif-header-title-group p { font-size: 13px; line-height: 1.5; }
+    .notif-mark-all-btn { min-height: 44px; justify-content: center; padding: 9px 14px; }
+    .notif-tabs { max-width: 100%; gap: 6px; margin-bottom: 18px; }
+    .notif-tab { min-height: 42px; gap: 6px; padding: 8px 12px; font-size: 12px; }
+    .notif-card { min-width: 0; gap: 10px; padding: 14px 12px; border-left-width: 3px; }
+    .notif-icon-box { width: 36px; height: 36px; border-radius: 11px; }
+    .notif-icon-box svg { width: 19px; height: 19px; }
+    .notif-content, .notif-content-header, .notif-title-row { min-width: 0; }
+    .notif-content-header { align-items: flex-start; gap: 7px; }
+    .notif-card-title { font-size: 14px; overflow-wrap: anywhere; }
+    .notif-status-pill { padding: 3px 8px; font-size: 9.5px; }
+    .notif-card-desc { font-size: 13px; line-height: 1.5; }
+    .notif-meta-row { flex-wrap: wrap; gap: 6px 12px; }
+    .notif-empty-box { padding: 38px 16px; }
+    .notif-empty-icon { width: 54px; height: 54px; margin-bottom: 12px; }
+    .notif-empty-icon svg { width: 26px; height: 26px; }
+    .notif-empty-box h3 { font-size: 16px; }
+    .notif-empty-box p { font-size: 13px; line-height: 1.5; }
+}
 </style>
 @endpush
 

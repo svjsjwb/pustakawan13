@@ -5,7 +5,7 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -520,7 +520,12 @@
         @media (max-width: 576px) {
 
             body {
-                padding: clamp(8px, 1.5vh, 14px) 15px;
+                height: auto;
+                min-height: 100vh;
+                min-height: 100dvh;
+                overflow-x: hidden;
+                overflow-y: auto;
+                padding: max(8px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(15px, env(safe-area-inset-left));
             }
 
             .auth-card {

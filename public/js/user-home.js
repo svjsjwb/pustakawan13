@@ -1,5 +1,32 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    const activityLinks = document.querySelectorAll('.user-home .user-dashboard-stat-card[href]');
+    const mobileActivityLayout = window.matchMedia('(max-width: 767px)');
+
+    function updateActivityLinkAvailability() {
+        activityLinks.forEach(function (link) {
+            if (mobileActivityLayout.matches) {
+                link.tabIndex = -1;
+                link.setAttribute('aria-disabled', 'true');
+            } else {
+                link.removeAttribute('tabindex');
+                link.removeAttribute('aria-disabled');
+            }
+        });
+    }
+
+    activityLinks.forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            if (mobileActivityLayout.matches) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    });
+
+    mobileActivityLayout.addEventListener('change', updateActivityLinkAvailability);
+    updateActivityLinkAvailability();
+
     /* =====================================================
        POPULAR BOOKS ENTRANCE ANIMATION (STAGGERED LOAD)
     ====================================================== */

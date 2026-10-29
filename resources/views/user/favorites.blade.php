@@ -192,6 +192,17 @@
 @keyframes ufav-copy-enter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes ufav-cta-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 700px) {
+    .ufav-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .ufav-card { min-width: 0; border-radius: 12px; }
+    .ufav-info { min-width: 0; padding: 10px; }
+    .ufav-title { font-size: 12.5px; }
+    .ufav-author { margin-bottom: 8px; }
+    .ufav-actions { gap: 6px; }
+    .ufav-remove-btn { min-height: 44px; padding: 6px 4px; font-size: 11px; }
+    .ufav-confirm-backdrop { padding: 12px; }
+    .ufav-confirm-dialog { padding: 18px; }
+    .ufav-confirm-actions { gap: 8px; margin-top: 16px; }
+    .ufav-confirm-actions button { min-height: 44px; padding: 0 12px; }
     .ul-page-header .ufav-remove-all-btn { padding: 9px 11px; font-size: 12px; }
     .ufav-empty-banner { grid-template-columns: 1fr; gap: 12px; min-height: 0; padding: 24px 22px 26px; text-align: center; }
     .ufav-empty-art svg { width: min(70%, 220px); }

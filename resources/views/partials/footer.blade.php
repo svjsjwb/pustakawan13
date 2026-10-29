@@ -1,4 +1,4 @@
-<footer class="site-footer">
+<footer class="site-footer {{ $footerClass ?? '' }}">
     {{-- Top Wave Transition --}}
     <div class="footer-top-wave" aria-hidden="true">
         <svg viewBox="0 0 1440 28" fill="none" preserveAspectRatio="none">
@@ -23,6 +23,10 @@
                 </p>
             </div>
         </div>
+
+        @if(($footerClass ?? '') === 'landing-footer')
+            <div class="footer-info-grid">
+        @endif
 
         {{-- Divider --}}
         <div class="footer-divider" aria-hidden="true"></div>
@@ -102,6 +106,9 @@
                 </div>
             </div>
         </div>
+        @if(($footerClass ?? '') === 'landing-footer')
+            </div>
+        @endif
     </div>
 
     {{-- Bottom Bar & Copyright --}}

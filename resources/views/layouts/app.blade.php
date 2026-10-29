@@ -21,7 +21,7 @@
 
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
 
-    <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/footer.css') }}?v={{ file_exists(public_path('css/footer.css')) ? filemtime(public_path('css/footer.css')) : time() }}">
 
     {{-- Pastikan admin tidak mewarisi preferensi tema atau density user dari localStorage --}}
     <script>
@@ -30,6 +30,7 @@
     </script>
 
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/responsive-overrides.css') }}?v={{ file_exists(public_path('css/responsive-overrides.css')) ? filemtime(public_path('css/responsive-overrides.css')) : time() }}">
 
 </head>
 
@@ -56,11 +57,8 @@
     </main>
 
 
-    {{-- =====================================================
-         FOOTER
-    ====================================================== --}}
-
-    @include('partials.footer')
+    @include('partials.footer', ['footerClass' => 'app-footer'])
+    @include('partials.mobile-bottom-nav')
 
 </div>
 

@@ -2,7 +2,7 @@
 @section('title', 'Peminjaman Buku – Perpustakaan Digital')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-loans.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user-loans.css') }}?v={{ file_exists(public_path('css/user-loans.css')) ? filemtime(public_path('css/user-loans.css')) : time() }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 @endpush
 

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
-use App\Models\Category;
 use App\Models\Reservation;
 use App\Models\Borrowing;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,22 +13,25 @@ use Illuminate\Support\Facades\DB;
 class UserCatalogController extends Controller
 {
     private array $catalogHierarchy = [
-        'Buku Pendidikan' => [
-            'SD'  => 'SD',
-            'SMP' => 'SMP',
-            'SMA' => 'SMA',
+        'Buku Pelajaran' => [
+            'TK' => 'TK',
+            'SD/MI' => 'SD/MI',
+            'SMP/MTs' => 'SMP/MTs',
+            'SMA/SMK/MA/SMAK/MAK' => 'SMA/SMK/MA/SMAK/MAK',
+            'Referensi' => 'Referensi',
         ],
-        'Anak' => [
-            'Fiksi'     => 'Fiksi',
-            'Non Fiksi' => 'Non Fiksi',
-        ],
-        'Remaja' => [
-            'Fiksi'     => 'Fiksi',
-            'Non Fiksi' => 'Non Fiksi',
-        ],
-        'Dewasa' => [
-            'Fiksi'     => 'Fiksi',
-            'Non Fiksi' => 'Non Fiksi',
+        'Buku Umum' => [
+            'Agama' => 'Agama',
+            'Majalah' => 'Majalah',
+            'Peta' => 'Peta',
+            'Referensi' => 'Referensi',
+            'Buku Anak' => 'Buku Anak',
+            'Buku Remaja' => 'Buku Remaja',
+            'Buku Dewasa' => 'Buku Dewasa',
+            'Ilmu Sosial' => 'Ilmu Sosial',
+            'Ilmu Murni/Sains' => 'Ilmu Murni/Sains',
+            'Bahasa/Sastra' => 'Bahasa/Sastra',
+            'Ilmu Terapan' => 'Ilmu Terapan',
         ],
     ];
 
@@ -72,63 +75,67 @@ class UserCatalogController extends Controller
         'Arsitektur Web Modern dan Cloud Computing' => 'Buku ini membahas cara merancang aplikasi web yang dapat berkembang melalui arsitektur terdistribusi, layanan mikro, API, container, dan infrastruktur cloud. Materi menghubungkan keputusan teknis dengan kebutuhan keandalan, keamanan, pemantauan, serta deployment. Pembaca mendapatkan dasar untuk memilih pola arsitektur dan membangun sistem yang lebih mudah dirawat.',
         'Pedagogi Kritis: Pendidikan Pembebasan Abad 21' => 'Buku ini membahas pendidikan sebagai proses dialog yang membantu manusia membaca dunia dan ikut mengubahnya, bukan sekadar menerima pengetahuan secara pasif. Gagasan tentang relasi guru dan peserta didik, kesadaran kritis, serta pengalaman sosial dikaji untuk membangun pembelajaran yang memanusiakan. Pembaca memperoleh landasan reflektif untuk menilai praktik pendidikan.',
         'Metode Penelitian Pendidikan Kuantitatif & Kualitatif' => 'Buku ini membahas perumusan masalah, kajian teori, desain penelitian, teknik pengumpulan data, analisis kuantitatif dan kualitatif, hingga penyusunan laporan ilmiah. Perbandingan pendekatan membantu pembaca memilih metode yang sesuai dengan pertanyaan penelitian dan menjaga validitas temuan. Materinya bermanfaat bagi mahasiswa, guru, dan peneliti yang menyiapkan karya akademik.',
+
+        // Entri sesuai judul buku aktual di database
+        'IPAS untuk Sekolah Dasar' => 'IPAS memperkenalkan hubungan antara makhluk hidup, benda, energi, lingkungan, masyarakat, dan ruang tempat manusia tinggal. Melalui kegiatan pengamatan dan pertanyaan inkuiri, siswa belajar menghubungkan konsep sains dengan geografi serta kehidupan sosial di Indonesia, sekaligus melatih rasa ingin tahu dan kepedulian terhadap lingkungan.',
+        'Bahasa Indonesia Pintar SD' => 'Buku ini mendampingi siswa SD mengembangkan kemampuan membaca pemahaman, menemukan gagasan utama, memperkaya kosakata, dan menulis kalimat hingga paragraf sederhana. Materinya disusun melalui teks dan latihan yang beragam agar pembaca mampu menyampaikan pikiran dengan runtut, memahami informasi secara kritis, serta menikmati kegiatan literasi.',
+        'Matematika Terpadu SMP Kelas VII' => 'Buku ini membahas bilangan, aljabar, persamaan, perbandingan, geometri, serta penyajian data untuk siswa kelas VII. Setiap topik disertai penjelasan konsep dan pemecahan masalah bertahap, sehingga pembaca dapat memahami alasan di balik suatu prosedur, mengerjakan latihan dengan sistematis, dan mempersiapkan diri menghadapi materi matematika berikutnya.',
+        'IPA Terpadu SMP' => 'Buku ini menghubungkan konsep fisika dan biologi dengan fenomena yang ditemui siswa dalam kehidupan sehari-hari, seperti gerak, energi, materi, makhluk hidup, dan lingkungan. Kegiatan pengamatan serta eksperimen sederhana mendorong pembaca menyusun pertanyaan, membaca bukti, dan menarik kesimpulan berdasarkan cara berpikir ilmiah.',
+        'Bahasa Indonesia SMP Kelas VIII' => 'Buku ini melatih kemampuan membaca, menulis, berbicara, dan menyimak siswa SMP kelas VIII melalui teks beragam genre. Pembahasan mencakup struktur teks, kosakata, ejaan, dan teknik penyampaian gagasan agar pembaca dapat mengekspresikan diri dengan lebih percaya diri.',
+        'Matematika Wajib SMA' => 'Buku ini membahas materi wajib matematika SMA mencakup fungsi, sistem persamaan, statistika, peluang, dan trigonometri dengan pendekatan konsep dan latihan bertahap. Penjelasan visual dan soal kontekstual membantu siswa mengembangkan penalaran logis dan mempersiapkan diri untuk evaluasi akhir.',
+        'Fisika Dasar SMA' => 'Buku ini mengupas mekanika, gerak, gaya, energi, impuls, momentum, serta dasar-dasar gelombang untuk siswa SMA. Contoh penerapan dari kehidupan sehari-hari dan eksperimen sederhana membantu pembaca mengaitkan rumus dengan gejala nyata serta melatih penalaran kuantitatif.',
+        'Bahasa Indonesia SMA' => 'Buku ini memperkuat kemampuan membaca kritis, menulis akademik, menyimak, dan berbicara siswa SMA melalui teks sastra dan non-sastra. Materi mencakup analisis teks, argumentasi, dan produksi tulisan agar pembaca dapat menyampaikan gagasan secara sistematis dan kreatif.',
+        'Petualangan di Hutan Ajaib' => 'Petualangan seru menanti di hutan yang penuh kejutan. Tokoh utama harus menghadapi tantangan dan teka-teki untuk menemukan jalan pulang, sambil belajar tentang kerja sama, keberanian, dan arti persahabatan sejati.',
+        'Rahasia Rumah Pohon' => 'Di balik rumah pohon tua tersimpan rahasia yang telah lama terlupakan. Bersama sahabat-sahabatnya, tokoh utama mengungkap misteri dan menemukan pelajaran berharga tentang kejujuran, rasa ingin tahu, dan keberanian menghadapi hal yang tak dikenal.',
+        'Kapal Kertas di Sungai Biru' => 'Sebuah kapal kertas membawa imajinasi seorang anak dalam petualangan menyusuri sungai biru yang penuh warna. Cerita ini mengajak pembaca merayakan keajaiban imajinasi dan keindahan dunia di sekitar kita.',
+        'Ensiklopedia Hewan untuk Anak' => 'Ensiklopedia bergambar ini memperkenalkan beragam hewan dari berbagai penjuru dunia dengan fakta menarik dan ilustrasi yang hidup. Pembaca anak diajak mengenal habitat, makanan, dan keistimewaan setiap hewan sambil menumbuhkan rasa cinta terhadap alam.',
+        'Aku Belajar Sains' => 'Buku panduan eksperimen sederhana yang mengajak anak-anak menjelajahi dunia sains melalui kegiatan yang menyenangkan dan mudah dilakukan di rumah. Setiap percobaan dirancang untuk membangun rasa ingin tahu dan pola pikir ilmiah sejak dini.',
+        'Atlas Dunia Anak' => 'Atlas bergambar yang memperkenalkan peta, negara, budaya, dan keajaiban alam dari seluruh penjuru dunia kepada pembaca cilik. Disajikan dengan ilustrasi berwarna-warni dan fakta menarik yang mudah dipahami anak-anak.',
+        'Langit Setelah Hujan' => 'Kisah tentang harapan yang tumbuh setelah masa-masa sulit. Tokoh utama menemukan kekuatan dalam persahabatan, keluarga, dan mimpi-mimpi sederhana yang menuntunnya melewati badai kehidupan remaja.',
+        'Jejak di Kota Senja' => 'Perjalanan seorang remaja menelusuri kota lamanya membawa kenangan, pertanyaan, dan penemuan tentang siapa dirinya sebenarnya. Novel ini mengangkat tema identitas, kenangan, dan keberanian untuk memulai babak baru.',
+        'Surat yang Tak Pernah Terkirim' => 'Kumpulan surat yang tak pernah sampai ke tujuan menyimpan perasaan, impian, dan keberanian yang tak terucapkan. Kisah ini mengajak pembaca merenungkan arti komunikasi, keberanian untuk jujur, dan nilai dari kata-kata yang tersimpan di hati.',
+        'Panduan Belajar Efektif untuk Remaja' => 'Buku panduan praktis yang membantu remaja mengembangkan strategi belajar yang efektif, manajemen waktu, dan kebiasaan positif untuk meraih prestasi akademik sekaligus menjaga keseimbangan hidup.',
+        'Psikologi Remaja dan Perkembangan Diri' => 'Buku ini membahas berbagai aspek perkembangan psikologis remaja, termasuk identitas, emosi, hubungan sosial, dan cara menghadapi tekanan. Disajikan secara mudah dipahami untuk membantu remaja mengenal diri sendiri lebih baik.',
+        'Literasi Digital untuk Pelajar' => 'Panduan penting bagi pelajar untuk menavigasi dunia digital secara bijak, aman, dan produktif. Mencakup topik keamanan siber, etika online, evaluasi informasi, dan pemanfaatan teknologi untuk mendukung pembelajaran.',
+        'Pulang ke Kota Lama' => 'Sebuah perjalanan kembali ke masa lalu yang menghadirkan kenangan, pilihan, dan pertanyaan tentang jalan yang telah dan belum ditempuh. Novel ini mengajak pembaca merenungkan makna rumah, identitas, dan penerimaan diri.',
+        'Perjalanan Musim Hujan' => 'Di tengah musim hujan yang panjang, tokoh utama menjalani perjalanan batin yang mengubah cara pandangnya tentang kehilangan, harapan, dan keberanian untuk terus melangkah meski jalan tak selalu jelas.',
+        'Malam di Stasiun Tua' => 'Stasiun tua menjadi saksi pertemuan dan perpisahan yang membentuk kehidupan berbagai tokoh. Novel ini menganyam kisah-kisah manusia tentang waktu, kesempatan yang terlewat, dan koneksi tak terduga yang mengubah segalanya.',
+        'Pengantar Manajemen Modern' => 'Buku ini memberikan fondasi yang kokoh dalam konsep manajemen modern, mencakup perencanaan, pengorganisasian, kepemimpinan, dan pengendalian organisasi di era yang terus berubah.',
+        'Dasar-Dasar Teknologi Informasi' => 'Pengantar yang komprehensif ke dunia teknologi informasi, mencakup hardware, software, jaringan, basis data, dan keamanan informasi. Ditulis dengan bahasa yang mudah dipahami untuk pembaca yang ingin membangun pemahaman dasar tentang dunia digital.',
+        'Sejarah Kota dan Masyarakat Indonesia' => 'Kajian mendalam tentang perkembangan kota-kota di Indonesia beserta dinamika sosial, budaya, dan ekonomi masyarakatnya dari masa ke masa. Memberikan pemahaman tentang bagaimana urbanisasi dan perubahan sosial membentuk wajah Indonesia modern.',
     ];
 
     public function index(Request $request)
     {
         $query = Book::with('category');
+        $isAjaxFilter = $request->ajax() || $request->input('ajax') == '1' || $request->wantsJson();
 
-        // ── Search ────────────────────────────────────────────
+        // ── Search (Judul, Penulis, Penerbit, ISBN) ────────────
         $search = trim((string) $request->input('search', ''));
         if ($search !== '') {
-            $query->where('judul_buku', 'like', "{$search}%");
+            $query->where(function (Builder $searchQuery) use ($search) {
+                $searchQuery->where('judul_buku', 'like', "%{$search}%")
+                    ->orWhere('penulis', 'like', "%{$search}%")
+                    ->orWhere('publisher', 'like', "%{$search}%")
+                    ->orWhere('isbn', 'like', "%{$search}%");
+            });
         }
 
         // ── Filter Kategori Hierarkis (Database Riil) ──────────
-        $mainCategory   = $request->input('main_category');
-        $subCategory    = $request->input('sub_category');
-        $educationLevel = $request->input('education_level');
-        $categoryId     = $request->input('category');
+        $mainCategory   = $request->filled('main_category') ? trim((string) $request->input('main_category')) : null;
+        $subCategory    = $request->filled('sub_category') ? trim((string) $request->input('sub_category')) : null;
+        $educationLevel = $request->filled('education_level') ? trim((string) $request->input('education_level')) : null;
+        $categoryId     = $request->filled('category') ? $request->input('category') : null;
 
-        if ($mainCategory) {
-            $query->where(function ($q) use ($mainCategory) {
-                $q->where('main_category', $mainCategory)
-                    ->orWhere(function ($legacyQuery) use ($mainCategory) {
-                        $legacyQuery->where(function ($categoryQuery) {
-                            $categoryQuery->whereNull('main_category')
-                                ->orWhere('main_category', '');
-                        })->whereHas('category', function ($category) use ($mainCategory) {
-                            $category->where('name', $mainCategory);
-                        });
-                    });
-            });
-        }
-
-        if ($subCategory) {
-            $query->where(function ($q) use ($subCategory, $mainCategory) {
-                $q->where('sub_category', $subCategory);
-
-                if ($mainCategory === 'Buku Pendidikan') {
-                    $q->orWhere('education_level', $subCategory);
-                }
-            });
-        }
-
-        if ($educationLevel) {
-            $query->where('education_level', $educationLevel);
-        }
-
-        // Fallback filter kategori lama jika ada query ?category=id
-        if ($categoryId && !$mainCategory) {
-            $query->where('category_id', $categoryId);
-        }
+        $this->applyCategoryFilters($query, $mainCategory, $subCategory, $educationLevel, $categoryId);
 
         // ── Filter status ─────────────────────────────────────
         $status = $request->input('status');
         if ($status) {
-            if ($status === 'tersedia') {
+            $normalizedStatus = strtolower($status);
+            if ($normalizedStatus === 'tersedia') {
                 $query->where('stok', '>', 0);
-            } elseif ($status === 'habis') {
+            } elseif ($normalizedStatus === 'habis' || $normalizedStatus === 'dipinjam') {
                 $query->where('stok', '<=', 0);
             }
         }
@@ -152,27 +159,26 @@ class UserCatalogController extends Controller
             return $book;
         });
 
-        // Real counts per main category & subcategory from database.
-        // Count TIDAK dipengaruhi oleh filter yang sedang aktif.
+        // Hitung data per grup dan subkategori untuk badge dropdown
+        $mainCounts = [
+            'Buku Pelajaran' => Book::where(function (Builder $q) {
+                $this->applyMainCategoryScope($q, 'Buku Pelajaran');
+                $q->orWhereHas('category', fn(Builder $catQ) => $this->applyCategoryNameScope($catQ, 'Buku Pelajaran'));
+            })->count(),
+            'Buku Umum' => Book::where(function (Builder $q) {
+                $this->applyMainCategoryScope($q, 'Buku Umum');
+                $q->orWhereHas('category', fn(Builder $catQ) => $this->applyCategoryNameScope($catQ, 'Buku Umum'));
+            })->count(),
+        ];
 
-        $subCounts = Book::select(
-            'main_category',
-            'sub_category',
-            'education_level'
-        )
-            ->get()
-            ->groupBy(function ($item) {
-                $sub = $item->sub_category ?: $item->education_level;
-
-                return $item->main_category . '::' . $sub;
-            })
-            ->map->count();
-
-        $mainCounts = Book::select('main_category')
-            ->whereNotNull('main_category')
-            ->get()
-            ->groupBy('main_category')
-            ->map->count();
+        $subCounts = [];
+        foreach ($this->catalogHierarchy as $grp => $subs) {
+            foreach ($subs as $subK => $subV) {
+                $subCounts[$grp . '::' . $subK] = Book::where(function (Builder $q) use ($grp, $subK) {
+                    $this->applySubcategoryQuery($q, $grp, $subK);
+                })->count();
+            }
+        }
 
         // Statistik perpustakaan untuk hero section
         $stats = [
@@ -208,7 +214,7 @@ class UserCatalogController extends Controller
         }
 
         // ── AJAX Response for Realtime Filter ─────────────────
-        if ($request->ajax() || $request->input('ajax') == '1' || $request->wantsJson()) {
+        if ($isAjaxFilter) {
             return response()->json([
                 'success'             => true,
                 'total'               => $books->total(),
@@ -250,6 +256,117 @@ class UserCatalogController extends Controller
             'reservedBookIds'  => $reservedBookIds,
             'borrowedBookIds'  => $borrowedBookIds,
         ]);
+    }
+
+    private function applyCategoryFilters(Builder $query, ?string $mainCategory, ?string $subCategory, ?string $educationLevel, $categoryId): void
+    {
+        if ($subCategory) {
+            $this->applySubcategoryQuery($query, $mainCategory, $subCategory);
+        } elseif ($mainCategory) {
+            $query->where(function (Builder $q) use ($mainCategory) {
+                $this->applyMainCategoryScope($q, $mainCategory);
+                $q->orWhereHas('category', fn(Builder $catQ) => $this->applyCategoryNameScope($catQ, $mainCategory));
+            });
+        } elseif ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        if ($educationLevel) {
+            $query->where('education_level', $educationLevel);
+        }
+    }
+
+    private function applySubcategoryQuery(Builder $query, ?string $mainCategory, string $subCategory): void
+    {
+        $query->where(function (Builder $q) use ($mainCategory, $subCategory) {
+            $q->where(function (Builder $direct) use ($mainCategory, $subCategory) {
+                if ($mainCategory) {
+                    $this->applyMainCategoryScope($direct, $mainCategory);
+                }
+                $this->applySubcategoryScope($direct, $mainCategory, $subCategory);
+            })
+            ->orWhereHas('subcategory', function (Builder $relSub) use ($mainCategory, $subCategory) {
+                $relSub->where('name', $subCategory);
+                if ($mainCategory) {
+                    $relSub->whereHas('category', function (Builder $relCat) use ($mainCategory) {
+                        $this->applyCategoryNameScope($relCat, $mainCategory);
+                    });
+                }
+            });
+        });
+    }
+
+    private function applyMainCategoryScope(Builder $query, string $mainCategory): void
+    {
+        if ($mainCategory === 'Buku Pelajaran') {
+            $query->whereIn('main_category', ['Buku Pelajaran', 'Buku Pendidikan', 'Pendidikan']);
+        } elseif ($mainCategory === 'Buku Umum') {
+            $query->whereIn('main_category', ['Buku Umum', 'Anak', 'Anak-Anak', 'Remaja', 'Dewasa', 'Umum']);
+        } else {
+            $query->where('main_category', $mainCategory);
+        }
+    }
+
+    private function applyCategoryNameScope(Builder $query, string $mainCategory): void
+    {
+        if ($mainCategory === 'Buku Pelajaran') {
+            $query->whereIn('name', ['Buku Pelajaran', 'Buku Pendidikan', 'Pendidikan']);
+        } elseif ($mainCategory === 'Buku Umum') {
+            $query->whereIn('name', ['Buku Umum', 'Anak', 'Anak-Anak', 'Remaja', 'Dewasa', 'Umum']);
+        } else {
+            $query->where('name', $mainCategory);
+        }
+    }
+
+    private function applySubcategoryScope(Builder $query, ?string $mainCategory, string $subCategory): void
+    {
+        if ($mainCategory === 'Buku Pelajaran') {
+            match ($subCategory) {
+                'TK' => $query->where(function ($q) {
+                    $q->whereIn('sub_category', ['TK', 'Taman Kanak-Kanak'])
+                      ->orWhereIn('education_level', ['TK', 'Taman Kanak-Kanak']);
+                }),
+                'SD/MI' => $query->where(function ($q) {
+                    $q->whereIn('sub_category', ['SD/MI', 'SD', 'MI'])
+                      ->orWhereIn('education_level', ['SD/MI', 'SD', 'MI']);
+                }),
+                'SMP/MTs' => $query->where(function ($q) {
+                    $q->whereIn('sub_category', ['SMP/MTs', 'SMP', 'MTs'])
+                      ->orWhereIn('education_level', ['SMP/MTs', 'SMP', 'MTs']);
+                }),
+                'SMA/SMK/MA/SMAK/MAK' => $query->where(function ($q) {
+                    $q->whereIn('sub_category', ['SMA/SMK/MA/SMAK/MAK', 'SMA', 'SMK', 'MA', 'MAK', 'SMAK'])
+                      ->orWhereIn('education_level', ['SMA/SMK/MA/SMAK/MAK', 'SMA', 'SMK', 'MA', 'MAK', 'SMAK']);
+                }),
+                'Referensi' => $query->where(function ($q) {
+                    $q->where('sub_category', 'Referensi')
+                      ->whereIn('main_category', ['Buku Pelajaran', 'Buku Pendidikan', 'Pendidikan']);
+                }),
+                default => $query->where('sub_category', $subCategory),
+            };
+        } elseif ($mainCategory === 'Buku Umum') {
+            match ($subCategory) {
+                'Buku Anak' => $query->where(function ($q) {
+                    $q->whereIn('sub_category', ['Buku Anak', 'Anak', 'Fiksi Anak', 'Non Fiksi Anak'])
+                      ->orWhereIn('main_category', ['Anak', 'Anak-Anak']);
+                }),
+                'Buku Remaja' => $query->where(function ($q) {
+                    $q->whereIn('sub_category', ['Buku Remaja', 'Remaja', 'Fiksi Remaja', 'Non Fiksi Remaja'])
+                      ->orWhere('main_category', 'Remaja');
+                }),
+                'Buku Dewasa' => $query->where(function ($q) {
+                    $q->whereIn('sub_category', ['Buku Dewasa', 'Dewasa', 'Fiksi Dewasa', 'Non Fiksi Dewasa'])
+                      ->orWhere('main_category', 'Dewasa');
+                }),
+                'Referensi' => $query->where(function ($q) {
+                    $q->where('sub_category', 'Referensi')
+                      ->whereIn('main_category', ['Buku Umum', 'Umum']);
+                }),
+                default => $query->where('sub_category', $subCategory),
+            };
+        } else {
+            $query->where('sub_category', $subCategory);
+        }
     }
 
     private function buildCatalogSynopsis(Book $book): string

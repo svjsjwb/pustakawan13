@@ -4,7 +4,7 @@
 @section('content_class', 'user-home-content')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-home.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user-home.css') }}?v={{ file_exists(public_path('css/user-home.css')) ? filemtime(public_path('css/user-home.css')) : time() }}">
 @endpush
 
 @section('content')
@@ -17,7 +17,8 @@
 
     <section class="user-hero motion-section">
 
-        <div class="user-hero-content motion-fade-up">
+        <div class="user-hero-content">
+            <div class="user-hero-copy motion-fade-up">
 
             <span class="user-hero-label">
                 PERPUSTAKAAN TIGA SERANGKAI
@@ -32,42 +33,19 @@
                 Jelajahi berbagai koleksi buku pilihan dan temukan bacaan yang sesuai dengan minat serta kebutuhan Anda.
             </p>
 
-            <div class="user-search-wrap">
-                <div class="user-search">
-
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2">
-
-                    <circle
-                        cx="11"
-                        cy="11"
-                        r="8">
-                    </circle>
-
-                    <line
-                        x1="21"
-                        y1="21"
-                        x2="16.65"
-                        y2="16.65">
-                    </line>
-
-                </svg>
-
-                    <input
-                    type="text"
-                    id="user-book-search"
-                    placeholder="Cari judul, penulis, atau kategori..."
-                    autocomplete="off">
-
-                </div>
-
-                <div class="user-search-results" id="user-search-results" role="listbox" aria-label="Hasil pencarian buku"></div>
-
             </div>
 
+            <div class="user-search-wrap">
+                <div class="user-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+
+                    <input type="text" id="user-book-search" placeholder="Cari judul, penulis, atau kategori..." autocomplete="off">
+                </div>
+                <div class="user-search-results" id="user-search-results" role="listbox" aria-label="Hasil pencarian buku"></div>
+            </div>
         </div>
 
 
@@ -170,7 +148,7 @@
             <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #287879; text-transform: uppercase;">Aktivitas Terbaru</span>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+        <div class="user-dashboard-widgets-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
 
             {{-- 1. Peminjaman Aktif --}}
             <a href="{{ route('user.loans') }}" class="user-dashboard-stat-card" style="text-decoration: none; display: block; background: #ffffff; border: 1px solid #e2eeee; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(27, 42, 58, 0.04);">
