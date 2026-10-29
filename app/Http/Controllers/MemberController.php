@@ -13,6 +13,34 @@ use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
+    private function generateMemberNumber(): string
+    {
+        $lastNumber = Member::where('member_number', 'like', 'MBR-%')
+            ->orderByDesc('id')
+            ->value('member_number');
+
+        if ($lastNumber && preg_match('/^MBR-(\d+)$/', $lastNumber, $matches)) {
+            $nextNumber = ((int) $matches[1]) + 1;
+        } else {
+            $nextNumber = 1;
+        }
+
+        do {
+            $memberNumber = 'MBR-' . str_pad(
+                (string) $nextNumber,
+                6,
+                '0',
+                STR_PAD_LEFT
+            );
+
+            $nextNumber++;
+        } while (
+            Member::where('member_number', $memberNumber)->exists()
+        );
+
+        return $memberNumber;
+    }
+
     private function validationRules(): array
     {
         return [
@@ -89,7 +117,9 @@ class MemberController extends Controller
 
         $validated['status'] = 'nonaktif';
 
-        Member::create($validated);
+        $validated['member_number'] = $this->generateMemberNumber();
+
+        Member::forceCreate($validated);
 
         return redirect()
             ->route('members.index')
