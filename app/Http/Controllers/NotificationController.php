@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppNotification;
-use App\Models\Borrowing;
 use App\Models\Member;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
@@ -38,12 +37,12 @@ class NotificationController extends Controller
                     $query->where('role', 'guest');
                 })->count()
                 : 0;
-            $pendingBorrowingsCount = $user->isAdmin()
-                ? Borrowing::where(function ($query) {
-                    $query->where('status', 'menunggu')
-                        ->orWhere('extension_status', 'menunggu');
-                })->count()
-                : 0;
+            $pendingBorrowingNotifications = $user->isAdmin()
+                ? AppNotification::where('role', 'admin')
+                    ->where('type', 'borrowing_new')
+                    ->where('is_read', false)
+                    ->pluck('id')
+                : collect();
             $pendingReservationsCount = $user->isAdmin()
                 ? Reservation::where('status', 'menunggu')->count()
                 : 0;
@@ -52,7 +51,8 @@ class NotificationController extends Controller
                 'unread_count' => $unreadCount,
                 'notifications' => $notifications,
                 'pending_members_count' => $pendingMembersCount,
-                'pending_borrowings_count' => $pendingBorrowingsCount,
+                'pending_borrowings_count' => $pendingBorrowingNotifications->count(),
+                'pending_borrowing_notification_ids' => $pendingBorrowingNotifications,
                 'pending_reservations_count' => $pendingReservationsCount,
             ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         }

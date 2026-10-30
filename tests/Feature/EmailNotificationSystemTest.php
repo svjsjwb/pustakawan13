@@ -499,6 +499,19 @@ class EmailNotificationSystemTest extends TestCase
             'due_at' => now()->addDays(14),
             'status' => 'menunggu',
         ]);
+        $newBorrowing = Borrowing::create([
+            'member_id' => $this->member->id,
+            'user_id' => $this->user->id,
+            'borrowed_at' => now(),
+            'due_at' => now()->addDays(14),
+            'status' => 'dipinjam',
+        ]);
+        $borrowingNotification = AppNotification::notifyAdmin(
+            'borrowing_new',
+            'Peminjaman Buku Otomatis Disetujui',
+            'Test User meminjam buku baru.',
+            ['borrowing_id' => $newBorrowing->id]
+        );
         Reservation::create([
             'member_id' => $this->member->id,
             'book_id' => $this->book->id,
@@ -521,10 +534,10 @@ class EmailNotificationSystemTest extends TestCase
         $pendingMembersCount = Member::whereHas('user', function ($query) {
             $query->where('role', 'guest');
         })->count();
-        $pendingBorrowingsCount = Borrowing::where(function ($query) {
-            $query->where('status', 'menunggu')
-                ->orWhere('extension_status', 'menunggu');
-        })->count();
+        $pendingBorrowingsCount = AppNotification::where('role', 'admin')
+            ->where('type', 'borrowing_new')
+            ->where('is_read', false)
+            ->count();
         $pendingReservationsCount = Reservation::where('status', 'menunggu')->count();
 
         $feed->assertOk()
@@ -533,6 +546,10 @@ class EmailNotificationSystemTest extends TestCase
             ->assertJsonPath('pending_members_count', $pendingMembersCount)
             ->assertJsonPath('pending_borrowings_count', $pendingBorrowingsCount)
             ->assertJsonPath('pending_reservations_count', $pendingReservationsCount);
+        $this->assertContains(
+            $borrowingNotification->id,
+            $feed->json('pending_borrowing_notification_ids')
+        );
         $this->assertStringContainsString(
             'no-store',
             $feed->headers->get('Cache-Control')
@@ -543,6 +560,17 @@ class EmailNotificationSystemTest extends TestCase
             ->assertSee('id="navMembersBadge"', false)
             ->assertSee('id="navBorrowingsBadge"', false)
             ->assertSee('id="navReservationsBadge"', false);
+
+        $this->actingAs($this->admin)
+            ->get(route('borrowings.index'))
+            ->assertOk();
+
+        $this->assertFalse($borrowingNotification->fresh()->is_read);
+
+        $this->actingAs($this->admin)
+            ->getJson(route('notifications.index'))
+            ->assertJsonPath('pending_borrowings_count', $pendingBorrowingsCount)
+            ->assertJsonPath('unread_count', $unreadCount);
     }
 
     public function test_first_login_queues_first_login_mail(): void

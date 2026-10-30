@@ -69,7 +69,7 @@
                 Peminjaman Buku
                 @if (Auth::check() && Auth::user()->role === 'admin')
                     <span id="navBorrowingsBadge" class="nav-count-badge"
-                        aria-label="Peminjaman menunggu diproses"></span>
+                        aria-label="Peminjaman baru atau menunggu diproses"></span>
                 @endif
             </a>
 
@@ -189,14 +189,50 @@ document.addEventListener('DOMContentLoaded', function () {
     const badge = document.getElementById('navNotifBadge');
     const membersBadge = document.getElementById('navMembersBadge');
     const borrowingsBadge = document.getElementById('navBorrowingsBadge');
+    const borrowingsNav = borrowingsBadge ? borrowingsBadge.closest('a') : null;
     const reservationsBadge = document.getElementById('navReservationsBadge');
     const list = document.getElementById('navNotifList');
 
     if (btn && dropdown) {
+        const borrowingBadgeSeenKey = 'navBorrowingsBadgeSeen:{{ Auth::id() ?? "guest" }}';
+        let borrowingNotificationIds = [];
+        let seenBorrowingNotificationIds = new Set();
+
         function updateCountBadge(element, count) {
             if (!element) return;
             element.style.display = count > 0 ? 'inline-flex' : 'none';
             element.textContent = count > 99 ? '99+' : count;
+        }
+
+        function getSeenBorrowingNotificationIds() {
+            try {
+                const storedIds = sessionStorage.getItem(borrowingBadgeSeenKey);
+                const parsedIds = storedIds ? JSON.parse(storedIds) : [];
+                seenBorrowingNotificationIds = new Set(
+                    Array.isArray(parsedIds) ? parsedIds : []
+                );
+            } catch (error) {
+                console.error('Status badge peminjaman gagal dimuat:', error);
+            }
+
+            return seenBorrowingNotificationIds;
+        }
+
+        function storeSeenBorrowingNotificationIds(ids) {
+            seenBorrowingNotificationIds = new Set(ids);
+            try {
+                sessionStorage.setItem(
+                    borrowingBadgeSeenKey,
+                    JSON.stringify(Array.from(seenBorrowingNotificationIds))
+                );
+            } catch (error) {
+                console.error('Status badge peminjaman gagal disimpan:', error);
+            }
+        }
+
+        function markBorrowingBadgeSeen(ids) {
+            storeSeenBorrowingNotificationIds(ids);
+            updateCountBadge(borrowingsBadge, 0);
         }
 
         function fetchNotifications() {
@@ -209,7 +245,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .then(data => {
                     updateCountBadge(membersBadge, data.pending_members_count || 0);
-                    updateCountBadge(borrowingsBadge, data.pending_borrowings_count || 0);
+                    borrowingNotificationIds = Array.isArray(data.pending_borrowing_notification_ids)
+                        ? data.pending_borrowing_notification_ids
+                        : [];
+                    if (borrowingsNav && borrowingsNav.classList.contains('active')) {
+                        markBorrowingBadgeSeen(borrowingNotificationIds);
+                    } else {
+                        const seenIds = new Set(
+                            Array.from(getSeenBorrowingNotificationIds()).filter(
+                                id => borrowingNotificationIds.includes(id)
+                            )
+                        );
+                        storeSeenBorrowingNotificationIds(seenIds);
+                        const unseenCount = borrowingNotificationIds.filter(
+                            id => !seenIds.has(id)
+                        ).length;
+                        updateCountBadge(borrowingsBadge, unseenCount);
+                    }
                     updateCountBadge(reservationsBadge, data.pending_reservations_count || 0);
 
                     if (data.unread_count > 0) {
@@ -237,6 +289,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 })
                 .catch(error => console.error('Pembaruan notifikasi navbar gagal:', error));
+        }
+
+        if (borrowingsNav) {
+            borrowingsNav.addEventListener('click', function () {
+                markBorrowingBadgeSeen(borrowingNotificationIds);
+            });
         }
 
         btn.addEventListener('click', function (e) {

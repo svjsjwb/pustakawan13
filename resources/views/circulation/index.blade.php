@@ -899,17 +899,7 @@
 
                                                     method="POST"
 
-                                                    class="return-form"
-
-                                                    onsubmit="
-
-                                                        return confirm(
-
-                                                            'Yakin buku ini sudah dikembalikan?'
-
-                                                        );
-
-                                                    ">
+                                                    class="return-form">
 
                                                     @csrf
 
@@ -1329,6 +1319,122 @@
 
 {{-- =========================================================
 
+     MODAL KONFIRMASI PENGEMBALIAN
+
+========================================================= --}}
+
+<div
+
+    id="returnConfirmModal"
+
+    class="extend-confirm-modal"
+
+    aria-hidden="true">
+
+    <div
+
+        class="extend-confirm-overlay"
+
+        onclick="closeReturnConfirmModal()">
+
+    </div>
+
+    <div
+
+        class="extend-confirm-card"
+
+        role="dialog"
+
+        aria-modal="true"
+
+        aria-labelledby="returnConfirmTitle"
+
+        aria-describedby="returnConfirmDescription">
+
+        <div class="extend-confirm-icon">
+
+            <svg
+
+                viewBox="0 0 24 24"
+
+                fill="none"
+
+                stroke="currentColor"
+
+                stroke-width="2"
+
+                stroke-linecap="round"
+
+                stroke-linejoin="round">
+
+                <path d="M5 4.75A1.75 1.75 0 0 1 6.75 3H20v16H6.75A1.75 1.75 0 0 0 5 20.75z" />
+
+                <path d="M5 4.75v16" />
+
+                <path d="m9 11 2 2 4-4" />
+
+            </svg>
+
+        </div>
+
+        <span class="extend-confirm-label">
+
+            KONFIRMASI PENGEMBALIAN
+
+        </span>
+
+        <h3 id="returnConfirmTitle">
+
+            Buku sudah dikembalikan?
+
+        </h3>
+
+        <p
+
+            id="returnConfirmDescription"
+
+            class="extend-confirm-description">
+
+            Pastikan buku sudah diterima. Status peminjaman akan diperbarui setelah kamu mengonfirmasi.
+
+        </p>
+
+        <div class="extend-confirm-actions">
+
+            <button
+
+                type="button"
+
+                class="extend-confirm-cancel"
+
+                onclick="closeReturnConfirmModal()">
+
+                Batal
+
+            </button>
+
+            <button
+
+                type="button"
+
+                id="returnConfirmSubmit"
+
+                class="extend-confirm-submit"
+
+                onclick="submitReturnLoan()">
+
+                Ya, kembalikan
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+{{-- =========================================================
+
      JAVASCRIPT
 
 ========================================================= --}}
@@ -1356,13 +1462,31 @@ document.addEventListener(
             );
 
         const rows =
-
             document.querySelectorAll(
-
                 '#borrowingTable tbody tr.borrowing-row'
-
             );
+        const returnModal =
+            document.getElementById(
+                'returnConfirmModal'
+            );
+        document.querySelectorAll('.return-form').forEach(
+            function (form) {
+                form.addEventListener(
+                    'submit',
+                    function (event) {
+                        if (!returnModal) {
+                            console.error(
+                                'Modal konfirmasi pengembalian tidak ditemukan.'
+                            );
+                            return;
+                        }
 
+                        event.preventDefault();
+                        openReturnConfirmModal(form);
+                    }
+                );
+            }
+        );
         if (searchInput) {
 
             searchInput.addEventListener(
@@ -1556,6 +1680,7 @@ document.addEventListener(
 ========================================================= */
 
 let extendFormPending = null;
+let returnFormPending = null;
 
 /* =========================================================
 
@@ -2048,10 +2173,117 @@ function submitExtendLoan() {
      */
 
     HTMLFormElement.prototype.submit.call(
-
         form
-
     );
+}
+
+/* =========================================================
+
+   KONFIRMASI PENGEMBALIAN
+
+========================================================= */
+
+function openReturnConfirmModal(form) {
+
+    const modal =
+
+        document.getElementById(
+
+            'returnConfirmModal'
+
+        );
+
+    const cancelButton = modal
+        ? modal.querySelector('.extend-confirm-cancel')
+        : null;
+
+    if (!modal || !cancelButton) {
+
+        console.error(
+
+            'Elemen modal konfirmasi pengembalian tidak lengkap.'
+
+        );
+
+        return;
+
+    }
+
+    returnFormPending = form;
+
+    modal.classList.add('open');
+
+    modal.setAttribute('aria-hidden', 'false');
+
+    document.body.style.overflow = 'hidden';
+
+    cancelButton.focus();
+
+}
+
+function closeReturnConfirmModal() {
+
+    const modal =
+
+        document.getElementById(
+
+            'returnConfirmModal'
+
+        );
+
+    if (!modal) {
+
+        return;
+
+    }
+
+    modal.classList.remove('open');
+
+    modal.setAttribute('aria-hidden', 'true');
+
+    returnFormPending = null;
+
+    document.body.style.overflow = '';
+
+}
+
+function submitReturnLoan() {
+
+    if (!returnFormPending) {
+
+        console.error(
+
+            'Tidak ada pengembalian yang menunggu konfirmasi.'
+
+        );
+
+        return;
+
+    }
+
+    const form = returnFormPending;
+
+    returnFormPending = null;
+
+    const modal =
+
+        document.getElementById(
+
+            'returnConfirmModal'
+
+        );
+
+    if (modal) {
+
+        modal.classList.remove('open');
+
+        modal.setAttribute('aria-hidden', 'true');
+
+    }
+
+    document.body.style.overflow = '';
+
+    HTMLFormElement.prototype.submit.call(form);
 
 }
 
@@ -2076,6 +2308,13 @@ document.addEventListener(
             return;
 
         }
+        const returnModal =
+
+            document.getElementById(
+
+                'returnConfirmModal'
+
+            );
 
         const confirmModal =
 
@@ -2092,7 +2331,19 @@ document.addEventListener(
                 'extendLoanModal'
 
             );
+        if (
 
+            returnModal &&
+
+            returnModal.classList.contains('open')
+
+        ) {
+
+            closeReturnConfirmModal();
+
+            return;
+
+        }
         /* =========================================
 
            PRIORITAS POPUP KONFIRMASI
