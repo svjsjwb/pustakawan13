@@ -1816,3 +1816,226 @@
 .action-buttons .btn-delete {
     line-height: 0;
 }
+
+/* =========================================================
+   MODAL TAMBAH ANGGOTA
+========================================================= */
+
+.member-create-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    background: rgba(15, 35, 38, 0.58);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.member-create-modal-overlay.show {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.member-create-modal {
+    position: relative;
+    width: min(100%, 620px);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding: 28px 30px 30px;
+    box-sizing: border-box;
+    border: 1px solid rgba(226, 238, 238, 0.9);
+    border-radius: 24px;
+    background: #ffffff;
+    box-shadow: 0 28px 80px rgba(8, 32, 35, 0.3);
+    transform: translateY(14px) scale(0.98);
+    transition: transform 0.22s ease;
+}
+
+.member-create-modal-overlay.show .member-create-modal {
+    transform: translateY(0) scale(1);
+}
+
+.member-create-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.member-create-modal-header h2 {
+    margin: 0 0 5px;
+    color: #19364f;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 800;
+}
+
+.member-create-modal-header p {
+    max-width: 430px;
+    margin: 0;
+    color: #718087;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.member-create-modal-close {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #287f80;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.member-create-modal-close:hover {
+    background: #21696a;
+    transform: rotate(90deg);
+}
+
+.member-create-form-card {
+    width: min(100%, 440px);
+    margin: 0 auto;
+    padding: 18px 22px;
+    box-sizing: border-box;
+    border: 1px solid #e4ebee;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(27, 42, 58, 0.06);
+}
+
+.member-create-form-section + .member-create-form-section {
+    margin-top: 21px;
+}
+
+.member-create-section-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 15px;
+    padding-bottom: 7px;
+    border-bottom: 1px dashed #e2e9eb;
+}
+
+.member-create-section-title span {
+    display: inline-flex;
+    width: 23px;
+    height: 23px;
+    flex: 0 0 23px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: #e8f5f5;
+    color: #287f80;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.member-create-section-title h3 {
+    margin: 0;
+    color: #304b5a;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.member-create-form-section .form-group + .form-group {
+    margin-top: 15px;
+}
+
+.member-create-form-section .form-group label span {
+    color: #dc2626;
+}
+
+.member-create-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #edf0f1;
+}
+
+.member-create-modal-actions .btn-cancel,
+.member-create-modal-actions .btn-save {
+    min-height: 40px;
+    gap: 8px;
+    padding: 0 17px;
+    font-size: 13px;
+}
+
+.member-create-modal-actions .btn-save svg {
+    width: 16px;
+    height: 16px;
+}
+
+.member-create-errors {
+    width: min(100%, 440px);
+    margin: 0 auto 16px;
+    padding: 12px 14px;
+    box-sizing: border-box;
+    border: 1px solid #f1caca;
+    border-radius: 10px;
+    background: #fff6f6;
+    color: #9c3434;
+    font-size: 12px;
+}
+
+.member-create-errors ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+@media (max-width: 600px) {
+    .member-create-modal-overlay {
+        align-items: flex-end;
+        padding: 10px;
+    }
+
+    .member-create-modal {
+        width: 100%;
+        max-height: calc(100vh - 20px);
+        padding: 22px 16px 18px;
+        border-radius: 20px;
+    }
+
+    .member-create-modal-header {
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .member-create-modal-header h2 {
+        font-size: 21px;
+    }
+
+    .member-create-form-card {
+        padding: 16px;
+    }
+
+    .member-create-modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .member-create-modal-actions .btn-cancel,
+    .member-create-modal-actions .btn-save {
+        width: 100%;
+    }
+}

@@ -61,7 +61,7 @@
             </div>
 
             <div class="member-hero-action">
-                <a href="{{ route('members.create') }}" class="btn-add-top">
+                <a href="{{ route('members.create') }}" class="btn-add-top" id="openMemberCreateModal">
                     + Tambah Anggota Baru
                 </a>
             </div>
@@ -392,6 +392,77 @@
 
 
     {{-- =========================================================
+     MODAL TAMBAH ANGGOTA
+========================================================= --}}
+
+    <div
+        id="memberCreateModal"
+        class="member-create-modal-overlay{{ $errors->any() ? ' show' : '' }}"
+        aria-hidden="{{ $errors->any() ? 'false' : 'true' }}">
+        <div
+            class="member-create-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="memberCreateModalTitle"
+            aria-describedby="memberCreateModalDescription">
+            <header class="member-create-modal-header">
+                <div>
+                    <h2 id="memberCreateModalTitle">Tambah Anggota Baru</h2>
+                    <p id="memberCreateModalDescription">
+                        Lengkapi data untuk mendaftarkan anggota baru ke sistem perpustakaan.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="member-create-modal-close"
+                    onclick="closeMemberCreateModal()"
+                    aria-label="Tutup form tambah anggota">
+                    &times;
+                </button>
+            </header>
+
+            @if ($errors->any())
+                <div class="member-create-errors" role="alert">
+                    <strong>Periksa kembali data yang diisi.</strong>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="member-create-form-card">
+                <form action="{{ route('members.store') }}" method="POST">
+                    @csrf
+
+                    @include('members.partials.create-fields')
+
+                    <div class="member-create-modal-actions">
+                        <button
+                            type="button"
+                            class="btn-cancel"
+                            onclick="closeMemberCreateModal()">
+                            Batal
+                        </button>
+                        <button type="submit" class="btn-save">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                                <path d="M17 21v-8H7v8" />
+                                <path d="M7 3v5h8" />
+                            </svg>
+                            Simpan Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    {{-- =========================================================
      MODAL KONFIRMASI HAPUS ANGGOTA
 ========================================================= --}}
 
@@ -502,7 +573,30 @@
             const statusFilter = document.getElementById('memberStatusFilter');
             const statusMenu = document.getElementById('memberStatusMenu');
             const statusLabel = document.getElementById('memberStatusLabel');
+            const createModal = document.getElementById('memberCreateModal');
+            const openCreateButton = document.getElementById('openMemberCreateModal');
             let selectedStatus = '';
+
+            if (openCreateButton && createModal) {
+                openCreateButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    openMemberCreateModal();
+                });
+
+                createModal.addEventListener('click', function(event) {
+                    if (event.target === createModal) {
+                        closeMemberCreateModal();
+                    }
+                });
+            }
+
+            if (createModal && createModal.classList.contains('show')) {
+                document.body.style.overflow = 'hidden';
+                const nameInput = createModal.querySelector('#name');
+                if (nameInput) {
+                    nameInput.focus();
+                }
+            }
 
             function filterMemberRows() {
                 if (!table) {
@@ -578,8 +672,12 @@
                 function(event) {
 
                     if (event.key === 'Escape') {
-
-                        closeMemberDeleteModal();
+                        const createModal = document.getElementById('memberCreateModal');
+                        if (createModal && createModal.classList.contains('show')) {
+                            closeMemberCreateModal();
+                        } else {
+                            closeMemberDeleteModal();
+                        }
 
                     }
 
@@ -624,6 +722,33 @@
         | FORM DELETE TERPILIH
         |--------------------------------------------------------------------------
         */
+
+        function openMemberCreateModal() {
+            const modal = document.getElementById('memberCreateModal');
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+
+            const nameInput = modal.querySelector('#name');
+            if (nameInput) {
+                nameInput.focus();
+            }
+        }
+
+        function closeMemberCreateModal() {
+            const modal = document.getElementById('memberCreateModal');
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
 
         let memberDeleteForm = null;
 
