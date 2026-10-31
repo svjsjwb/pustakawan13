@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppNotification;
+use App\Models\Borrowing;
 use App\Models\Member;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
@@ -41,6 +42,10 @@ class NotificationController extends Controller
                 ? AppNotification::where('role', 'admin')
                     ->where('type', 'borrowing_new')
                     ->where('is_read', false)
+                    ->whereIn('data->borrowing_id', Borrowing::query()
+                        ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
+                        ->whereNull('returned_at')
+                        ->select('id'))
                     ->pluck('id')
                 : collect();
             $pendingReservationsCount = $user->isAdmin()

@@ -68,6 +68,7 @@ class EmailNotificationSystemTest extends TestCase
             ['email' => 'testuser@example.com'],
             [
                 'user_id' => $this->user->id,
+                'member_number' => 'TEST' . strtoupper(uniqid()),
                 'name' => 'Test User',
                 'phone' => '08123456789',
                 'status' => 'aktif',
@@ -537,6 +538,10 @@ class EmailNotificationSystemTest extends TestCase
         $pendingBorrowingsCount = AppNotification::where('role', 'admin')
             ->where('type', 'borrowing_new')
             ->where('is_read', false)
+            ->whereIn('data->borrowing_id', Borrowing::query()
+                ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
+                ->whereNull('returned_at')
+                ->select('id'))
             ->count();
         $pendingReservationsCount = Reservation::where('status', 'menunggu')->count();
 
@@ -571,6 +576,52 @@ class EmailNotificationSystemTest extends TestCase
             ->getJson(route('notifications.index'))
             ->assertJsonPath('pending_borrowings_count', $pendingBorrowingsCount)
             ->assertJsonPath('unread_count', $unreadCount);
+    }
+
+    public function test_admin_borrowing_badge_only_counts_unreturned_borrowings(): void
+    {
+        $activeBorrowing = Borrowing::create([
+            'member_id' => $this->member->id,
+            'user_id' => $this->user->id,
+            'borrowed_at' => now(),
+            'due_at' => now()->addDays(14),
+            'status' => 'dipinjam',
+        ]);
+        $returnedBorrowing = Borrowing::create([
+            'member_id' => $this->member->id,
+            'user_id' => $this->user->id,
+            'borrowed_at' => now()->subDays(14),
+            'due_at' => now(),
+            'returned_at' => now(),
+            'status' => 'dikembalikan',
+        ]);
+
+        $activeNotification = AppNotification::notifyAdmin(
+            'borrowing_new',
+            'Peminjaman baru',
+            'Peminjaman masih berjalan.',
+            ['borrowing_id' => $activeBorrowing->id]
+        );
+        $returnedNotification = AppNotification::notifyAdmin(
+            'borrowing_new',
+            'Peminjaman selesai',
+            'Peminjaman sudah dikembalikan.',
+            ['borrowing_id' => $returnedBorrowing->id]
+        );
+
+        $response = $this->actingAs($this->admin)
+            ->getJson(route('notifications.index'))
+            ->assertOk()
+            ->assertJsonPath('pending_borrowings_count', 1);
+
+        $this->assertSame(
+            [$activeNotification->id],
+            $response->json('pending_borrowing_notification_ids')
+        );
+        $this->assertNotContains(
+            $returnedNotification->id,
+            $response->json('pending_borrowing_notification_ids')
+        );
     }
 
     public function test_first_login_queues_first_login_mail(): void
