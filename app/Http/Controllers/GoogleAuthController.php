@@ -111,16 +111,53 @@ class GoogleAuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | CEK DATA MEMBER YANG SUDAH DIDAFTARKAN MANUAL OLEH ADMIN
+        |--------------------------------------------------------------------------
+        |
+        | Jika admin sudah menginput data anggota manual di web admin dengan email ini,
+        | otomatis setujui user (role: member) ketika login via Google tanpa harus
+        | menunggu persetujuan admin lagi.
+        |
+        */
+
+        $existingMember = Member::whereRaw(
+            'LOWER(email) = ?',
+            [$googleEmail]
+        )->first();
+
+        /*
+        |--------------------------------------------------------------------------
         | USER GOOGLE BARU
         |--------------------------------------------------------------------------
         |
-        | Jangan langsung membuat User/Member.
-        | Simpan data Google sementara di session.
-        | User baru akan dibuat setelah memilih divisi.
+        | Jika user belum ada dan belum pernah didaftarkan admin, simpan session
+        | dan arahkan ke form pemilihan divisi.
+        | Jika sudah didaftarkan admin, langsung buat akun User sebagai member.
         |
         */
 
         if (!$user) {
+            if ($existingMember) {
+                // Admin sudah mendaftarkan data anggota di web admin!
+                // Langsung buat User sebagai 'member' (otomatis disetujui).
+                $user = User::create([
+                    'name'      => $existingMember->name ?: $googleName,
+                    'email'     => $googleEmail,
+                    'google_id' => $googleId,
+                    'phone'     => $existingMember->phone,
+                    'role'      => 'member',
+                    'password'  => null,
+                ]);
+
+                $existingMember->update([
+                    'user_id' => $user->id,
+                ]);
+
+                app(\App\Services\MemberStatusService::class)->sync($existingMember);
+
+                return $this->loginUser($user);
+            }
+
             session([
                 'google_registration' => [
                     'google_id' => $googleId,
@@ -138,20 +175,19 @@ class GoogleAuthController extends Controller
         | USER SUDAH ADA
         |--------------------------------------------------------------------------
         |
-        | Sinkronkan identitas Google tanpa mengubah role
-        | dan tanpa mengubah status Member.
+        | Sinkronkan identitas Google.
         |
         */
 
         $user->forceFill([
-            'name'      => $googleName,
+            'name'      => $user->name ?: $googleName,
             'email'     => $googleEmail,
             'google_id' => $googleId,
         ])->save();
 
         /*
         |--------------------------------------------------------------------------
-        | PASTIKAN DATA MEMBER ADA
+        | PASTIKAN DATA MEMBER ADA & DIHUBUNGKAN
         |--------------------------------------------------------------------------
         */
 
@@ -161,14 +197,11 @@ class GoogleAuthController extends Controller
         )->first();
 
         if (!$member) {
-            $member = Member::whereRaw(
-                'LOWER(email) = ?',
-                [$googleEmail]
-            )->first();
+            $member = $existingMember;
         }
 
         if (!$member) {
-            Member::forceCreate([
+            $member = Member::forceCreate([
                 'member_number' => $this->generateMemberNumber(),
                 'user_id'       => $user->id,
                 'name'          => $googleName,
@@ -183,11 +216,26 @@ class GoogleAuthController extends Controller
                 'status'        => 'nonaktif',
             ]);
         } else {
-            $member->update([
+            $updateData = [
                 'user_id' => $user->id,
-                'name'    => $googleName,
-                'email'   => $googleEmail,
-            ]);
+            ];
+            if (empty($member->name)) {
+                $updateData['name'] = $googleName;
+            }
+            if (empty($member->email)) {
+                $updateData['email'] = $googleEmail;
+            }
+            $member->update($updateData);
+
+            // Jika akun user masih berstatus 'guest' tapi data member sudah ada (didaftarkan admin),
+            // otomatis ubah role menjadi 'member' (langsung disetujui)!
+            if ($user->role === 'guest') {
+                $user->update(['role' => 'member']);
+            }
+        }
+
+        if ($member) {
+            app(\App\Services\MemberStatusService::class)->sync($member);
         }
 
         /*
@@ -297,32 +345,53 @@ class GoogleAuthController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        $existingMember = Member::whereRaw(
+            'LOWER(email) = ?',
+            [strtolower($googleRegistration['email'])]
+        )->first();
+
+        // Jika email cocok dengan data yang didaftarkan admin, otomatis jadikan 'member' (disetujui)
+        $role = $existingMember ? 'member' : 'guest';
+
         $user = DB::transaction(function () use (
             $googleRegistration,
-            $validated
+            $validated,
+            $existingMember,
+            $role
         ) {
             $user = User::create([
                 'name'      => $validated['name'],
                 'email'     => $googleRegistration['email'],
                 'google_id' => $googleRegistration['google_id'],
                 'password'  => null,
-                'role'      => 'guest',
+                'role'      => $role,
             ]);
 
-            Member::forceCreate([
-                'member_number' => $this->generateMemberNumber(),
-                'user_id'       => $user->id,
-                'name'          => $validated['name'],
-                'email'         => $googleRegistration['email'],
-                'division'      => $validated['division'],
-                'phone'         => null,
-                'address'       => null,
-                'nis_nip'       => null,
-                'gender'        => null,
-                'class'         => null,
-                'registered_at' => now()->toDateString(),
-                'status'        => 'nonaktif',
-            ]);
+            if ($existingMember) {
+                $existingMember->update([
+                    'user_id'  => $user->id,
+                    'name'     => $validated['name'],
+                    'division' => $validated['division'],
+                ]);
+                $member = $existingMember;
+            } else {
+                $member = Member::forceCreate([
+                    'member_number' => $this->generateMemberNumber(),
+                    'user_id'       => $user->id,
+                    'name'          => $validated['name'],
+                    'email'         => $googleRegistration['email'],
+                    'division'      => $validated['division'],
+                    'phone'         => null,
+                    'address'       => null,
+                    'nis_nip'       => null,
+                    'gender'        => null,
+                    'class'         => null,
+                    'registered_at' => now()->toDateString(),
+                    'status'        => 'nonaktif',
+                ]);
+            }
+
+            app(\App\Services\MemberStatusService::class)->sync($member);
 
             return $user;
         });
@@ -395,6 +464,15 @@ class GoogleAuthController extends Controller
         | GOOGLE USER BARU → DASHBOARD
         |--------------------------------------------------------------------------
         */
+
+        if ($user->role === 'member') {
+            return redirect()
+                ->route('dashboard')
+                ->with(
+                    'success',
+                    'Login berhasil. Akun Anda telah disetujui sebagai member.'
+                );
+        }
 
         return redirect()
             ->route('dashboard')

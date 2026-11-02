@@ -11,109 +11,131 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('book_copies', function (Blueprint $table) {
+        if (!Schema::hasTable('book_copies')) {
+            Schema::create('book_copies', function (Blueprint $table) {
+                $table->id();
 
-            $table->id();
+                /*
+                 * Buku induk.
+                 *
+                 * Contoh:
+                 * books.id = 10
+                 * berarti semua copy di bawahnya
+                 * adalah eksemplar dari buku yang sama.
+                 */
+                $table->foreignId('book_id')
+                    ->constrained('books')
+                    ->cascadeOnUpdate()
+                    ->cascadeOnDelete();
 
-            /*
-             * Buku induk.
-             *
-             * Contoh:
-             * books.id = 10
-             * berarti semua copy di bawahnya
-             * adalah eksemplar dari buku yang sama.
-             */
-            $table->foreignId('book_id')
-                ->constrained('books')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                /*
+                 * Rak tempat eksemplar disimpan.
+                 */
+                $table->foreignId('shelf_id')
+                    ->nullable()
+                    ->constrained('shelves')
+                    ->nullOnDelete();
 
-            /*
-             * Rak tempat eksemplar disimpan.
-             */
-            $table->foreignId('shelf_id')
-                ->nullable()
-                ->constrained('shelves')
-                ->nullOnDelete();
+                /*
+                 * Posisi fisik eksemplar di dalam rak.
+                 */
+                $table->unsignedInteger('section')
+                    ->nullable();
 
-            /*
-             * Posisi fisik eksemplar di dalam rak.
-             */
-            $table->unsignedInteger('section')
-                ->nullable();
+                $table->string('side', 20)
+                    ->nullable();
 
-            $table->string('side', 20)
-                ->nullable();
+                $table->unsignedInteger('row')
+                    ->nullable();
 
-            $table->unsignedInteger('row')
-                ->nullable();
+                $table->unsignedInteger('column')
+                    ->nullable();
 
-            $table->unsignedInteger('column')
-                ->nullable();
+                /*
+                 * Nomor eksemplar.
+                 *
+                 * Contoh:
+                 * Buku A -> c.1, c.2, c.3
+                 * Buku B -> c.1, c.2, c.3
+                 */
+                $table->string('copy', 20);
 
-            /*
-             * Nomor eksemplar.
-             *
-             * Contoh:
-             * Buku A -> c.1, c.2, c.3
-             * Buku B -> c.1, c.2, c.3
-             */
-            $table->string('copy', 20);
+                /*
+                 * Status operasional eksemplar.
+                 */
+                $table->enum('status', [
+                    'available',
+                    'reserved',
+                    'borrowed',
+                    'maintenance',
+                    'lost',
+                ])->default('available');
 
-            /*
-             * Status operasional eksemplar.
-             */
-            $table->enum('status', [
-                'available',
-                'reserved',
-                'borrowed',
-                'maintenance',
-                'lost',
-            ])->default('available');
+                /*
+                 * Kondisi fisik eksemplar.
+                 */
+                $table->enum('condition', [
+                    'baik',
+                    'rusak',
+                    'hilang',
+                ])->default('baik');
 
-            /*
-             * Kondisi fisik eksemplar.
-             */
-            $table->enum('condition', [
-                'baik',
-                'rusak',
-                'hilang',
-            ])->default('baik');
+                /*
+                 * Copy hanya unik dalam buku yang sama.
+                 *
+                 * Buku A -> c.1
+                 * Buku B -> c.1
+                 * diperbolehkan.
+                 */
+                $table->unique([
+                    'book_id',
+                    'copy',
+                ]);
 
-            /*
-             * Copy hanya unik dalam buku yang sama.
-             *
-             * Buku A -> c.1
-             * Buku B -> c.1
-             * diperbolehkan.
-             */
-            $table->unique([
-                'book_id',
-                'copy',
-            ]);
+                /*
+                 * Index untuk pencarian posisi copy.
+                 */
+                $table->index([
+                    'shelf_id',
+                    'section',
+                    'side',
+                    'row',
+                    'column',
+                ]);
 
-            /*
-             * Index untuk pencarian posisi copy.
-             */
-            $table->index([
-                'shelf_id',
-                'section',
-                'side',
-                'row',
-                'column',
-            ]);
+                /*
+                 * Index untuk pencarian copy berdasarkan
+                 * buku dan status.
+                 */
+                $table->index([
+                    'book_id',
+                    'status',
+                ]);
 
-            /*
-             * Index untuk pencarian copy berdasarkan
-             * buku dan status.
-             */
-            $table->index([
-                'book_id',
-                'status',
-            ]);
-
-            $table->timestamps();
-        });
+                $table->timestamps();
+            });
+        } else {
+            Schema::table('book_copies', function (Blueprint $table) {
+                if (!Schema::hasColumn('book_copies', 'shelf_id')) {
+                    $table->foreignId('shelf_id')->nullable()->constrained('shelves')->nullOnDelete();
+                }
+                if (!Schema::hasColumn('book_copies', 'section')) {
+                    $table->unsignedInteger('section')->nullable();
+                }
+                if (!Schema::hasColumn('book_copies', 'side')) {
+                    $table->string('side', 20)->nullable();
+                }
+                if (!Schema::hasColumn('book_copies', 'row')) {
+                    $table->unsignedInteger('row')->nullable();
+                }
+                if (!Schema::hasColumn('book_copies', 'column')) {
+                    $table->unsignedInteger('column')->nullable();
+                }
+                if (!Schema::hasColumn('book_copies', 'copy')) {
+                    $table->string('copy', 20)->nullable();
+                }
+            });
+        }
     }
 
     /**

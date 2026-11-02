@@ -98,7 +98,7 @@
             </button>
         </div>
 
-        {{-- Dropdowns for Pendidikan, Anak-Anak, Remaja, Dewasa --}}
+        {{-- Dropdowns for Buku Pelajaran and Buku Umum --}}
         @foreach($catalogHierarchy as $groupName => $subcategories)
             @php
                 $groupLabel = $groupName;
@@ -117,61 +117,56 @@
                         aria-expanded="false"
                         id="catTrigger_{{ Str::slug($groupName) }}">
                     <span class="pd-trigger-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                         </svg>
                     </span>
                     <span class="pd-trigger-label" id="catLabel_{{ Str::slug($groupName) }}">
-                        @if($isGroupActive && $activeSubName)
-                            {{ $groupLabel }}: {{ $activeSubName }} ✓
-                        @elseif($isGroupActive)
-                            {{ $groupLabel }}: Semua ✓
-                        @else
-                            {{ $groupLabel }}
-                        @endif
+                        {{ $groupLabel }}
                     </span>
+                    <span class="pd-trigger-count">{{ $groupTotal }}</span>
                     <span class="pd-trigger-arrow">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </span>
                 </button>
 
                 <div class="pd-panel pd-category-panel" role="menu" aria-label="{{ $groupLabel }}">
-                    <div class="pd-panel-header">{{ $groupLabel }} ({{ $groupTotal }} Buku)</div>
-                    <button type="button"
-                            class="pd-item pd-category-option pd-category-parent-btn {{ $isGroupActive && !$activeSubName ? 'is-selected active-subcat' : '' }}"
-                            data-main="{{ $groupName }}"
-                            data-sub=""
-                            onclick="selectSubcategory('{{ $groupName }}', '', event)">
-                        <span class="pd-item-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                            </svg>
-                        </span>
-                        <span class="pd-item-label">Semua {{ $groupLabel }}</span>
-                        <span class="pd-item-check"><span class="check-text">✓</span></span>
-                        <span class="pd-category-count">{{ $groupTotal }}</span>
-                    </button>
-                    @foreach($subcategories as $subKey => $subLabel)
-                        @php
-                            $isItemActive = ($isGroupActive && $subCategory === $subKey);
-                            $count = $subCounts[$groupName . '::' . $subKey] ?? 0;
-                        @endphp
+                    <div class="pd-panel-header">{{ strtoupper($groupName) }}</div>
+                    <div class="pd-category-options-list">
                         <button type="button"
-                                class="pd-item pd-category-option pd-subcat-btn {{ $isItemActive ? 'is-selected active-subcat' : '' }}"
+                                class="pd-item pd-category-option pd-category-parent-btn {{ $isGroupActive && !$activeSubName ? 'is-selected active-subcat' : '' }}"
                                 data-main="{{ $groupName }}"
-                                data-sub="{{ $subKey }}"
-                                onclick="selectSubcategory('{{ $groupName }}', '{{ $subKey }}', event)">
+                                data-sub=""
+                                onclick="selectSubcategory('{{ $groupName }}', '', event)">
                             <span class="pd-item-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M4 6h16M4 12h16M4 18h10"></path>
+                                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
                                 </svg>
                             </span>
-                            <span class="pd-item-label">{{ $subLabel }}</span>
-                            <span class="pd-item-check"><span class="check-text">✓</span></span>
-                            <span class="pd-category-count">{{ $count }}</span>
+                            <span class="pd-item-label">Semua {{ $groupLabel }}</span>
+                            <span class="pd-category-count">{{ $groupTotal }}</span>
                         </button>
-                    @endforeach
+                        @foreach($subcategories as $subKey => $subLabel)
+                            @php
+                                $isItemActive = ($isGroupActive && $subCategory === $subKey);
+                                $count = $subCounts[$groupName . '::' . $subKey] ?? 0;
+                            @endphp
+                            <button type="button"
+                                    class="pd-item pd-category-option pd-subcat-btn {{ $isItemActive ? 'is-selected active-subcat' : '' }}"
+                                    data-main="{{ $groupName }}"
+                                    data-sub="{{ $subKey }}"
+                                    onclick="selectSubcategory('{{ $groupName }}', '{{ $subKey }}', event)">
+                                <span class="pd-item-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 6h16M4 12h16M4 18h10"></path>
+                                    </svg>
+                                </span>
+                                <span class="pd-item-label">{{ $subLabel }}</span>
+                                <span class="pd-category-count">{{ $count }}</span>
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         @endforeach
@@ -716,9 +711,7 @@ function syncCategoryUiState(mainCat, subCat) {
         trigger?.classList.toggle('has-value', isActiveGroup);
 
         if (triggerLabel) {
-            triggerLabel.textContent = isActiveGroup
-                ? `${label}: ${subCat || 'Semua'} ✓`
-                : label;
+            triggerLabel.textContent = label;
         }
 
         wrapper.querySelectorAll('.pd-category-option').forEach(option => {

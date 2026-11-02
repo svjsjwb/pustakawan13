@@ -116,18 +116,40 @@ class BookController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function index()
+    public function index(Request $request)
     {
-        $books = Book::with([
-            'category',
-            'subcategory',
-        ])
-            ->latest()
+        $search = $request->query('search');
+        $categoryId = $request->query('category_id');
+
+        $categories = Category::whereIn('name', ['Buku Pelajaran', 'Buku Umum'])
+            ->withCount('books')
+            ->orderByRaw("CASE WHEN name = 'Buku Pelajaran' THEN 1 WHEN name = 'Buku Umum' THEN 2 ELSE 99 END")
             ->get();
+
+        $totalBooksCount = Book::count();
+
+        $query = Book::with([
+            'category:id,name',
+            'subcategory:id,name',
+        ])
+            ->when($search, function ($q, $search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('judul_buku', 'like', "%{$search}%")
+                        ->orWhere('penulis', 'like', "%{$search}%")
+                        ->orWhere('isbn', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%");
+                });
+            })
+            ->when($categoryId, function ($q, $categoryId) {
+                $q->where('category_id', $categoryId);
+            })
+            ->latest('id');
+
+        $books = $query->paginate(25)->withQueryString();
 
         return view(
             'books.index',
-            compact('books')
+            compact('books', 'categories', 'totalBooksCount', 'search', 'categoryId')
         );
     }
 

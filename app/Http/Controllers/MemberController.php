@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use App\Models\Member;
+use App\Models\User;
 use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Reservation;
@@ -116,10 +117,65 @@ class MemberController extends Controller
         );
 
         $validated['status'] = 'nonaktif';
+        $validated['registered_at'] = now()->toDateString();
 
         $validated['member_number'] = $this->generateMemberNumber();
 
-        Member::forceCreate($validated);
+        $email = !empty($validated['email']) ? strtolower(trim($validated['email'])) : null;
+
+        if ($email) {
+            $validated['email'] = $email;
+
+            // Cari apakah akun User sudah ada berdasarkan email
+            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+
+            if ($user) {
+                // User sudah ada (misal sebelumnya mendaftar mandiri sebagai guest)
+                // Otomatis ubah role menjadi member (disetujui oleh admin)
+                $wasGuest = ($user->role === 'guest');
+                $user->update([
+                    'name'  => $validated['name'],
+                    'phone' => $validated['phone'] ?? $user->phone,
+                    'role'  => 'member',
+                ]);
+
+                if ($wasGuest) {
+                    try {
+                        NotificationService::userApproved($user);
+                    } catch (\Throwable $e) {
+                        \Log::warning('Gagal kirim notifikasi userApproved: ' . $e->getMessage());
+                    }
+                }
+            } else {
+                // Pre-create akun User dengan role 'member'
+                // Sehingga ketika user login lewat Google dengan email ini, otomatis langsung disetujui
+                $user = User::create([
+                    'name'     => $validated['name'],
+                    'email'    => $email,
+                    'phone'    => $validated['phone'] ?? null,
+                    'role'     => 'member',
+                    'password' => null,
+                ]);
+            }
+
+            $validated['user_id'] = $user->id;
+
+            // Cek apakah sudah ada entri Member untuk email atau user_id ini (hindari duplikasi)
+            $existingMember = Member::where('user_id', $user->id)
+                ->orWhereRaw('LOWER(email) = ?', [$email])
+                ->first();
+
+            if ($existingMember) {
+                $existingMember->update($validated);
+                $member = $existingMember;
+            } else {
+                $member = Member::forceCreate($validated);
+            }
+        } else {
+            $member = Member::forceCreate($validated);
+        }
+
+        app(MemberStatusService::class)->sync($member);
 
         return redirect()
             ->route('members.index')
@@ -164,6 +220,39 @@ class MemberController extends Controller
             $this->validationRules(),
             $this->validationMessages()
         );
+
+        $email = !empty($validated['email']) ? strtolower(trim($validated['email'])) : null;
+
+        if ($email) {
+            $validated['email'] = $email;
+
+            if ($member->user) {
+                $member->user->update([
+                    'name'  => $validated['name'],
+                    'email' => $email,
+                    'phone' => $validated['phone'] ?? $member->user->phone,
+                    'role'  => 'member',
+                ]);
+            } else {
+                $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+                if ($user) {
+                    $user->update([
+                        'name'  => $validated['name'],
+                        'phone' => $validated['phone'] ?? $user->phone,
+                        'role'  => 'member',
+                    ]);
+                } else {
+                    $user = User::create([
+                        'name'     => $validated['name'],
+                        'email'    => $email,
+                        'phone'    => $validated['phone'] ?? null,
+                        'role'     => 'member',
+                        'password' => null,
+                    ]);
+                }
+                $validated['user_id'] = $user->id;
+            }
+        }
 
         $member->update($validated);
 

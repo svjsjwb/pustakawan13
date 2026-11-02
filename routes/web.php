@@ -1,29 +1,29 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ForgotPasswordController;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\GoogleAuthController;
-use App\Http\Controllers\BookController;
-use App\Http\Controllers\CirculationController;
-use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\MemberController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\BookCopyController;
-use App\Http\Controllers\UserHomeController;
-use App\Http\Controllers\UserCatalogController;
-use App\Http\Controllers\UserBorrowingController;
-use App\Http\Controllers\RoleAwareNavigationController;
-use App\Http\Controllers\UserHistoryController;
-use App\Http\Controllers\UserProfileController;
-use App\Http\Controllers\UserFavoriteController;
-use App\Http\Controllers\UserReservationController;
-use App\Http\Controllers\UserAnnouncementController;
-use App\Http\Controllers\UserNotificationController;
-use App\Http\Controllers\UserHelpController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\BookCopyController;
+use App\Http\Controllers\CirculationController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\RoleAwareNavigationController;
+use App\Http\Controllers\UserAnnouncementController;
+use App\Http\Controllers\UserBorrowingController;
+use App\Http\Controllers\UserCatalogController;
+use App\Http\Controllers\UserFavoriteController;
+use App\Http\Controllers\UserHelpController;
+use App\Http\Controllers\UserHistoryController;
+use App\Http\Controllers\UserHomeController;
+use App\Http\Controllers\UserNotificationController;
+use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\UserReservationController;
+use Illuminate\Support\Facades\Route;
 
 // ============================================================
 // LANDING
@@ -36,7 +36,6 @@ Route::get('/', function () {
 // AUTENTIKASI (GUEST - tidak perlu login)
 // ============================================================
 Route::middleware('guest')->group(function () {
-
     // Tampilkan halaman login
     Route::get('/login', [LoginController::class, 'showLoginForm'])
         ->name('login');
@@ -94,6 +93,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/catalog', [RoleAwareNavigationController::class, 'catalog'])->name('catalog');
     Route::get('/reservations', [RoleAwareNavigationController::class, 'reservations'])->name('reservations.index');
     Route::get('/borrowings', [RoleAwareNavigationController::class, 'borrowings'])->name('borrowings.index');
+    Route::get('/peminjaman', [RoleAwareNavigationController::class, 'borrowings'])->name('user.borrowings');
+    Route::get('/pinjam', [RoleAwareNavigationController::class, 'borrowings'])->name('pinjam');
+    Route::get('/user/loans', [RoleAwareNavigationController::class, 'borrowings'])->name('user.loans');
     Route::get('/history', [RoleAwareNavigationController::class, 'history'])->name('history');
     Route::patch('/borrowings/{borrowing}/extend', [UserBorrowingController::class, 'extend'])->name('borrowings.extend');
     Route::post('/activities/{activity}/read', [ActivityController::class, 'markAsRead'])->name('activities.markAsRead');
@@ -103,7 +105,6 @@ Route::middleware('auth')->group(function () {
 // HALAMAN ADMIN  (middleware: auth + role admin)
 // ============================================================
 Route::middleware(['auth', 'admin'])->group(function () {
-
     // BUKU
     // Lookup ISBN tetap dipertahankan dari backend admin lama.
     Route::get('/books/isbn-lookup', [
@@ -117,7 +118,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::prefix('books/{book}/copies')
         ->name('books.copies.')
         ->group(function () {
-
             Route::get('/', [
                 BookCopyController::class,
                 'index'
@@ -227,7 +227,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 Route::middleware(['auth', 'role.user'])->group(function () {
-
     // BERANDA
     Route::get('/home', [UserHomeController::class, 'index'])->name('user.home');
     Route::get('/user/search', [UserHomeController::class, 'search'])->name('user.search');
@@ -235,18 +234,14 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     // KATALOG
     Route::get('/user/catalog', [UserCatalogController::class, 'index'])->name('user.catalog');
 
-    // PEMINJAMAN BUKU - HALAMAN KHUSUS
-    Route::get('/peminjaman', [UserBorrowingController::class, 'index'])->name('user.borrowings');
-
     // PEMINJAMAN AKTIF & PERMINTAAN PINJAM
-    Route::get('/user/loans', [UserBorrowingController::class, 'index'])->name('user.loans');
     Route::post('/user/loans/request', [UserBorrowingController::class, 'store'])->name('user.loans.store');
     Route::patch('/user/loans/{borrowing}/extend', [UserBorrowingController::class, 'requestExtension'])->name('user.loans.extend');
 
     // FAVORIT
-    Route::get('/user/favorites',         [UserFavoriteController::class, 'index'])->name('user.favorites');
+    Route::get('/user/favorites', [UserFavoriteController::class, 'index'])->name('user.favorites');
     Route::post('/user/favorites/toggle', [UserFavoriteController::class, 'toggle'])->name('user.favorites.toggle');
-    Route::get('/user/favorites/check',   [UserFavoriteController::class, 'check'])->name('user.favorites.check');
+    Route::get('/user/favorites/check', [UserFavoriteController::class, 'check'])->name('user.favorites.check');
 
     // RESERVASI
     Route::get('/user/reservations', [UserReservationController::class, 'index'])->name('user.reservations');
@@ -258,8 +253,8 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     Route::get('/user/announcements', [UserAnnouncementController::class, 'index'])->name('user.announcements');
 
     // NOTIFIKASI
-    Route::get('/notifications',                   [NotificationController::class, 'index'])->name('user.notifications');
-    Route::post('/user/notifications/dismiss',     [UserNotificationController::class, 'dismiss'])->name('user.notifications.dismiss');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('user.notifications');
+    Route::post('/user/notifications/dismiss', [UserNotificationController::class, 'dismiss'])->name('user.notifications.dismiss');
     Route::post('/user/notifications/dismiss-all', [UserNotificationController::class, 'dismissAll'])->name('user.notifications.dismiss-all');
 
     // BANTUAN
@@ -267,7 +262,6 @@ Route::middleware(['auth', 'role.user'])->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-
     // RIWAYAT — bisa diakses semua user terautentikasi (member, guest, admin)
     Route::get('/user/history', [UserHistoryController::class, 'index'])->name('user.history');
 
@@ -289,9 +283,9 @@ Route::middleware('auth')->group(function () {
 // API NOTIFIKASI (AUTH)
 // ============================================================
 Route::middleware('auth')->group(function () {
-    Route::get('/api/notifications',            [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/api/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/api/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/api/notifications/read-all',  [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    Route::post('/api/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });
 
 // ============================================================
@@ -314,8 +308,8 @@ Route::prefix('email-preview')->group(function () {
             messageText: 'Pengguna baru telah mendaftar di sistem perpustakaan.',
             details: [
                 'Nama Pengguna' => 'Budi Santoso',
-                'Email'         => 'budi.santoso@gmail.com',
-                'Role'          => 'user',
+                'Email' => 'budi.santoso@gmail.com',
+                'Role' => 'user',
                 'Tanggal Daftar' => now()->translatedFormat('d M Y H:i') . ' WIB',
             ],
             actionUrl: url('/members'),

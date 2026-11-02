@@ -21,13 +21,39 @@
             @php
                 $isFav = in_array($book->id, $favoriteIds ?? []);
                 $isAvailable = ($book->available_stock ?? 0) > 0;
+
+                $mainCat = $book->main_category;
+                $subCat = $book->sub_category ?: $book->education_level;
+
+                if (in_array($mainCat, ['Buku Pendidikan', 'Pendidikan', 'Buku Pelajaran'])) {
+                    $badgeMain = 'Buku Pelajaran';
+                    $badgeSub = match($subCat) {
+                        'SD', 'SD/MI' => 'SD/MI',
+                        'SMP', 'SMP/MTs' => 'SMP/MTs',
+                        'SMA', 'SMA/SMK/MA/SMAK/MAK' => 'SMA/SMK/MA/SMAK/MAK',
+                        'TK' => 'TK',
+                        'Referensi' => 'Referensi',
+                        default => ($subCat ?: 'Umum'),
+                    };
+                    $badgeText = $badgeSub ? ($badgeMain . ' • ' . $badgeSub) : $badgeMain;
+                } elseif (in_array($mainCat, ['Anak', 'Anak-Anak', 'Buku Anak'])) {
+                    $badgeText = 'Buku Umum • Buku Anak';
+                } elseif (in_array($mainCat, ['Remaja', 'Buku Remaja'])) {
+                    $badgeText = 'Buku Umum • Buku Remaja';
+                } elseif (in_array($mainCat, ['Dewasa', 'Buku Dewasa'])) {
+                    $badgeText = 'Buku Umum • Buku Dewasa';
+                } elseif ($mainCat) {
+                    $badgeText = $subCat ? ($mainCat . ' • ' . $subCat) : $mainCat;
+                } else {
+                    $badgeText = $book->category->name ?? 'Buku Umum';
+                }
             @endphp
             <div class="saas-book-card"
                  onclick="openCatalogModal(this)"
                  data-id="{{ $book->id }}"
                  data-title="{{ $book->title }}"
                  data-author="{{ $book->author ?? '-' }}"
-                 data-category="{{ $book->category->name ?? 'Umum' }}"
+                 data-category="{{ $badgeText }}"
                  data-main-category="{{ $book->main_category ?? '' }}"
                  data-sub-category="{{ $book->sub_category ?? '' }}"
                  data-education-level="{{ $book->education_level ?? '' }}"
@@ -57,8 +83,8 @@
                     @endif
 
                     {{-- Category Badge --}}
-                    <span class="saas-card-badge">
-                        {{ Str::limit($book->sub_category ? ($book->main_category . ' • ' . $book->sub_category) : ($book->category->name ?? 'Umum'), 24) }}
+                    <span class="saas-card-badge" title="{{ $badgeText }}">
+                        {{ Str::limit($badgeText, 28) }}
                     </span>
 
                     {{-- Availability Badge --}}

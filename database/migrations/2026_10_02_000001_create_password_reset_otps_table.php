@@ -8,17 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('password_reset_otps', function (Blueprint $table) {
-            $table->id();
-            $table->string('email')->index();
-            $table->string('otp_hash');
-            $table->unsignedTinyInteger('attempts')->default(0);
-            $table->timestamp('expires_at');
-            $table->timestamp('verified_at')->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('password_reset_otps')) {
+            Schema::create('password_reset_otps', function (Blueprint $table) {
+                $table->id();
+                $table->string('email')->index();
+                $table->string('otp_hash');
+                $table->unsignedTinyInteger('attempts')->default(0);
+                $table->timestamp('expires_at');
+                $table->timestamp('verified_at')->nullable();
+                $table->timestamps();
 
-            $table->index(['email', 'expires_at']);
-        });
+                $table->index(['email', 'expires_at']);
+            });
+        }
     }
 
     public function down(): void

@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('books', function (Blueprint $table) {
+        if (!Schema::hasTable('books')) {
+            Schema::create('books', function (Blueprint $table) {
             $table->id();
 
             // Bibliographic identity.
@@ -51,6 +52,28 @@ return new class extends Migration
             $table->index('ddc');
             $table->index('status');
         });
+        } else {
+            Schema::table('books', function (Blueprint $table) {
+                if (!Schema::hasColumn('books', 'isbn')) {
+                    $table->string('isbn', 20)->nullable()->unique();
+                }
+                if (!Schema::hasColumn('books', 'publisher')) {
+                    $table->string('publisher')->nullable();
+                }
+                if (!Schema::hasColumn('books', 'publication_year')) {
+                    $table->unsignedSmallInteger('publication_year')->nullable();
+                }
+                if (!Schema::hasColumn('books', 'call_number')) {
+                    $table->string('call_number', 100)->nullable();
+                }
+                if (!Schema::hasColumn('books', 'description')) {
+                    $table->text('description')->nullable();
+                }
+                if (!Schema::hasColumn('books', 'cover')) {
+                    $table->string('cover')->nullable();
+                }
+            });
+        }
     }
 
     public function down(): void

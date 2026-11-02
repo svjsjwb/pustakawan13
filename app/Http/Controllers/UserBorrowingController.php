@@ -103,9 +103,19 @@ class UserBorrowingController extends Controller
         $member = $user->member;
 
         if (!$member) {
-            return response()->json([
-                'message' => 'Data anggota tidak ditemukan.',
-            ], 404);
+            $member = Member::where('email', $user->email)->first();
+            if ($member) {
+                $member->update(['user_id' => $user->id]);
+            } else {
+                $member = Member::create([
+                    'user_id'       => $user->id,
+                    'name'          => $user->name,
+                    'email'         => $user->email,
+                    'division'      => $user->division ?? 'Umum',
+                    'status'        => 'aktif',
+                    'registered_at' => now()->toDateString(),
+                ]);
+            }
         }
 
         $borrowedAt = now();

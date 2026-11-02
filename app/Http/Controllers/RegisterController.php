@@ -55,15 +55,19 @@ class RegisterController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | BUAT USER SEBAGAI GUEST
+        | BUAT USER
         |--------------------------------------------------------------------------
         */
 
+        $cleanEmail = strtolower(trim($validated['email']));
+        $existingMember = Member::whereRaw('LOWER(email) = ?', [$cleanEmail])->first();
+        $role = $existingMember ? 'member' : 'guest';
+
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => strtolower(trim($validated['email'])),
+            'name'     => $validated['name'],
+            'email'    => $cleanEmail,
             'password' => Hash::make($validated['password']),
-            'role' => 'guest',
+            'role'     => $role,
         ]);
 
         /*
@@ -83,28 +87,35 @@ class RegisterController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | BUAT DATA PENDAFTAR DI MEMBERS
+        | DATA PENDAFTAR DI MEMBERS
         |--------------------------------------------------------------------------
-        |
-        | Guest tetap mempunyai data member agar admin bisa melihat
-        | data pendaftar di halaman Keanggotaan.
-        |
         */
 
-        Member::create([
-            'user_id' => $user->id,
-            'member_number' => $memberNumber,
-            'name' => $validated['name'],
-            'email' => $user->email,
-            'division' => $validated['division'],
-            'phone' => null,
-            'address' => null,
-            'nis_nip' => null,
-            'gender' => null,
-            'class' => null,
-            'registered_at' => now()->toDateString(),
-            'status' => 'nonaktif',
-        ]);
+        if ($existingMember) {
+            $existingMember->update([
+                'user_id'  => $user->id,
+                'name'     => $validated['name'],
+                'division' => $validated['division'],
+            ]);
+            $member = $existingMember;
+        } else {
+            $member = Member::forceCreate([
+                'user_id'       => $user->id,
+                'member_number' => $memberNumber,
+                'name'          => $validated['name'],
+                'email'         => $user->email,
+                'division'      => $validated['division'],
+                'phone'         => null,
+                'address'       => null,
+                'nis_nip'       => null,
+                'gender'        => null,
+                'class'         => null,
+                'registered_at' => now()->toDateString(),
+                'status'        => 'nonaktif',
+            ]);
+        }
+
+        app(\App\Services\MemberStatusService::class)->sync($member);
 
         /*
         |--------------------------------------------------------------------------
@@ -123,6 +134,15 @@ class RegisterController extends Controller
                     'error' => $mailException->getMessage(),
                 ]
             );
+        }
+
+        if ($user->role === 'member') {
+            return redirect()
+                ->route('login')
+                ->with(
+                    'success',
+                    'Pendaftaran berhasil. Akun Anda telah disetujui sebagai member. Silakan login.'
+                );
         }
 
         return redirect()

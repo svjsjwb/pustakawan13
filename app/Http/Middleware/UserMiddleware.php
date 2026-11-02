@@ -16,6 +16,12 @@ class UserMiddleware
         }
 
         if (Auth::user()->role !== 'member' && Auth::user()->role !== 'admin') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Akun Anda belum disetujui sebagai member.'
+                ], 403);
+            }
+
             return redirect('/catalog')
                 ->with(
                     'error',

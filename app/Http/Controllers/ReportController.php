@@ -349,7 +349,7 @@ class ReportController extends Controller
             );
 
 
-
+      
         $collectionReportData =
             $this->getCollectionReportData(
                 $startDate,
@@ -362,58 +362,27 @@ class ReportController extends Controller
          * RINGKASAN KOLEKSI
          * ========================================================
          */
-        $collectionAddedCount =
-            $collectionReportData
-            ->where(
-                'type',
-                'added'
-            )
-            ->count();
-
-        // Kompatibilitas dengan view admin/user hasil merge:
-        // "totalBooks" merepresentasikan buku yang ditambahkan pada periode.
+        $collectionAddedCount = Book::whereBetween('created_at', [$startDate, $endDate])->count();
         $totalBooks = $collectionAddedCount;
 
-
-        $collectionAddedCopyCount =
-            $collectionReportData
-            ->where(
-                'type',
-                'copy_added'
-            )
+        $collectionAddedCopyCount = BookCopy::join('books', 'books.id', '=', 'book_copies.book_id')
+            ->whereBetween('book_copies.created_at', [$startDate, $endDate])
+            ->whereColumn('book_copies.created_at', '>', 'books.created_at')
             ->count();
 
-
-        $collectionWithdrawnCount =
-            $collectionReportData
-            ->where('type', 'withdrawn')
+        $collectionWithdrawnCount = (int) CollectionWithdrawal::where('type', 'book')
+            ->whereBetween('withdrawn_at', [$startDate, $endDate])
             ->sum('quantity');
 
-        $collectionDeletedCopyCount =
-            $collectionReportData
-            ->where('type', 'copy_withdrawn')
-            ->sum('quantity');
-
-
-        $collectionDamagedCount =
-            $collectionReportData
-            ->where(
-                'type',
-                'damaged'
-            )
+        $collectionDeletedCopyCount = CollectionWithdrawal::where('type', 'copy')
+            ->whereBetween('withdrawn_at', [$startDate, $endDate])
             ->count();
 
-        $collectionLostCount =
-            $collectionReportData
-            ->where(
-                'type',
-                'lost'
-            )
+        $collectionDamagedCount = BookCopy::where('condition', 'rusak')
+            ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
 
-
-        $totalCollectionChanges =
-            $collectionReportData->count();
+        $totalCollectionChanges = $collectionAddedCount + $collectionAddedCopyCount + $collectionWithdrawnCount + $collectionDeletedCopyCount;
 
 
         /*
@@ -1001,7 +970,6 @@ class ReportController extends Controller
                 'collectionWithdrawnCount',
                 'collectionDeletedCopyCount',
                 'collectionDamagedCount',
-                'collectionLostCount',
                 'totalCollectionChanges',
 
                 'totalBorrowed',
@@ -1062,7 +1030,9 @@ class ReportController extends Controller
      * "Eksemplar Ditambahkan".
      */
         $addedBooks =
-            Book::with('copies')
+            Book::query()
+            ->withCount('copies')
+            ->select('id', 'judul_buku', 'created_at')
             ->whereBetween(
                 'created_at',
                 [
@@ -1074,13 +1044,14 @@ class ReportController extends Controller
                 'created_at',
                 'desc'
             )
+            ->limit(200)
             ->get();
 
 
         foreach ($addedBooks as $book) {
 
             $copyCount =
-                $book->copies->count();
+                $book->copies_count;
 
 
             $data->push([
@@ -1096,7 +1067,7 @@ class ReportController extends Controller
                 'judul_buku' =>
                 $book->judul_buku,
 
-                'copy' =>
+                'barcode' =>
                 null,
 
                 'quantity' =>
@@ -1180,14 +1151,14 @@ class ReportController extends Controller
                 $copy->book->judul_buku
                     ?? 'Buku',
 
-                'copy' =>
-                $copy->copy,
+                'barcode' =>
+                $copy->barcode,
 
                 'quantity' =>
                 1,
 
                 'display_quantity' =>
-                $copy->copy
+                $copy->barcode
                     ?? '1 eksemplar',
 
                 'reason' =>
@@ -1224,27 +1195,39 @@ class ReportController extends Controller
             ->get();
 
 
-        foreach ($withdrawnBooks as $withdrawal) {
+        foreach (
+            $withdrawnBooks
+            as $withdrawal
+        ) {
 
             $data->push([
-                'type' => 'withdrawn',
+                'type' =>
+                'withdrawn',
 
-                'label' => 'Buku Dihapus',
+                'label' =>
+                'Buku Ditarik',
 
-                'date' => $withdrawal->withdrawn_at,
+                'date' =>
+                $withdrawal->withdrawn_at,
 
-                'judul_buku' => $withdrawal->book_title,
+                'judul_buku' =>
+                $withdrawal->book_title,
 
-                'copy' => null,
+                'barcode' =>
+                null,
 
-                // 1 record type=book = 1 buku dihapus
-                'quantity' => 1,
+                'quantity' =>
+                $withdrawal->quantity,
 
-                'display_quantity' => '1 buku',
+                'display_quantity' =>
+                $withdrawal->quantity
+                    . ' eksemplar',
 
-                'reason' => $withdrawal->reason,
+                'reason' =>
+                $withdrawal->reason,
 
-                'sort_date' => $withdrawal->withdrawn_at,
+                'sort_date' =>
+                $withdrawal->withdrawn_at,
             ]);
         }
 
@@ -1285,17 +1268,12 @@ class ReportController extends Controller
             as $withdrawal
         ) {
 
-            $quantity = (int) (
-                $withdrawal->quantity
-                ?? 1
-            );
-
             $data->push([
                 'type' =>
                 'copy_withdrawn',
 
                 'label' =>
-                'Eksemplar Dihapus',
+                'Eksemplar Ditarik',
 
                 'date' =>
                 $withdrawal->withdrawn_at,
@@ -1303,19 +1281,15 @@ class ReportController extends Controller
                 'judul_buku' =>
                 $withdrawal->book_title,
 
-                'copy' =>
-                $withdrawal->copy,
+                'barcode' =>
+                $withdrawal->barcode,
 
-                // Jumlah eksemplar yang benar-benar dihapus.
-                // Untuk hapus 1 copy: 1.
-                // Untuk hapus seluruh buku: jumlah seluruh copy.
                 'quantity' =>
-                $quantity,
+                1,
 
                 'display_quantity' =>
-                $withdrawal->copy
-                    ? $withdrawal->copy
-                    : $quantity . ' eksemplar',
+                $withdrawal->barcode
+                    ?? '1 eksemplar',
 
                 'reason' =>
                 $withdrawal->reason,
@@ -1373,14 +1347,14 @@ class ReportController extends Controller
                 $copy->book->judul_buku
                     ?? 'Buku',
 
-                'copy' =>
-                $copy->copy,
+                'barcode' =>
+                $copy->barcode,
 
                 'quantity' =>
                 1,
 
                 'display_quantity' =>
-                $copy->copy
+                $copy->barcode
                     ?? '1 eksemplar',
 
                 'reason' =>
@@ -1392,70 +1366,6 @@ class ReportController extends Controller
             ]);
         }
 
-        /*
- * ========================================================
- * 6. KONDISI HILANG
- * ========================================================
- *
- * Database saat ini menyimpan kondisi terakhir.
- *
- * Jadi bagian ini menampilkan eksemplar yang sekarang
- * mempunyai condition = hilang.
- *
- * Bukan histori perubahan kondisi.
- */
-        $lostCopies =
-            BookCopy::with([
-                'book'
-            ])
-            ->where(
-                'condition',
-                'hilang'
-            )
-            ->orderBy(
-                'updated_at',
-                'desc'
-            )
-            ->get();
-
-
-        foreach (
-            $lostCopies
-            as $copy
-        ) {
-            $data->push([
-                'type' =>
-                'lost',
-
-                'label' =>
-                'Kondisi Hilang',
-
-                'date' =>
-                $copy->updated_at
-                    ?? $copy->created_at,
-
-                'judul_buku' =>
-                $copy->book->judul_buku
-                    ?? 'Buku',
-
-                'copy' =>
-                $copy->copy,
-
-                'quantity' =>
-                1,
-
-                'display_quantity' =>
-                $copy->copy
-                    ?? '1 eksemplar',
-
-                'reason' =>
-                'Eksemplar hilang',
-
-                'sort_date' =>
-                $copy->updated_at
-                    ?? $copy->created_at,
-            ]);
-        }
 
         return $data
             ->sortByDesc(
@@ -1993,224 +1903,16 @@ class ReportController extends Controller
         $endDate,
         $type
     ) {
-
-        $data =
-            $this->getCollectionReportData(
-                $startDate,
-                $endDate
-            );
-
-
-        /*
-         * ========================================================
-         * HARIAN
-         * ========================================================
-         */
-        if ($type === 'day') {
-
-            $labels = [
-                '00',
-                '04',
-                '08',
-                '12',
-                '16',
-                '20',
-            ];
-
-            $bars = [];
-
-
-            foreach ($labels as $hour) {
-
-                $start =
-                    $startDate
-                    ->copy()
-                    ->setHour(
-                        (int) $hour
-                    )
-                    ->startOfHour();
-
-
-                $end =
-                    $start
-                    ->copy()
-                    ->addHours(3)
-                    ->endOfHour();
-
-
-                $count =
-                    $data
-                    ->filter(function ($item) use (
-                        $start,
-                        $end
-                    ) {
-
-                        return $item['sort_date']
-                            ->between(
-                                $start,
-                                $end
-                            );
-                    })
-                    ->count();
-
-
-                $bars[] =
-                    $count;
+        return $this->generateDateChart(
+            Book::query(),
+            'created_at',
+            $startDate,
+            $endDate,
+            $type,
+            function ($query) {
+                return $query;
             }
-
-
-            return [
-                $labels,
-                $this->normalizeBars($bars)
-            ];
-        }
-
-
-        /*
-         * ========================================================
-         * MINGGUAN
-         * ========================================================
-         */
-        if ($type === 'week') {
-
-            $labels = [];
-
-            $bars = [];
-
-            $cursor =
-                $startDate->copy();
-
-
-            while (
-                $cursor->lte(
-                    $endDate
-                )
-            ) {
-
-                $dayStart =
-                    $cursor
-                    ->copy()
-                    ->startOfDay();
-
-
-                $dayEnd =
-                    $cursor
-                    ->copy()
-                    ->endOfDay();
-
-
-                $labels[] =
-                    $cursor->translatedFormat(
-                        'D'
-                    );
-
-
-                $bars[] =
-                    $data
-                    ->filter(function ($item) use (
-                        $dayStart,
-                        $dayEnd
-                    ) {
-
-                        return $item['sort_date']
-                            ->between(
-                                $dayStart,
-                                $dayEnd
-                            );
-                    })
-                    ->count();
-
-
-                $cursor->addDay();
-            }
-
-
-            return [
-                $labels,
-                $this->normalizeBars($bars)
-            ];
-        }
-
-
-        /*
-         * ========================================================
-         * BULANAN
-         * ========================================================
-         */
-        $labels = [];
-
-        $bars = [];
-
-        $cursor =
-            $startDate->copy();
-
-        $weekNumber = 1;
-
-
-        while (
-            $cursor->lte(
-                $endDate
-            )
-        ) {
-
-            $weekStart =
-                $cursor
-                ->copy()
-                ->startOfDay();
-
-
-            $weekEnd =
-                $cursor
-                ->copy()
-                ->addDays(6)
-                ->endOfDay();
-
-
-            if (
-                $weekEnd->gt(
-                    $endDate
-                )
-            ) {
-
-                $weekEnd =
-                    $endDate->copy();
-            }
-
-
-            $labels[] =
-                'M' . $weekNumber;
-
-
-            $bars[] =
-                $data
-                ->filter(function ($item) use (
-                    $weekStart,
-                    $weekEnd
-                ) {
-
-                    return $item['sort_date']
-                        ->between(
-                            $weekStart,
-                            $weekEnd
-                        );
-                })
-                ->count();
-
-
-            $cursor =
-                $weekEnd
-                ->copy()
-                ->addSecond();
-
-
-            $weekNumber++;
-        }
-
-
-        return [
-            $labels,
-            $this->normalizeBars($bars)
-        ];
+        );
     }
 
 
