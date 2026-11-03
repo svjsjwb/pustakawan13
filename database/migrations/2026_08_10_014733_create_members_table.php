@@ -7,48 +7,47 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        if (!Schema::hasTable('members')) {
-            Schema::create('members', function (Blueprint $table) {
-                $table->id();
 
-                // Relasi ke user
-                $table->foreignId('user_id')
-                    ->nullable()
-                    ->constrained('users')
-                    ->nullOnDelete();
+        Schema::create('members', function (Blueprint $table) {
+            $table->id();
 
-                // Identitas anggota
-                $table->string('member_number')->unique();
-                $table->string('name');
+            // Relasi ke user
+            $table->foreignId('user_id')
+                ->nullable()
+                ->unique()
+                ->constrained('users')
+                ->nullOnDelete();
 
-                $table->string('division')->nullable();
-                $table->string('nis_nip')->nullable();
+            // Identitas anggota
+            $table->string('member_number')->unique();
+            $table->string('name');
 
-                $table->enum('gender', [
-                    'Laki-laki',
-                    'Perempuan'
-                ])->nullable();
+            $table->string('division')->nullable();
+            $table->string('nis_nip')->nullable();
 
-                $table->string('class')->nullable();
-                $table->text('address')->nullable();
-                $table->string('phone')->nullable();
-                $table->string('email')->nullable();
-                $table->date('registered_at')->nullable();
+            $table->enum('gender', [
+                'Laki-laki',
+                'Perempuan'
+            ])->nullable();
 
-                // Pertahankan enum yang digunakan aplikasi
-                $table->enum('status', [
-                    'aktif',
-                    'nonaktif'
-                ])->default('nonaktif');
+            $table->string('class')->nullable();
+            $table->text('address')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->date('registered_at')->nullable();
 
-                $table->timestamps();
+            // Pertahankan enum yang digunakan aplikasi
+            $table->enum('status', [
+                'aktif',
+                'nonaktif'
+            ])->default('nonaktif');
 
-                // Index
-                $table->index('user_id');
-                $table->index('email');
-                $table->index('status');
-            });
-        }
+            $table->timestamps();
+
+            // Index
+            $table->index('email');
+            $table->index('status');
+        });
     }
 
     public function down(): void

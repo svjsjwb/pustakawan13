@@ -33,7 +33,6 @@ class Book extends Model
         'status',
         'no_iventaris',
         'kode_buku',
-        'rak',
         'sku',
     ];
 
@@ -136,11 +135,6 @@ class Book extends Model
     public function subcategory(): BelongsTo
     {
         return $this->belongsTo(Subcategory::class, 'subcategory_id');
-    }
-
-    public function rack(): BelongsTo
-    {
-        return $this->belongsTo(Rack::class, 'rak', 'code');
     }
 
     public function borrowingDetails(): HasMany

@@ -26,8 +26,9 @@ return new class extends Migration
 
             // Relasi buku
             $table->foreignId('book_id')
+                ->nullable()
                 ->constrained('books')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
 
             // Copy buku
             $table->foreignId('book_copy_id')

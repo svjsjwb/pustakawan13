@@ -37,7 +37,6 @@ return new class extends Migration
             // Legacy-compatible stock/status fields used by the application.
             $table->unsignedInteger('stok')->default(0);
             $table->enum('status', ['Tersedia', 'Dipinjam'])->default('Tersedia');
-            $table->string('rak', 20)->nullable();
 
             $table->timestamps();
 
