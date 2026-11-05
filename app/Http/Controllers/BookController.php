@@ -1605,6 +1605,9 @@ class BookController extends Controller
         Request $request,
         Book $book
     ) {
+        if (!$request->filled('reason') && $request->filled('withdrawal_reason')) {
+            $request->merge(['reason' => $request->input('withdrawal_reason')]);
+        }
 
         $validated = $request->validate([
             'reason' => [

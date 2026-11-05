@@ -126,7 +126,10 @@ class RecommendationService
         int $limit = 8
     ): Collection {
         $query = Book::query()
+            ->with('category')
             ->where('stok', '>', 0)
+            ->whereNotNull('cover')
+            ->where('cover', '!=', '')
             ->whereNotIn('id', $data['book_ids']);
 
         $scoreParts = [];
@@ -322,10 +325,23 @@ class RecommendationService
         $excludeIds = $excludeIds ?? collect();
 
         $query = Book::query()
+            ->with('category')
             ->where('stok', '>', 0);
 
         if ($excludeIds->isNotEmpty()) {
             $query->whereNotIn('id', $excludeIds);
+        }
+
+        // Prioritaskan buku yang memiliki cover
+        $hasCoverCount = Book::where('stok', '>', 0)
+            ->whereNotNull('cover')
+            ->where('cover', '!=', '')
+            ->count();
+
+        if ($hasCoverCount >= $limit) {
+            $query->whereNotNull('cover')->where('cover', '!=', '');
+        } else {
+            $query->orderByRaw('CASE WHEN cover IS NOT NULL AND cover != "" THEN 0 ELSE 1 END');
         }
 
         /*

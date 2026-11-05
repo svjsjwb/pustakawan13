@@ -159,14 +159,23 @@ function confirmBookDelete() {
         return;
     }
 
-    let hiddenInput = bookDeleteForm.querySelector('input[name="withdrawal_reason"]');
+    let hiddenInput = bookDeleteForm.querySelector('input[name="reason"]');
     if (!hiddenInput) {
         hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
-        hiddenInput.name = 'withdrawal_reason';
+        hiddenInput.name = 'reason';
         bookDeleteForm.appendChild(hiddenInput);
     }
     hiddenInput.value = reason;
+
+    let legacyInput = bookDeleteForm.querySelector('input[name="withdrawal_reason"]');
+    if (!legacyInput) {
+        legacyInput = document.createElement('input');
+        legacyInput.type = 'hidden';
+        legacyInput.name = 'withdrawal_reason';
+        bookDeleteForm.appendChild(legacyInput);
+    }
+    legacyInput.value = reason;
 
     bookDeleteForm.submit();
 }

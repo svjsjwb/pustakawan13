@@ -108,6 +108,7 @@ class UserBorrowingController extends Controller
                 $member->update(['user_id' => $user->id]);
             } else {
                 $member = Member::create([
+                    'member_number' => Member::generateMemberNumber(),
                     'user_id'       => $user->id,
                     'name'          => $user->name,
                     'email'         => $user->email,

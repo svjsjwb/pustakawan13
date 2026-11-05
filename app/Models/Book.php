@@ -121,6 +121,27 @@ class Book extends Model
         $this->attributes['stok'] = (int) $value;
     }
 
+    public function getRakAttribute(): ?string
+    {
+        if (!empty($this->attributes['rak'])) {
+            return $this->attributes['rak'];
+        }
+
+        if ($this->relationLoaded('copies')) {
+            $shelf = $this->copies->first()?->shelf;
+            if ($shelf) {
+                return $shelf->name ?? $shelf->code;
+            }
+        }
+
+        $firstCopy = $this->copies()->with('shelf')->whereNotNull('shelf_id')->first();
+        if ($firstCopy?->shelf) {
+            return $firstCopy->shelf->name ?? $firstCopy->shelf->code;
+        }
+
+        return null;
+    }
+
     /*
      * |--------------------------------------------------------------------------
      * | RELATIONSHIPS

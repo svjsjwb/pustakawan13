@@ -26,7 +26,7 @@
             <option value="E-Publishing" {{ old('division') === 'E-Publishing' ? 'selected' : '' }}>E-Publishing</option>
             <option value="Finance" {{ old('division') === 'Finance' ? 'selected' : '' }}>Finance</option>
             <option value="General Trading" {{ old('division') === 'General Trading' ? 'selected' : '' }}>General Trading</option>
-            <option value="HR &amp; GA" {{ old('division') === 'HR & GA' ? 'selected' : '' }}>HR &amp; GA</option>
+            <option value="HR & GA" {{ old('division') === 'HR & GA' ? 'selected' : '' }}>HR &amp; GA</option>
             <option value="HSE" {{ old('division') === 'HSE' ? 'selected' : '' }}>HSE</option>
             <option value="IQA" {{ old('division') === 'IQA' ? 'selected' : '' }}>IQA</option>
             <option value="IT" {{ old('division') === 'IT' ? 'selected' : '' }}>IT</option>

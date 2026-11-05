@@ -79,7 +79,7 @@ class UserCatalogController extends Controller
 
     public function index(Request $request)
     {
-        $query = Book::with('category');
+        $query = Book::with(['category', 'copies.shelf']);
 
         // ── Search ────────────────────────────────────────────
         $search = trim((string) $request->input('search', ''));

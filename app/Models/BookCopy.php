@@ -20,6 +20,16 @@ class BookCopy extends Model
         'condition',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (BookCopy $copy) {
+            if (empty($copy->copy) && $copy->book_id) {
+                $count = static::where('book_id', $copy->book_id)->count();
+                $copy->copy = 'c.' . ($count + 1);
+            }
+        });
+    }
+
     public function book(): BelongsTo
     {
         return $this->belongsTo(Book::class);

@@ -27,6 +27,47 @@ class Member extends Model
         'status',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (Member $member) {
+            if (empty($member->member_number)) {
+                $member->member_number = static::generateMemberNumber();
+            }
+        });
+    }
+
+    public static function generateMemberNumber(): string
+    {
+        $lastNumber = static::where('member_number', 'like', 'MBR-%')
+            ->orderByDesc('id')
+            ->value('member_number');
+
+        if ($lastNumber && preg_match('/^MBR-(\d+)$/', $lastNumber, $matches)) {
+            $nextNumber = ((int) $matches[1]) + 1;
+        } else {
+            $nextNumber = 1;
+        }
+
+        do {
+            $memberNumber = 'MBR-' . str_pad(
+                (string) $nextNumber,
+                6,
+                '0',
+                STR_PAD_LEFT
+            );
+            $nextNumber++;
+        } while (
+            static::where('member_number', $memberNumber)->exists()
+        );
+
+        return $memberNumber;
+    }
+
+    public function setStatusAttribute($value): void
+    {
+        $this->attributes['status'] = $value ? strtolower(trim((string) $value)) : 'nonaktif';
+    }
+
     /**
      * Relasi ke Akun Pengguna (User)
      */

@@ -119,14 +119,19 @@ class UserReservationController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        if ($user && $user->isAdmin()) {
+            return redirect('/catalog')->with('error', 'Akun Anda belum disetujui sebagai member.');
+        }
+
         $validated = $request->validate([
             'book_id'     => 'required|exists:books,id',
             'reserved_at' => 'nullable|date',
             'seat_number' => 'nullable|string|max:10',
         ]);
 
-        $user   = Auth::user();
-        $member = $user->member;
+        $member = $user ? $user->member : null;
 
         if (!$member) {
             return response()->json([
