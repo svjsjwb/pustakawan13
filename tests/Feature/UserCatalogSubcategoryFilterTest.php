@@ -100,6 +100,25 @@ class UserCatalogSubcategoryFilterTest extends TestCase
         }
     }
 
+    public function test_all_category_subcategory_labels_render_as_marquee_copies(): void
+    {
+        foreach ($this->subcategories as $mainCategory => $subcategories) {
+            foreach ($subcategories as $subCategory) {
+                $result = $this->catalogJson([
+                    'main_category' => $mainCategory,
+                    'sub_category' => $subCategory,
+                ]);
+                $label = $mainCategory . ' • ' . $subCategory;
+
+                $this->assertSame(
+                    2,
+                    substr_count($result['grid_html'], $label),
+                    "Expected two marquee copies for {$mainCategory} / {$subCategory}"
+                );
+            }
+        }
+    }
+
     public function test_each_all_group_option_returns_its_complete_group_only(): void
     {
         foreach ($this->subcategories as $mainCategory => $subcategories) {

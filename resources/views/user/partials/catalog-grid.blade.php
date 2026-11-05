@@ -21,6 +21,10 @@
             @php
                 $isFav = in_array($book->id, $favoriteIds ?? []);
                 $isAvailable = ($book->available_stock ?? 0) > 0;
+                $categoryLabel = $book->main_category ?: ($book->category->name ?? 'Umum');
+                if ($book->sub_category) {
+                    $categoryLabel .= ' • ' . $book->sub_category;
+                }
             @endphp
             <div class="saas-book-card"
                  onclick="openCatalogModal(this)"
@@ -57,14 +61,23 @@
                     @endif
 
                     {{-- Category Badge --}}
-                    <span class="saas-card-badge">
-                        {{ Str::limit($book->sub_category ? ($book->main_category . ' • ' . $book->sub_category) : ($book->category->name ?? 'Umum'), 24) }}
-                    </span>
+                    <div class="saas-card-badges">
+                        <span class="saas-card-badge">
+                            <span class="saas-card-badge-track">
+                                <span class="saas-card-badge-copy">
+                                    <span class="saas-card-badge-copy-text">{{ $categoryLabel }}</span>
+                                </span>
+                                <span class="saas-card-badge-copy" aria-hidden="true">
+                                    <span class="saas-card-badge-copy-text">{{ $categoryLabel }}</span>
+                                </span>
+                            </span>
+                        </span>
 
-                    {{-- Availability Badge --}}
-                    <span class="saas-stock-badge {{ $isAvailable ? 'available' : 'unavailable' }}">
-                        {{ $isAvailable ? 'Tersedia' : 'Habis' }}
-                    </span>
+                        {{-- Availability Badge --}}
+                        <span class="saas-stock-badge {{ $isAvailable ? 'available' : 'unavailable' }}">
+                            {{ $isAvailable ? 'Tersedia' : 'Habis' }}
+                        </span>
+                    </div>
 
                     {{-- Hover Overlay Action Buttons --}}
                     <div class="saas-card-overlay">

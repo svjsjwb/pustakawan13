@@ -519,6 +519,33 @@ window.catalogState = {
 
 let catalogRequestId = 0;
 
+function updateCatalogBadgeMarquees() {
+    document.querySelectorAll('.saas-card-badge').forEach(function(badge) {
+        const text = badge.querySelector('.saas-card-badge-copy-text');
+        const badgeRow = badge.parentElement;
+        const stockBadge = badgeRow && badgeRow.querySelector('.saas-stock-badge');
+        if (!text || !stockBadge) return;
+
+        const badgeStyle = window.getComputedStyle(badge);
+        const textWidth = text.getBoundingClientRect().width;
+        const paddingWidth = parseFloat(badgeStyle.paddingLeft) + parseFloat(badgeStyle.paddingRight);
+        const rowStyle = window.getComputedStyle(badgeRow);
+        const gapWidth = parseFloat(rowStyle.columnGap) || 0;
+        const maxBadgeWidth = badgeRow.clientWidth - stockBadge.getBoundingClientRect().width - gapWidth;
+
+        badge.style.width = Math.max(0, Math.min(textWidth + paddingWidth, maxBadgeWidth)) + 'px';
+        badge.classList.add('is-marquee');
+
+        const copy = text.closest('.saas-card-badge-copy');
+        const copyStyle = window.getComputedStyle(copy);
+        const cycleWidth = textWidth + parseFloat(copyStyle.paddingRight);
+        badge.style.setProperty('--saas-marquee-duration', (cycleWidth / 18) + 's');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', updateCatalogBadgeMarquees);
+window.addEventListener('resize', updateCatalogBadgeMarquees, { passive: true });
+
 function fetchCatalog(newParams = {}, pushHistory = true) {
     const requestId = ++catalogRequestId;
     Object.assign(window.catalogState, newParams);
@@ -554,6 +581,7 @@ function fetchCatalog(newParams = {}, pushHistory = true) {
         if (data.success) {
             if (gridContainer && data.grid_html) {
                 gridContainer.innerHTML = data.grid_html;
+                updateCatalogBadgeMarquees();
             }
             if (metaContainer && data.meta_html) {
                 metaContainer.innerHTML = data.meta_html;
