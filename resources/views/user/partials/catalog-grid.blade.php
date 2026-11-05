@@ -21,7 +21,6 @@
             @php
                 $isFav = in_array($book->id, $favoriteIds ?? []);
                 $isAvailable = ($book->available_stock ?? 0) > 0;
-
                 $mainCat = $book->main_category;
                 $subCat = $book->sub_category ?: $book->education_level;
 
@@ -35,17 +34,19 @@
                         'Referensi' => 'Referensi',
                         default => ($subCat ?: 'Umum'),
                     };
-                    $badgeText = $badgeSub ? ($badgeMain . ' • ' . $badgeSub) : $badgeMain;
+                    $categoryLabel = $badgeSub ? ($badgeMain . ' • ' . $badgeSub) : $badgeMain;
                 } elseif (in_array($mainCat, ['Anak', 'Anak-Anak', 'Buku Anak'])) {
-                    $badgeText = 'Buku Umum • Buku Anak';
+                    $categoryLabel = 'Buku Umum • Buku Anak';
                 } elseif (in_array($mainCat, ['Remaja', 'Buku Remaja'])) {
-                    $badgeText = 'Buku Umum • Buku Remaja';
+                    $categoryLabel = 'Buku Umum • Buku Remaja';
                 } elseif (in_array($mainCat, ['Dewasa', 'Buku Dewasa'])) {
-                    $badgeText = 'Buku Umum • Buku Dewasa';
+                    $categoryLabel = 'Buku Umum • Buku Dewasa';
                 } elseif ($mainCat) {
-                    $badgeText = $subCat ? ($mainCat . ' • ' . $subCat) : $mainCat;
+                    $categoryLabel = $subCat ? ($mainCat . ' • ' . $subCat) : $mainCat;
                 } else {
-                    $badgeText = $book->category->name ?? 'Buku Umum';
+                    $categoryLabel = $book->category->name ?? 'Buku Umum';
+                }
+                $badgeText = $categoryLabel;
                 }
             @endphp
             <div class="saas-book-card"
@@ -83,14 +84,23 @@
                     @endif
 
                     {{-- Category Badge --}}
-                    <span class="saas-card-badge" title="{{ $badgeText }}">
-                        {{ Str::limit($badgeText, 28) }}
-                    </span>
+                    <div class="saas-card-badges">
+                        <span class="saas-card-badge" title="{{ $categoryLabel }}">
+                            <span class="saas-card-badge-track">
+                                <span class="saas-card-badge-copy">
+                                    <span class="saas-card-badge-copy-text">{{ $categoryLabel }}</span>
+                                </span>
+                                <span class="saas-card-badge-copy" aria-hidden="true">
+                                    <span class="saas-card-badge-copy-text">{{ $categoryLabel }}</span>
+                                </span>
+                            </span>
+                        </span>
 
-                    {{-- Availability Badge --}}
-                    <span class="saas-stock-badge {{ $isAvailable ? 'available' : 'unavailable' }}">
-                        {{ $isAvailable ? 'Tersedia' : 'Habis' }}
-                    </span>
+                        {{-- Availability Badge --}}
+                        <span class="saas-stock-badge {{ $isAvailable ? 'available' : 'unavailable' }}">
+                            {{ $isAvailable ? 'Tersedia' : 'Habis' }}
+                        </span>
+                    </div>
 
                     {{-- Hover Overlay Action Buttons --}}
                     <div class="saas-card-overlay">

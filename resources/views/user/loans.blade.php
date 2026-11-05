@@ -161,12 +161,16 @@
     display: none;
     position: fixed;
     inset: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    overscroll-behavior: contain;
     background: rgba(0, 0, 0, 0.52);
     backdrop-filter: blur(4px);
     z-index: 9999;
     align-items: center;
     justify-content: center;
     padding: 16px;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
 }
 
 .ext-modal-overlay.open {
@@ -180,10 +184,15 @@
 }
 
 .ext-modal-card {
+    display: flex;
+    flex-direction: column;
     background: var(--surface, #ffffff);
     border-radius: 24px;
     width: 100%;
     max-width: 520px;
+    max-height: calc(100vh - 32px);
+    max-height: min(90dvh, calc(100dvh - 24px));
+    min-height: 0;
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0,0,0,0.1);
     animation: extSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     overflow: hidden;
@@ -199,6 +208,7 @@
     background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
     padding: 22px 28px 20px;
     display: flex;
+    flex-shrink: 0;
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
@@ -261,7 +271,13 @@
 
 /* Body */
 .ext-modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 24px 28px;
+    scrollbar-gutter: stable;
 }
 
 /* Info Grid */
@@ -479,9 +495,23 @@
 .ext-modal-footer {
     padding: 16px 28px 24px;
     display: flex;
+    flex-shrink: 0;
     gap: 12px;
     justify-content: flex-end;
     border-top: 1px solid var(--border, #e2e8f0);
+}
+
+@media (max-width: 600px) {
+    .ext-modal-overlay { padding: 12px; }
+    .ext-modal-card { border-radius: 18px; max-height: calc(100dvh - 24px); }
+    .ext-modal-header { padding: 16px 18px; }
+    .ext-modal-header-left { gap: 10px; }
+    .ext-modal-header-icon { width: 38px; height: 38px; border-radius: 12px; }
+    .ext-modal-header h3 { font-size: 15px; }
+    .ext-modal-header p { font-size: 11.5px; }
+    .ext-modal-body { padding: 16px 18px; }
+    .ext-modal-footer { padding: 12px 18px max(12px, env(safe-area-inset-bottom)); gap: 8px; }
+    .ext-btn-cancel, .ext-btn-submit { padding: 10px 14px; }
 }
 
 .ext-btn-cancel {
@@ -537,6 +567,29 @@
     box-shadow: 0 16px 48px rgba(0,0,0,0.15) !important;
     border: 1px solid rgba(15, 118, 110, 0.15) !important;
     z-index: 10001 !important;
+    width: min(290px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100vh - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+    transform-origin: top left;
+}
+
+.flatpickr-innerContainer,
+.flatpickr-rContainer,
+.flatpickr-days,
+.dayContainer { width: 100% !important; max-width: 100% !important; }
+.dayContainer { min-width: 100% !important; }
+.flatpickr-weekdays { height: 27px !important; }
+.flatpickr-weekday { height: 27px !important; line-height: 27px !important; }
+.flatpickr-day {
+    flex-basis: 14.2857% !important;
+    max-width: 14.2857% !important;
+    height: 34px !important;
+    line-height: 34px !important;
+    box-sizing: border-box;
 }
 
 .flatpickr-day.selected,
@@ -556,7 +609,7 @@
 
 .flatpickr-months .flatpickr-month {
     position: relative !important;
-    height: 52px !important;
+    height: 46px !important;
     background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%) !important;
     border-radius: 16px 16px 0 0 !important;
 }
@@ -576,7 +629,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .flatpickr-current-month, .flatpickr-current-month .numInputWrapper span,
@@ -591,36 +644,48 @@
     display: none !important;
 }
 
-.ext-calendar-select {
-    position: static;
-    flex: 0 0 auto;
+.ext-calendar-navigation-group {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
 }
 
-.ext-calendar-trigger {
+.ext-calendar-month-control {
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 3px;
     height: 36px;
-    padding: 0 12px;
-    border: 1px solid rgba(255, 255, 255, 0.38);
+    padding: 0 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.14);
-    color: #fff;
-    font: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    background: rgba(255, 255, 255, 0.1);
 }
 
-.ext-calendar-select-month .ext-calendar-trigger { width: 142px; }
+.ext-calendar-month-label {
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    height: 34px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
 
 .ext-calendar-year-label {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 54px;
+    width: 46px;
     height: 36px;
     color: #fff;
     font-size: 14px;
@@ -641,8 +706,8 @@
 .ext-calendar-year-nav {
     display: grid;
     place-items: center;
-    width: 26px;
-    height: 28px;
+    width: 22px;
+    height: 26px;
     padding: 0;
     border: 0;
     border-radius: 7px;
@@ -674,91 +739,23 @@
     cursor: not-allowed;
 }
 
-.ext-calendar-trigger::after {
-    content: "";
-    width: 7px;
-    height: 7px;
-    flex: 0 0 7px;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
-    transform: translateY(-2px) rotate(45deg);
-    transition: transform 0.18s ease;
+@media (max-width: 360px) {
+    .flatpickr-calendar { width: min(276px, calc(100vw - 24px)) !important; }
+    .ext-calendar-navigation-group { gap: 8px; }
+    .flatpickr-months .flatpickr-month { height: 44px !important; }
+    .flatpickr-current-month { gap: 4px; }
+    .flatpickr-weekdays, .flatpickr-weekday { height: 24px !important; line-height: 24px !important; }
+    .flatpickr-day { height: 32px !important; line-height: 32px !important; }
+    .ext-calendar-month-control { width: 128px; }
+    .ext-calendar-year-control { gap: 1px; padding: 0 2px; }
+    .ext-calendar-year-nav { width: 20px; height: 24px; }
+    .ext-calendar-year-label { width: 42px; }
 }
 
-.ext-calendar-select.is-open .ext-calendar-trigger,
-.ext-calendar-trigger:hover,
-.ext-calendar-trigger:focus-visible {
-    outline: none;
-    border-color: rgba(255, 255, 255, 0.8);
-    background: rgba(255, 255, 255, 0.24);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14);
-}
-
-.ext-calendar-select.is-open .ext-calendar-trigger::after {
-    transform: translateY(2px) rotate(225deg);
-}
-
-.ext-calendar-menu {
-    position: absolute;
-    z-index: 10003;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    max-height: 250px;
-    padding: 6px;
-    overflow-y: auto;
-    border: 1px solid #d7e8e5;
-    border-radius: 12px;
-    background: #fff;
-    box-shadow: 0 14px 34px rgba(8, 47, 45, 0.24);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(5px);
-    transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
-    scrollbar-width: thin;
-    scrollbar-color: #9ac9c3 transparent;
-}
-
-.ext-calendar-menu.is-visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.ext-calendar-menu.opens-up {
-    transform: translateY(-5px);
-}
-
-.ext-calendar-menu.opens-up.is-visible {
-    transform: translateY(0);
-}
-
-.ext-calendar-option {
-    width: 100%;
-    min-height: 36px;
-    padding: 7px 10px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: #164743;
-    font: inherit;
-    font-size: 13px;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.14s ease, color 0.14s ease;
-}
-
-.ext-calendar-option:hover,
-.ext-calendar-option:focus-visible {
-    outline: none;
-    background: #edf8f6;
-    color: #0f766e;
-}
-
-.ext-calendar-option.is-current {
-    background: #dff3ef;
-    color: #0f766e;
-    font-weight: 700;
+@media (max-height: 620px) {
+    .flatpickr-months .flatpickr-month { height: 42px !important; }
+    .flatpickr-weekdays, .flatpickr-weekday { height: 24px !important; line-height: 24px !important; }
+    .flatpickr-day { height: 30px !important; line-height: 30px !important; }
 }
 
 .flatpickr-current-month input.cur-year {
@@ -1212,116 +1209,34 @@ let EXT_CURRENT_DUE_ISO = null; // e.g. "2026-09-28"
 let EXT_BORROWED_AT_ISO = null;
 let EXT_PICKER          = null;
 
-function updateExtensionMonthDropdown(instance) {
+function updateExtensionCalendarHeader(instance) {
     const controls = instance.extensionCalendarControls;
     if (!controls) return;
 
-    controls.monthTrigger.textContent = instance.l10n.months.longhand[instance.currentMonth];
+    controls.monthLabel.textContent = instance.l10n.months.longhand[instance.currentMonth];
     controls.yearLabel.textContent = String(instance.currentYear);
-    controls.previousYearButton.disabled = false;
-    instance.prevMonthNav?.classList.remove('flatpickr-disabled');
-    controls.monthMenu.replaceChildren();
-
-    instance.l10n.months.longhand.forEach((month, index) => {
-        controls.monthMenu.appendChild(createExtensionCalendarOption(
-            month,
-            index === instance.currentMonth,
-            function() {
-                instance.changeMonth(index, false);
-                closeExtensionCalendarMenus(instance);
-            }
-        ));
-    });
 }
 
-function createExtensionCalendarOption(label, isCurrent, onSelect) {
-    const option = document.createElement('button');
-    option.type = 'button';
-    option.className = 'ext-calendar-option' + (isCurrent ? ' is-current' : '');
-    option.setAttribute('role', 'option');
-    option.setAttribute('aria-selected', String(isCurrent));
-    option.textContent = label;
-    option.addEventListener('click', onSelect);
-    return option;
-}
-
-function closeExtensionCalendarMenus(instance) {
-    const controls = instance.extensionCalendarControls;
-    if (!controls) return;
-
-    controls.monthControl.classList.remove('is-open');
-    controls.monthTrigger.setAttribute('aria-expanded', 'false');
-    controls.monthMenu.classList.remove('is-visible', 'opens-up');
-}
-
-function openExtensionCalendarMenu(instance, control) {
-    closeExtensionCalendarMenus(instance);
-
-    const trigger = control.querySelector('button');
-    const rect = trigger.getBoundingClientRect();
-    const calendarRect = instance.calendarContainer.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const opensUp = spaceBelow < 270 && spaceAbove > spaceBelow;
-    const availableSpace = opensUp ? spaceAbove : spaceBelow;
-    const menuHeight = Math.max(90, Math.min(250, availableSpace - 16));
-    const menuWidth = 190;
-
-    control.menu.style.maxHeight = menuHeight + 'px';
-    control.menu.style.width = menuWidth + 'px';
-    control.menu.style.left = Math.max(8, Math.min(rect.left - calendarRect.left, calendarRect.width - menuWidth - 8)) + 'px';
-    control.menu.style.top = opensUp ? 'auto' : rect.bottom - calendarRect.top + 6 + 'px';
-    control.menu.style.bottom = opensUp ? calendarRect.bottom - rect.top + 6 + 'px' : 'auto';
-    control.menu.classList.toggle('opens-up', opensUp);
-    control.menu.classList.add('is-visible');
-    control.classList.add('is-open');
-    trigger.setAttribute('aria-expanded', 'true');
-
-    control.menu.querySelector('.is-current')?.scrollIntoView({ block: 'nearest' });
-}
-
-function createExtensionCalendarControl(instance, type, label) {
-    const currentMonth = instance.calendarContainer.querySelector('.flatpickr-current-month');
-    if (!currentMonth) return null;
-
-    const control = document.createElement('div');
-    control.className = 'ext-calendar-select ext-calendar-select-' + type;
-
-    const trigger = document.createElement('button');
-    trigger.type = 'button';
-    trigger.className = 'ext-calendar-trigger';
-    trigger.setAttribute('aria-label', 'Pilih ' + label.toLowerCase());
-    trigger.setAttribute('aria-haspopup', 'listbox');
-    trigger.setAttribute('aria-expanded', 'false');
-
-    const menu = document.createElement('div');
-    menu.className = 'ext-calendar-menu';
-    menu.setAttribute('role', 'listbox');
-    menu.setAttribute('aria-label', 'Pilih ' + label.toLowerCase());
-
-    trigger.addEventListener('click', function(event) {
-        event.stopPropagation();
-        if (control.classList.contains('is-open')) {
-            closeExtensionCalendarMenus(instance);
-        } else {
-            openExtensionCalendarMenu(instance, control);
-        }
-    });
-
-    control.append(trigger, menu);
-    currentMonth.appendChild(control);
-    instance.calendarContainer.appendChild(menu);
-    control.menu = menu;
-
-    return control;
-}
-
-function addExtensionCalendarDropdowns(instance) {
-    const monthControl = createExtensionCalendarControl(instance, 'month', 'Bulan');
-    if (!monthControl) return;
-
+function addExtensionCalendarNavigation(instance) {
     const [dueYear, dueMonth, dueDay] = EXT_CURRENT_DUE_ISO.split('-').map(Number);
     const currentDue = new Date(dueYear, dueMonth - 1, dueDay);
+    const navigationGroup = document.createElement('div');
+    navigationGroup.className = 'ext-calendar-navigation-group';
+
+    const monthControl = document.createElement('div');
+    monthControl.className = 'ext-calendar-month-control';
+    const previousMonthButton = document.createElement('button');
+    previousMonthButton.type = 'button';
+    previousMonthButton.className = 'ext-calendar-year-nav is-previous';
+    previousMonthButton.setAttribute('aria-label', 'Bulan sebelumnya');
+    const monthLabel = document.createElement('span');
+    monthLabel.className = 'ext-calendar-month-label';
+    const nextMonthButton = document.createElement('button');
+    nextMonthButton.type = 'button';
+    nextMonthButton.className = 'ext-calendar-year-nav is-next';
+    nextMonthButton.setAttribute('aria-label', 'Bulan berikutnya');
+    monthControl.append(previousMonthButton, monthLabel, nextMonthButton);
+
     const yearControl = document.createElement('div');
     yearControl.className = 'ext-calendar-year-control';
     const previousYearButton = document.createElement('button');
@@ -1335,15 +1250,19 @@ function addExtensionCalendarDropdowns(instance) {
     nextYearButton.className = 'ext-calendar-year-nav is-next';
     nextYearButton.setAttribute('aria-label', 'Tahun berikutnya');
     yearControl.append(previousYearButton, yearLabel, nextYearButton);
-    instance.calendarContainer.querySelector('.flatpickr-current-month').appendChild(yearControl);
 
-    instance.extensionCalendarControls = {
-        monthControl,
-        monthTrigger: monthControl.querySelector('button'),
-        monthMenu: monthControl.menu,
-        previousYearButton,
-        yearLabel,
-    };
+    navigationGroup.append(monthControl, yearControl);
+    instance.calendarContainer.querySelector('.flatpickr-current-month').appendChild(navigationGroup);
+    instance.extensionCalendarControls = { monthLabel, yearLabel };
+
+    previousMonthButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        instance.changeMonth(-1);
+    });
+    nextMonthButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        instance.changeMonth(1);
+    });
     previousYearButton.addEventListener('click', function(event) {
         event.stopPropagation();
         instance.changeYear(instance.currentYear - 1);
@@ -1352,18 +1271,13 @@ function addExtensionCalendarDropdowns(instance) {
         event.stopPropagation();
         instance.changeYear(instance.currentYear + 1);
     });
-    instance.calendarContainer.addEventListener('click', function(event) {
-        if (!event.target.closest('.ext-calendar-select, .ext-calendar-menu')) {
-            closeExtensionCalendarMenus(instance);
-        }
-    });
 
     instance.jumpToDate(currentDue);
-    updateExtensionMonthDropdown(instance);
+    updateExtensionCalendarHeader(instance);
 }
 
 function openExtendPicker() {
-    document.getElementById('extensionPickerOverlay')?.classList.add('open');
+    updateExtensionCalendarHeader(instance);
     document.body.style.overflow = 'hidden';
 }
 
@@ -1434,15 +1348,16 @@ function openExtendModal(actionUrl, bookTitle, dueDateISO, dueDateFormatted, bor
         minDate: toISODate(minDate),
         disableMobile: true,
         appendTo: document.body,
-        position: 'below',
+        position: 'auto',
         onReady: function(selectedDates, dateStr, instance) {
-            addExtensionCalendarDropdowns(instance);
+            instance._positionElement = instance.altInput || instance.input;
+            addExtensionCalendarNavigation(instance);
         },
         onYearChange: function(selectedDates, dateStr, instance) {
-            updateExtensionMonthDropdown(instance);
+            updateExtensionCalendarHeader(instance);
         },
         onMonthChange: function(selectedDates, dateStr, instance) {
-            updateExtensionMonthDropdown(instance);
+            updateExtensionCalendarHeader(instance);
         },
         onChange: function(selectedDates, dateStr) {
             onDateSelected(dateStr);
