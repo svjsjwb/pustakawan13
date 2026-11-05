@@ -116,48 +116,24 @@ class BookController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function index(Request $request)
+    public function index()
     {
-    public function index(Request $request)
-    {
-        $search = $request->query('search');
-        $categoryId = $request->query('category_id');
-
-        $categories = Category::with('subcategories')
-            ->whereIn('name', ['Buku Pelajaran', 'Buku Umum'])
-            ->withCount('books')
-            ->orderByRaw("CASE WHEN name = 'Buku Pelajaran' THEN 1 WHEN name = 'Buku Umum' THEN 2 ELSE 99 END")
-            ->get();
-
-        $totalBooksCount = Book::count();
-
-        $query = Book::with([
-            'category:id,name',
-            'subcategory:id,name',
-        ])
-            ->when($search, function ($q, $search) {
-                $q->where(function ($sub) use ($search) {
-                    $sub->where('judul_buku', 'like', "%{$search}%")
-                        ->orWhere('penulis', 'like', "%{$search}%")
-                        ->orWhere('isbn', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%");
-                });
-            })
-            ->when($categoryId, function ($q, $categoryId) {
-                $q->where('category_id', $categoryId);
-            })
-            ->latest('id');
-
-        $books = $query->paginate(25)->withQueryString();
-
-        $createData = $this->getCreateFormData();
-        $createData['categories'] = $categories;
-
         return view(
             'books.index',
-            compact('books', 'categories', 'totalBooksCount', 'search', 'categoryId') + $createData
+            $this->getIndexViewData()
         );
     }
+
+    private function getIndexViewData(): array
+    {
+        $books = Book::with([
+            'category',
+            'subcategory',
+        ])
+            ->latest()
+            ->get();
+
+        return compact('books') + $this->getCreateFormData();
     }
 
     private function getCreateFormData(): array
@@ -1555,9 +1531,6 @@ class BookController extends Controller
         Request $request,
         Book $book
     ) {
-        if (!$request->filled('reason') && $request->filled('withdrawal_reason')) {
-            $request->merge(['reason' => $request->input('withdrawal_reason')]);
-        }
 
         $validated = $request->validate([
             'reason' => [
