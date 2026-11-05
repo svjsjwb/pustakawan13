@@ -12,12 +12,14 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('borrowing_id')
+                ->nullable()
                 ->constrained('borrowings')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
 
             $table->foreignId('book_id')
+                ->nullable()
                 ->constrained('books')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
 
             $table->foreignId('book_copy_id')
                 ->nullable()

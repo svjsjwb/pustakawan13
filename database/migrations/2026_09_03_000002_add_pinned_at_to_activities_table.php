@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('activities', function (Blueprint $table) {
-            $table->timestamp('pinned_at')->nullable()->after('description');
+            $table->timestamp('pinned_at')->nullable();
         });
     }
 
