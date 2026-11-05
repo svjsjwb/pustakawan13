@@ -20,18 +20,10 @@ class BookCopyController extends Controller
 
     public function index(Book $book)
     {
-        $copies = $book->copies()
-            ->with('shelf.zone.floor')
-            ->orderBy('id')
-            ->get();
-
-        return view(
-            'book_copies.index',
-            compact(
-                'book',
-                'copies'
-            )
-        );
+        return redirect()->route('books.edit', [
+            'book' => $book,
+            'tab' => 'copies',
+        ]);
     }
 
 
@@ -424,10 +416,7 @@ class BookCopyController extends Controller
         });
 
         return redirect()
-            ->route(
-                'books.copies.index',
-                $book
-            )
+            ->route('books.edit', ['book' => $book, 'tab' => 'copies'])
             ->with(
                 'success',
                 "Eksemplar {$copyNumber} berhasil ditambahkan."
@@ -596,10 +585,7 @@ class BookCopyController extends Controller
 
 
         return redirect()
-            ->route(
-                'books.copies.index',
-                $book
-            )
+            ->route('books.edit', ['book' => $book, 'tab' => 'copies'])
             ->with(
                 'success',
                 'Eksemplar buku berhasil diperbarui.'
@@ -843,10 +829,7 @@ class BookCopyController extends Controller
 
 
         return redirect()
-            ->route(
-                'books.copies.index',
-                $book
-            )
+            ->route('books.edit', ['book' => $book, 'tab' => 'copies'])
             ->with(
                 'success',
                 'Eksemplar buku berhasil dihapus dari koleksi.'

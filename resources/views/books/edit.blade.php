@@ -1,45 +1,37 @@
-@extends('layouts.app')
-
-@section('title', 'Edit Buku - ' . $book->title)
-
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/books.css') }}">
-@endpush
-
-@section('content')
-
-    <div class="book-form-page">
-
-        {{-- Breadcrumb --}}
-        <nav class="book-breadcrumb">
-            <a href="{{ route('books.index') }}">Manajemen Buku</a>
-            <span class="separator">/</span>
-            <span class="current">Edit Buku</span>
-        </nav>
-
-        @include('books._edit_navigation')
+    <div class="book-form-modal-page book-edit-modal-page">
         <div class="book-form-card">
 
             {{-- Header Form --}}
             <div class="book-form-header">
-                <h2>Edit Data Buku</h2>
-                <p class="book-form-subtitle">
-                    Perbarui rincian informasi, ketersediaan stok, atau sampul untuk buku
-                    <strong>{{ $book->title }}</strong>.
-                </p>
+                <div>
+                    <h2 id="bookEditModalTitle">{{ ($activeBookTab ?? 'edit') === 'copies' ? 'Kelola Eksemplar' : 'Edit Data Buku' }}</h2>
+                    <p id="bookEditModalSubtitle" class="book-form-subtitle">
+                        @if (($activeBookTab ?? 'edit') === 'copies')
+                            Kelola salinan fisik buku <strong>{{ $book->title }}</strong>.
+                        @else
+                        Perbarui rincian informasi, ketersediaan stok, atau sampul untuk buku
+                        <strong>{{ $book->title }}</strong>.
+                        @endif
+                    </p>
+                </div>
+                <button type="button" class="book-create-modal-close" onclick="closeBookEditModal()"
+                    aria-label="Tutup form edit buku">&times;</button>
             </div>
 
-            {{-- Alert Error Global --}}
-            @if ($errors->any())
-                <div class="form-alert-error">
-                    <strong>Terdapat beberapa kesalahan pengisian:</strong>
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            @include('books._edit_navigation')
+
+            <section class="book-edit-tab-panel" data-book-panel="edit" @if (($activeBookTab ?? 'edit') !== 'edit') hidden @endif>
+                {{-- Alert Error Global --}}
+                @if ($errors->any())
+                    <div class="form-alert-error">
+                        <strong>Terdapat beberapa kesalahan pengisian:</strong>
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
             <form action="{{ route('books.update', $book) }}" method="POST" enctype="multipart/form-data">
 
@@ -48,18 +40,17 @@
 
                 <div class="book-form-grid">
 
-                    {{-- SECTION 1: INFORMASI UTAMA BUKU --}}
                     <div class="form-section-heading">
                         <div class="form-section-icon">1</div>
-                        <span class="form-section-title">Informasi Utama Buku</span>
+                        <span class="form-section-title">Cari Data Buku Berdasarkan ISBN</span>
                     </div>
 
                     {{-- Judul Buku (Full Width) --}}
                     <div class="book-form-group book-form-full">
-                        <label for="title">
+                        <label for="edit-title">
                             Judul Buku <span class="required">*</span>
                         </label>
-                        <input type="text" id="title" name="title"
+                        <input type="text" id="edit-title" name="title"
                             class="input @error('title') is-invalid @enderror" value="{{ old('title', $book->title) }}"
                             required>
                         @error('title')
@@ -69,10 +60,10 @@
 
                     {{-- Penulis --}}
                     <div class="book-form-group">
-                        <label for="author">
+                        <label for="edit-author">
                             Penulis / Pengarang <span class="required">*</span>
                         </label>
-                        <input type="text" id="author" name="author"
+                        <input type="text" id="edit-author" name="author"
                             class="input @error('author') is-invalid @enderror" value="{{ old('author', $book->author) }}"
                             required>
                         @error('author')
@@ -82,10 +73,10 @@
 
                     {{-- Kategori --}}
                     <div class="book-form-group">
-                        <label for="category_id">
+                        <label for="edit-category_id">
                             Kategori Buku <span class="required">*</span>
                         </label>
-                        <select id="category_id" name="category_id" class="input @error('category_id') is-invalid @enderror"
+                        <select id="edit-category_id" name="category_id" class="input @error('category_id') is-invalid @enderror"
                             required>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}"
@@ -101,10 +92,10 @@
 
                     {{-- Subkategori --}}
                     <div class="book-form-group">
-                        <label for="subcategory_id">
+                        <label for="edit-subcategory_id">
                             Subkategori Buku
                         </label>
-                        <select id="subcategory_id" name="subcategory_id"
+                        <select id="edit-subcategory_id" name="subcategory_id"
                             class="input @error('subcategory_id') is-invalid @enderror">
                             <option value="">-- Pilih Subkategori --</option>
                             @if ($book->category && $book->category->subcategories)
@@ -123,11 +114,11 @@
 
                     {{-- SKU --}}
                     <div class="book-form-group">
-                        <label for="sku">
+                        <label for="edit-sku">
                             SKU <span class="required">*</span>
                         </label>
 
-                        <input type="text" id="sku" name="sku" class="input @error('sku') is-invalid @enderror"
+                        <input type="text" id="edit-sku" name="sku" class="input @error('sku') is-invalid @enderror"
                             value="{{ old('sku', $book->sku) }}" placeholder="Kode unik koleksi" required>
 
                         @error('sku')
@@ -136,30 +127,44 @@
                     </div>
 
                     {{-- ISBN --}}
-                    <div class="book-form-group">
-                        <label for="isbn">
+                    <div class="book-form-group book-form-full">
+                        <label for="edit-isbn">
                             ISBN <span class="required">*</span>
                         </label>
-                        <input type="text" id="isbn" name="isbn"
-                            class="input @error('isbn') is-invalid @enderror" value="{{ old('isbn', $book->isbn) }}"
-                            required>
+                        <div class="isbn-panel">
+                            <div class="isbn-panel-head">
+                                <div>
+                                    <p class="isbn-panel-title">ISBN Lookup</p>
+                                    <p class="isbn-panel-help">Cari metadata menggunakan ISBN-10 atau ISBN-13. Data yang ditemukan dapat disunting sebelum disimpan.</p>
+                                </div>
+                            </div>
+                            <div class="isbn-search-row">
+                                <input type="text" id="edit-isbn" name="isbn"
+                                    class="input @error('isbn') is-invalid @enderror"
+                                    value="{{ old('isbn', $book->isbn) }}" placeholder="Contoh: 9786020324786"
+                                    autocomplete="off" required>
+                                <button type="button" id="editLookupIsbnButton" class="isbn-search-btn">Cari ISBN</button>
+                            </div>
+                            <div id="editIsbnStatus" class="isbn-status"></div>
+                            <div id="editSourceBadge" class="source-badge"></div>
+                        </div>
                         @error('isbn')
                             <span class="form-error">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    {{-- SECTION 2: PENERBITAN & STOK --}}
                     <div class="form-section-heading">
                         <div class="form-section-icon">2</div>
-                        <span class="form-section-title">Penerbitan & Persediaan</span>
+                        <span class="form-section-title">Metadata Bibliografi</span>
                     </div>
+                    <div class="metadata-note">Data dengan label <strong>Otomatis</strong> berasal dari sumber metadata dan tetap dapat diedit sebelum disimpan.</div>
 
                     {{-- Penerbit --}}
                     <div class="book-form-group">
-                        <label for="publisher">
+                        <label for="edit-publisher">
                             Penerbit <span class="required">*</span>
                         </label>
-                        <input type="text" id="publisher" name="publisher"
+                        <input type="text" id="edit-publisher" name="publisher"
                             class="input @error('publisher') is-invalid @enderror"
                             value="{{ old('publisher', $book->publisher) }}" required>
                         @error('publisher')
@@ -169,10 +174,10 @@
 
                     {{-- Tahun Terbit --}}
                     <div class="book-form-group">
-                        <label for="publication_year">
+                        <label for="edit-publication_year">
                             Tahun Terbit <span class="required">*</span>
                         </label>
-                        <input type="number" id="publication_year" name="publication_year"
+                        <input type="number" id="edit-publication_year" name="publication_year"
                             class="input @error('publication_year') is-invalid @enderror" min="1900"
                             max="{{ date('Y') + 1 }}" value="{{ old('publication_year', $book->publication_year) }}"
                             required>
@@ -183,10 +188,10 @@
 
                     {{-- Jumlah Stok --}}
                     <div class="book-form-group">
-                        <label for="stock">
+                        <label for="edit-stock">
                             Jumlah Stok Tersedia <span class="required">*</span>
                         </label>
-                        <input type="number" id="stock" name="stock"
+                        <input type="number" id="edit-stock" name="stock"
                             class="input @error('stock') is-invalid @enderror" min="1"
                             value="{{ old('stock', $book->stock) }}" required>
                         @error('stock')
@@ -196,10 +201,10 @@
 
                     {{-- No. Inventaris --}}
                     <div class="book-form-group">
-                        <label for="no_iventaris">
+                        <label for="edit-no_iventaris">
                             No. Inventaris
                         </label>
-                        <input type="text" id="no_iventaris" name="no_iventaris"
+                        <input type="text" id="edit-no_iventaris" name="no_iventaris"
                             class="input @error('no_iventaris') is-invalid @enderror"
                             value="{{ old('no_iventaris', $book->no_iventaris) }}" placeholder="cth. INV-2024-001">
                         @error('no_iventaris')
@@ -209,10 +214,10 @@
 
                     {{-- Kode Buku --}}
                     <div class="book-form-group">
-                        <label for="kode_buku">
+                        <label for="edit-kode_buku">
                             Kode Buku
                         </label>
-                        <input type="text" id="kode_buku" name="kode_buku"
+                        <input type="text" id="edit-kode_buku" name="kode_buku"
                             class="input @error('kode_buku') is-invalid @enderror"
                             value="{{ old('kode_buku', $book->kode_buku) }}" placeholder="cth. BK-001">
                         @error('kode_buku')
@@ -222,10 +227,10 @@
 
                     {{-- DDC --}}
                     <div class="book-form-group">
-                        <label for="ddc">
+                        <label for="edit-ddc">
                             Kode DDC
                         </label>
-                        <input type="text" id="ddc" name="ddc"
+                        <input type="text" id="edit-ddc" name="ddc"
                             class="input @error('ddc') is-invalid @enderror" value="{{ old('ddc', $book->ddc) }}"
                             placeholder="cth. 005.13">
                         @error('ddc')
@@ -236,7 +241,7 @@
                     {{-- Rak --}}
                     <div class="book-form-group">
 
-                        <label for="shelf_id">
+                        <label for="edit-shelf_id">
 
                             Rak
 
@@ -246,7 +251,7 @@
 
                         </label>
 
-                        <select id="shelf_id" name="shelf_id" class="input @error('shelf_id') is-invalid @enderror"
+                        <select id="edit-shelf_id" name="shelf_id" class="input @error('shelf_id') is-invalid @enderror"
                             required>
 
                             <option value="">
@@ -287,10 +292,10 @@
 
                     {{-- Edisi --}}
                     <div class="book-form-group">
-                        <label for="edition">
+                        <label for="edit-edition">
                             Edisi
                         </label>
-                        <input type="text" id="edition" name="edition"
+                        <input type="text" id="edit-edition" name="edition"
                             class="input @error('edition') is-invalid @enderror"
                             value="{{ old('edition', $book->edition) }}" placeholder="cth. Edisi ke-3">
                         @error('edition')
@@ -299,19 +304,18 @@
                     </div>
 
 
-                    {{-- SECTION 3: DESKRIPSI & COVER --}}
-
                     <div class="form-section-heading">
                         <div class="form-section-icon">3</div>
-                        <span class="form-section-title">Sinopsis & Sampul Buku</span>
+                        <span class="form-section-title">Klasifikasi & Data Internal Perpustakaan</span>
                     </div>
+                    <div class="metadata-note">Bagian ini adalah data internal perpustakaan dan tidak diambil dari API.</div>
 
                     {{-- Deskripsi / Sinopsis --}}
                     <div class="book-form-group book-form-full">
-                        <label for="description">
+                        <label for="edit-description">
                             Sinopsis / Deskripsi Buku
                         </label>
-                        <textarea id="description" name="description" class="input @error('description') is-invalid @enderror"
+                        <textarea id="edit-description" name="description" class="input @error('description') is-invalid @enderror"
                             rows="4">{{ old('description', $book->description) }}</textarea>
                         @error('description')
                             <span class="form-error">{{ $message }}</span>
@@ -319,17 +323,21 @@
                     </div>
 
                     {{-- Cover Buku dengan Upload Box & Live Preview --}}
+                    <div class="form-section-heading">
+                        <div class="form-section-icon">4</div>
+                        <span class="form-section-title">Sampul Buku</span>
+                    </div>
                     <div class="book-form-group book-form-full">
-                        <label for="cover">
+                        <label for="edit-cover">
                             Cover / Sampul Buku
                         </label>
 
                         <div class="cover-upload-area">
-                            <div class="cover-preview-box" id="coverPreviewContainer">
+                            <div class="cover-preview-box" id="edit-coverPreviewContainer">
                                 @if ($book->cover)
-                                    <img id="coverPreviewImage" src="{{ asset('storage/' . $book->cover) }}"
+                                    <img id="edit-coverPreviewImage" src="{{ asset('storage/' . $book->cover) }}"
                                         alt="Cover {{ $book->title }}">
-                                    <div class="cover-placeholder-icon" id="coverPlaceholder" style="display: none;">
+                                    <div class="cover-placeholder-icon" id="edit-coverPlaceholder" style="display: none;">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                                             stroke-linecap="round" stroke-linejoin="round">
                                             <rect width="18" height="18" x="3" y="3" rx="2"
@@ -340,7 +348,7 @@
                                         <span>No Cover</span>
                                     </div>
                                 @else
-                                    <div class="cover-placeholder-icon" id="coverPlaceholder">
+                                    <div class="cover-placeholder-icon" id="edit-coverPlaceholder">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                                             stroke-linecap="round" stroke-linejoin="round">
                                             <rect width="18" height="18" x="3" y="3" rx="2"
@@ -350,16 +358,16 @@
                                         </svg>
                                         <span>No Cover</span>
                                     </div>
-                                    <img id="coverPreviewImage" src="#" alt="Preview Cover"
+                                    <img id="edit-coverPreviewImage" src="#" alt="Preview Cover"
                                         style="display: none;">
                                 @endif
                             </div>
 
                             <div class="cover-upload-details">
-                                <input type="file" id="cover" name="cover" class="cover-file-input"
+                                <input type="file" id="edit-cover" name="cover" class="cover-file-input"
                                     accept="image/jpeg,image/png,image/jpg,image/webp">
 
-                                <label for="cover" class="cover-upload-btn">
+                                <label for="edit-cover" class="cover-upload-btn">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                         stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -384,7 +392,8 @@
 
                 {{-- Form Actions --}}
                 <div class="book-form-actions">
-                    <a href="{{ route('books.index') }}" class="book-btn-cancel">
+                    <a href="{{ route('books.index') }}" class="book-btn-cancel"
+                        onclick="closeBookEditModal(event)">
                         Batal
                     </a>
 
@@ -401,16 +410,171 @@
 
             </form>
 
-        </div>
+            </section>
 
+            <section class="book-edit-tab-panel" data-book-panel="copies" @if (($activeBookTab ?? 'edit') !== 'copies') hidden @endif>
+                @include('book_copies._management-modal', ['book' => $editBook ?? $book])
+            </section>
+
+        </div>
     </div>
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const coverInput = document.getElementById('cover');
-                const previewImage = document.getElementById('coverPreviewImage');
-                const placeholder = document.getElementById('coverPlaceholder');
+                const editModal = document.getElementById('bookEditModal');
+                const formGrid = editModal?.querySelector('.book-form-grid');
+                const editNavigation = editModal?.querySelector('.book-edit-navigation');
+                const editTabPanels = editModal?.querySelectorAll('.book-edit-tab-panel');
+                const editTitle = editModal?.querySelector('#bookEditModalTitle');
+                const editSubtitle = editModal?.querySelector('#bookEditModalSubtitle');
+                const bookTitle = @json($book->title);
+                const isbnInput = editModal?.querySelector('#edit-isbn');
+                const lookupIsbnButton = editModal?.querySelector('#editLookupIsbnButton');
+                const isbnStatus = editModal?.querySelector('#editIsbnStatus');
+                const sourceBadge = editModal?.querySelector('#editSourceBadge');
+                const coverInput = editModal?.querySelector('#edit-cover');
+                const previewImage = editModal?.querySelector('#edit-coverPreviewImage');
+                const placeholder = editModal?.querySelector('#edit-coverPlaceholder');
+
+                function setActiveBookTab(tab, updateHistory = false, url = null) {
+                    if (!editModal) return;
+                    const activeTab = tab === 'copies' ? 'copies' : 'edit';
+                    window.closeCopyCreateInline?.();
+
+                    editNavigation?.querySelectorAll('[data-book-tab]').forEach(link => {
+                        const isActive = link.dataset.bookTab === activeTab;
+                        link.classList.toggle('active', isActive);
+                        if (isActive) link.setAttribute('aria-current', 'page');
+                        else link.removeAttribute('aria-current');
+                    });
+                    editTabPanels?.forEach(panel => {
+                        panel.hidden = panel.dataset.bookPanel !== activeTab;
+                    });
+
+                    if (editTitle) {
+                        editTitle.textContent = activeTab === 'copies' ? 'Kelola Eksemplar' : 'Edit Data Buku';
+                    }
+                    if (editSubtitle) {
+                        editSubtitle.textContent = activeTab === 'copies'
+                            ? 'Kelola salinan fisik buku ' + bookTitle + '.'
+                            : 'Perbarui rincian informasi, ketersediaan stok, atau sampul untuk buku ' + bookTitle + '.';
+                    }
+                    editModal.querySelector('.book-form-modal-page').scrollTop = 0;
+
+                    if (updateHistory && url) history.pushState({ bookTab: activeTab }, '', url);
+                }
+
+                editNavigation?.addEventListener('click', event => {
+                    const link = event.target.closest('a[data-book-tab]');
+                    if (!link || event.defaultPrevented || event.button !== 0 ||
+                        event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+                    event.preventDefault();
+                    setActiveBookTab(link.dataset.bookTab, true, link.href);
+                });
+
+                window.addEventListener('popstate', () => {
+                    if (!editModal) return;
+                    setActiveBookTab(new URLSearchParams(location.search).get('tab'));
+                });
+
+                if (formGrid) {
+                    const field = id => formGrid.querySelector('#' + id)?.closest('.book-form-group');
+                    const headings = formGrid.querySelectorAll('.form-section-heading');
+                    const notes = formGrid.querySelectorAll('.metadata-note');
+                    const orderedItems = [
+                        headings[0],
+                        field('edit-isbn'),
+                        headings[1],
+                        notes[0],
+                        field('edit-title'),
+                        field('edit-author'),
+                        field('edit-publisher'),
+                        field('edit-publication_year'),
+                        field('edit-edition'),
+                        field('edit-ddc'),
+                        field('edit-description'),
+                        headings[2],
+                        notes[1],
+                        field('edit-category_id'),
+                        field('edit-subcategory_id'),
+                        field('edit-sku'),
+                        field('edit-no_iventaris'),
+                        field('edit-kode_buku'),
+                        field('edit-shelf_id'),
+                        field('edit-stock'),
+                        headings[3],
+                        field('edit-cover')
+                    ];
+
+                    orderedItems.filter(Boolean).forEach(item => formGrid.appendChild(item));
+                }
+
+                function setIsbnStatus(message, type) {
+                    if (!isbnStatus) return;
+                    isbnStatus.textContent = message;
+                    isbnStatus.className = 'isbn-status show ' + type;
+                }
+
+                async function lookupEditIsbn() {
+                    const isbn = (isbnInput?.value || '').toUpperCase().replace(/[^0-9X]/g, '');
+                    if (isbnInput) isbnInput.value = isbn;
+                    if (!/^\d{10}$|^\d{13}$/.test(isbn)) {
+                        setIsbnStatus('ISBN harus berupa ISBN-10 atau ISBN-13.', 'error');
+                        isbnInput?.focus();
+                        return;
+                    }
+
+                    lookupIsbnButton.disabled = true;
+                    sourceBadge.className = 'source-badge';
+                    setIsbnStatus('Mencari metadata buku…', 'info');
+
+                    try {
+                        const response = await fetch('{{ route('books.isbn.lookup') }}?isbn=' + encodeURIComponent(isbn), {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        const result = await response.json();
+                        if (!response.ok || !result.success) {
+                            setIsbnStatus(result.message || 'Metadata buku tidak ditemukan. Lengkapi data secara manual.', 'error');
+                            return;
+                        }
+
+                        const data = result.data || {};
+                        const values = {
+                            'edit-isbn': data.isbn,
+                            'edit-title': data.title,
+                            'edit-author': data.author,
+                            'edit-publisher': data.publisher,
+                            'edit-publication_year': data.publication_year,
+                            'edit-edition': data.edition,
+                            'edit-description': data.description
+                        };
+                        Object.entries(values).forEach(([id, value]) => {
+                            const input = editModal.querySelector('#' + id);
+                            if (input && value) input.value = value;
+                        });
+                        setIsbnStatus(result.message || 'Metadata berhasil ditemukan. Periksa kembali sebelum menyimpan.', 'success');
+                        sourceBadge.textContent = 'Sumber metadata: ' + (data.source || 'API');
+                        sourceBadge.className = 'source-badge show';
+                    } catch (error) {
+                        console.error(error);
+                        setIsbnStatus('Terjadi kendala saat menghubungi sumber metadata. Silakan lengkapi data secara manual.', 'error');
+                    } finally {
+                        lookupIsbnButton.disabled = false;
+                    }
+                }
+
+                lookupIsbnButton?.addEventListener('click', lookupEditIsbn);
+                isbnInput?.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        lookupEditIsbn();
+                    }
+                });
 
                 if (coverInput && previewImage) {
                     coverInput.addEventListener('change', function(e) {
@@ -431,8 +595,8 @@
 
                 const subcategoryData = @json($subcategoryData ?? []);
 
-                const categorySelect = document.getElementById('category_id');
-                const subcategorySelect = document.getElementById('subcategory_id');
+                const categorySelect = editModal?.querySelector('#edit-category_id');
+                const subcategorySelect = editModal?.querySelector('#edit-subcategory_id');
 
                 const selectedCategory = @json(old('category_id', $book->category_id));
                 const selectedSubcategory = @json(old('subcategory_id', $book->subcategory_id));
@@ -473,5 +637,3 @@
             });
         </script>
     @endpush
-
-@endsection

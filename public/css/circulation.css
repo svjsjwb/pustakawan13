@@ -351,27 +351,11 @@
 }
 
 #page-circulation .field input[type="date"] {
-
-    display: flex;
-
-    align-items: center;
-
-}
-
-#page-circulation .field input[type="date"]::-webkit-datetime-edit {
-
-    display: flex;
-
-    align-items: center;
-
-    padding: 0;
-
+    padding-right: 40px;
 }
 
 #page-circulation .field input[type="date"]::-webkit-calendar-picker-indicator {
-
-    margin-left: auto;
-
+    display: none;
 }
 
 #page-circulation .field select option:disabled {
@@ -547,11 +531,33 @@
 ========================================================= */
 
 #page-circulation .table-wrap {
-
     width: 100%;
-
     overflow-x: auto;
+    max-height: 610px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #c9c5b5 transparent;
+}
 
+#page-circulation .table-wrap::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+#page-circulation .table-wrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#page-circulation .table-wrap::-webkit-scrollbar-thumb {
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    background: #c9c5b5;
+}
+
+#page-circulation .table-wrap::-webkit-scrollbar-thumb:hover {
+    background: #aaa591;
 }
 
 #page-circulation table {
@@ -565,7 +571,9 @@
 }
 
 #page-circulation table th {
-
+    position: sticky;
+    top: 0;
+    z-index: 1;
     padding: 12px 10px;
 
     background: #a8cfd0;
@@ -2516,6 +2524,410 @@ input[type="number"] {
 
     .circulation-hero h1 {
         font-size: 30px;
+    }
+}
+
+#page-circulation .book-picker {
+    position: relative;
+}
+
+#page-circulation .book-picker-search {
+    width: 100%;
+    height: 40px;
+    padding: 0 11px;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #111827;
+    outline: none;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+#page-circulation .book-picker-search:focus {
+    border-color: #62a8e8;
+    box-shadow: 0 0 0 2px rgba(98, 168, 232, .12);
+}
+
+#page-circulation .book-picker-select {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+#page-circulation .book-picker-suggestions {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    left: 0;
+    z-index: 20;
+    max-height: 220px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 1px solid #dce5e8;
+    border-radius: 9px;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(20, 45, 54, .16);
+}
+
+#page-circulation .book-picker-suggestions[hidden] {
+    display: none;
+}
+
+#page-circulation .book-picker-option {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #243746;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+}
+
+#page-circulation .book-picker-option:hover,
+#page-circulation .book-picker-option:focus {
+    outline: none;
+    background: #edf7f7;
+}
+
+#page-circulation .book-picker-option:disabled {
+    color: #9aa5ae;
+    cursor: not-allowed;
+}
+
+#page-circulation .book-picker-empty {
+    padding: 12px;
+    color: #7a8791;
+    font-size: 12px;
+}
+
+#page-circulation .circulation-hero {
+    justify-content: space-between;
+    gap: 24px;
+}
+
+#page-circulation .circulation-hero-action {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+}
+
+#page-circulation .circulation-add-button {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+    border: 1px solid #287f80;
+    border-radius: 8px;
+    background: #287f80;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color .2s ease, transform .15s ease, box-shadow .2s ease;
+}
+
+#page-circulation .circulation-add-button:hover {
+    background: #236f70;
+    box-shadow: 0 3px 8px rgba(40, 127, 128, .2);
+    transform: translateY(-1px);
+}
+
+#page-circulation .two-col {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+#page-circulation .borrowing-card {
+    width: 100%;
+    min-width: 0;
+}
+
+#page-circulation .loan-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    background: rgba(15, 35, 38, .58);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s ease, visibility .22s ease;
+}
+
+#page-circulation .loan-modal-overlay.open {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#page-circulation .loan-modal-card {
+    position: relative;
+    width: min(100%, 640px);
+    max-height: calc(100vh - 40px);
+    overflow: hidden;
+    padding: 0;
+    box-sizing: border-box;
+    border: 1px solid rgba(226, 238, 238, .9);
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: 0 28px 80px rgba(8, 32, 35, .3);
+    transform: translateY(14px) scale(.98);
+    transition: transform .22s ease;
+}
+
+#page-circulation .loan-modal-scroll {
+    max-height: calc(100vh - 66px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 12px;
+    padding: 14px 18px 16px;
+    box-sizing: border-box;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #c9c5b5 transparent;
+}
+
+#page-circulation .loan-modal-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+#page-circulation .loan-modal-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#page-circulation .loan-modal-scroll::-webkit-scrollbar-thumb {
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    background: #c9c5b5;
+}
+
+#page-circulation .loan-modal-scroll::-webkit-scrollbar-thumb:hover {
+    background: #aaa591;
+}
+
+#page-circulation .loan-modal-overlay.open .loan-modal-card {
+    transform: translateY(0) scale(1);
+}
+
+#page-circulation .loan-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+#page-circulation .loan-modal-header h2 {
+    margin: 0 0 5px;
+    color: #19364f;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 800;
+}
+
+#page-circulation .loan-modal-header p {
+    margin: 0;
+    color: #718087;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+#page-circulation .loan-modal-close {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #287f80;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color .2s ease, transform .2s ease;
+}
+
+#page-circulation .loan-modal-close:hover {
+    background: #21696a;
+    transform: rotate(90deg);
+}
+
+#page-circulation .loan-modal-form-card {
+    padding: 20px 22px;
+    border: 1px solid #e4ebee;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(27, 42, 58, .06);
+}
+
+#page-circulation #member_id {
+    appearance: none;
+    padding-right: 38px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 15px;
+}
+
+#page-circulation .loan-modal-form-card .field {
+    margin-bottom: 14px;
+}
+
+#page-circulation .date-input-wrap {
+    position: relative;
+}
+
+#page-circulation .date-input-wrap input[type="date"] {
+    padding-right: 42px;
+}
+
+#page-circulation .date-picker-button {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    display: inline-flex;
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #17212b;
+    cursor: pointer;
+    transform: translateY(-50%);
+}
+
+#page-circulation .date-picker-button:hover,
+#page-circulation .date-picker-button:focus-visible {
+    background: #edf5f5;
+    outline: none;
+}
+
+#page-circulation .date-picker-button svg {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+}
+
+#page-circulation .loan-modal-form-card .field-row .field {
+    margin-bottom: 0;
+}
+
+#page-circulation .loan-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #edf0f1;
+}
+
+#page-circulation .loan-modal-cancel {
+    min-height: 40px;
+    padding: 0 17px;
+    border: 1px solid #d7e1e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #52616d;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#page-circulation .loan-modal-cancel:hover {
+    background: #f4f9f9;
+}
+
+#page-circulation .loan-modal-actions .loan-submit {
+    width: auto;
+    min-height: 40px;
+    margin-top: 0;
+    padding: 0 18px;
+    border-radius: 8px;
+}
+
+#page-circulation .loan-modal-errors {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid #f1caca;
+    border-radius: 10px;
+    background: #fff6f6;
+    color: #9c3434;
+    font-size: 12px;
+}
+
+#page-circulation .loan-modal-errors ul {
+    margin: 6px 0 0;
+}
+
+@media (max-width: 700px) {
+    #page-circulation .circulation-hero {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    #page-circulation .circulation-hero-action,
+    #page-circulation .circulation-add-button {
+        width: 100%;
+    }
+
+    #page-circulation .loan-modal-overlay {
+        align-items: flex-end;
+        padding: 10px;
+    }
+
+    #page-circulation .loan-modal-card {
+        width: 100%;
+        max-height: calc(100vh - 20px);
+        border-radius: 20px;
+    }
+
+    #page-circulation .loan-modal-scroll {
+        max-height: calc(100vh - 42px);
+        margin: 10px;
+        padding: 12px 6px 10px 10px;
+    }
+
+    #page-circulation .loan-modal-form-card {
+        padding: 16px;
+    }
+
+    #page-circulation .loan-modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    #page-circulation .loan-modal-cancel,
+    #page-circulation .loan-modal-actions .loan-submit {
+        width: 100%;
     }
 
     .circulation-hero p {

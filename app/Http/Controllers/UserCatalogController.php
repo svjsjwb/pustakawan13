@@ -219,7 +219,11 @@ class UserCatalogController extends Controller
             'az' => $query->orderBy('judul_buku', 'asc'),
             'za' => $query->orderBy('judul_buku', 'desc'),
             'terlama' => $query->oldest(),
-            default => $query->orderByRaw('CASE WHEN cover IS NOT NULL AND cover != "" THEN 0 ELSE 1 END')->latest(),
+            default => $query
+                ->orderByRaw(
+                    "CASE WHEN NULLIF(TRIM(cover), '') IS NOT NULL THEN 0 ELSE 1 END"
+                )
+                ->latest(),
         };
 
         $books = $query->paginate(20)->withQueryString();

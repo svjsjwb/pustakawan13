@@ -30,7 +30,8 @@
             </div>
 
             <div class="books-hero-action">
-                <a href="{{ route('books.create') }}" class="book-toolbar-btn book-toolbar-add">
+                <button type="button" class="book-toolbar-btn book-toolbar-add" id="openBookCreateModal"
+                    aria-haspopup="dialog" aria-controls="bookCreateModal">
 
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
                         stroke-linejoin="round" aria-hidden="true">
@@ -41,7 +42,7 @@
                     </svg>
 
                     Tambah Buku Baru
-                </a>
+                </button>
             </div>
         </section>
 
@@ -371,6 +372,23 @@
 
     </div>
 
+    <div id="bookCreateModal"
+        class="book-create-modal-overlay{{ $errors->any() && !isset($editBook) ? ' is-open' : '' }}"
+        aria-hidden="{{ $errors->any() && !isset($editBook) ? 'false' : 'true' }}">
+        <div class="book-create-modal-dialog" role="dialog" aria-modal="true"
+            aria-labelledby="bookCreateModalTitle">
+            @include('books.create', ['isBookModal' => true])
+        </div>
+    </div>
+
+    @isset($editBook)
+        <div id="bookEditModal" class="book-create-modal-overlay is-open" aria-hidden="false">
+            <div class="book-create-modal-dialog" role="dialog" aria-modal="true"
+                aria-labelledby="bookEditModalTitle">
+                @include('books.edit', ['book' => $editBook, 'isEditModal' => true])
+            </div>
+        </div>
+    @endisset
 
     {{-- =========================================================
          MODAL HAPUS BUKU
@@ -498,5 +516,139 @@
         </div>
 
     </div>
+
+    @push('scripts')
+        <script>
+            (() => {
+                const modal = document.getElementById('bookCreateModal');
+                const openButton = document.getElementById('openBookCreateModal');
+
+                if (!modal || !openButton) return;
+
+                const closeButton = modal.querySelector('.book-create-modal-close');
+                const dialog = modal.querySelector('.book-create-modal-dialog');
+
+                window.openBookCreateModal = () => {
+                    modal.classList.add('is-open');
+                    modal.setAttribute('aria-hidden', 'false');
+                    document.body.style.overflow = 'hidden';
+                    closeButton?.focus();
+                };
+
+                window.closeBookCreateModal = () => {
+                    modal.classList.remove('is-open');
+                    modal.setAttribute('aria-hidden', 'true');
+                    document.body.style.overflow = '';
+                    openButton.focus();
+                };
+
+                openButton.addEventListener('click', window.openBookCreateModal);
+                modal.addEventListener('click', event => {
+                    if (event.target === modal) window.closeBookCreateModal();
+                });
+                document.addEventListener('keydown', event => {
+                    if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+                        if (document.getElementById('isbnScannerModal')?.classList.contains('is-open')) {
+                            return;
+                        }
+                        window.closeBookCreateModal();
+                    }
+                });
+
+                if (modal.classList.contains('is-open')) {
+                    document.body.style.overflow = 'hidden';
+                    closeButton?.focus();
+                }
+
+                dialog.addEventListener('click', event => event.stopPropagation());
+            })();
+
+            (() => {
+                const modal = document.getElementById('bookEditModal');
+                if (!modal) return;
+
+                const indexUrl = @json(route('books.index'));
+                window.closeBookEditModal = event => {
+                    event?.preventDefault();
+                    window.location.href = indexUrl;
+                };
+
+                modal.addEventListener('click', event => {
+                    if (event.target === modal) window.closeBookEditModal();
+                });
+                document.addEventListener('keydown', event => {
+                    if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+                        const copyCreateInline = document.getElementById('copyCreateInline');
+                        const copyEditInline = document.getElementById('copyEditInline');
+                        if ((copyCreateInline && !copyCreateInline.hidden) ||
+                            (copyEditInline && !copyEditInline.hidden)) {
+                            closeCopyInline();
+                            return;
+                        }
+                        if (document.getElementById('copyDeleteModal')?.classList.contains('show')) {
+                            closeCopyDeleteModal();
+                            return;
+                        }
+                        window.closeBookEditModal();
+                    }
+                });
+                document.body.style.overflow = 'hidden';
+                modal.querySelector('.book-create-modal-close')?.focus();
+            })();
+
+            let copyDeleteForm = null;
+            window.openCopyDeleteModal = button => {
+                copyDeleteForm = button.closest('.copy-delete-form');
+                if (!copyDeleteForm) return;
+
+                const row = button.closest('tr');
+                const modal = document.getElementById('copyDeleteModal');
+                const reason = document.getElementById('copyDeleteReason');
+                const copyNumber = row?.querySelector('.copy-barcode')?.textContent.trim() || '-';
+                if (!modal || !reason) return;
+
+                document.getElementById('deleteCopyNumber').textContent = copyNumber;
+                reason.value = '';
+                modal.classList.add('show');
+                modal.setAttribute('aria-hidden', 'false');
+                reason.focus();
+            };
+
+            window.closeCopyDeleteModal = () => {
+                const modal = document.getElementById('copyDeleteModal');
+                if (!modal) return;
+                modal.classList.remove('show');
+                modal.setAttribute('aria-hidden', 'true');
+                copyDeleteForm = null;
+            };
+
+            window.confirmCopyDelete = () => {
+                const reason = document.getElementById('copyDeleteReason');
+                const value = reason?.value.trim();
+                if (!copyDeleteForm || !reason || !value) {
+                    reason?.focus();
+                    return;
+                }
+
+                let field = copyDeleteForm.querySelector('input[name="reason"]');
+                if (!field) {
+                    field = document.createElement('input');
+                    field.type = 'hidden';
+                    field.name = 'reason';
+                    copyDeleteForm.appendChild(field);
+                }
+                field.value = value;
+                copyDeleteForm.submit();
+            };
+
+            const copyDeleteModal = document.getElementById('copyDeleteModal');
+            if (copyDeleteModal) {
+                document.body.appendChild(copyDeleteModal);
+            }
+            copyDeleteModal?.addEventListener('click', event => {
+                if (event.target.id === 'copyDeleteModal') window.closeCopyDeleteModal();
+            });
+        </script>
+    @endpush
 
 @endsection

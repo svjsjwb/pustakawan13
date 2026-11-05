@@ -281,8 +281,14 @@
                                                 </form>
                                             @else
                                                 {{-- EDIT --}}
-                                                <a href="{{ route('members.edit', $member->id) }}" class="btn-edit"
-                                                    title="Edit Anggota" aria-label="Edit Anggota">
+                                                <button type="button" class="btn-edit"
+                                                    title="Edit Anggota" aria-label="Edit Anggota"
+                                                    data-member-id="{{ $member->id }}"
+                                                    data-update-url="{{ route('members.update', $member->id) }}"
+                                                    data-name="{{ $member->name }}"
+                                                    data-email="{{ $member->email }}"
+                                                    data-division="{{ $member->division }}"
+                                                    data-phone="{{ $member->phone }}">
 
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -291,7 +297,7 @@
                                                         <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
                                                     </svg>
 
-                                                </a>
+                                                </button>
 
 
                                                 {{-- HAPUS --}}
@@ -397,8 +403,8 @@
 
     <div
         id="memberCreateModal"
-        class="member-create-modal-overlay{{ $errors->any() ? ' show' : '' }}"
-        aria-hidden="{{ $errors->any() ? 'false' : 'true' }}">
+        class="member-create-modal-overlay{{ $errors->any() && old('member_form_action') !== 'edit' ? ' show' : '' }}"
+        aria-hidden="{{ $errors->any() && old('member_form_action') !== 'edit' ? 'false' : 'true' }}">
         <div
             class="member-create-modal"
             role="dialog"
@@ -422,7 +428,7 @@
                 </button>
             </header>
 
-            @if ($errors->any())
+            @if ($errors->any() && old('member_form_action') !== 'edit')
                 <div class="member-create-errors" role="alert">
                     <strong>Periksa kembali data yang diisi.</strong>
                     <ul>
@@ -454,6 +460,143 @@
                                 <path d="M7 3v5h8" />
                             </svg>
                             Simpan Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div
+        id="memberEditModal"
+        class="member-create-modal-overlay{{ $errors->any() && old('member_form_action') === 'edit' ? ' show' : '' }}"
+        aria-hidden="{{ $errors->any() && old('member_form_action') === 'edit' ? 'false' : 'true' }}">
+        <div
+            class="member-create-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="memberEditModalTitle"
+            aria-describedby="memberEditModalDescription">
+            <header class="member-create-modal-header">
+                <div>
+                    <h2 id="memberEditModalTitle">Edit Anggota</h2>
+                    <p id="memberEditModalDescription">Perbarui data anggota perpustakaan.</p>
+                </div>
+
+                <button
+                    type="button"
+                    class="member-create-modal-close"
+                    onclick="closeMemberEditModal()"
+                    aria-label="Tutup form edit anggota">
+                    &times;
+                </button>
+            </header>
+
+            @if ($errors->any() && old('member_form_action') === 'edit')
+                <div class="member-create-errors" role="alert">
+                    <strong>Periksa kembali data yang diisi.</strong>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="member-create-form-card">
+                <form
+                    id="memberEditForm"
+                    action="{{ $errors->any() && old('member_form_action') === 'edit' ? route('members.update', old('member_id')) : '#' }}"
+                    method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="member_form_action" value="edit">
+                    <input id="editMemberId" type="hidden" name="member_id" value="{{ old('member_id') }}">
+
+                    <div class="member-create-form-section">
+                        <div class="member-create-section-title">
+                            <span>1</span>
+                            <h3>Informasi Pribadi</h3>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editMemberName">Nama <span>*</span></label>
+                            <input
+                                type="text"
+                                id="editMemberName"
+                                name="name"
+                                value="{{ old('name') }}"
+                                placeholder="Masukkan nama anggota"
+                                autocomplete="name"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editMemberDivision">Divisi <span>*</span></label>
+                            <select id="editMemberDivision" name="division" required>
+                                <option value="">-- Pilih Divisi --</option>
+                                <option value="Center Of Excellence" @selected(old('division') === 'Center Of Excellence')>Center Of Excellence</option>
+                                <option value="Digital Business" @selected(old('division') === 'Digital Business')>Digital Business</option>
+                                <option value="E-Publishing" @selected(old('division') === 'E-Publishing')>E-Publishing</option>
+                                <option value="Finance" @selected(old('division') === 'Finance')>Finance</option>
+                                <option value="General Trading" @selected(old('division') === 'General Trading')>General Trading</option>
+                                <option value="HR &amp; GA" @selected(old('division') === 'HR & GA')>HR &amp; GA</option>
+                                <option value="HSE" @selected(old('division') === 'HSE')>HSE</option>
+                                <option value="IQA" @selected(old('division') === 'IQA')>IQA</option>
+                                <option value="IT" @selected(old('division') === 'IT')>IT</option>
+                                <option value="Marketing" @selected(old('division') === 'Marketing')>Marketing</option>
+                                <option value="MTIS Perpuskita dan Tisera" @selected(old('division') === 'MTIS Perpuskita dan Tisera')>MTIS Perpuskita dan Tisera</option>
+                                <option value="MTIS Planning and Development" @selected(old('division') === 'MTIS Planning and Development')>MTIS Planning and Development</option>
+                                <option value="People Development Center" @selected(old('division') === 'People Development Center')>People Development Center</option>
+                                <option value="Production" @selected(old('division') === 'Production')>Production</option>
+                                <option value="School Book Sales" @selected(old('division') === 'School Book Sales')>School Book Sales</option>
+                                <option value="School Book Publishing" @selected(old('division') === 'School Book Publishing')>School Book Publishing</option>
+                                <option value="SCM" @selected(old('division') === 'SCM')>SCM</option>
+                                <option value="TAX" @selected(old('division') === 'TAX')>TAX</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="member-create-form-section">
+                        <div class="member-create-section-title">
+                            <span>2</span>
+                            <h3>Kontak</h3>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editMemberEmail">Email</label>
+                            <input
+                                type="email"
+                                id="editMemberEmail"
+                                name="email"
+                                value="{{ old('email') }}"
+                                placeholder="Contoh: nama@email.com"
+                                autocomplete="email">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editMemberPhone">No. Telepon <span>*</span></label>
+                            <input
+                                type="text"
+                                id="editMemberPhone"
+                                name="phone"
+                                value="{{ old('phone') }}"
+                                placeholder="Contoh: 081234567890"
+                                autocomplete="tel"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="member-create-modal-actions">
+                        <button type="button" class="btn-cancel" onclick="closeMemberEditModal()">Batal</button>
+                        <button type="submit" class="btn-save">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                                <path d="M17 21v-8H7v8" />
+                                <path d="M7 3v5h8" />
+                            </svg>
+                            Simpan Perubahan
                         </button>
                     </div>
                 </form>
@@ -575,6 +718,7 @@
             const statusLabel = document.getElementById('memberStatusLabel');
             const createModal = document.getElementById('memberCreateModal');
             const openCreateButton = document.getElementById('openMemberCreateModal');
+            const editModal = document.getElementById('memberEditModal');
             let selectedStatus = '';
 
             if (openCreateButton && createModal) {
@@ -597,6 +741,29 @@
                     nameInput.focus();
                 }
             }
+
+            document.querySelectorAll('.btn-edit[data-update-url]').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    openMemberEditModal(button);
+                });
+            });
+
+            if (editModal) {
+                editModal.addEventListener('click', function(event) {
+                    if (event.target === editModal) {
+                        closeMemberEditModal();
+                    }
+                });
+            }
+
+            if (editModal && editModal.classList.contains('show')) {
+                document.body.style.overflow = 'hidden';
+                document.getElementById('editMemberName')?.focus();
+            }
+
+            @if ($errors->any() && old('member_form_action') === 'edit')
+                document.getElementById('editMemberId').value = @json(old('member_id'));
+            @endif
 
             function filterMemberRows() {
                 if (!table) {
@@ -673,7 +840,10 @@
 
                     if (event.key === 'Escape') {
                         const createModal = document.getElementById('memberCreateModal');
-                        if (createModal && createModal.classList.contains('show')) {
+                        const editModal = document.getElementById('memberEditModal');
+                        if (editModal && editModal.classList.contains('show')) {
+                            closeMemberEditModal();
+                        } else if (createModal && createModal.classList.contains('show')) {
                             closeMemberCreateModal();
                         } else {
                             closeMemberDeleteModal();
@@ -741,6 +911,36 @@
 
         function closeMemberCreateModal() {
             const modal = document.getElementById('memberCreateModal');
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        function openMemberEditModal(button) {
+            const modal = document.getElementById('memberEditModal');
+            const form = document.getElementById('memberEditForm');
+            if (!modal || !form || !button) {
+                return;
+            }
+
+            form.action = button.dataset.updateUrl;
+            document.getElementById('editMemberId').value = button.dataset.memberId || '';
+            document.getElementById('editMemberName').value = button.dataset.name || '';
+            document.getElementById('editMemberEmail').value = button.dataset.email || '';
+            document.getElementById('editMemberDivision').value = button.dataset.division || '';
+            document.getElementById('editMemberPhone').value = button.dataset.phone || '';
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('editMemberName').focus();
+        }
+
+        function closeMemberEditModal() {
+            const modal = document.getElementById('memberEditModal');
             if (!modal) {
                 return;
             }
