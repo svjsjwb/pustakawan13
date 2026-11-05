@@ -118,6 +118,14 @@ class BookController extends Controller
 
     public function index()
     {
+        return view(
+            'books.index',
+            $this->getIndexViewData()
+        );
+    }
+
+    private function getIndexViewData(): array
+    {
         $books = Book::with([
             'category',
             'subcategory',
@@ -125,20 +133,10 @@ class BookController extends Controller
             ->latest()
             ->get();
 
-        return view(
-            'books.index',
-            compact('books')
-        );
+        return compact('books') + $this->getCreateFormData();
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
-
-    public function create()
+    private function getCreateFormData(): array
     {
         $categoryOrder = [
             'Buku Pelajaran',
@@ -157,14 +155,11 @@ class BookController extends Controller
             )
             ->values();
 
-
         $subcategoryData = $categories
             ->mapWithKeys(function ($category) {
-
                 return [
                     $category->id => $category->subcategories
                         ->map(function ($subcategory) {
-
                             return [
                                 'id' => $subcategory->id,
                                 'name' => $subcategory->name,
@@ -176,27 +171,31 @@ class BookController extends Controller
             })
             ->toArray();
 
-
-        /*
-         * =========================================================
-         * LOKASI BUKU
-         * Lantai → Zona → Rak
-         * =========================================================
-         */
         $floors = LibraryFloor::with([
             'zones.shelves'
         ])
             ->orderBy('floor_number')
             ->get();
 
+        return compact(
+            'categories',
+            'subcategoryData',
+            'floors'
+        );
+    }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE
+    |--------------------------------------------------------------------------
+    */
+
+    public function create()
+    {
         return view(
-            'books.create',
-            compact(
-                'categories',
-                'subcategoryData',
-                'floors'
-            )
+            'books.create-page',
+            $this->getCreateFormData()
         );
     }
 
@@ -709,77 +708,26 @@ class BookController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function edit(Book $book)
+    public function edit(Request $request, Book $book)
     {
-        $categoryOrder = [
-            'Buku Pelajaran',
-            'Buku Umum',
-        ];
-
-
-        $categories = Category::with(
-            'subcategories'
-        )
-            ->whereIn(
-                'name',
-                $categoryOrder
-            )
-            ->get()
-            ->sortBy(
-                fn($category) => array_search(
-                    $category->name,
-                    $categoryOrder,
-                    true
-                )
-            )
-            ->values();
-
-
-        $subcategoryData = $categories
-            ->mapWithKeys(function ($category) {
-
-                return [
-                    $category->id =>
-                    $category->subcategories
-                        ->map(function ($subcategory) {
-
-                            return [
-                                'id' =>
-                                $subcategory->id,
-
-                                'name' =>
-                                $subcategory->name,
-                            ];
-                        })
-                        ->values()
-                        ->toArray(),
-                ];
-            })
-            ->toArray();
-
-
-        /*
-         * =========================================================
-         * LOKASI BUKU
-         * Lantai → Zona → Rak
-         * =========================================================
-         */
-
-        $floors = LibraryFloor::with([
-            'zones.shelves'
-        ])
-            ->orderBy('floor_number')
+        $book->loadMissing('category.subcategories');
+        $editBook = $book;
+        $activeBookTab = $request->query('tab') === 'copies' ? 'copies' : 'edit';
+        $copies = $book->copies()
+            ->with('shelf.zone.floor')
+            ->orderBy('id')
             ->get();
-
+        $nextCopyNumber = (int) $copies
+            ->filter(
+                fn ($copy) => is_string($copy->copy) &&
+                    str_starts_with($copy->copy, 'c.')
+            )
+            ->map(fn ($copy) => (int) str_replace('c.', '', $copy->copy))
+            ->max() + 1;
 
         return view(
-            'books.edit',
-            compact(
-                'book',
-                'categories',
-                'subcategoryData',
-                'floors'
-            )
+            'books.index',
+            $this->getIndexViewData() + compact('editBook', 'copies', 'activeBookTab', 'nextCopyNumber')
         );
     }
 

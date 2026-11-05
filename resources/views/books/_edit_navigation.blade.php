@@ -4,9 +4,8 @@
 
 <div class="book-edit-navigation">
 
-    <a
-        href="{{ route('books.edit', $book) }}"
-        class="book-edit-tab {{ request()->routeIs('books.edit') ? 'active' : '' }}">
+    <a href="{{ route('books.edit', [$book, 'tab' => 'edit']) }}" data-book-tab="edit"
+        class="book-edit-tab {{ ($activeBookTab ?? 'edit') === 'edit' ? 'active' : '' }}">
 
         <span class="book-edit-tab-icon">
             <svg
@@ -32,9 +31,8 @@
     </a>
 
 
-    <a
-        href="{{ route('books.copies.index', $book) }}"
-        class="book-edit-tab {{ request()->routeIs('books.copies.*') ? 'active' : '' }}">
+    <a href="{{ route('books.edit', [$book, 'tab' => 'copies']) }}" data-book-tab="copies"
+        class="book-edit-tab {{ ($activeBookTab ?? 'edit') === 'copies' ? 'active' : '' }}">
 
         <span class="book-edit-tab-icon">
             <svg

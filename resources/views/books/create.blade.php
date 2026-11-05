@@ -1,26 +1,24 @@
-@extends('layouts.app')
-
-@section('title', 'Tambah Buku Baru')
-
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/books.css') }}">
-@endpush
-
-@section('content')
-    <div class="book-form-page">
+    <div class="book-form-page{{ ($isBookModal ?? false) ? ' book-form-modal-page' : '' }}">
+        @unless ($isBookModal ?? false)
         <nav class="book-breadcrumb">
             <a href="{{ route('books.index') }}">Manajemen Buku</a><span class="separator">/</span><span class="current">Tambah
                 Buku Baru</span>
         </nav>
+        @endunless
 
         <div class="book-form-card">
             <div class="book-form-header">
-                <h2>Tambah Buku Baru</h2>
-                <p class="book-form-subtitle">Masukkan ISBN untuk mengambil metadata buku secara otomatis, lalu periksa dan
-                    lengkapi data koleksi perpustakaan.</p>
+                <div>
+                    <h2 @if ($isBookModal ?? false) id="bookCreateModalTitle" @endif>Tambah Buku Baru</h2>
+                    <p class="book-form-subtitle">Lengkapi formulir di bawah ini untuk menambahkan koleksi buku baru ke sistem perpustakaan.</p>
+                </div>
+                @if ($isBookModal ?? false)
+                    <button type="button" class="book-create-modal-close" onclick="closeBookCreateModal()"
+                        aria-label="Tutup form tambah buku">&times;</button>
+                @endif
             </div>
 
-            @if ($errors->any())
+            @if ($errors->any() && !isset($editBook))
                 <div class="form-alert-error"><strong>Periksa kembali data berikut:</strong>
                     <ul>
                         @foreach ($errors->all() as $error)
@@ -302,7 +300,11 @@
                 </div>
 
                 <div class="book-form-actions">
-                    <a href="{{ route('books.index') }}" class="book-btn-cancel">Batal</a>
+                    @if ($isBookModal ?? false)
+                        <button type="button" class="book-btn-cancel" onclick="closeBookCreateModal()">Batal</button>
+                    @else
+                        <a href="{{ route('books.index') }}" class="book-btn-cancel">Batal</a>
+                    @endif
                     <button type="submit" class="book-btn-save">Simpan Buku</button>
                 </div>
             </form>
@@ -327,8 +329,6 @@
             <button type="button" id="cancelIsbnScanner" class="isbn-scanner-cancel">Tutup</button>
         </div>
     </div>
-@endsection
-
 @push('scripts')
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
@@ -347,6 +347,9 @@
             const subcategories = @json($subcategoryData);
             const oldSubcategory = @json(old('subcategory_id'));
             const scannerModal = document.getElementById('isbnScannerModal');
+            if (scannerModal && document.getElementById('bookCreateModal')) {
+                document.body.appendChild(scannerModal);
+            }
             const scannerStatus = document.getElementById('isbnScannerStatus');
             let scanner = null;
 

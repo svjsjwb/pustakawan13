@@ -51,6 +51,12 @@
 
         </div>
 
+        <div class="circulation-hero-action">
+            <button type="button" class="circulation-add-button" onclick="openLoanModal()">
+                + Tambah Peminjam Buku
+            </button>
+        </div>
+
     </div>
 
     {{-- =====================================================
@@ -91,7 +97,7 @@
 
     ====================================================== --}}
 
-    @if($errors->any())
+    @if($errors->any() && old('circulation_form_action') !== 'borrow')
 
         <div class="alert-error">
 
@@ -209,6 +215,127 @@
         </div>
     @endif
 
+    <div
+        id="loanModal"
+        class="loan-modal-overlay{{ $errors->any() && old('circulation_form_action') === 'borrow' ? ' open' : '' }}"
+        aria-hidden="{{ $errors->any() && old('circulation_form_action') === 'borrow' ? 'false' : 'true' }}">
+        <section class="loan-modal-card" role="dialog" aria-modal="true"
+            aria-labelledby="loanModalTitle" aria-describedby="loanModalDescription">
+            <div class="loan-modal-scroll">
+            <header class="loan-modal-header">
+                <div>
+                    <h2 id="loanModalTitle">Pinjam Buku</h2>
+                    <p id="loanModalDescription">Pilih anggota, buku, dan tanggal peminjaman.</p>
+                </div>
+                <button type="button" class="loan-modal-close" onclick="closeLoanModal()"
+                    aria-label="Tutup form peminjaman">&times;</button>
+            </header>
+
+            @if($errors->any() && old('circulation_form_action') === 'borrow')
+                <div class="loan-modal-errors" role="alert">
+                    <strong>Periksa kembali data peminjaman.</strong>
+                    <ul class="error-list">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="loan-modal-form-card">
+                <form action="{{ route('borrowings.store') }}" method="POST" id="circulationForm">
+                    @csrf
+                    <input type="hidden" name="circulation_form_action" value="borrow">
+
+                    <div class="field">
+                        <label for="member_id">Anggota</label>
+                        <select name="member_id" id="member_id" required>
+                            <option value="">-- Pilih Anggota --</option>
+                            @foreach($members as $member)
+                                <option value="{{ $member->id }}" @selected(old('member_id') == $member->id)>
+                                    {{ $member->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="bookSearch">Buku</label>
+                        <div class="book-picker">
+                            <input
+                                type="search"
+                                id="bookSearch"
+                                class="book-picker-search"
+                                placeholder="Cari atau pilih buku..."
+                                autocomplete="off"
+                                role="combobox"
+                                aria-autocomplete="list"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                                aria-controls="bookSuggestions"
+                                required>
+                            <select name="book_id" id="book_id" class="book-picker-select" aria-hidden="true" tabindex="-1">
+                                <option value="">-- Pilih Buku --</option>
+                                @foreach($books as $book)
+                                    <option value="{{ $book->id }}"
+                                        @selected(old('book_id') == $book->id)
+                                        @disabled($book->available_stock <= 0)>
+                                        {{ $book->title }} —
+                                        @if($book->available_stock > 0)
+                                            Stok {{ $book->available_stock }}
+                                        @else
+                                            STOK HABIS
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div id="bookSuggestions" class="book-picker-suggestions" role="listbox" hidden></div>
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="borrowed_at">Tanggal Pinjam</label>
+                            <div class="date-input-wrap">
+                                <input type="date" name="borrowed_at" id="borrowed_at"
+                                    value="{{ old('borrowed_at', now()->format('Y-m-d')) }}" required>
+                                <button type="button" class="date-picker-button" data-date-input="borrowed_at"
+                                    aria-label="Pilih tanggal pinjam">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                                        <path d="M16 3v4M8 3v4M3 11h18" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="due_at">Tanggal Pengembalian</label>
+                            <div class="date-input-wrap">
+                                <input type="date" name="due_at" id="due_at"
+                                    value="{{ old('due_at', now()->addDays(7)->format('Y-m-d')) }}" required>
+                                <button type="button" class="date-picker-button" data-date-input="due_at"
+                                    aria-label="Pilih tanggal pengembalian">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                                        <path d="M16 3v4M8 3v4M3 11h18" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="loan-modal-actions">
+                        <button type="button" class="loan-modal-cancel" onclick="closeLoanModal()">Batal</button>
+                        <button type="submit" class="loan-submit">Proses Peminjaman</button>
+                    </div>
+                </form>
+            </div>
+            </div>
+        </section>
+    </div>
+
     {{-- =====================================================
 
          MAIN TWO COLUMN
@@ -216,238 +343,6 @@
     ====================================================== --}}
 
     <div class="two-col">
-
-        {{-- =================================================
-
-             KIRI
-
-             FORM PEMINJAMAN
-
-        ================================================== --}}
-
-        <div class="card form-card">
-
-            <div class="card-pad">
-
-                <h3>
-
-                    Pinjam Buku
-
-                </h3>
-
-                <p class="loan-description">
-
-                    Pilih anggota, buku, dan tanggal peminjaman.
-
-                </p>
-
-                <form
-
-                    action="{{ route('borrowings.store') }}"
-
-                    method="POST"
-
-                    id="circulationForm">
-
-                    @csrf
-
-                    {{-- ANGGOTA --}}
-
-                    <div class="field">
-
-                        <label for="member_id">
-
-                            Anggota
-
-                        </label>
-
-                        <select
-
-                            name="member_id"
-
-                            id="member_id"
-
-                            required>
-
-                            <option value="">
-
-                                -- Pilih Anggota --
-
-                            </option>
-
-                            @foreach($members as $member)
-
-                                <option
-
-                                    value="{{ $member->id }}"
-
-                                    @selected(
-
-                                        old('member_id') == $member->id
-
-                                    )>
-
-                                    {{ $member->name }}
-
-                                </option>
-
-                            @endforeach
-
-                        </select>
-
-                    </div>
-
-                    {{-- BUKU --}}
-
-                    <div class="field">
-
-                        <label for="book_id">
-
-                            Buku
-
-                        </label>
-
-                        <select
-
-                            name="book_id"
-
-                            id="book_id"
-
-                            required>
-
-                            <option value="">
-
-                                -- Pilih Buku --
-
-                            </option>
-
-                            @foreach($books as $book)
-
-                                <option
-
-                                    value="{{ $book->id }}"
-
-                                    @selected(
-
-                                        old('book_id') == $book->id
-
-                                    )
-
-                                    @disabled(
-
-                                        $book->available_stock <= 0
-
-                                    )>
-
-                                    {{ $book->title }}
-
-                                    —
-
-                                    @if($book->available_stock > 0)
-
-                                        Stok {{ $book->available_stock }}
-
-                                    @else
-
-                                        STOK HABIS
-
-                                    @endif
-
-                                </option>
-
-                            @endforeach
-
-                        </select>
-
-                    </div>
-
-                    {{-- TANGGAL --}}
-
-                    <div class="field-row">
-
-                        <div class="field">
-
-                            <label for="borrowed_at">
-
-                                Tanggal Pinjam
-
-                            </label>
-
-                            <input
-
-                                type="date"
-
-                                name="borrowed_at"
-
-                                id="borrowed_at"
-
-                                value="{{ old(
-
-                                    'borrowed_at',
-
-                                    now()->format('Y-m-d')
-
-                                ) }}"
-
-                                required>
-
-                        </div>
-
-                        <div class="field">
-
-                            <label for="due_at">
-
-                                Tanggal Pengembalian
-
-                            </label>
-
-                            <input
-
-                                type="date"
-
-                                name="due_at"
-
-                                id="due_at"
-
-                                value="{{ old(
-
-                                    'due_at',
-
-                                    now()->addDays(7)->format('Y-m-d')
-
-                                ) }}"
-
-                                required>
-
-                        </div>
-
-                    </div>
-
-                    {{-- SUBMIT --}}
-
-                    <button
-
-                        type="submit"
-
-                        class="loan-submit">
-
-                        Proses Peminjaman
-
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
-
-        {{-- =================================================
-
-             KANAN
-
-             DAFTAR PEMINJAMAN
-
-        ================================================== --}}
 
         <div class="card borrowing-card">
 
@@ -1447,6 +1342,153 @@ document.addEventListener(
 
     function () {
 
+        const loanModal = document.getElementById('loanModal');
+        if (loanModal) {
+            loanModal.addEventListener('click', function (event) {
+                if (event.target === loanModal) {
+                    closeLoanModal();
+                }
+            });
+        }
+
+        if (loanModal && loanModal.classList.contains('open')) {
+            document.body.style.overflow = 'hidden';
+            document.getElementById('member_id')?.focus();
+        }
+
+        document.querySelectorAll('.date-picker-button[data-date-input]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const dateInput = document.getElementById(button.dataset.dateInput);
+                if (!dateInput) {
+                    console.error('Input tanggal untuk date picker tidak ditemukan.');
+                    return;
+                }
+
+                if (typeof dateInput.showPicker === 'function') {
+                    dateInput.showPicker();
+                } else {
+                    dateInput.focus();
+                    dateInput.click();
+                }
+            });
+        });
+
+        const bookSearch = document.getElementById('bookSearch');
+        const bookSelect = document.getElementById('book_id');
+        const bookSuggestions = document.getElementById('bookSuggestions');
+        const circulationForm = document.getElementById('circulationForm');
+
+        if (bookSearch && bookSelect && bookSuggestions) {
+            const formatBookLabel = function(option) {
+                return option.textContent
+                    .replace(/\s+/g, ' ')
+                    .replace(/\s*—\s*/g, ' - ')
+                    .trim();
+            };
+
+            const closeBookSuggestions = function() {
+                bookSuggestions.hidden = true;
+                bookSearch.setAttribute('aria-expanded', 'false');
+            };
+
+            const renderBookSuggestions = function() {
+                const query = bookSearch.value.trim().toLocaleLowerCase();
+                bookSuggestions.replaceChildren();
+
+                const matchingOptions = Array.from(bookSelect.options).filter(function(option) {
+                    return option.value &&
+                        option.textContent.toLocaleLowerCase().includes(query);
+                });
+
+                if (!matchingOptions.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'book-picker-empty';
+                    empty.textContent = 'Buku tidak ditemukan.';
+                    bookSuggestions.appendChild(empty);
+                } else {
+                    matchingOptions.forEach(function(option) {
+                        const suggestion = document.createElement('button');
+                        suggestion.type = 'button';
+                        suggestion.className = 'book-picker-option';
+                        suggestion.setAttribute('role', 'option');
+                        suggestion.setAttribute('aria-selected', String(option.value === bookSelect.value));
+                        suggestion.disabled = option.disabled;
+                        suggestion.textContent = formatBookLabel(option);
+                        suggestion.addEventListener('mousedown', function(event) {
+                            event.preventDefault();
+                        });
+                        suggestion.addEventListener('click', function() {
+                            bookSelect.value = option.value;
+                            bookSearch.value = formatBookLabel(option);
+                            bookSearch.setCustomValidity('');
+                            bookSearch.focus();
+                            closeBookSuggestions();
+                        });
+                        bookSuggestions.appendChild(suggestion);
+                    });
+                }
+
+                bookSuggestions.hidden = false;
+                bookSearch.setAttribute('aria-expanded', 'true');
+            };
+
+            const selectedBook = bookSelect.options[bookSelect.selectedIndex];
+            if (selectedBook && selectedBook.value) {
+                bookSearch.value = formatBookLabel(selectedBook);
+            }
+
+            bookSearch.addEventListener('focus', renderBookSuggestions);
+            bookSearch.addEventListener('input', function() {
+                bookSelect.value = '';
+                bookSearch.setCustomValidity('Pilih buku dari daftar saran.');
+                renderBookSuggestions();
+            });
+            bookSearch.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeBookSuggestions();
+                    return;
+                }
+
+                if (event.key === 'ArrowDown' && !bookSuggestions.hidden) {
+                    const firstOption = bookSuggestions.querySelector('.book-picker-option:not(:disabled)');
+                    if (firstOption) {
+                        event.preventDefault();
+                        firstOption.focus();
+                    }
+                }
+            });
+            bookSuggestions.addEventListener('keydown', function(event) {
+                const options = Array.from(bookSuggestions.querySelectorAll('.book-picker-option:not(:disabled)'));
+                const currentIndex = options.indexOf(document.activeElement);
+
+                if (event.key === 'ArrowDown' && currentIndex < options.length - 1) {
+                    event.preventDefault();
+                    options[currentIndex + 1].focus();
+                } else if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    if (currentIndex > 0) {
+                        options[currentIndex - 1].focus();
+                    } else {
+                        bookSearch.focus();
+                    }
+                } else if (event.key === 'Escape') {
+                    closeBookSuggestions();
+                    bookSearch.focus();
+                }
+            });
+            bookSearch.addEventListener('blur', function() {
+                window.setTimeout(closeBookSuggestions, 120);
+            });
+            circulationForm?.addEventListener('submit', function(event) {
+                if (!bookSelect.value) {
+                    event.preventDefault();
+                    bookSearch.setCustomValidity('Pilih buku dari daftar saran.');
+                    bookSearch.reportValidity();
+                    bookSearch.focus();
+                }
+            });
+        }
+
         /* =====================================================
 
            LIVE SEARCH
@@ -1465,6 +1507,30 @@ document.addEventListener(
             document.querySelectorAll(
                 '#borrowingTable tbody tr.borrowing-row'
             );
+        const tableWrap = document.querySelector('#page-circulation .table-wrap');
+        const borrowingTable = document.getElementById('borrowingTable');
+        const fitBorrowingTableViewport = function() {
+            if (!tableWrap || !borrowingTable) {
+                return;
+            }
+
+            const header = borrowingTable.querySelector('thead');
+            const visibleRows = Array.from(borrowingTable.querySelectorAll('tbody tr.borrowing-row'))
+                .slice(0, 10);
+            if (!header || visibleRows.length === 0) {
+                return;
+            }
+
+            const visibleHeight = header.getBoundingClientRect().height +
+                visibleRows.reduce(function(total, row) {
+                    return total + row.getBoundingClientRect().height;
+                }, 0);
+
+            tableWrap.style.maxHeight = Math.ceil(visibleHeight) + 'px';
+        };
+        fitBorrowingTableViewport();
+        window.addEventListener('resize', fitBorrowingTableViewport);
+
         const returnModal =
             document.getElementById(
                 'returnConfirmModal'
@@ -1681,6 +1747,30 @@ document.addEventListener(
 
 let extendFormPending = null;
 let returnFormPending = null;
+
+function openLoanModal() {
+    const modal = document.getElementById('loanModal');
+    if (!modal) {
+        console.error('Popup peminjaman buku tidak ditemukan.');
+        return;
+    }
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('member_id')?.focus();
+}
+
+function closeLoanModal() {
+    const modal = document.getElementById('loanModal');
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+}
 
 /* =========================================================
 
@@ -2331,6 +2421,20 @@ document.addEventListener(
                 'extendLoanModal'
 
             );
+        const loanModal =
+
+            document.getElementById(
+
+                'loanModal'
+
+            );
+        if (loanModal && loanModal.classList.contains('open')) {
+
+            closeLoanModal();
+
+            return;
+
+        }
         if (
 
             returnModal &&
