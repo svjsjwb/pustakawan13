@@ -127,6 +127,69 @@
     flex-wrap: wrap;
 }
 
+.rsv-book-actions {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 18px;
+}
+
+.rsv-btn-cancel-reservation {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 9px 15px;
+    border: 1.5px solid rgba(185, 28, 28, .42);
+    border-radius: 12px;
+    background: transparent;
+    color: #b91c1c;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.rsv-btn-cancel-reservation:hover,
+.rsv-btn-cancel-reservation:focus-visible { outline: none; border-color: #b91c1c; background: rgba(185, 28, 28, .06); }
+.rsv-btn-cancel-reservation svg { width: 17px; height: 17px; flex: 0 0 auto; }
+.rsv-cancelled-badge { border-color: rgba(185, 28, 28, .2) !important; color: #991b1b !important; background: rgba(220, 38, 38, .08) !important; }
+.rsv-cancel-success {
+    display: none;
+    margin-bottom: 18px;
+    padding: 13px 16px;
+    border: 1px solid rgba(22, 101, 52, .2);
+    border-radius: 12px;
+    color: #166534;
+    background: rgba(22, 163, 74, .08);
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+.rsv-cancel-dialog {
+    width: min(440px, calc(100vw - 32px));
+    max-width: none;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    color: var(--text);
+    background: var(--surface);
+    box-shadow: 0 24px 70px rgba(8, 35, 34, .24);
+}
+.rsv-cancel-dialog::backdrop { background: rgba(12, 35, 34, .48); backdrop-filter: blur(3px); }
+.rsv-cancel-dialog-content { padding: 26px; }
+.rsv-cancel-dialog-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px; border: 1px solid rgba(185, 28, 28, .2); border-radius: 14px; color: #b91c1c; background: rgba(220, 38, 38, .07); }
+.rsv-cancel-dialog-icon svg { width: 22px; height: 22px; }
+.rsv-cancel-dialog h2 { margin: 0 0 8px; color: var(--text); font: 800 18px/1.3 'Poppins', sans-serif; }
+.rsv-cancel-dialog p { margin: 0; color: var(--text-muted); font-size: 13.5px; line-height: 1.55; }
+.rsv-cancel-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.rsv-cancel-dialog-actions button { min-height: 42px; padding: 9px 14px; border-radius: 11px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.rsv-cancel-back { border: 1px solid var(--border); color: var(--text); background: var(--surface); }
+.rsv-cancel-confirm { border: 1px solid #b91c1c; color: #fff; background: #b91c1c; }
+.rsv-cancel-back:hover { background: var(--primary-light); }
+.rsv-cancel-confirm:hover { border-color: #991b1b; background: #991b1b; }
+
 @media (max-width: 640px) {
     .rsv-book-header-card {
         flex-direction: column;
@@ -141,6 +204,10 @@
     .rsv-book-title {
         font-size: 20px;
     }
+    .rsv-header-info { width: 100%; }
+    .rsv-cancel-dialog-content { padding: 22px 18px; }
+    .rsv-cancel-dialog-actions { flex-direction: column-reverse; }
+    .rsv-cancel-dialog-actions button { width: 100%; }
 }
 
 /* ── Section Title Standard ────────────────────────────────────────────── */
@@ -471,9 +538,11 @@
     $tanggalPersetujuan = in_array($status, ['disetujui', 'siap_diambil', 'selesai'])
         ? $reservation->updated_at->format('d F Y')
         : null;
+    $canCancelReservation = in_array($status, ['menunggu', 'disetujui', 'siap_diambil'], true);
 @endphp
 
 <div class="rsv-detail-container">
+    <div class="rsv-cancel-success" id="rsvCancelSuccess" role="status" aria-live="polite">Reservasi berhasil dibatalkan.</div>
 
     {{-- =========================================================================
          1. INFORMASI BUKU (Cover, Judul, Penulis, Kategori, Status)
@@ -508,7 +577,7 @@
 
             <div class="rsv-header-status-row">
                 {{-- Premium Status Badge --}}
-                <span class="status-badge {{ $badgeClass }}" style="padding: 6px 16px 6px 10px; font-size: 13px;">
+                <span class="status-badge {{ $badgeClass }}" id="rsvStatusBadge" style="padding: 6px 16px 6px 10px; font-size: 13px;">
                     <span class="status-badge-icon" style="width: 22px; height: 22px;">
                         @if($status === 'menunggu')
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -522,15 +591,44 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
                         @endif
                     </span>
-                    <span>{{ $statusLabel }}</span>
+                    <span id="rsvStatusLabel">{{ $statusLabel }}</span>
                 </span>
 
                 <span style="font-size: 12.5px; color: var(--text-muted); font-family: monospace;">
                     #{{ $reservationCode }}
                 </span>
             </div>
+
+            @if($canCancelReservation)
+                <div class="rsv-book-actions" id="rsvBookActions">
+                    <button type="button" class="rsv-btn-cancel-reservation" id="rsvCancelTrigger" aria-haspopup="dialog">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/>
+                        </svg>
+                        <span>Batalkan Reservasi</span>
+                    </button>
+                </div>
+            @endif
         </div>
     </div>
+
+    @if($canCancelReservation)
+        <dialog class="rsv-cancel-dialog" id="rsvCancelDialog" aria-labelledby="rsvCancelTitle" aria-describedby="rsvCancelDescription">
+            <div class="rsv-cancel-dialog-content">
+                <div class="rsv-cancel-dialog-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/>
+                    </svg>
+                </div>
+                <h2 id="rsvCancelTitle">Batalkan Reservasi?</h2>
+                <p id="rsvCancelDescription">Reservasi buku <strong>{{ $book?->title ?? 'ini' }}</strong> akan ditandai sebagai dibatalkan pada tampilan ini.</p>
+                <div class="rsv-cancel-dialog-actions">
+                    <button type="button" class="rsv-cancel-back" id="rsvCancelBack">Kembali</button>
+                    <button type="button" class="rsv-cancel-confirm" id="rsvCancelConfirm">Ya, Batalkan Reservasi</button>
+                </div>
+            </div>
+        </dialog>
+    @endif
 
     {{-- =========================================================================
          2. TRACKING STATUS RESERVASI (Timeline Modern)
@@ -678,5 +776,44 @@
     </div>
 
 </div>
+
+@if($canCancelReservation)
+    @push('scripts')
+    <script>
+        const cancelReservationDialog = document.getElementById('rsvCancelDialog');
+        const cancelReservationTrigger = document.getElementById('rsvCancelTrigger');
+        const cancelReservationBack = document.getElementById('rsvCancelBack');
+        const cancelReservationConfirm = document.getElementById('rsvCancelConfirm');
+
+        cancelReservationTrigger?.addEventListener('click', function() {
+            cancelReservationDialog?.showModal();
+        });
+        cancelReservationBack?.addEventListener('click', function() {
+            cancelReservationDialog?.close();
+            cancelReservationTrigger?.focus();
+        });
+        cancelReservationDialog?.addEventListener('click', function(event) {
+            if (event.target === cancelReservationDialog) {
+                cancelReservationDialog.close();
+                cancelReservationTrigger?.focus();
+            }
+        });
+        cancelReservationConfirm?.addEventListener('click', function() {
+            const badge = document.getElementById('rsvStatusBadge');
+            badge?.classList.remove('status-menunggu', 'status-disetujui', 'status-siap_diambil', 'status-ditolak', 'status-dikembalikan', 'status-dipinjam');
+            badge?.classList.add('status-ditolak', 'rsv-cancelled-badge');
+            const badgeIcon = badge?.querySelector('.status-badge-icon');
+            if (badgeIcon) {
+                badgeIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg>';
+            }
+            document.getElementById('rsvStatusLabel').textContent = 'Dibatalkan';
+            document.getElementById('rsvCancelSuccess').style.display = 'block';
+            document.getElementById('rsvBookActions')?.remove();
+            cancelReservationDialog.close();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+    @endpush
+@endif
 
 @endsection
