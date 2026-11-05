@@ -341,7 +341,7 @@ class RecommendationService
         if ($hasCoverCount >= $limit) {
             $query->whereNotNull('cover')->where('cover', '!=', '');
         } else {
-            $query->orderByRaw('CASE WHEN cover IS NOT NULL AND cover != "" THEN 0 ELSE 1 END');
+            $query->orderByRaw("CASE WHEN NULLIF(TRIM(cover), '') IS NOT NULL THEN 0 ELSE 1 END");
         }
 
         /*
