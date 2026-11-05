@@ -87,12 +87,13 @@ class UserReservationController extends Controller
         );
     }
 
+
     /**
      * Halaman Detail Reservasi Buku
      */
     public function show($id)
     {
-        $user   = Auth::user();
+        $user = Auth::user();
         $member = $user->member;
 
         if (!$member) {
@@ -103,7 +104,7 @@ class UserReservationController extends Controller
 
         $reservation = Reservation::with([
             'book.category',
-            'bookCopy'
+            'bookCopy.shelf.zone.floor'
         ])
             ->where('member_id', $member->id)
             ->findOrFail($id);
@@ -113,6 +114,7 @@ class UserReservationController extends Controller
             compact('reservation', 'member')
         );
     }
+
 
     /**
      * User mengajukan reservasi buku dari katalog
