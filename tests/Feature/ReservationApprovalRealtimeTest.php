@@ -11,13 +11,13 @@ use App\Models\Reservation;
 use App\Models\User;
 use App\Models\UserFavorite;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ReservationApprovalRealtimeTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected User $adminUser;
     protected User $regularUser;

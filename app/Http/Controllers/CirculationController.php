@@ -35,15 +35,9 @@ class CirculationController extends Controller
          * Semua buku tetap ditampilkan,
          * termasuk yang stok tersedia = 0.
          */
-        $books = Book::orderByRaw("
-    COALESCE(
-        NULLIF(
-            substring(judul_buku from '([0-9]+)$'),
-            ''
-        )::BIGINT,
-        0
-    ) ASC
-")->get();
+        $books = Book::orderByRaw(
+            "CAST(SUBSTRING_INDEX(judul_buku, ' ', -1) AS UNSIGNED) ASC, judul_buku ASC"
+        )->get();
 
         $reservations = Reservation::with([
             'member',
