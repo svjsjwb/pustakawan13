@@ -68,8 +68,9 @@ class DashboardController extends Controller
          */
 
         $reservations = Reservation::with([
-            'member',
-            'book'
+            'user:id,name',
+            'member:id,name',
+            'book:id,judul_buku'
         ])
             ->latest()
             ->take(20)
@@ -125,8 +126,9 @@ class DashboardController extends Controller
          * ========================================================
          */
 
-        $members = Member::latest()
-            ->take(20)
+        $members = Member::select(['id', 'name', 'created_at'])
+            ->latest()
+            ->take(4)
             ->get();
 
         foreach ($members as $member) {
@@ -156,8 +158,9 @@ class DashboardController extends Controller
          * ========================================================
          */
 
-        $books = Book::latest()
-            ->take(20)
+        $books = Book::select(['id', 'judul_buku', 'created_at'])
+            ->latest()
+            ->take(4)
             ->get();
 
         foreach ($books as $book) {
@@ -188,7 +191,7 @@ class DashboardController extends Controller
          */
 
         foreach (
-            $reservations->take(20)
+            $reservations->take(4)
             as $reservation
         ) {
 
@@ -218,12 +221,10 @@ class DashboardController extends Controller
          * ========================================================
          */
 
-        $borrowings = Borrowing::with([
-            'member',
-            'details.book'
-        ])
+        $borrowings = Borrowing::select(['id', 'member_id', 'created_at'])
+            ->with('member:id,name')
             ->latest()
-            ->take(20)
+            ->take(4)
             ->get();
 
 
@@ -255,12 +256,7 @@ class DashboardController extends Controller
          * ========================================================
          */
 
-        $manualActivities =
-            \Illuminate\Support\Facades\Schema::hasTable(
-                'activities'
-            )
-            ? Activity::latest()->get()
-            : collect();
+        $manualActivities = Activity::latest()->take(4)->get();
 
 
         foreach (
@@ -320,12 +316,7 @@ class DashboardController extends Controller
          * ========================================================
          */
 
-        $allManualActivities =
-            \Illuminate\Support\Facades\Schema::hasTable(
-                'activities'
-            )
-            ? Activity::latest()->get()
-            : collect();
+        $allManualActivities = $manualActivities;
 
 
         /*
@@ -372,6 +363,10 @@ class DashboardController extends Controller
 
         $weekNumber = 1;
 
+        $borrowings = Borrowing::select(['created_at'])
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereIn('status', ['dipinjam', 'dikembalikan'])
+            ->get();
 
         while (
             $cursor->lte($endDate)
@@ -406,21 +401,9 @@ class DashboardController extends Controller
 
 
             $counts[] =
-                Borrowing::whereBetween(
-                    'created_at',
-                    [
-                        $weekStart,
-                        $weekEnd
-                    ]
-                )
-                ->whereIn(
-                    'status',
-                    [
-                        'dipinjam',
-                        'dikembalikan'
-                    ]
-                )
-                ->count();
+                $borrowings->filter(function ($b) use ($weekStart, $weekEnd) {
+                    return $b->created_at && $b->created_at->between($weekStart, $weekEnd);
+                })->count();
 
 
             $cursor =

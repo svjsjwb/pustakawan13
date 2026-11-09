@@ -119,8 +119,11 @@ class UserCatalogController extends Controller
 
     public function index(Request $request)
     {
-        // Eager load category dan copies.shelf untuk mengeliminasi N+1 query getRakAttribute() di catalog-grid
-        $query = Book::with(['category', 'copies.shelf']);
+        // Eager load category dan copies.shelf.zone.floor untuk lokasi rak dan mengeliminasi N+1 query
+        $query = Book::with([
+            'category',
+            'copies.shelf.zone.floor'
+        ]);
 
         // ── Search ────────────────────────────────────────────
         $search = trim((string) $request->input('search', ''));
@@ -204,6 +207,38 @@ class UserCatalogController extends Controller
 
         $books->getCollection()->transform(function (Book $book) {
 
+            // AMBIL LOKASI LANTAI DAN ZONA DARI BOOK COPIES
+            $lokasiRak = $book->copies
+                ->map(function ($copy) {
+                    $shelf = $copy->shelf;
+                    $zone = $shelf?->zone;
+                    $floor = $zone?->floor;
+
+                    if (!$shelf || !$zone || !$floor) {
+                        return null;
+                    }
+
+                    // Hanya lantai 1 TSSO dan lantai 3 TSPM
+                    $validLocation =
+                        ($floor->floor_number == 1 && $zone->code === 'TSSO') ||
+                        ($floor->floor_number == 3 && $zone->code === 'TSPM');
+
+                    if (!$validLocation) {
+                        return null;
+                    }
+
+                    return $floor->name . ' / ' . $zone->code;
+                })
+                ->filter()
+                ->unique()
+                ->values();
+
+            $book->rak = $lokasiRak->isNotEmpty()
+                ? $lokasiRak->implode(', ')
+                : null;
+
+
+            // SYNOPSIS BUKU (TETAP SEPERTI KODE AWAL)
             if (isset($this->catalogSynopses[$book->title])) {
                 $book->description = $this->catalogSynopses[$book->title];
             } elseif (

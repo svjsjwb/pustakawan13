@@ -1519,8 +1519,11 @@ document.addEventListener(
 
             const header = borrowingTable.querySelector('thead');
             const visibleRows = Array.from(borrowingTable.querySelectorAll('tbody tr.borrowing-row'))
+                .filter(function(row) {
+                    return row.style.display !== 'none';
+                })
                 .slice(0, 10);
-            if (!header || visibleRows.length === 0) {
+            if (!header) {
                 return;
             }
 
@@ -1593,6 +1596,7 @@ document.addEventListener(
                         }
 
                     );
+                    fitBorrowingTableViewport();
 
                 }
 

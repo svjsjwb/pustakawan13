@@ -258,24 +258,30 @@ class ReportController extends Controller
 
         /*
          * ========================================================
-         * PEMINJAMAN
+         * PEMINJAMAN (UNIFIED QUERY)
          * ========================================================
          */
-        $borrowings =
-            Borrowing::with([
-                'member',
-                'details.book'
-            ])
-            ->whereBetween(
-                'borrowed_at',
-                [
-                    $startDate,
-                    $endDate
-                ]
-            )
-            ->latest('borrowed_at')
-            ->get();
+        $allBorrowings = Borrowing::with([
+            'member:id,name,member_number',
+            'details:id,borrowing_id,book_id,quantity',
+            'details.book:id,judul_buku,isbn',
+        ])
+        ->where(function ($q) use ($startDate, $endDate) {
+            $q->whereBetween('borrowed_at', [$startDate, $endDate])
+              ->orWhere(function ($sub) use ($startDate, $endDate) {
+                  $sub->whereNotNull('due_at')
+                      ->where('due_at', '<=', $endDate)
+                      ->where(function ($r) use ($startDate) {
+                          $r->whereNull('returned_at')->orWhere('returned_at', '>=', $startDate);
+                      });
+              });
+        })
+        ->latest('borrowed_at')
+        ->get();
 
+        $borrowings = $allBorrowings->filter(function ($b) use ($startDate, $endDate) {
+            return $b->borrowed_at && Carbon::parse($b->borrowed_at)->between($startDate, $endDate);
+        });
 
         $borrowedBooks =
             $borrowings->count();
@@ -311,7 +317,8 @@ class ReportController extends Controller
         $historicalLateBorrowings =
             $this->getHistoricalLateBorrowings(
                 $startDate,
-                $endDate
+                $endDate,
+                $allBorrowings
             );
 
         $totalLate =
@@ -325,7 +332,8 @@ class ReportController extends Controller
             $this->generateBorrowChart(
                 $startDate,
                 $endDate,
-                $periodType
+                $periodType,
+                $borrowings
             );
 
 
@@ -345,12 +353,16 @@ class ReportController extends Controller
             $this->generateLateChart(
                 $startDate,
                 $endDate,
-                $periodType
+                $periodType,
+                $historicalLateBorrowings
             );
 
 
       
-        $collectionReportData =
+        [
+            $collectionReportData,
+            $collectionCounts
+        ] =
             $this->getCollectionReportData(
                 $startDate,
                 $endDate
@@ -362,25 +374,12 @@ class ReportController extends Controller
          * RINGKASAN KOLEKSI
          * ========================================================
          */
-        $collectionAddedCount = Book::whereBetween('created_at', [$startDate, $endDate])->count();
+        $collectionAddedCount = $collectionCounts['collectionAddedCount'];
         $totalBooks = $collectionAddedCount;
-
-        $collectionAddedCopyCount = BookCopy::join('books', 'books.id', '=', 'book_copies.book_id')
-            ->whereBetween('book_copies.created_at', [$startDate, $endDate])
-            ->whereColumn('book_copies.created_at', '>', 'books.created_at')
-            ->count();
-
-        $collectionWithdrawnCount = (int) CollectionWithdrawal::where('type', 'book')
-            ->whereBetween('withdrawn_at', [$startDate, $endDate])
-            ->sum('quantity');
-
-        $collectionDeletedCopyCount = CollectionWithdrawal::where('type', 'copy')
-            ->whereBetween('withdrawn_at', [$startDate, $endDate])
-            ->count();
-
-        $collectionDamagedCount = BookCopy::where('condition', 'rusak')
-            ->whereBetween('updated_at', [$startDate, $endDate])
-            ->count();
+        $collectionAddedCopyCount = $collectionCounts['collectionAddedCopyCount'];
+        $collectionWithdrawnCount = $collectionCounts['collectionWithdrawnCount'];
+        $collectionDeletedCopyCount = $collectionCounts['collectionDeletedCopyCount'];
+        $collectionDamagedCount = $collectionCounts['collectionDamagedCount'];
 
         $totalCollectionChanges = $collectionAddedCount + $collectionAddedCopyCount + $collectionWithdrawnCount + $collectionDeletedCopyCount;
 
@@ -397,7 +396,8 @@ class ReportController extends Controller
             $this->generateCollectionChart(
                 $startDate,
                 $endDate,
-                $periodType
+                $periodType,
+                $collectionAddedCount
             );
 
 
@@ -406,11 +406,27 @@ class ReportController extends Controller
          * ANGGOTA AKTIF
          * ========================================================
          */
-        $activeMemberIds =
-            $this->getActiveMemberIds(
-                $startDate,
-                $endDate
-            );
+        $activeBorrowings = $allBorrowings->filter(function ($b) use ($startDate, $endDate) {
+            $borrowedAt = $b->borrowed_at ? Carbon::parse($b->borrowed_at) : null;
+            $returnedAt = $b->returned_at ? Carbon::parse($b->returned_at) : null;
+            return $borrowedAt && $borrowedAt->lte($endDate) && ($returnedAt === null || $returnedAt->gte($startDate));
+        });
+
+        $activeReservations = Reservation::with('book:id,judul_buku')
+            ->whereNotIn('status', ['ditolak', 'dibatalkan'])
+            ->whereDate('reserved_at', '<=', $endDate)
+            ->where(function ($query) use ($startDate) {
+                $query->whereNull('expires_at')->orWhereDate('expires_at', '>=', $startDate);
+            })
+            ->latest('reserved_at')
+            ->get();
+
+        $activeMemberIds = $activeBorrowings->pluck('member_id')
+            ->concat($activeReservations->pluck('member_id'))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
 
 
         $activeMembers =
@@ -424,7 +440,9 @@ class ReportController extends Controller
             $this->generateMemberChart(
                 $startDate,
                 $endDate,
-                $periodType
+                $periodType,
+                $activeBorrowings,
+                $activeReservations
             );
 
 
@@ -729,6 +747,9 @@ class ReportController extends Controller
          * dan reservasi. PDF menggunakan sumber data yang sama.
          * Satu anggota ditampilkan satu kali.
          */
+        $activeMemberBorrowings = $activeBorrowings->groupBy('member_id');
+        $activeMemberReservations = $activeReservations->groupBy('member_id');
+
         $activeMembersExportData =
             Member::query()
             ->whereIn(
@@ -738,69 +759,14 @@ class ReportController extends Controller
             ->get()
             ->map(function ($member, $index) use (
                 $startDate,
-                $endDate
+                $endDate,
+                $activeMemberBorrowings,
+                $activeMemberReservations
             ) {
 
-                $borrowing =
-                    Borrowing::with([
-                        'details.book'
-                    ])
-                    ->where(
-                        'member_id',
-                        $member->id
-                    )
-                    ->whereDate(
-                        'borrowed_at',
-                        '<=',
-                        $endDate
-                    )
-                    ->where(function ($query) use (
-                        $startDate
-                    ) {
-                        $query
-                            ->whereNull('returned_at')
-                            ->orWhereDate(
-                                'returned_at',
-                                '>=',
-                                $startDate
-                            );
-                    })
-                    ->latest('borrowed_at')
-                    ->first();
+                $borrowing = $activeMemberBorrowings->get($member->id)?->first();
 
-                $reservation =
-                    Reservation::with([
-                        'book'
-                    ])
-                    ->where(
-                        'member_id',
-                        $member->id
-                    )
-                    ->whereNotIn(
-                        'status',
-                        [
-                            'ditolak',
-                            'dibatalkan',
-                        ]
-                    )
-                    ->whereDate(
-                        'reserved_at',
-                        '<=',
-                        $endDate
-                    )
-                    ->where(function ($query) use (
-                        $startDate
-                    ) {
-                        $query
-                            ->whereNull('expires_at')
-                            ->orWhereDate(
-                                'expires_at',
-                                '>=',
-                                $startDate
-                            );
-                    })
-                    ->latest('reserved_at')
-                    ->first();
+                $reservation = $activeMemberReservations->get($member->id)?->first();
 
                 $borrowingDate =
                     $borrowing
@@ -1172,15 +1138,11 @@ class ReportController extends Controller
 
         /*
      * ========================================================
-     * 3. BUKU DITARIK
+     * 3. BUKU & EKSEMPLAR DITARIK (UNIFIED QUERY)
      * ========================================================
      */
-        $withdrawnBooks =
+        $allWithdrawals =
             CollectionWithdrawal::query()
-            ->where(
-                'type',
-                'book'
-            )
             ->whereBetween(
                 'withdrawn_at',
                 [
@@ -1193,6 +1155,9 @@ class ReportController extends Controller
                 'desc'
             )
             ->get();
+
+        $withdrawnBooks = $allWithdrawals->where('type', 'book');
+        $withdrawnCopies = $allWithdrawals->where('type', 'copy');
 
 
         foreach (
@@ -1243,26 +1208,6 @@ class ReportController extends Controller
      * Eksemplar yang ditarik tetap bisa muncul di laporan
      * walaupun record BookCopy sudah dihapus dari database.
      */
-        $withdrawnCopies =
-            CollectionWithdrawal::query()
-            ->where(
-                'type',
-                'copy'
-            )
-            ->whereBetween(
-                'withdrawn_at',
-                [
-                    $startDate,
-                    $endDate
-                ]
-            )
-            ->orderBy(
-                'withdrawn_at',
-                'desc'
-            )
-            ->get();
-
-
         foreach (
             $withdrawnCopies
             as $withdrawal
@@ -1320,6 +1265,13 @@ class ReportController extends Controller
                 'condition',
                 'rusak'
             )
+            ->whereBetween(
+                'updated_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
+            )
             ->orderBy(
                 'updated_at',
                 'desc'
@@ -1367,11 +1319,22 @@ class ReportController extends Controller
         }
 
 
-        return $data
-            ->sortByDesc(
-                'sort_date'
-            )
-            ->values();
+        $counts = [
+            'collectionAddedCount' => $addedBooks->count(),
+            'collectionAddedCopyCount' => $addedCopies->count(),
+            'collectionWithdrawnCount' => (int) $withdrawnBooks->sum('quantity'),
+            'collectionDeletedCopyCount' => $withdrawnCopies->count(),
+            'collectionDamagedCount' => $damagedCopies->count(),
+        ];
+
+        return [
+            $data
+                ->sortByDesc(
+                    'sort_date'
+                )
+                ->values(),
+            $counts
+        ];
     }
 
 
@@ -1577,14 +1540,22 @@ class ReportController extends Controller
      */
     private function getHistoricalLateBorrowings(
         $startDate,
-        $endDate
+        $endDate,
+        $preloadedBorrowings = null
     ) {
-        $borrowings = Borrowing::with([
-            'member',
-            'details.book',
-        ])
-            ->whereNotNull('due_at')
-            ->get();
+        $borrowings = $preloadedBorrowings !== null
+            ? $preloadedBorrowings->whereNotNull('due_at')
+            : Borrowing::with([
+                'member:id,name',
+                'details:id,borrowing_id,book_id,quantity',
+                'details.book:id,judul_buku,isbn',
+            ])
+                ->whereNotNull('due_at')
+                ->where('due_at', '<=', $endDate)
+                ->where(function ($q) use ($startDate) {
+                    $q->whereNull('returned_at')->orWhere('returned_at', '>=', $startDate);
+                })
+                ->get();
 
         return $borrowings
             ->filter(function ($borrowing) use (
@@ -1645,8 +1616,19 @@ class ReportController extends Controller
     private function generateBorrowChart(
         $startDate,
         $endDate,
-        $type
+        $type,
+        $borrowings = null
     ) {
+        if ($borrowings !== null) {
+            return $this->generateDateChartFromCollection(
+                $borrowings,
+                'borrowed_at',
+                $startDate,
+                $endDate,
+                $type
+            );
+        }
+
         return $this->generateDateChart(
             Borrowing::query(),
             'borrowed_at',
@@ -1668,10 +1650,12 @@ class ReportController extends Controller
     private function generateLateChart(
         $startDate,
         $endDate,
-        $type
+        $type,
+        $precomputedLateBorrowings = null
     ) {
-        $lateBorrowings =
-            $this->getHistoricalLateBorrowings(
+        $lateBorrowings = $precomputedLateBorrowings !== null
+            ? $precomputedLateBorrowings
+            : $this->getHistoricalLateBorrowings(
                 $startDate,
                 $endDate
             );
@@ -1901,8 +1885,18 @@ class ReportController extends Controller
     private function generateCollectionChart(
         $startDate,
         $endDate,
-        $type
+        $type,
+        $collectionAddedCount = null
     ) {
+        if ($collectionAddedCount === 0) {
+            $labels = match ($type) {
+                'day'  => ['00', '04', '08', '12', '16', '20'],
+                'week' => ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                default => ['M1', 'M2', 'M3', 'M4', 'M5'],
+            };
+            return [$labels, array_fill(0, count($labels), 0)];
+        }
+
         return $this->generateDateChart(
             Book::query(),
             'created_at',
@@ -1998,73 +1992,53 @@ class ReportController extends Controller
     private function generateMemberChart(
         $startDate,
         $endDate,
-        $type
+        $type,
+        $activeBorrowings = null,
+        $activeReservations = null
     ) {
+        $filterMembers = function ($winStart, $winEnd) use ($activeBorrowings, $activeReservations) {
+            if ($activeBorrowings !== null && $activeReservations !== null) {
+                $bIds = $activeBorrowings->filter(function ($b) use ($winStart, $winEnd) {
+                    $borrowedAt = $b->borrowed_at ? ($b->borrowed_at instanceof \Carbon\Carbon ? $b->borrowed_at : \Carbon\Carbon::parse($b->borrowed_at)) : null;
+                    $returnedAt = $b->returned_at ? ($b->returned_at instanceof \Carbon\Carbon ? $b->returned_at : \Carbon\Carbon::parse($b->returned_at)) : null;
+                    return $borrowedAt && $borrowedAt->lte($winEnd) && ($returnedAt === null || $returnedAt->gte($winStart));
+                })->pluck('member_id');
+
+                $rIds = $activeReservations->filter(function ($r) use ($winStart, $winEnd) {
+                    $createdAt = $r->created_at ? ($r->created_at instanceof \Carbon\Carbon ? $r->created_at : \Carbon\Carbon::parse($r->created_at)) : null;
+                    $expiresAt = $r->expires_at ? ($r->expires_at instanceof \Carbon\Carbon ? $r->expires_at : \Carbon\Carbon::parse($r->expires_at)) : null;
+                    return $createdAt && $createdAt->lte($winEnd) && ($expiresAt === null || $expiresAt->gte($winStart));
+                })->pluck('member_id');
+
+                return $bIds->concat($rIds)->filter()->unique()->values()->all();
+            }
+
+            return $this->getActiveMemberIds($winStart, $winEnd);
+        };
+
         if ($type === 'day') {
-
-            $memberIds =
-                $this->getActiveMemberIds(
-                    $startDate,
-                    $endDate
-                );
-
-
+            $memberIds = $filterMembers($startDate, $endDate);
             return [
                 ['Hari'],
-                $this->normalizeBars([
-                    count($memberIds)
-                ])
+                $this->normalizeBars([count($memberIds)])
             ];
         }
 
-
         if ($type === 'week') {
-
             $labels = [];
-
             $bars = [];
+            $cursor = $startDate->copy();
 
-            $cursor =
-                $startDate->copy();
+            while ($cursor->lte($endDate)) {
+                $dayStart = $cursor->copy()->startOfDay();
+                $dayEnd = $cursor->copy()->endOfDay();
 
+                $memberIds = $filterMembers($dayStart, $dayEnd);
 
-            while (
-                $cursor->lte(
-                    $endDate
-                )
-            ) {
-
-                $dayStart =
-                    $cursor
-                    ->copy()
-                    ->startOfDay();
-
-                $dayEnd =
-                    $cursor
-                    ->copy()
-                    ->endOfDay();
-
-
-                $memberIds =
-                    $this->getActiveMemberIds(
-                        $dayStart,
-                        $dayEnd
-                    );
-
-
-                $labels[] =
-                    $cursor->translatedFormat(
-                        'D'
-                    );
-
-
-                $bars[] =
-                    count($memberIds);
-
-
+                $labels[] = $cursor->translatedFormat('D');
+                $bars[] = count($memberIds);
                 $cursor->addDay();
             }
-
 
             return [
                 $labels,
@@ -2072,71 +2046,27 @@ class ReportController extends Controller
             ];
         }
 
-
         $labels = [];
-
         $bars = [];
-
-        $cursor =
-            $startDate->copy();
-
+        $cursor = $startDate->copy();
         $weekNumber = 1;
 
+        while ($cursor->lte($endDate)) {
+            $weekStart = $cursor->copy()->startOfDay();
+            $weekEnd = $cursor->copy()->addDays(6)->endOfDay();
 
-        while (
-            $cursor->lte(
-                $endDate
-            )
-        ) {
-
-            $weekStart =
-                $cursor
-                ->copy()
-                ->startOfDay();
-
-
-            $weekEnd =
-                $cursor
-                ->copy()
-                ->addDays(6)
-                ->endOfDay();
-
-
-            if (
-                $weekEnd->gt(
-                    $endDate
-                )
-            ) {
-
-                $weekEnd =
-                    $endDate->copy();
+            if ($weekEnd->gt($endDate)) {
+                $weekEnd = $endDate->copy();
             }
 
+            $memberIds = $filterMembers($weekStart, $weekEnd);
 
-            $memberIds =
-                $this->getActiveMemberIds(
-                    $weekStart,
-                    $weekEnd
-                );
+            $labels[] = 'M' . $weekNumber;
+            $bars[] = count($memberIds);
 
-
-            $labels[] =
-                'M' . $weekNumber;
-
-
-            $bars[] =
-                count($memberIds);
-
-
-            $cursor =
-                $weekEnd
-                ->copy()
-                ->addSecond();
-
-
+            $cursor = $weekEnd->copy()->addSecond();
             $weekNumber++;
         }
-
 
         return [
             $labels,
@@ -2341,6 +2271,89 @@ class ReportController extends Controller
             $labels,
             $this->normalizeBars($bars)
         ];
+    }
+
+
+    /**
+     * ============================================================
+     * GRAFIK DARI KOLEKSI (IN-MEMORY)
+     * ============================================================
+     */
+    private function generateDateChartFromCollection(
+        $collection,
+        $column,
+        $startDate,
+        $endDate,
+        $type
+    ) {
+        if ($type === 'day') {
+            $labels = ['00', '04', '08', '12', '16', '20'];
+            $bars = [];
+
+            foreach ($labels as $hour) {
+                $start = $startDate->copy()->setHour((int) $hour)->startOfHour();
+                $end = $start->copy()->addHours(3)->endOfHour();
+
+                $bars[] = $collection->filter(function ($item) use ($column, $start, $end) {
+                    $val = $item->{$column};
+                    if (!$val) return false;
+                    $date = $val instanceof \Carbon\Carbon ? $val : \Carbon\Carbon::parse($val);
+                    return $date->between($start, $end);
+                })->count();
+            }
+
+            return [$labels, $this->normalizeBars($bars)];
+        }
+
+        if ($type === 'week') {
+            $labels = [];
+            $bars = [];
+            $cursor = $startDate->copy();
+
+            while ($cursor->lte($endDate)) {
+                $dayStart = $cursor->copy()->startOfDay();
+                $dayEnd = $cursor->copy()->endOfDay();
+
+                $labels[] = $cursor->translatedFormat('D');
+                $bars[] = $collection->filter(function ($item) use ($column, $dayStart, $dayEnd) {
+                    $val = $item->{$column};
+                    if (!$val) return false;
+                    $date = $val instanceof \Carbon\Carbon ? $val : \Carbon\Carbon::parse($val);
+                    return $date->between($dayStart, $dayEnd);
+                })->count();
+
+                $cursor->addDay();
+            }
+
+            return [$labels, $this->normalizeBars($bars)];
+        }
+
+        $labels = [];
+        $bars = [];
+        $cursor = $startDate->copy();
+        $weekNumber = 1;
+
+        while ($cursor->lte($endDate)) {
+            $weekStart = $cursor->copy()->startOfDay();
+            $weekEnd = $cursor->copy()->addDays(6)->endOfDay();
+
+            if ($weekEnd->gt($endDate)) {
+                $weekEnd = $endDate->copy();
+            }
+
+            $labels[] = 'M' . $weekNumber;
+            $bars[] = $collection->filter(function ($item) use ($column, $weekStart, $weekEnd) {
+                $val = $item->{$column};
+                if (!$val) return false;
+                $date = $val instanceof \Carbon\Carbon ? $val : \Carbon\Carbon::parse($val);
+                return $date->between($weekStart, $weekEnd);
+            })->count();
+
+            $cursor = $weekEnd->copy()->addSecond();
+            $weekNumber++;
+        }
+
+        return [$labels, $this->normalizeBars($bars)];
     }
 
 

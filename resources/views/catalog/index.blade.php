@@ -62,16 +62,16 @@
                 );
             }
 
-            // Hitung data dinamis untuk dropdown
-            $totalBooksCount = \App\Models\Book::count();
+            // Hitung data dinamis untuk dropdown (di-cache 120 detik)
+            $totalBooksCount = \Illuminate\Support\Facades\Cache::remember('catalog_total_books_cnt', 120, fn() => \App\Models\Book::count());
 
-            $availableBooksCount = \App\Models\Book::whereHas('copies', function ($q) {
+            $availableBooksCount = \Illuminate\Support\Facades\Cache::remember('catalog_avail_books_cnt', 120, fn() => \App\Models\Book::whereHas('copies', function ($q) {
                 $q->where('status', 'available');
-            })->count();
+            })->count());
 
-            $borrowedBooksCount = \App\Models\Book::whereHas('copies', function ($q) {
+            $borrowedBooksCount = \Illuminate\Support\Facades\Cache::remember('catalog_borrowed_books_cnt', 120, fn() => \App\Models\Book::whereHas('copies', function ($q) {
                 $q->whereIn('status', ['borrowed', 'reserved']);
-            })->count();
+            })->count());
 
 
             // Label tombol filter kategori
@@ -279,7 +279,7 @@
                             @foreach ($categories as $category)
 
                                 @php
-                                    $catCount = $category->books()->count();
+                                    $catCount = $category->books_count ?? $category->books()->count();
                                 @endphp
 
                                 <a href="{{ route(

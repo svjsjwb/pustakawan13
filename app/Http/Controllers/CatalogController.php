@@ -17,6 +17,7 @@ class CatalogController extends Controller
 
         $categories = Category::whereIn('name', $categoryOrder)
             ->with('subcategories')
+            ->withCount('books')
             ->orderByRaw("
                 CASE name
                     WHEN 'Buku Pelajaran' THEN 1

@@ -21,11 +21,12 @@ class CirculationController extends Controller
      */
     public function index(Request $request)
     {
-        $members = Member::orderBy('name')->get();
+        $members = Member::select(['id', 'member_number', 'name'])->orderBy('name')->get();
 
         $extensionRequests = Borrowing::with([
-            'member',
-            'details.book',
+            'member:id,member_number,name',
+            'details:id,borrowing_id,book_id,quantity',
+            'details.book:id,judul_buku,isbn',
         ])
             ->where('extension_status', 'menunggu')
             ->latest()
@@ -64,8 +65,8 @@ class CirculationController extends Controller
         }
 
         $reservations = Reservation::with([
-            'member',
-            'book',
+            'member:id,member_number,name',
+            'book:id,judul_buku,isbn',
         ])
             ->whereNotIn('status', [
                 'ditolak',
@@ -112,8 +113,9 @@ class CirculationController extends Controller
         */
 
         $borrowings = Borrowing::with([
-            'member',
-            'details.book',
+            'member:id,member_number,name',
+            'details:id,borrowing_id,book_id,quantity',
+            'details.book:id,judul_buku,isbn',
         ])
             ->whereYear('borrowed_at', $year)
             ->whereMonth('borrowed_at', $month)
