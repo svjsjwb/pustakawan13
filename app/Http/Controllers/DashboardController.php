@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Member;
 use App\Models\Borrowing;
+use App\Models\BorrowingDetail;
 use App\Models\Reservation;
 use App\Models\Activity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -16,19 +19,25 @@ class DashboardController extends Controller
     {
         /*
          * ========================================================
-         * STATISTIK CARD (TOTAL, REALTIME)
+         * STATISTIK CARD (TOTAL, REALTIME - CACHE 60s)
          * ========================================================
          */
 
-        $totalBooks = Book::count();
+        $stats = Cache::remember('admin_dashboard_stats', 60, function () {
+            return [
+                'totalBooks'     => Book::count(),
+                'borrowedBooks'  => Borrowing::where('status', 'dipinjam')->count(),
+                'activeMembers'  => Member::where('status', 'aktif')->count(),
+                'lateBorrowings' => Borrowing::where('status', 'dipinjam')
+                    ->whereDate('due_at', '<', today())
+                    ->count(),
+            ];
+        });
 
-        $borrowedBooks = Borrowing::where('status', 'dipinjam')->count();
-
-        $activeMembers = Member::where('status', 'aktif')->count();
-
-        $lateBorrowings = Borrowing::where('status', 'dipinjam')
-            ->whereDate('due_at', '<', today())
-            ->count();
+        $totalBooks     = $stats['totalBooks'];
+        $borrowedBooks  = $stats['borrowedBooks'];
+        $activeMembers  = $stats['activeMembers'];
+        $lateBorrowings = $stats['lateBorrowings'];
 
 
         /*
@@ -67,70 +76,31 @@ class DashboardController extends Controller
             ->get();
 
 
-        // tabel buku populer
-        
-        $borrowingCounts = collect();
+        // tabel buku populer (dioptimasi: 1 query agregasi SQL + cache 5 menit)
+        $popularBooks = Cache::remember('admin_dashboard_popular_books_v2', 300, function () {
+            return BorrowingDetail::query()
+                ->select('book_id', DB::raw('SUM(COALESCE(quantity, 1)) as total_borrowed'))
+                ->groupBy('book_id')
+                ->orderByDesc('total_borrowed')
+                ->take(5)
+                ->with('book:id,judul_buku')
+                ->get()
+                ->map(function ($detail) {
+                    $total = (int) $detail->total_borrowed;
+                    return [
+                        'book_id'           => $detail->book_id,
+                        'title'             => $detail->book?->title ?? '-',
+                        'borrowing_total'   => $total,
+                        'reservation_total' => 0,
+                        'total'             => $total,
+                    ];
+                })
+                ->all();
+        });
 
-        $allBorrowings = Borrowing::with('details')->get();
-
-        foreach ($allBorrowings as $borrowing) {
-
-            foreach ($borrowing->details as $detail) {
-
-                $bookId = $detail->book_id;
-
-                $quantity = (int) ($detail->quantity ?? 1);
-
-                $borrowingCounts[$bookId] =
-                    ($borrowingCounts[$bookId] ?? 0)
-                    + $quantity;
-            }
+        if (!is_array($popularBooks)) {
+            $popularBooks = [];
         }
-
-
-        $popularBookIds = $borrowingCounts
-            ->keys()
-            ->values();
-
-
-        $popularBooks = Book::whereIn(
-            'id',
-            $popularBookIds
-        )
-            ->get()
-            ->map(function ($book) use ($borrowingCounts) {
-
-                $borrowingTotal =
-                    (int) (
-                        $borrowingCounts[$book->id] ?? 0
-                    );
-
-                return [
-                    'book_id' =>
-                    $book->id,
-
-                    'title' =>
-                    $book->title ?? '-',
-
-                    'borrowing_total' =>
-                    $borrowingTotal,
-
-                    'reservation_total' =>
-                    0,
-
-                    'total' =>
-                    $borrowingTotal,
-                ];
-            })
-            ->sort(function ($a, $b) {
-
-                /*
-         * Popularitas terbesar di atas.
-         */
-                return $b['total'] <=> $a['total'];
-            })
-            ->take(5)
-            ->values();
 
         /*
          * ========================================================

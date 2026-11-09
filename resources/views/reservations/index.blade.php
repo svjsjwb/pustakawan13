@@ -764,7 +764,7 @@
                                                         in_array($reservation->status, ['menunggu', 'disetujui'])
                                                     ))
                                                 <span class="action-done">
-                                                    —
+                                                    -
                                                 </span>
                                             @endif
 

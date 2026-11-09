@@ -7,7 +7,7 @@
     <title>Daftar | Perpustakaan Tiga Serangkai</title>
     <meta name="color-scheme" content="dark light">
     <link rel="preload" as="image" href="{{ asset('images/bg-ts.jpeg') }}" fetchpriority="high">
-    <link rel="stylesheet" href="{{ asset('css/register.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/register.css') }}?v={{ file_exists(public_path('css/register.css')) ? filemtime(public_path('css/register.css')) : '1.0' }}">
     <style>
         /* ============================================================
            REGISTER PAGE — ZERO GREEN FLASH ON REFRESH / DIRECT LOAD

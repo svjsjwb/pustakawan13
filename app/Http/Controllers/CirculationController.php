@@ -35,7 +35,8 @@ class CirculationController extends Controller
          * Semua buku tetap ditampilkan,
          * termasuk yang stok tersedia = 0.
          */
-        $books = Book::orderByRaw("
+        $cacheFile = storage_path('framework/cache/books_dropdown.json');
+        $orderRaw = "
     COALESCE(
         NULLIF(
             substring(judul_buku from '([0-9]+)$'),
@@ -43,12 +44,28 @@ class CirculationController extends Controller
         )::BIGINT,
         0
     ) ASC
-")->get();
+";
+
+        if (!file_exists($cacheFile) || (time() - filemtime($cacheFile) > 600)) {
+            $booksData = Book::select(['id', 'judul_buku', 'stok'])
+                ->orderByRaw($orderRaw)
+                ->get()
+                ->map(function ($b) {
+                    return (object) [
+                        'id' => $b->id,
+                        'title' => $b->title,
+                        'available_stock' => $b->available_stock,
+                    ];
+                });
+            @file_put_contents($cacheFile, json_encode($booksData));
+            $books = $booksData;
+        } else {
+            $books = json_decode(file_get_contents($cacheFile));
+        }
 
         $reservations = Reservation::with([
             'member',
             'book',
-            'bookCopy',
         ])
             ->whereNotIn('status', [
                 'ditolak',
@@ -97,7 +114,6 @@ class CirculationController extends Controller
         $borrowings = Borrowing::with([
             'member',
             'details.book',
-            'details.bookCopy.shelf.zone.floor',
         ])
             ->whereYear('borrowed_at', $year)
             ->whereMonth('borrowed_at', $month)

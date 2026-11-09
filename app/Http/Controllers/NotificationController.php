@@ -38,14 +38,21 @@ class NotificationController extends Controller
                     $query->where('role', 'guest');
                 })->count()
                 : 0;
-            $pendingBorrowingNotifications = $user->isAdmin()
+
+            $activeBorrowingIds = $user->isAdmin()
+                ? Borrowing::query()
+                    ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
+                    ->whereNull('returned_at')
+                    ->pluck('id')
+                    ->map(fn($id) => (string) $id)
+                    ->all()
+                : [];
+
+            $pendingBorrowingNotifications = ($user->isAdmin() && !empty($activeBorrowingIds))
                 ? AppNotification::where('role', 'admin')
                     ->where('type', 'borrowing_new')
                     ->where('is_read', false)
-                    ->whereIn('data->borrowing_id', Borrowing::query()
-                        ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
-                        ->whereNull('returned_at')
-                        ->select('id'))
+                    ->whereIn('data->borrowing_id', $activeBorrowingIds)
                     ->pluck('id')
                 : collect();
             $pendingReservationsCount = $user->isAdmin()
@@ -66,9 +73,18 @@ class NotificationController extends Controller
         $tab = $request->query('tab', 'all');
         $baseQuery = AppNotification::where('user_id', $user->id)->where('role', 'user');
 
-        $totalCount = (clone $baseQuery)->count();
-        $unreadCount = (clone $baseQuery)->where('is_read', false)->count();
-        $readCount = (clone $baseQuery)->where('is_read', true)->count();
+        $counts = AppNotification::where('user_id', $user->id)
+            ->where('role', 'user')
+            ->selectRaw("
+                COUNT(*) as total,
+                COUNT(CASE WHEN is_read = false THEN 1 END) as unread,
+                COUNT(CASE WHEN is_read = true THEN 1 END) as read
+            ")
+            ->first();
+
+        $totalCount  = (int) ($counts->total ?? 0);
+        $unreadCount = (int) ($counts->unread ?? 0);
+        $readCount   = (int) ($counts->read ?? 0);
 
         $query = clone $baseQuery;
         if ($tab === 'unread') {

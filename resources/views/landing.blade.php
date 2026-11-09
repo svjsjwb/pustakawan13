@@ -11,12 +11,12 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="preload" as="image" href="{{ asset('images/bg-ts.jpeg') }}" fetchpriority="high">
-    <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ file_exists(public_path('css/landing.css')) ? filemtime(public_path('css/landing.css')) : '1.0' }}">
     <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/register.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/register.css') }}?v={{ file_exists(public_path('css/register.css')) ? filemtime(public_path('css/register.css')) : '1.0' }}">
 
     <style>
         /* ============================================================
@@ -32,7 +32,7 @@
             overflow: hidden !important;
             overscroll-behavior: none;
             background: #020f10; /* Asli Landing Page */
-            font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         }
 
         .viewport-wrapper {
@@ -356,8 +356,8 @@
                 <section class="login-panel">
                     <div class="login-card">
                         <div class="login-header">
-                            <h2>WELCOME!!</h2>
-                            <p>Selamat menjelajah jendela dunia.</p>
+                            <h2>Selamat Datang</h2>
+                            <p>Masuk untuk menjelajahi koleksi buku dan layanan literasi.</p>
                         </div>
 
                         @if ($errors->any())

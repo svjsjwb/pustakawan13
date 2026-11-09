@@ -45,9 +45,10 @@ class ReservationController extends Controller
          * BUKU
          * =====================================================
          *
-         * Gunakan kolom schema baru: judul_buku.
+         * View reservations/index tidak me-render seluruh daftar $books.
+         * Gunakan koleksi kosong untuk mencegah overhead memori 15.000+ buku.
          */
-        $books = Book::orderBy('judul_buku')->get();
+        $books = collect();
 
         /*
          * =====================================================
@@ -60,14 +61,8 @@ class ReservationController extends Controller
             'bookCopy.shelf.zone.floor',
         ]);
 
-        // Tentukan kolom batas waktu yang tersedia pada schema.
-        $dueColumn = Schema::hasColumn('reservations', 'due_at')
-            ? 'due_at'
-            : (
-                Schema::hasColumn('reservations', 'expires_at')
-                ? 'expires_at'
-                : 'reserved_at'
-            );
+        // Kolom batas waktu reservasi resmi pada skema adalah expires_at.
+        $dueColumn = 'expires_at';
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $startDate = Carbon::parse($request->start_date)->startOfDay();

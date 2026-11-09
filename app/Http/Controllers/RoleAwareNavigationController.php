@@ -31,4 +31,11 @@ class RoleAwareNavigationController extends Controller
     {
         return app(UserHistoryController::class)->index($request);
     }
+
+    public function extend(Request $request, \App\Models\Borrowing $borrowing)
+    {
+        return Auth::user()->isAdmin()
+            ? app(CirculationController::class)->extend($request, $borrowing)
+            : app(UserBorrowingController::class)->extend($request, $borrowing);
+    }
 }

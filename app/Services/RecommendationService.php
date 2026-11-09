@@ -8,31 +8,46 @@ use App\Models\Borrowing;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class RecommendationService
 {
 
     public function getForUser(?User $user, int $limit = 8): Collection
     {
-        if (!$user) {
-            return $this->getColdStartRecommendations($limit);
+        $cacheKey = $user ? "user_recs_ids_{$user->id}_{$limit}" : "cold_recs_ids_{$limit}";
+
+        $bookIds = Cache::remember($cacheKey, 300, function () use ($user, $limit) {
+            if (!$user) {
+                return $this->getColdStartRecommendations($limit)->pluck('id')->toArray();
+            }
+
+            $interactionData = $this->getUserInteractionData($user);
+
+            $hasInteraction =
+                $interactionData['book_ids']->isNotEmpty() ||
+                $interactionData['category_ids']->isNotEmpty() ||
+                $interactionData['subcategory_ids']->isNotEmpty();
+
+            if (!$hasInteraction) {
+                return $this->getColdStartRecommendations($limit)->pluck('id')->toArray();
+            }
+
+            return $this->getPersonalizedRecommendations(
+                $interactionData,
+                $limit
+            )->pluck('id')->toArray();
+        });
+
+        if (empty($bookIds)) {
+            return collect();
         }
 
-        $interactionData = $this->getUserInteractionData($user);
-
-        $hasInteraction =
-            $interactionData['book_ids']->isNotEmpty() ||
-            $interactionData['category_ids']->isNotEmpty() ||
-            $interactionData['subcategory_ids']->isNotEmpty();
-
-        if (!$hasInteraction) {
-            return $this->getColdStartRecommendations($limit);
-        }
-
-        return $this->getPersonalizedRecommendations(
-            $interactionData,
-            $limit
-        );
+        return Book::with('category')
+            ->whereIn('id', $bookIds)
+            ->get()
+            ->sortBy(fn($b) => array_search($b->id, $bookIds))
+            ->values();
     }
 
     protected function getUserInteractionData(User $user): array
@@ -332,11 +347,13 @@ class RecommendationService
             $query->whereNotIn('id', $excludeIds);
         }
 
-        // Prioritaskan buku yang memiliki cover
-        $hasCoverCount = Book::where('stok', '>', 0)
-            ->whereNotNull('cover')
-            ->where('cover', '!=', '')
-            ->count();
+        // Prioritaskan buku yang memiliki cover (cache hitungan selama 1 jam)
+        $hasCoverCount = Cache::remember('books_has_cover_count', 3600, function () {
+            return Book::where('stok', '>', 0)
+                ->whereNotNull('cover')
+                ->where('cover', '!=', '')
+                ->count();
+        });
 
         if ($hasCoverCount >= $limit) {
             $query->whereNotNull('cover')->where('cover', '!=', '');

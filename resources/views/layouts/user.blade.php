@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{{ asset('css/user-theme.css') }}">
     <link rel="stylesheet" href="{{ asset('css/premium-dropdown.css') }}">
     <link rel="stylesheet" href="{{ asset('css/guest-approval.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/activity-popup.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/activity-popup.css') }}?v={{ file_exists(public_path('css/activity-popup.css')) ? filemtime(public_path('css/activity-popup.css')) : '1.0' }}">
 
     {{-- Anti-flash dark mode & layout density initializer --}}
     <script>
@@ -71,7 +71,10 @@
 
     {{-- Guest Approval Popup --}}
     @auth
-        @if (Auth::user()->role === 'guest')
+        @if (Auth::user()->role === 'guest' && session('show_guest_approval_popup'))
+            @php
+                session()->forget('show_guest_approval_popup');
+            @endphp
             <div class="guest-approval-overlay" id="guestApprovalPopup" data-user-id="{{ Auth::id() }}">
                 <div class="guest-approval-modal">
 
@@ -113,7 +116,7 @@
     <div id="ulToastContainer"></div>
 
     <script src="{{ asset('js/app.js') }}"></script>
-    <script src="{{ asset('js/guest-approval.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/guest-approval.js') }}?v={{ file_exists(public_path('js/guest-approval.js')) ? filemtime(public_path('js/guest-approval.js')) : '1.0' }}"></script>
     <script>
         // ── Auto-hide flash ───────────────────────────────────────
         setTimeout(() => {

@@ -290,7 +290,7 @@
                                                 @if (!empty($activity['description']) && $activity['type'] !== 'manual')
                                                     <span class="activity-book">
 
-                                                        — {{ $activity['description'] }}
+                                                        · {{ $activity['description'] }}
 
                                                     </span>
                                                 @endif

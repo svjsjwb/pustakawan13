@@ -148,6 +148,8 @@
                             @if($book?->cover)
                                 <img src="{{ asset('storage/' . $book->cover) }}"
                                      alt="{{ $book->title }}"
+                                     loading="lazy"
+                                     decoding="async"
                                      style="width: 46px; height: 62px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(18,63,61,0.15); flex-shrink: 0;">
                             @else
                                 <div style="width: 46px; height: 62px; border-radius: 8px; background: linear-gradient(145deg, #278482, #124f4e); color: #fff; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">

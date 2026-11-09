@@ -47,6 +47,9 @@ class LoginController extends Controller
             $request->session()->flash('just_logged_in', true);
 
             $user = Auth::user();
+            if ($user && $user->role === 'guest') {
+                $request->session()->put('show_guest_approval_popup', true);
+            }
 
             // Redirect berdasarkan role
             if ($user->role === 'admin') {

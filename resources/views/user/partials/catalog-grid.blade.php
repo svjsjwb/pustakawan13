@@ -47,7 +47,6 @@
                     $categoryLabel = $book->category->name ?? 'Buku Umum';
                 }
                 $badgeText = $categoryLabel;
-                }
             @endphp
             <div class="saas-book-card"
                  onclick="openCatalogModal(this)"
@@ -75,7 +74,8 @@
                         <img src="{{ asset('storage/'.$book->cover) }}"
                              alt="{{ $book->title }}"
                              class="saas-card-cover-img"
-                             loading="lazy">
+                             loading="lazy"
+                             decoding="async">
                     @else
                         <div class="saas-card-cover-fallback">
                             <span class="fallback-letter">{{ strtoupper(substr($book->title, 0, 1)) }}</span>

@@ -8,6 +8,7 @@ use App\Models\Reservation;
 use App\Models\Borrowing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class UserCatalogController extends Controller
@@ -118,13 +119,14 @@ class UserCatalogController extends Controller
 
     public function index(Request $request)
     {
-        $query = Book::with('category');
+        // Eager load category dan copies.shelf untuk mengeliminasi N+1 query getRakAttribute() di catalog-grid
+        $query = Book::with(['category', 'copies.shelf']);
 
         // ── Search ────────────────────────────────────────────
         $search = trim((string) $request->input('search', ''));
 
         if ($search !== '') {
-            $query->where('judul_buku', 'like', "{$search}%");
+            $query->where('judul_buku', 'ilike', "{$search}%");
         }
 
         // ── Filter Kategori Hierarkis ─────────────────────────
@@ -225,38 +227,9 @@ class UserCatalogController extends Controller
             return $book;
         });
 
-        // ── Real counts per main category & subcategory ───────
-        // Count TIDAK dipengaruhi oleh filter yang sedang aktif.
-
-        $subCounts = Book::select(
-            'main_category',
-            'sub_category',
-            'education_level'
-        )
-            ->get()
-            ->groupBy(function ($item) {
-                $sub = $item->sub_category ?: $item->education_level;
-
-                return $item->main_category . '::' . $sub;
-            })
-            ->map->count();
-
-        $mainCounts = Book::select('main_category')
-            ->whereNotNull('main_category')
-            ->get()
-            ->groupBy('main_category')
-            ->map->count();
-
-        // ── Statistik perpustakaan untuk hero section ─────────
-
-        $stats = [
-            'total_titles'    => Book::count(),
-            'available_count' => Book::where('stok', '>', 0)->count(),
-            'borrowed_count'  => Borrowing::where('status', 'dipinjam')->count(),
-        ];
+        $isAjax = $request->ajax() || $request->input('ajax') == '1' || $request->wantsJson();
 
         // ── Favorit session & status user ─────────────────────
-
         $favoriteIds = session('user_favorites', []);
 
         $reservedBookIds = [];
@@ -281,31 +254,19 @@ class UserCatalogController extends Controller
                     ->pluck('book_id')
                     ->all();
 
-                $borrowedBookIds = Borrowing::where(
-                    'member_id',
-                    $member->id
-                )
-                    ->where('status', 'dipinjam')
-                    ->whereHas('details')
-                    ->with('details')
-                    ->get()
-                    ->flatMap(
-                        fn($borrowing) =>
-                        $borrowing->details->pluck('book_id')
-                    )
+                $borrowedBookIds = DB::table('borrowing_details')
+                    ->join('borrowings', 'borrowing_details.borrowing_id', '=', 'borrowings.id')
+                    ->where('borrowings.member_id', $member->id)
+                    ->whereIn('borrowings.status', ['dipinjam', 'diperpanjang', 'terlambat'])
+                    ->pluck('borrowing_details.book_id')
                     ->unique()
                     ->values()
                     ->all();
             }
         }
 
-        // ── AJAX Response for Realtime Filter ─────────────────
-
-        if (
-            $request->ajax() ||
-            $request->input('ajax') == '1' ||
-            $request->wantsJson()
-        ) {
+        // ── AJAX Response for Realtime Filter & Paginasi (Bypass Query Stat) ──
+        if ($isAjax) {
             return response()->json([
                 'success' => true,
 
@@ -339,6 +300,34 @@ class UserCatalogController extends Controller
                 )->render(),
             ]);
         }
+
+        // ── Real counts per main category & subcategory (Hanya untuk Full Page Load) ──
+        $subCounts = Cache::remember('catalog_sub_counts_v2', 600, function () {
+            return DB::table('books')
+                ->selectRaw("CONCAT(main_category, '::', COALESCE(NULLIF(sub_category, ''), education_level)) as grp, count(*) as total")
+                ->whereNotNull('main_category')
+                ->groupBy('main_category', 'sub_category', 'education_level')
+                ->pluck('total', 'grp')
+                ->all();
+        });
+
+        $mainCounts = Cache::remember('catalog_main_counts_v2', 600, function () {
+            return DB::table('books')
+                ->selectRaw('main_category, count(*) as total')
+                ->whereNotNull('main_category')
+                ->groupBy('main_category')
+                ->pluck('total', 'main_category')
+                ->all();
+        });
+
+        // ── Statistik perpustakaan untuk hero section ─────────
+        $stats = Cache::remember('catalog_hero_stats', 300, function () {
+            return [
+                'total_titles'    => Book::count(),
+                'available_count' => Book::where('stok', '>', 0)->count(),
+                'borrowed_count'  => Borrowing::where('status', 'dipinjam')->count(),
+            ];
+        });
 
         return view('user.catalog', [
             'books'            => $books,

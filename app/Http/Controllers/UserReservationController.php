@@ -37,7 +37,7 @@ class UserReservationController extends Controller
 
             if ($search !== '') {
                 $query->whereHas('book', function ($q) use ($search) {
-                    $q->where('judul_buku', 'like', "{$search}%");
+                    $q->where('judul_buku', 'ilike', "{$search}%");
                 });
             }
 
@@ -51,34 +51,24 @@ class UserReservationController extends Controller
                 ->paginate(10)
                 ->withQueryString();
 
-            // Hitungan status untuk tab / badge
-            $allRes = Reservation::where('member_id', $member->id)->get();
+            // Hitungan status untuk tab / badge via agregasi SQL cepat
+            $counts = Reservation::where('member_id', $member->id)
+                ->selectRaw("
+                    COUNT(*) as total,
+                    COUNT(CASE WHEN status IN ('menunggu', 'disetujui', 'siap_diambil') THEN 1 END) as aktif,
+                    COUNT(CASE WHEN status = 'menunggu' THEN 1 END) as menunggu,
+                    COUNT(CASE WHEN status = 'disetujui' THEN 1 END) as disetujui,
+                    COUNT(CASE WHEN status = 'siap_diambil' THEN 1 END) as siap_diambil,
+                    COUNT(CASE WHEN status = 'ditolak' THEN 1 END) as ditolak
+                ")
+                ->first();
 
-            $statusCounts['semua'] = $allRes->count();
-
-            $statusCounts['aktif'] = $allRes
-                ->whereIn('status', [
-                    'menunggu',
-                    'disetujui',
-                    'siap_diambil'
-                ])
-                ->count();
-
-            $statusCounts['menunggu'] = $allRes
-                ->where('status', 'menunggu')
-                ->count();
-
-            $statusCounts['disetujui'] = $allRes
-                ->where('status', 'disetujui')
-                ->count();
-
-            $statusCounts['siap_diambil'] = $allRes
-                ->where('status', 'siap_diambil')
-                ->count();
-
-            $statusCounts['ditolak'] = $allRes
-                ->where('status', 'ditolak')
-                ->count();
+            $statusCounts['semua']        = (int) ($counts->total ?? 0);
+            $statusCounts['aktif']        = (int) ($counts->aktif ?? 0);
+            $statusCounts['menunggu']     = (int) ($counts->menunggu ?? 0);
+            $statusCounts['disetujui']    = (int) ($counts->disetujui ?? 0);
+            $statusCounts['siap_diambil'] = (int) ($counts->siap_diambil ?? 0);
+            $statusCounts['ditolak']      = (int) ($counts->ditolak ?? 0);
         }
 
         return view(
@@ -148,13 +138,23 @@ class UserReservationController extends Controller
             ->exists();
 
         if ($alreadyReserved) {
-            return response()->json([
-                'message' => 'Buku ini sudah ada di daftar reservasi Anda.',
-                'already_reserved' => true,
-            ], 409);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'message' => 'Buku ini sudah ada di daftar reservasi Anda.',
+                    'already_reserved' => true,
+                ], 409);
+            }
+
+            return back()->with('error', 'Buku ini sudah ada di daftar reservasi Anda.');
         }
 
         if ($book->available_stock < 1) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'message' => 'Maaf, stok buku ini sedang habis sehingga tidak dapat direservasi.',
+                ], 409);
+            }
+
             return back()->with(
                 'error',
                 'Maaf, stok buku ini sedang habis sehingga tidak dapat direservasi.'

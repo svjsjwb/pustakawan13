@@ -437,6 +437,10 @@ class GoogleAuthController extends Controller
         request()->session()->flash('just_logged_in', true);
         request()->session()->put('just_logged_in', true);
 
+        if ($user->role === 'guest') {
+            request()->session()->put('show_guest_approval_popup', true);
+        }
+
         /*
         |--------------------------------------------------------------------------
         | FIRST LOGIN NOTIFICATION
@@ -494,6 +498,10 @@ class GoogleAuthController extends Controller
         request()->session()->regenerate();
         request()->session()->flash('just_logged_in', true);
         request()->session()->put('just_logged_in', true);
+
+        if ($user->role === 'guest') {
+            request()->session()->put('show_guest_approval_popup', true);
+        }
 
         /*
         |--------------------------------------------------------------------------

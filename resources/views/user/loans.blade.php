@@ -919,7 +919,9 @@
                     @if($detail->book?->cover)
                         <img src="{{ asset('storage/'.$detail->book->cover) }}"
                              class="loan-cover"
-                             alt="{{ $detail->book->title }}">
+                             alt="{{ $detail->book->title }}"
+                             loading="lazy"
+                             decoding="async">
                     @else
                         <div class="loan-cover loan-cover-fallback">
                             {{ strtoupper(substr($detail->book?->title ?? 'B', 0, 1)) }}

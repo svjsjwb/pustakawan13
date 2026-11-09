@@ -171,7 +171,7 @@
                 >
 
                 {{ $zone->name }}
-                —
+                ·
                 {{ $shelf->code }}
 
             </option>
@@ -212,7 +212,7 @@
             ) == 1
             )
             >
-            Section 1 — A-01
+            Section 1 · A-01
         </option>
 
         <option
@@ -223,7 +223,7 @@
             ) == 2
             )
             >
-            Section 2 — A-02
+            Section 2 · A-02
         </option>
 
     </select>

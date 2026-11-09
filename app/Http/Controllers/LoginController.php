@@ -67,6 +67,10 @@ class LoginController extends Controller
         $request->session()->flash('just_logged_in', true);
         $request->session()->put('just_logged_in', true);
 
+        if ($user->role === 'guest') {
+            $request->session()->put('show_guest_approval_popup', true);
+        }
+
         if ($isFirstLogin) {
             \App\Services\NotificationService::firstLogin($user, $request->ip(), $request->userAgent());
         }

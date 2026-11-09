@@ -45,19 +45,20 @@ class MemberStatusService
                 })
                 ->exists();
 
-            $member->update([
-                'status' => ($hasActiveBorrowing || $hasActiveReservation)
-                    ? 'aktif'
-                    : 'nonaktif'
-            ]);
+            $newStatus = ($hasActiveBorrowing || $hasActiveReservation) ? 'aktif' : 'nonaktif';
+            if ($member->status !== $newStatus) {
+                $member->update(['status' => $newStatus]);
+            }
 
             return;
         }
 
         // Jika tidak memiliki user / role yang valid
-        $member->update([
-            'status' => 'nonaktif'
-        ]);
+        if ($member->status !== 'nonaktif') {
+            $member->update([
+                'status' => 'nonaktif'
+            ]);
+        }
     }
 
     /**
@@ -76,41 +77,29 @@ class MemberStatusService
           ]);
 
         /*
-         * Member perlu dihitung berdasarkan aktivitasnya.
+         * Member perlu dihitung berdasarkan aktivitasnya secara batch.
          */
-        Member::whereHas('user', function ($q) {
+        $activeMemberIds = Member::whereHas('user', function ($q) {
             $q->where('role', 'member');
-        })
-        ->with(['borrowings', 'reservations'])
-        ->get()
-        ->each(function (Member $member) {
+        })->where(function ($query) {
+            $query->whereHas('borrowings', function ($b) {
+                $b->whereNull('returned_at')
+                  ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat']);
+            })->orWhereHas('reservations', function ($r) {
+                $r->whereNotIn('status', ['selesai', 'ditolak', 'dibatalkan'])
+                  ->where(function ($sub) {
+                      $sub->whereNull('expires_at')
+                          ->orWhere('expires_at', '>=', now());
+                  });
+            });
+        })->pluck('id');
 
-            $hasActiveBorrowing = $member->borrowings()
-                ->whereNull('returned_at')
-                ->whereIn('status', [
-                    'dipinjam',
-                    'diperpanjang',
-                    'terlambat',
-                ])
-                ->exists();
+        Member::whereIn('id', $activeMemberIds)
+            ->where('status', '!=', 'aktif')
+            ->update(['status' => 'aktif']);
 
-            $hasActiveReservation = $member->reservations()
-                ->whereNotIn('status', [
-                    'selesai',
-                    'ditolak',
-                    'dibatalkan',
-                ])
-                ->where(function ($query) {
-                    $query->whereNull('expires_at')
-                        ->orWhere('expires_at', '>=', now());
-                })
-                ->exists();
-
-            $member->update([
-                'status' => ($hasActiveBorrowing || $hasActiveReservation)
-                    ? 'aktif'
-                    : 'nonaktif'
-            ]);
-        });
+        Member::whereNotIn('id', $activeMemberIds)
+            ->where('status', '!=', 'nonaktif')
+            ->update(['status' => 'nonaktif']);
     }
 }

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\CollectionWithdrawal;
+use App\Models\Borrowing;
+use App\Models\BorrowingDetail;
+use App\Models\Reservation;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\Shelf;
@@ -116,24 +119,37 @@ class BookController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
         return view(
             'books.index',
-            $this->getIndexViewData()
+            $this->getIndexViewData($request)
         );
     }
 
-    private function getIndexViewData(): array
+    private function getIndexViewData(\Illuminate\Http\Request $request): array
     {
-        $books = Book::with([
+        $query = Book::with([
             'category',
             'subcategory',
-        ])
-            ->latest()
-            ->get();
+        ]);
 
-        return compact('books') + $this->getCreateFormData();
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('judul_buku', 'ilike', "%{$search}%")
+                  ->orWhere('pengarang', 'ilike', "%{$search}%")
+                  ->orWhere('isbn', 'ilike', "%{$search}%");
+            });
+        }
+
+        if ($categoryId = $request->get('category_id')) {
+            $query->where('category_id', $categoryId);
+        }
+
+        $totalBooksCount = Book::count();
+        $books = $query->latest()->paginate(25)->withQueryString();
+
+        return compact('books', 'totalBooksCount') + $this->getCreateFormData();
     }
 
     private function getCreateFormData(): array
@@ -144,6 +160,7 @@ class BookController extends Controller
         ];
 
         $categories = Category::with('subcategories')
+            ->withCount('books')
             ->whereIn('name', $categoryOrder)
             ->get()
             ->sortBy(
@@ -1539,6 +1556,24 @@ class BookController extends Controller
                 'max:500',
             ],
         ]);
+
+        $hasActiveBorrowings = BorrowingDetail::where('book_id', $book->id)
+            ->whereHas('borrowing', fn($q) => $q->whereIn('status', ['menunggu', 'dipinjam', 'diperpanjang', 'terlambat']))
+            ->exists()
+            || Borrowing::where('book_id', $book->id)
+            ->whereIn('status', ['menunggu', 'dipinjam', 'diperpanjang', 'terlambat'])
+            ->exists();
+
+        $hasActiveReservations = Reservation::where('book_id', $book->id)
+            ->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])
+            ->exists();
+
+        if ($hasActiveBorrowings || $hasActiveReservations) {
+            return back()->with(
+                'error',
+                'Buku tidak dapat ditarik/dihapus dari koleksi karena sedang dalam sirkulasi peminjaman aktif atau antrean reservasi.'
+            );
+        }
 
 
         DB::transaction(

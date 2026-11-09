@@ -27,11 +27,18 @@ class UserHistoryController extends Controller
             $month  = $request->input('month', '');
             $year   = $request->input('year', '');
 
-            // -- Statistik hero (seluruh data, tanpa filter) --
-            $allBorrowings = Borrowing::where('member_id', $member->id)->get();
-            $stats['total_borrowed']     = $allBorrowings->count();
-            $stats['active_borrowed']    = $allBorrowings->where('status', 'dipinjam')->count();
-            $stats['returned_borrowed']  = $allBorrowings->where('status', 'dikembalikan')->count();
+            // -- Statistik hero (seluruh data, tanpa filter via agregasi SQL) --
+            $borrowingCounts = Borrowing::where('member_id', $member->id)
+                ->selectRaw("
+                    COUNT(*) as total,
+                    COUNT(CASE WHEN status = 'dipinjam' THEN 1 END) as active,
+                    COUNT(CASE WHEN status = 'dikembalikan' THEN 1 END) as returned
+                ")
+                ->first();
+
+            $stats['total_borrowed']     = (int) ($borrowingCounts->total ?? 0);
+            $stats['active_borrowed']    = (int) ($borrowingCounts->active ?? 0);
+            $stats['returned_borrowed']  = (int) ($borrowingCounts->returned ?? 0);
             $stats['total_reservations'] = Reservation::where('member_id', $member->id)->count();
 
             // -- Ambil semua Borrowing user (semua status) --
@@ -46,8 +53,8 @@ class UserHistoryController extends Controller
             }
             if ($search !== '') {
                 $borrowingQuery->whereHas('details.book', fn($q) =>
-                    $q->where('judul_buku', 'like', "{$search}%")
-                      ->orWhere('penulis', 'like', "{$search}%")
+                    $q->where('judul_buku', 'ilike', "{$search}%")
+                      ->orWhere('penulis', 'ilike', "{$search}%")
                 );
             }
 
@@ -100,8 +107,8 @@ class UserHistoryController extends Controller
             }
             if ($search !== '') {
                 $reservationQuery->whereHas('book', fn($q) =>
-                    $q->where('judul_buku', 'like', "{$search}%")
-                      ->orWhere('penulis', 'like', "{$search}%")
+                    $q->where('judul_buku', 'ilike', "{$search}%")
+                      ->orWhere('penulis', 'ilike', "{$search}%")
                 );
             }
 

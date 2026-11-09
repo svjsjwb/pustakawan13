@@ -9,6 +9,7 @@ use App\Models\Borrowing;
 use App\Models\Reservation;
 use App\Services\RecommendationService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 
 class UserHomeController extends Controller
@@ -25,16 +26,18 @@ class UserHomeController extends Controller
         $latestRequest       = null;
 
         if ($member) {
-            $activeLoansCount = Borrowing::where('member_id', $member->id)
-                ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
-                ->count();
+            $borrowingStats = Borrowing::where('member_id', $member->id)
+                ->selectRaw("
+                    COUNT(CASE WHEN status IN ('dipinjam', 'diperpanjang', 'terlambat') THEN 1 END) as active_loans,
+                    COUNT(CASE WHEN status = 'dikembalikan' THEN 1 END) as history_count
+                ")
+                ->first();
+
+            $activeLoansCount = (int) ($borrowingStats->active_loans ?? 0);
+            $historyCount     = (int) ($borrowingStats->history_count ?? 0);
 
             $activeReservesCount = Reservation::where('member_id', $member->id)
                 ->whereIn('status', ['menunggu', 'disetujui'])
-                ->count();
-
-            $historyCount = Borrowing::where('member_id', $member->id)
-                ->where('status', 'dikembalikan')
                 ->count();
 
             // Kumpulkan permohonan terakhir (Peminjaman, Reservasi, atau Usulan Buku)
@@ -97,21 +100,21 @@ class UserHomeController extends Controller
                 ->first();
         }
 
-        // Buku populer
-        // Prioritaskan buku yang memiliki cover jika kolom cover ada
-        $popularBooksQuery = Book::with('category')
-            ->where('stok', '>', 0);
+        // Buku populer (di-cache ID lokal selama 5 menit)
+        $popularBookIds = Cache::remember('user_home_popular_book_ids', 300, function () {
+            return Book::where('stok', '>', 0)
+                ->orderByRaw("CASE WHEN NULLIF(TRIM(cover), '') IS NOT NULL THEN 0 ELSE 1 END")
+                ->orderByDesc('stok')
+                ->take(10)
+                ->pluck('id')
+                ->toArray();
+        });
 
-        if (\Illuminate\Support\Facades\Schema::hasColumn('books', 'cover')) {
-            $popularBooksQuery->orderByRaw(
-                "CASE WHEN NULLIF(TRIM(cover), '') IS NOT NULL THEN 0 ELSE 1 END"
-            );
-        }
-
-        $popularBooks = $popularBooksQuery
-            ->orderByDesc('stok')
-            ->take(10)
-            ->get();
+        $popularBooks = Book::with('category')
+            ->whereIn('id', $popularBookIds)
+            ->get()
+            ->sortBy(fn($b) => array_search($b->id, $popularBookIds))
+            ->values();
 
         // Rekomendasi buku untuk user
         $recommendations = app(RecommendationService::class)
@@ -136,22 +139,18 @@ class UserHomeController extends Controller
             ->values();
 
         // Aktivitas / Pengumuman
-        // dari Pandu — popup announcement
-        $announcements = \Illuminate\Support\Facades\Schema::hasTable('activities')
-            ? Activity::latest()->get()
-            : collect();
+        $announcements = Activity::latest()->get();
 
-        // Aktivitas yang belum dibaca oleh user ini
-        $unreadAnnouncements = $announcements
-            ->filter(function ($activity) use ($user) {
-                return method_exists($activity, 'reads')
-                    && !$activity->reads()
-                        ->where('user_id', $user?->id)
-                        ->exists();
-            })
-            ->values();
-
-        $unreadAnnouncement = $unreadAnnouncements->first();
+        $unreadAnnouncements = collect();
+        $unreadAnnouncement = null;
+        if ($user) {
+            $readIds = \Illuminate\Support\Facades\DB::table('activity_reads')
+                ->where('user_id', $user->id)
+                ->pluck('activity_id')
+                ->toArray();
+            $unreadAnnouncements = $announcements->whereNotIn('id', $readIds)->values();
+            $unreadAnnouncement = $unreadAnnouncements->first();
+        }
 
         return view('user.home', compact(
             'popularBooks',

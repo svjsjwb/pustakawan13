@@ -3511,6 +3511,17 @@
     transform: none;
 }
 
+.books-page-dots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 13px;
+    user-select: none;
+}
+
 .books-pagination-info {
     width: 100%;
 

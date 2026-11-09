@@ -29,7 +29,9 @@ use Illuminate\Support\Facades\Route;
 // LANDING
 // ============================================================
 Route::get('/', function () {
-    return view('landing');
+    return response()
+        ->view('landing')
+        ->header('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
 })->name('landing');
 
 // ============================================================
@@ -97,7 +99,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pinjam', [RoleAwareNavigationController::class, 'borrowings'])->name('pinjam');
     Route::get('/user/loans', [RoleAwareNavigationController::class, 'borrowings'])->name('user.loans');
     Route::get('/history', [RoleAwareNavigationController::class, 'history'])->name('history');
-    Route::patch('/borrowings/{borrowing}/extend', [UserBorrowingController::class, 'extend'])->name('borrowings.extend');
+    Route::patch('/borrowings/{borrowing}/extend', [RoleAwareNavigationController::class, 'extend'])->name('borrowings.extend');
     Route::post('/activities/{activity}/read', [ActivityController::class, 'markAsRead'])->name('activities.markAsRead');
 });
 
@@ -155,9 +157,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::patch('/borrowings/{borrowing}/return', [CirculationController::class, 'returnBook'])
         ->name('borrowings.return');
-
-    Route::patch('/borrowings/{borrowing}/extend', [CirculationController::class, 'extend'])
-        ->name('borrowings.extend');
 
     Route::patch('/borrowings/{borrowing}/approve-extension', [CirculationController::class, 'approveExtension'])
         ->name('borrowings.approveExtension');

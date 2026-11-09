@@ -860,21 +860,6 @@ body {
     transform: translateX(3px);
 }
 
-.eg-drop-menu-item.active {
-    background: var(--primary-subtle);
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.eg-drop-menu-item.active .eg-drop-menu-icon {
-    background: var(--primary);
-    color: #ffffff;
-}
-
-.eg-drop-menu-item.active .eg-drop-menu-chevron {
-    color: var(--primary);
-}
-
 .eg-drop-menu-item-left {
     display: flex;
     align-items: center;

@@ -134,7 +134,7 @@
 
                                         <div class="coverflow-poster">
                                             @if($book->cover)
-                                                <img src="{{ asset('storage/' . $book->cover) }}" alt="{{ $book->title }}" loading="lazy">
+                                                <img src="{{ asset('storage/' . $book->cover) }}" alt="{{ $book->title }}" loading="lazy" decoding="async">
                                             @else
                                                 <div class="coverflow-fallback-cover">
                                                     <div class="fallback-spine"></div>
@@ -367,7 +367,9 @@
 
                         <img
                             src="{{ asset('storage/' . $book->cover) }}"
-                            alt="{{ $book->title }}">
+                            alt="{{ $book->title }}"
+                            loading="lazy"
+                            decoding="async">
 
                         @else
 

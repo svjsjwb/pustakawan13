@@ -183,7 +183,7 @@
                     <option value="">-- Pilih Rak --</option>
                     @foreach ($floors as $floor)
                         @foreach ($floor->zones as $zone)
-                            <optgroup label="{{ $floor->name }} — {{ $zone->name }}">
+                            <optgroup label="{{ $floor->name }} · {{ $zone->name }}">
                                 @foreach ($zone->shelves as $shelf)
                                     <option value="{{ $shelf->id }}"
                                         @selected(old('shelf_id', $book->copies->first()?->shelf_id) == $shelf->id)>
@@ -250,7 +250,7 @@
                     <option value="">-- Pilih Rak --</option>
                     @foreach ($floors as $floor)
                         @foreach ($floor->zones as $zone)
-                            <optgroup label="{{ $floor->name }} — {{ $zone->name }}">
+                            <optgroup label="{{ $floor->name }} · {{ $zone->name }}">
                                 @foreach ($zone->shelves as $shelf)
                                     <option value="{{ $shelf->id }}"
                                         @selected(old('shelf_id') == $shelf->id)>{{ $shelf->name }}</option>

@@ -124,7 +124,7 @@
                         {{-- 1. My Profile --}}
                         <li>
                             <a href="{{ route('user.profile') }}"
-                                class="eg-drop-menu-item {{ request()->routeIs('user.profile') ? 'active' : '' }}">
+                                class="eg-drop-menu-item">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -142,7 +142,7 @@
                         {{-- 2. Favorit Saya --}}
                         <li>
                             <a href="{{ route('user.favorites') }}"
-                                class="eg-drop-menu-item {{ request()->routeIs('user.favorites') ? 'active' : '' }}">
+                                class="eg-drop-menu-item">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -161,7 +161,7 @@
                         {{-- 3. Reservasi Saya --}}
                         <li>
                             <a href="{{ route('user.reservations') }}"
-                                class="eg-drop-menu-item {{ request()->routeIs('user.reservations') ? 'active' : '' }}">
+                                class="eg-drop-menu-item">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -185,7 +185,7 @@
                         {{-- 4. Riwayat Aktivitas --}}
                         <li>
                             <a href="{{ route('user.history') }}"
-                                class="eg-drop-menu-item {{ request()->routeIs('history', 'user.history') ? 'active' : '' }}">
+                                class="eg-drop-menu-item">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"

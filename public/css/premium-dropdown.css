@@ -933,12 +933,12 @@ body.dark-theme {
 
 /* Loading state for catalog grid during AJAX fetch */
 #catalogGridContainer {
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.15s ease, filter 0.15s ease;
 }
 
 #catalogGridContainer.loading {
-    opacity: 0.45;
+    opacity: 0.4;
+    filter: blur(1px);
     pointer-events: none;
-    transform: scale(0.995);
 }
 

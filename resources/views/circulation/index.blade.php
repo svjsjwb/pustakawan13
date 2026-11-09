@@ -277,10 +277,13 @@
                             <select name="book_id" id="book_id" class="book-picker-select" aria-hidden="true" tabindex="-1">
                                 <option value="">-- Pilih Buku --</option>
                                 @foreach($books as $book)
+                                    @php
+                                        $book = (object) $book;
+                                    @endphp
                                     <option value="{{ $book->id }}"
                                         @selected(old('book_id') == $book->id)
                                         @disabled($book->available_stock <= 0)>
-                                        {{ $book->title }} —
+                                        {{ $book->title }} ·
                                         @if($book->available_stock > 0)
                                             Stok {{ $book->available_stock }}
                                         @else

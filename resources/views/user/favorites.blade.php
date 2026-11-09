@@ -53,7 +53,7 @@
     <div class="ufav-card" id="favCard{{ $book->id }}">
         <div class="ufav-cover">
             @if($book->cover)
-                <img src="{{ asset('storage/'.$book->cover) }}" alt="{{ $book->title }}">
+                <img src="{{ asset('storage/'.$book->cover) }}" alt="{{ $book->title }}" loading="lazy" decoding="async">
             @else
                 <div class="ufav-cover-ph">{{ Str::limit($book->title, 35) }}</div>
             @endif
@@ -64,9 +64,9 @@
             @endif
         </div>
         <div class="ufav-info">
-            <span class="ufav-cat">{{ $book->category->name ?? '—' }}</span>
+            <span class="ufav-cat">{{ $book->category->name ?? 'Umum' }}</span>
             <h3 class="ufav-title">{{ $book->title }}</h3>
-            <p class="ufav-author">{{ $book->author ?? '—' }}</p>
+            <p class="ufav-author">{{ $book->author ?? '-' }}</p>
             <div class="ufav-actions">
                 <button class="ufav-remove-btn" onclick="removeFav({{ $book->id }})">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

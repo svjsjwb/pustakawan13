@@ -68,7 +68,7 @@
         <div class="books-content-card">
 
             {{-- TOOLBAR PENCARIAN + FILTER KATEGORI --}}
-            <div class="book-toolbar">
+            <form method="GET" action="{{ route('books.index') }}" id="books-filter-form" class="book-toolbar">
 
                 <div class="book-search-wrapper">
 
@@ -80,7 +80,8 @@
 
                     </svg>
 
-                    <input type="text" id="books-search" class="book-search-input"
+                    <input type="text" id="books-search" name="search" class="book-search-input"
+                        value="{{ request('search') }}"
                         placeholder="Cari buku berdasarkan judul, pengarang, ISBN..." autocomplete="off">
 
                 </div>
@@ -99,7 +100,7 @@
                         </svg>
 
                         <span id="books-category-label">
-                            Semua Kategori
+                            {{ ($selectedCategory = $categories->firstWhere('id', request('category_id')))?->name ?? 'Semua Kategori' }}
                         </span>
 
                         <svg class="books-category-trigger-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -119,36 +120,26 @@
                         </div>
 
 
-                        <button type="button" class="books-category-option active" data-value="">
+                        <button type="button" class="books-category-option{{ !request('category_id') ? ' active' : '' }}" data-value="">
 
                             <span>Semua Kategori</span>
 
                             <span class="books-category-count">
-                                {{ $books->count() }}
+                                {{ $totalBooksCount ?? $books->total() }}
                             </span>
 
                         </button>
 
 
-                        @foreach ($books->pluck('category')->filter()->unique('id')->sortBy(function ($category) {
-                return match ($category->name) {
-                    'Buku Pelajaran' => 1,
-                    'Buku Umum' => 2,
-                    default => 99,
-                };
-            }) as $category)
-                            @php
-                                $categoryCount = $books->where('category_id', $category->id)->count();
-                            @endphp
-
-                            <button type="button" class="books-category-option" data-value="{{ $category->id }}">
+                        @foreach ($categories as $category)
+                            <button type="button" class="books-category-option{{ request('category_id') == $category->id ? ' active' : '' }}" data-value="{{ $category->id }}">
 
                                 <span>
                                     {{ $category->name }}
                                 </span>
 
                                 <span class="books-category-count">
-                                    {{ $categoryCount }}
+                                    {{ $category->books_count ?? 0 }}
                                 </span>
 
                             </button>
@@ -158,15 +149,15 @@
 
 
                     {{-- Hidden select tetap dipakai JavaScript sebagai sumber filter --}}
-                    <select id="books-filter-kategori" class="books-category-filter books-category-hidden-select"
+                    <select id="books-filter-kategori" name="category_id" class="books-category-filter books-category-hidden-select"
                         aria-hidden="true" tabindex="-1">
 
                         <option value="">
                             Semua Kategori
                         </option>
 
-                        @foreach ($books->pluck('category')->filter()->unique('id')->sortBy('name') as $category)
-                            <option value="{{ $category->id }}">
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}" @selected(request('category_id') == $category->id)>
                                 {{ $category->name }}
                             </option>
                         @endforeach
@@ -175,7 +166,7 @@
 
                 </div>
 
-            </div>
+            </form>
 
 
             {{-- TABLE HEADER --}}
@@ -189,7 +180,7 @@
 
                     <span class="book-total" id="books-total">
 
-                        Total: {{ $books->count() }} Buku
+                        Total: {{ $totalBooksCount ?? $books->total() }} Buku
 
                     </span>
 
@@ -333,16 +324,12 @@
             </div>
 
 
-            {{-- PAGINASI CLIENT-SIDE --}}
-            <div class="books-pagination" id="books-pagination">
-
-                <div class="books-pagination-links" id="books-pagination-links">
+            {{-- PAGINASI --}}
+            @if ($books->total() > 0)
+                <div class="books-pagination" id="books-pagination">
+                    {{ $books->onEachSide(1)->links('partials.books-pagination') }}
                 </div>
-
-                <div class="books-pagination-info" id="books-pagination-info">
-                </div>
-
-            </div>
+            @endif
 
         </div>
 

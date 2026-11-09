@@ -1,35 +1,23 @@
 document.addEventListener('DOMContentLoaded', function () {
     const popup = document.getElementById('guestApprovalPopup');
-
     if (!popup) return;
 
-    // Bersihkan key lama jika ada
-    try {
-        sessionStorage.removeItem('guestApprovalPopupShown');
-    } catch (e) {}
+    popup.addEventListener('click', function (e) {
+        if (e.target === popup) {
+            closeGuestApprovalPopup();
+        }
+    });
 
-    const userId = popup.getAttribute('data-user-id') || 'guest';
-    const storageKey = 'guestApprovalDismissed_' + userId;
-
-    // Hanya hilangkan jika user SUDAH PERNAH memencet "Mengerti" / tombol tutup
-    if (sessionStorage.getItem(storageKey) === '1') {
-        popup.remove();
-        return;
-    }
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && document.getElementById('guestApprovalPopup')) {
+            closeGuestApprovalPopup();
+        }
+    });
 });
 
 function closeGuestApprovalPopup() {
     const popup = document.getElementById('guestApprovalPopup');
-
     if (!popup) return;
-
-    const userId = popup.getAttribute('data-user-id') || 'guest';
-    const storageKey = 'guestApprovalDismissed_' + userId;
-
-    // Simpan penanda bahwa user SUDAH memencet Mengerti / Tutup
-    try {
-        sessionStorage.setItem(storageKey, '1');
-    } catch (e) {}
 
     popup.classList.add('closing');
 

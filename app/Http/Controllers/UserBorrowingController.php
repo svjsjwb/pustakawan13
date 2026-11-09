@@ -40,7 +40,7 @@ class UserBorrowingController extends Controller
                 ->take(5)
                 ->get();
 
-            $borrowings = Borrowing::with([
+            $rawBorrowings = Borrowing::with([
                 'details.book.category'
             ])
                 ->where('member_id', $member->id)
@@ -50,35 +50,29 @@ class UserBorrowingController extends Controller
                     'terlambat'
                 ])
                 ->latest()
-                ->get()
-                ->map(function (Borrowing $borrowing) {
+                ->get();
 
-                    $borrowing->days_remaining =
-                        $borrowing->due_at
-                        ? (int) now()->diffInDays(
-                            $borrowing->due_at,
-                            false
-                        )
-                        : null;
+            // Kumpulkan seluruh book_id aktif untuk mengecek antrean reservasi dalam 1 query (eliminasi N+1)
+            $allActiveBookIds = $rawBorrowings->flatMap(fn($b) => $b->details->pluck('book_id'))->unique()->filter()->values()->all();
 
-                    $bookIds = $borrowing->details
-                        ->pluck('book_id');
+            $reservedBookIds = !empty($allActiveBookIds)
+                ? Reservation::whereIn('book_id', $allActiveBookIds)
+                    ->where('member_id', '!=', $member->id)
+                    ->whereIn('status', ['menunggu', 'disetujui'])
+                    ->pluck('book_id')
+                    ->flip()
+                : collect();
 
-                    $borrowing->has_reservation_queue =
-                        Reservation::whereIn('book_id', $bookIds)
-                        ->where(
-                            'member_id',
-                            '!=',
-                            $borrowing->member_id
-                        )
-                        ->whereIn('status', [
-                            'menunggu',
-                            'disetujui'
-                        ])
-                        ->exists();
+            $borrowings = $rawBorrowings->map(function (Borrowing $borrowing) use ($reservedBookIds) {
+                $borrowing->days_remaining = $borrowing->due_at
+                    ? (int) now()->diffInDays($borrowing->due_at, false)
+                    : null;
 
-                    return $borrowing;
-                });
+                $bookIds = $borrowing->details->pluck('book_id');
+                $borrowing->has_reservation_queue = $bookIds->contains(fn($id) => $reservedBookIds->has($id));
+
+                return $borrowing;
+            });
         }
 
         return view('user.loans', compact(

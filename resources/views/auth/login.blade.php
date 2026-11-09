@@ -138,7 +138,7 @@
             .form-group { margin-bottom: 7px !important; }
         }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/register.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/register.css') }}?v={{ file_exists(public_path('css/register.css')) ? filemtime(public_path('css/register.css')) : '1.0' }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -193,8 +193,8 @@
         <div class="login-card">
 
             <div class="login-header">
-                <h2>WELCOME!!</h2>
-                <p>Selamat menjelajah jendela dunia.</p>
+                <h2>Selamat Datang</h2>
+                <p>Masuk untuk menjelajahi koleksi buku dan layanan literasi.</p>
             </div>
 
             @if ($errors->any())

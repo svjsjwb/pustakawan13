@@ -185,37 +185,37 @@ class CatalogController extends Controller
 
                         $q->where(
                             'judul_buku',
-                            'like',
+                            'ilike',
                             "%{$search}%"
                         )
 
                         ->orWhere(
                             'penulis',
-                            'like',
+                            'ilike',
                             "%{$search}%"
                         )
 
                         ->orWhere(
                             'isbn',
-                            'like',
+                            'ilike',
                             "%{$search}%"
                         )
 
                         ->orWhere(
                             'sku',
-                            'like',
+                            'ilike',
                             "%{$search}%"
                         )
 
                         ->orWhere(
                             'no_iventaris',
-                            'like',
+                            'ilike',
                             "%{$search}%"
                         )
 
                         ->orWhere(
                             'kode_buku',
-                            'like',
+                            'ilike',
                             "%{$search}%"
                         )
 
