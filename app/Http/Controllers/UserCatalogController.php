@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\Subcategory;
 use App\Models\Reservation;
 use App\Models\Borrowing;
 use Illuminate\Http\Request;
@@ -119,9 +120,21 @@ class UserCatalogController extends Controller
 
     public function index(Request $request)
     {
-        // Eager load category dan copies.shelf.zone.floor untuk lokasi rak dan mengeliminasi N+1 query
+        // Ambil data kategori beserta subkategori dari database
+        $categories = Category::with('subcategories')
+            ->orderByRaw("
+                CASE name
+                    WHEN 'Buku Pelajaran' THEN 1
+                    WHEN 'Buku Umum' THEN 2
+                    ELSE 99
+                END
+            ")
+            ->get();
+
+        // Eager load category, subcategory, dan copies.shelf.zone.floor untuk eliminasi N+1
         $query = Book::with([
             'category',
+            'subcategory',
             'copies.shelf.zone.floor'
         ]);
 
@@ -132,49 +145,42 @@ class UserCatalogController extends Controller
             $query->where('judul_buku', 'ilike', "{$search}%");
         }
 
-        // ── Filter Kategori Hierarkis ─────────────────────────
-        $mainCategory   = $request->input('main_category');
-        $subCategory    = $request->input('sub_category');
+        // ── Filter Kategori & Subkategori berbasis ID ─────────
+        $categoryId = $request->input('category_id') ?? $request->input('category');
+        $subcategoryId = $request->input('subcategory_id') ?? $request->input('subcategory');
+
+        // Kompatibilitas mundur dengan parameter teks legacy (jika ada yang mengakses URL lama)
+        if (!$categoryId && $request->filled('main_category')) {
+            $cat = $categories->firstWhere('name', $request->input('main_category'));
+            $categoryId = $cat?->id;
+        }
+        if (!$subcategoryId && $request->filled('sub_category')) {
+            $subQuery = Subcategory::where('name', $request->input('sub_category'));
+            if ($categoryId) {
+                $subQuery->where('category_id', $categoryId);
+            }
+            $sub = $subQuery->first();
+            $subcategoryId = $sub?->id;
+        }
+
+        $categoryId = is_numeric($categoryId) ? (int) $categoryId : null;
+        $subcategoryId = is_numeric($subcategoryId) ? (int) $subcategoryId : null;
+
+        $selectedCategory = $categoryId ? $categories->firstWhere('id', $categoryId) : null;
+        $selectedSubcategory = ($selectedCategory && $subcategoryId)
+            ? $selectedCategory->subcategories->firstWhere('id', $subcategoryId)
+            : ($subcategoryId ? Subcategory::find($subcategoryId) : null);
+
+        $mainCategory = $selectedCategory?->name ?? '';
+        $subCategory = $selectedSubcategory?->name ?? '';
         $educationLevel = $request->input('education_level');
-        $categoryId     = $request->input('category');
 
-        if ($mainCategory) {
-            $query->where(function ($q) use ($mainCategory) {
-                $q->where('main_category', $mainCategory)
-                    ->orWhereHas('category', function ($c) use ($mainCategory) {
-                        $c->where('name', $mainCategory);
-                    });
-            });
-        }
-
-        if ($subCategory) {
-            $query->where(function ($q) use ($subCategory, $mainCategory) {
-                $q->where('sub_category', $subCategory);
-
-                /*
-                 * education_level hanya digunakan untuk
-                 * Buku Pelajaran.
-                 *
-                 * Karena sub_category Buku Pelajaran sekarang:
-                 * TK
-                 * SD/MI
-                 * SMP/MTs
-                 * SMA/SMK/MA/SMAK/MAK
-                 * Referensi
-                 */
-                if ($mainCategory === 'Buku Pelajaran') {
-                    $q->orWhere('education_level', $subCategory);
-                }
-            });
-        }
-
-        if ($educationLevel) {
-            $query->where('education_level', $educationLevel);
-        }
-
-        // Fallback filter berdasarkan category_id
-        if ($categoryId && !$mainCategory) {
+        if ($categoryId) {
             $query->where('category_id', $categoryId);
+        }
+
+        if ($subcategoryId) {
+            $query->where('subcategory_id', $subcategoryId);
         }
 
         // ── Filter status ─────────────────────────────────────
@@ -307,10 +313,12 @@ class UserCatalogController extends Controller
 
                 'total' => $books->total(),
 
-                'main_category' => $mainCategory,
-                'sub_category'  => $subCategory,
-                'status'        => $status,
-                'sort'          => $sort,
+                'category_id'    => $categoryId,
+                'subcategory_id' => $subcategoryId,
+                'main_category'  => $mainCategory,
+                'sub_category'   => $subCategory,
+                'status'         => $status,
+                'sort'           => $sort,
 
                 'grid_html' => view(
                     'user.partials.catalog-grid',
@@ -327,6 +335,8 @@ class UserCatalogController extends Controller
                     [
                         'books' => $books,
                         'search' => $search,
+                        'selectedCategory' => $selectedCategory,
+                        'selectedSubcategory' => $selectedSubcategory,
                         'mainCategory' => $mainCategory,
                         'subCategory' => $subCategory,
                         'status' => $status,
@@ -336,22 +346,22 @@ class UserCatalogController extends Controller
             ]);
         }
 
-        // ── Real counts per main category & subcategory (Hanya untuk Full Page Load) ──
-        $subCounts = Cache::remember('catalog_sub_counts_v2', 600, function () {
+        // ── Real counts per category_id & subcategory_id (Hanya untuk Full Page Load) ──
+        $subCounts = Cache::remember('catalog_sub_counts_by_id_v2', 600, function () {
             return DB::table('books')
-                ->selectRaw("CONCAT(main_category, '::', COALESCE(NULLIF(sub_category, ''), education_level)) as grp, count(*) as total")
-                ->whereNotNull('main_category')
-                ->groupBy('main_category', 'sub_category', 'education_level')
-                ->pluck('total', 'grp')
+                ->selectRaw('subcategory_id, count(*) as total')
+                ->whereNotNull('subcategory_id')
+                ->groupBy('subcategory_id')
+                ->pluck('total', 'subcategory_id')
                 ->all();
         });
 
-        $mainCounts = Cache::remember('catalog_main_counts_v2', 600, function () {
+        $mainCounts = Cache::remember('catalog_main_counts_by_id_v2', 600, function () {
             return DB::table('books')
-                ->selectRaw('main_category, count(*) as total')
-                ->whereNotNull('main_category')
-                ->groupBy('main_category')
-                ->pluck('total', 'main_category')
+                ->selectRaw('category_id, count(*) as total')
+                ->whereNotNull('category_id')
+                ->groupBy('category_id')
+                ->pluck('total', 'category_id')
                 ->all();
         });
 
@@ -365,21 +375,26 @@ class UserCatalogController extends Controller
         });
 
         return view('user.catalog', [
-            'books'            => $books,
-            'catalogHierarchy' => $this->catalogHierarchy,
-            'mainCounts'       => $mainCounts,
-            'subCounts'        => $subCounts,
-            'favoriteIds'      => $favoriteIds,
-            'search'           => $search ?? '',
-            'mainCategory'     => $mainCategory ?? '',
-            'subCategory'      => $subCategory ?? '',
-            'educationLevel'   => $educationLevel ?? '',
-            'activeCategory'   => $categoryId ?? '',
-            'activeSort'       => $sort,
-            'status'           => $status ?? '',
-            'stats'            => $stats,
-            'reservedBookIds'  => $reservedBookIds,
-            'borrowedBookIds'  => $borrowedBookIds,
+            'books'                 => $books,
+            'categories'            => $categories,
+            'selectedCategory'      => $selectedCategory,
+            'selectedSubcategory'   => $selectedSubcategory,
+            'selectedCategoryId'    => $categoryId ?? '',
+            'selectedSubcategoryId' => $subcategoryId ?? '',
+            'catalogHierarchy'      => $this->catalogHierarchy,
+            'mainCounts'            => $mainCounts,
+            'subCounts'             => $subCounts,
+            'favoriteIds'           => $favoriteIds,
+            'search'                => $search ?? '',
+            'mainCategory'          => $mainCategory ?? '',
+            'subCategory'           => $subCategory ?? '',
+            'educationLevel'        => $educationLevel ?? '',
+            'activeCategory'        => $categoryId ?? '',
+            'activeSort'            => $sort,
+            'status'                => $status ?? '',
+            'stats'                 => $stats,
+            'reservedBookIds'       => $reservedBookIds,
+            'borrowedBookIds'       => $borrowedBookIds,
         ]);
     }
 }

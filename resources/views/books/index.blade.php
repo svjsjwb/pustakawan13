@@ -230,6 +230,9 @@
 
                                 <td>
                                     {{ $book->category->name ?? '-' }}
+                                    @if($book->subcategory)
+                                        <div style="font-size: 0.8rem; color: #64748b;">{{ $book->subcategory->name }}</div>
+                                    @endif
                                 </td>
 
                                 <td>

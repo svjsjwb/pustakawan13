@@ -127,8 +127,10 @@ class BookController extends Controller
         );
     }
 
-    private function getIndexViewData(\Illuminate\Http\Request $request): array
+    private function getIndexViewData(?\Illuminate\Http\Request $request = null): array
     {
+        $request = $request ?? request();
+
         $query = Book::with([
             'category',
             'subcategory',
@@ -144,6 +146,10 @@ class BookController extends Controller
 
         if ($categoryId = $request->get('category_id')) {
             $query->where('category_id', $categoryId);
+        }
+
+        if ($subcategoryId = $request->get('subcategory_id')) {
+            $query->where('subcategory_id', $subcategoryId);
         }
 
         $totalBooksCount = Book::count();
@@ -744,7 +750,7 @@ class BookController extends Controller
 
         return view(
             'books.index',
-            $this->getIndexViewData() + compact('editBook', 'copies', 'activeBookTab', 'nextCopyNumber')
+            $this->getIndexViewData($request) + compact('editBook', 'copies', 'activeBookTab', 'nextCopyNumber')
         );
     }
 

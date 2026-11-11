@@ -4,16 +4,21 @@
     @endif
     <span>Menampilkan <strong id="catalogTotalCountText">{{ $books->total() }}</strong> koleksi buku</span>
 
-    @if(!empty($subCategory))
+    @php
+        $activeCatName = $selectedCategory?->name ?? $mainCategory ?? '';
+        $activeSubName = $selectedSubcategory?->name ?? $subCategory ?? '';
+    @endphp
+
+    @if(!empty($activeSubName))
         <span class="saas-active-filter-badge">
             <span class="check-icon">✓</span>
-            <span>{{ $mainCategory ? ($mainCategory . ' • ') : '' }}{{ $subCategory }}</span>
+            <span>{{ $activeCatName ? ($activeCatName . ' • ') : '' }}{{ $activeSubName }}</span>
             <button type="button" class="btn-remove-chip" onclick="clearCategoryFilter()" title="Hapus filter subkategori">×</button>
         </span>
-    @elseif(!empty($mainCategory))
+    @elseif(!empty($activeCatName))
         <span class="saas-active-filter-badge">
             <span class="check-icon">✓</span>
-            <span>{{ $mainCategory }}</span>
+            <span>{{ $activeCatName }}</span>
             <button type="button" class="btn-remove-chip" onclick="clearCategoryFilter()" title="Hapus filter kategori">×</button>
         </span>
     @endif
@@ -27,7 +32,7 @@
 </div>
 
 @php
-    $hasAnyFilter = !empty($search) || !empty($mainCategory) || !empty($subCategory) || !empty($status) || (!empty($activeSort) && $activeSort !== 'terbaru');
+    $hasAnyFilter = !empty($search) || !empty($activeCatName) || !empty($activeSubName) || !empty($status) || (!empty($activeSort) && $activeSort !== 'terbaru');
 @endphp
 
 @if($hasAnyFilter)

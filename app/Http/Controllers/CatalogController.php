@@ -49,55 +49,45 @@ class CatalogController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER KATEGORI
+        | FILTER KATEGORI (BERBASIS ID)
         |--------------------------------------------------------------------------
         */
 
+        $categoryId = $request->input('category_id') ?? $request->input('category');
         if (
-            $request->filled('category') &&
-            $request->category !== 'Semua' &&
-            $request->category !== 'Semua Kategori'
+            $categoryId &&
+            $categoryId !== 'Semua' &&
+            $categoryId !== 'Semua Kategori'
         ) {
-
-            if (is_numeric($request->category)) {
-
-                $query->where(
-                    'category_id',
-                    $request->category
-                );
-
-            } else {
-
-                $query->whereHas(
-                    'category',
-                    function ($q) use ($request) {
-
-                        $q->where(
-                            'name',
-                            $request->category
-                        );
-
-                    }
-                );
-
+            if (!is_numeric($categoryId)) {
+                $categoryId = Category::where('name', $categoryId)->value('id');
             }
 
+            if ($categoryId) {
+                $query->where('category_id', $categoryId);
+            }
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER SUBKATEGORI
+        | FILTER SUBKATEGORI (BERBASIS ID)
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('subcategory')) {
+        $subcategoryId = $request->input('subcategory_id') ?? $request->input('subcategory');
+        if ($subcategoryId && $subcategoryId !== 'Semua') {
+            if (!is_numeric($subcategoryId)) {
+                $subQuery = \App\Models\Subcategory::where('name', $subcategoryId);
+                if (!empty($categoryId)) {
+                    $subQuery->where('category_id', $categoryId);
+                }
+                $subcategoryId = $subQuery->value('id');
+            }
 
-            $query->where(
-                'subcategory_id',
-                $request->subcategory
-            );
-
+            if ($subcategoryId) {
+                $query->where('subcategory_id', $subcategoryId);
+            }
         }
 
 

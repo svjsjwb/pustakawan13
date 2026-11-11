@@ -48,8 +48,8 @@
         ========================================================== --}}
 
         @php
-            $selectedCategoryId = request('category');
-            $selectedSubcategoryId = request('subcategory');
+            $selectedCategoryId = request('category_id') ?? request('category');
+            $selectedSubcategoryId = request('subcategory_id') ?? request('subcategory');
             $selectedStatus = request('status');
 
             $selectedCategory = $categories->firstWhere('id', $selectedCategoryId);

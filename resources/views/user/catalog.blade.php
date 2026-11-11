@@ -54,8 +54,11 @@
                autocomplete="off">
 
         {{-- Preserve category & status in hidden inputs if set --}}
-        @if(request('category'))
-            <input type="hidden" name="category" value="{{ request('category') }}">
+        @if(!empty($selectedCategoryId))
+            <input type="hidden" name="category_id" value="{{ $selectedCategoryId }}">
+        @endif
+        @if(!empty($selectedSubcategoryId))
+            <input type="hidden" name="subcategory_id" value="{{ $selectedSubcategoryId }}">
         @endif
         @if(request('status'))
             <input type="hidden" name="status" value="{{ request('status') }}">
@@ -80,7 +83,9 @@
     <div class="saas-category-dropdowns">
         {{-- Semua Kategori Button --}}
         @php
-            $isAllActive = empty($mainCategory) && empty($subCategory);
+            $currentCatId = (string) ($selectedCategoryId ?? '');
+            $currentSubId = (string) ($selectedSubcategoryId ?? '');
+            $isAllActive = empty($currentCatId) && empty($currentSubId);
         @endphp
         <div class="pd-select-wrapper pd-category-wrapper {{ $isAllActive ? 'has-active-category' : '' }}" id="wrapperAllCategories">
             <button type="button"
@@ -98,32 +103,31 @@
             </button>
         </div>
 
-        {{-- Dropdowns for Buku Pelajaran and Buku Umum --}}
-        @foreach($catalogHierarchy as $groupName => $subcategories)
+        {{-- Dropdowns for categories and subcategories from DB --}}
+        @foreach($categories as $category)
             @php
-                $groupLabel = $groupName;
-                $isGroupActive = ($mainCategory === $groupName);
-                $activeSubName = $isGroupActive ? $subCategory : '';
-                $groupTotal = $mainCounts[$groupName] ?? 0;
+                $catId = (string) $category->id;
+                $isGroupActive = ($currentCatId === $catId);
+                $groupTotal = $mainCounts[$category->id] ?? ($category->books_count ?? 0);
             @endphp
 
             <div class="pd-select-wrapper pd-category-wrapper {{ $isGroupActive ? 'has-active-category' : '' }}"
-                 data-category-group="{{ $groupName }}"
-                 data-category-label="{{ $groupLabel }}"
-                 id="catWrapper_{{ Str::slug($groupName) }}">
+                 data-category-id="{{ $category->id }}"
+                 data-category-label="{{ $category->name }}"
+                 id="catWrapper_{{ $category->id }}">
                 <button type="button"
                         class="pd-trigger {{ $isGroupActive ? 'has-value' : '' }}"
                         aria-haspopup="true"
                         aria-expanded="false"
-                        id="catTrigger_{{ Str::slug($groupName) }}">
+                        id="catTrigger_{{ $category->id }}">
                     <span class="pd-trigger-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                         </svg>
                     </span>
-                    <span class="pd-trigger-label" id="catLabel_{{ Str::slug($groupName) }}">
-                        {{ $groupLabel }}
+                    <span class="pd-trigger-label" id="catLabel_{{ $category->id }}">
+                        {{ $category->name }}
                     </span>
                     <span class="pd-trigger-count">{{ $groupTotal }}</span>
                     <span class="pd-trigger-arrow">
@@ -131,38 +135,39 @@
                     </span>
                 </button>
 
-                <div class="pd-panel pd-category-panel" role="menu" aria-label="{{ $groupLabel }}">
-                    <div class="pd-panel-header">{{ strtoupper($groupName) }}</div>
+                <div class="pd-panel pd-category-panel" role="menu" aria-label="{{ $category->name }}">
+                    <div class="pd-panel-header">{{ strtoupper($category->name) }}</div>
                     <div class="pd-category-options-list">
                         <button type="button"
-                                class="pd-item pd-category-option pd-category-parent-btn {{ $isGroupActive && !$activeSubName ? 'is-selected active-subcat' : '' }}"
-                                data-main="{{ $groupName }}"
-                                data-sub=""
-                                onclick="selectSubcategory('{{ $groupName }}', '', event)">
+                                class="pd-item pd-category-option pd-category-parent-btn {{ $isGroupActive && empty($currentSubId) ? 'is-selected active-subcat' : '' }}"
+                                data-category-id="{{ $category->id }}"
+                                data-sub-id=""
+                                onclick="selectSubcategory('{{ $category->id }}', '', event)">
                             <span class="pd-item-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
                                 </svg>
                             </span>
-                            <span class="pd-item-label">Semua {{ $groupLabel }}</span>
+                            <span class="pd-item-label">Semua {{ $category->name }}</span>
                             <span class="pd-category-count">{{ $groupTotal }}</span>
                         </button>
-                        @foreach($subcategories as $subKey => $subLabel)
+                        @foreach($category->subcategories as $subcategory)
                             @php
-                                $isItemActive = ($isGroupActive && $subCategory === $subKey);
-                                $count = $subCounts[$groupName . '::' . $subKey] ?? 0;
+                                $subId = (string) $subcategory->id;
+                                $isItemActive = ($isGroupActive && $currentSubId === $subId);
+                                $count = $subCounts[$subcategory->id] ?? 0;
                             @endphp
                             <button type="button"
                                     class="pd-item pd-category-option pd-subcat-btn {{ $isItemActive ? 'is-selected active-subcat' : '' }}"
-                                    data-main="{{ $groupName }}"
-                                    data-sub="{{ $subKey }}"
-                                    onclick="selectSubcategory('{{ $groupName }}', '{{ $subKey }}', event)">
+                                    data-category-id="{{ $category->id }}"
+                                    data-sub-id="{{ $subcategory->id }}"
+                                    onclick="selectSubcategory('{{ $category->id }}', '{{ $subcategory->id }}', event)">
                                 <span class="pd-item-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M4 6h16M4 12h16M4 18h10"></path>
                                     </svg>
                                 </span>
-                                <span class="pd-item-label">{{ $subLabel }}</span>
+                                <span class="pd-item-label">{{ $subcategory->name }}</span>
                                 <span class="pd-category-count">{{ $count }}</span>
                             </button>
                         @endforeach
@@ -564,6 +569,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── 2. Realtime AJAX Catalog Filter Engine (SaaS 2026) ─────────────────────────
 window.catalogState = {
     search: "{{ $search }}",
+    category_id: "{{ $selectedCategoryId }}",
+    subcategory_id: "{{ $selectedSubcategoryId }}",
     main_category: "{{ $mainCategory }}",
     sub_category: "{{ $subCategory }}",
     status: "{{ $status }}",
@@ -608,8 +615,8 @@ function fetchCatalog(newParams = {}, pushHistory = true) {
 
     const params = new URLSearchParams();
     if (window.catalogState.search) params.set('search', window.catalogState.search);
-    if (window.catalogState.main_category) params.set('main_category', window.catalogState.main_category);
-    if (window.catalogState.sub_category) params.set('sub_category', window.catalogState.sub_category);
+    if (window.catalogState.category_id) params.set('category_id', window.catalogState.category_id);
+    if (window.catalogState.subcategory_id) params.set('subcategory_id', window.catalogState.subcategory_id);
     if (window.catalogState.status) params.set('status', window.catalogState.status);
     if (window.catalogState.sort && window.catalogState.sort !== 'terbaru') params.set('sort', window.catalogState.sort);
     if (window.catalogState.page && window.catalogState.page > 1) params.set('page', window.catalogState.page);
@@ -634,8 +641,8 @@ function fetchCatalog(newParams = {}, pushHistory = true) {
                 metaContainer.innerHTML = data.meta_html;
             }
 
-            // Sync visual states for subcategories
-            syncCategoryUiState(window.catalogState.main_category, window.catalogState.sub_category);
+            // Sync visual states for categories & subcategories based on IDs
+            syncCategoryUiState(window.catalogState.category_id, window.catalogState.subcategory_id);
 
             // Sync visual state for status dropdown
             syncStatusUiState(window.catalogState.status);
@@ -660,7 +667,7 @@ function fetchCatalog(newParams = {}, pushHistory = true) {
     });
 }
 
-function selectSubcategory(mainCategory, subCategory, e) {
+function selectSubcategory(categoryId, subcategoryId, e) {
     if (e) e.stopPropagation();
 
     // Close any open dropdowns
@@ -671,10 +678,12 @@ function selectSubcategory(mainCategory, subCategory, e) {
     const bd = document.querySelector('.pd-backdrop');
     if (bd) bd.classList.remove('active');
 
-    // Only one subcategory can be active! Clean old filters and query database
+    // Filter using category_id and subcategory_id
     fetchCatalog({
-        main_category: mainCategory,
-        sub_category: subCategory,
+        category_id: categoryId ? String(categoryId) : '',
+        subcategory_id: subcategoryId ? String(subcategoryId) : '',
+        main_category: '',
+        sub_category: '',
         page: 1
     });
 }
@@ -703,6 +712,8 @@ function resetAllCatalogFilters() {
 
     fetchCatalog({
         search: '',
+        category_id: '',
+        subcategory_id: '',
         main_category: '',
         sub_category: '',
         status: '',
@@ -713,6 +724,8 @@ function resetAllCatalogFilters() {
 
 function clearCategoryFilter() {
     fetchCatalog({
+        category_id: '',
+        subcategory_id: '',
         main_category: '',
         sub_category: '',
         page: 1
@@ -726,26 +739,21 @@ function clearStatusFilter() {
     });
 }
 
-function syncCategoryUiState(mainCat, subCat) {
-    const hasCategory = Boolean(mainCat || subCat);
+function syncCategoryUiState(catId, subId) {
+    const hasCategory = Boolean(catId || subId);
 
-    document.querySelectorAll('.pd-category-wrapper[data-category-group]').forEach(wrapper => {
-        const group = wrapper.dataset.categoryGroup;
-        const label = wrapper.dataset.categoryLabel || group;
+    document.querySelectorAll('.pd-category-wrapper[data-category-id]').forEach(wrapper => {
+        const wrapperCatId = wrapper.dataset.categoryId;
         const trigger = wrapper.querySelector('.pd-trigger');
-        const triggerLabel = wrapper.querySelector('.pd-trigger-label');
-        const isActiveGroup = Boolean(mainCat) && group === mainCat;
+        const isActiveGroup = Boolean(catId) && String(wrapperCatId) === String(catId);
 
         wrapper.classList.toggle('has-active-category', isActiveGroup);
         trigger?.classList.toggle('has-value', isActiveGroup);
 
-        if (triggerLabel) {
-            triggerLabel.textContent = label;
-        }
-
         wrapper.querySelectorAll('.pd-category-option').forEach(option => {
+            const optSubId = option.dataset.subId !== undefined ? option.dataset.subId : (option.dataset.subcategoryId || '');
             const isSelected = isActiveGroup
-                && (option.dataset.sub || '') === (subCat || '');
+                && String(optSubId) === String(subId || '');
             option.classList.toggle('is-selected', isSelected);
             option.classList.toggle('active-subcat', isSelected);
         });
@@ -832,8 +840,8 @@ window.addEventListener('popstate', (e) => {
         const url = new URL(window.location.href);
         fetchCatalog({
             search: url.searchParams.get('search') || '',
-            main_category: url.searchParams.get('main_category') || '',
-            sub_category: url.searchParams.get('sub_category') || '',
+            category_id: url.searchParams.get('category_id') || url.searchParams.get('category') || '',
+            subcategory_id: url.searchParams.get('subcategory_id') || url.searchParams.get('subcategory') || '',
             status: url.searchParams.get('status') || '',
             sort: url.searchParams.get('sort') || 'terbaru',
             page: url.searchParams.get('page') || 1,

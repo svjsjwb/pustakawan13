@@ -21,41 +21,21 @@
             @php
                 $isFav = in_array($book->id, $favoriteIds ?? []);
                 $isAvailable = ($book->available_stock ?? 0) > 0;
-                $mainCat = $book->main_category;
-                $subCat = $book->sub_category ?: $book->education_level;
-
-                if (in_array($mainCat, ['Buku Pendidikan', 'Pendidikan', 'Buku Pelajaran'])) {
-                    $badgeMain = 'Buku Pelajaran';
-                    $badgeSub = match($subCat) {
-                        'SD', 'SD/MI' => 'SD/MI',
-                        'SMP', 'SMP/MTs' => 'SMP/MTs',
-                        'SMA', 'SMA/SMK/MA/SMAK/MAK' => 'SMA/SMK/MA/SMAK/MAK',
-                        'TK' => 'TK',
-                        'Referensi' => 'Referensi',
-                        default => ($subCat ?: 'Umum'),
-                    };
-                    $categoryLabel = $badgeSub ? ($badgeMain . ' • ' . $badgeSub) : $badgeMain;
-                } elseif (in_array($mainCat, ['Anak', 'Anak-Anak', 'Buku Anak'])) {
-                    $categoryLabel = 'Buku Umum • Buku Anak';
-                } elseif (in_array($mainCat, ['Remaja', 'Buku Remaja'])) {
-                    $categoryLabel = 'Buku Umum • Buku Remaja';
-                } elseif (in_array($mainCat, ['Dewasa', 'Buku Dewasa'])) {
-                    $categoryLabel = 'Buku Umum • Buku Dewasa';
-                } elseif ($mainCat) {
-                    $categoryLabel = $subCat ? ($mainCat . ' • ' . $subCat) : $mainCat;
-                } else {
-                    $categoryLabel = $book->category->name ?? 'Buku Umum';
-                }
+                $catName = $book->category?->name ?? 'Buku Umum';
+                $subCatName = $book->subcategory?->name;
+                $categoryLabel = $subCatName ? "{$catName} • {$subCatName}" : $catName;
                 $badgeText = $categoryLabel;
             @endphp
             <div class="saas-book-card"
                  onclick="openCatalogModal(this)"
                  data-id="{{ $book->id }}"
+                 data-category-id="{{ $book->category_id }}"
+                 data-subcategory-id="{{ $book->subcategory_id }}"
                  data-title="{{ $book->title }}"
                  data-author="{{ $book->author ?? '-' }}"
                  data-category="{{ $badgeText }}"
-                 data-main-category="{{ $book->main_category ?? '' }}"
-                 data-sub-category="{{ $book->sub_category ?? '' }}"
+                 data-main-category="{{ $catName }}"
+                 data-sub-category="{{ $subCatName ?? '' }}"
                  data-education-level="{{ $book->education_level ?? '' }}"
                  data-publisher="{{ $book->publisher ?? '-' }}"
                  data-year="{{ $book->publication_year ?? '-' }}"
