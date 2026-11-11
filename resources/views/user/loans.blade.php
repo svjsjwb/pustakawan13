@@ -646,34 +646,40 @@
 
 .ext-calendar-navigation-group {
     display: flex;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    width: fit-content;
+    width: 100%;
     max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     margin-inline: auto;
 }
 
 .ext-calendar-month-control {
-    display: inline-flex;
+    display: flex;
+    flex: 1 1 0;
     align-items: center;
     justify-content: space-between;
     gap: 3px;
     height: 36px;
+    min-width: 0;
     padding: 0 4px;
+    box-sizing: border-box;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.1);
 }
 
 .ext-calendar-month-label {
-    display: inline-flex;
-    flex: 1 1 auto;
+    display: flex;
+    flex: 1 1 0;
     align-items: center;
     justify-content: center;
     min-width: 0;
     height: 34px;
+    box-sizing: border-box;
     color: #fff;
     font-size: 14px;
     font-weight: 700;
@@ -682,22 +688,27 @@
 }
 
 .ext-calendar-year-label {
-    display: inline-flex;
+    display: flex;
+    flex: 1 1 0;
     align-items: center;
     justify-content: center;
-    width: 46px;
-    height: 36px;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
     color: #fff;
     font-size: 14px;
     font-weight: 700;
 }
 
 .ext-calendar-year-control {
-    display: inline-flex;
+    display: flex;
+    flex: 1 1 0;
     align-items: center;
     gap: 3px;
     height: 36px;
+    min-width: 0;
     padding: 0 4px;
+    box-sizing: border-box;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.1);
@@ -705,10 +716,12 @@
 
 .ext-calendar-year-nav {
     display: grid;
+    flex: 0 0 22px;
     place-items: center;
     width: 22px;
     height: 26px;
     padding: 0;
+    box-sizing: border-box;
     border: 0;
     border-radius: 7px;
     background: transparent;
@@ -746,10 +759,8 @@
     .flatpickr-current-month { gap: 4px; }
     .flatpickr-weekdays, .flatpickr-weekday { height: 24px !important; line-height: 24px !important; }
     .flatpickr-day { height: 32px !important; line-height: 32px !important; }
-    .ext-calendar-month-control { width: 128px; }
     .ext-calendar-year-control { gap: 1px; padding: 0 2px; }
     .ext-calendar-year-nav { width: 20px; height: 24px; }
-    .ext-calendar-year-label { width: 42px; }
 }
 
 @media (max-height: 620px) {
