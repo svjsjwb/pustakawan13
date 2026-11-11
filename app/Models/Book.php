@@ -26,8 +26,6 @@ class Book extends Model
         'cover',
         'category_id',
         'subcategory_id',
-        'main_category',
-        'sub_category',
         'education_level',
         'stok',
         'status',
@@ -140,6 +138,11 @@ class Book extends Model
         }
 
         return null;
+    }
+
+    public function getMainCategoryAttribute(): ?string
+    {
+        return $this->category?->name;
     }
 
     /*

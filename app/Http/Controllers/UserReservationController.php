@@ -26,6 +26,7 @@ class UserReservationController extends Controller
             'disetujui'    => 0,
             'siap_diambil' => 0,
             'ditolak'      => 0,
+            'dibatalkan'   => 0,
         ];
 
         if ($member) {
@@ -59,7 +60,8 @@ class UserReservationController extends Controller
                     COUNT(CASE WHEN status = 'menunggu' THEN 1 END) as menunggu,
                     COUNT(CASE WHEN status = 'disetujui' THEN 1 END) as disetujui,
                     COUNT(CASE WHEN status = 'siap_diambil' THEN 1 END) as siap_diambil,
-                    COUNT(CASE WHEN status = 'ditolak' THEN 1 END) as ditolak
+                    COUNT(CASE WHEN status = 'ditolak' THEN 1 END) as ditolak,
+                    COUNT(CASE WHEN status = 'dibatalkan' THEN 1 END) as dibatalkan
                 ")
                 ->first();
 
@@ -69,6 +71,7 @@ class UserReservationController extends Controller
             $statusCounts['disetujui']    = (int) ($counts->disetujui ?? 0);
             $statusCounts['siap_diambil'] = (int) ($counts->siap_diambil ?? 0);
             $statusCounts['ditolak']      = (int) ($counts->ditolak ?? 0);
+            $statusCounts['dibatalkan']   = (int) ($counts->dibatalkan ?? 0);
         }
 
         return view(
@@ -255,6 +258,94 @@ class UserReservationController extends Controller
                 'success',
                 'Reservasi buku berhasil diajukan! Menunggu persetujuan Admin.'
             );
+    }
+
+    /**
+     * User membatalkan reservasi buku
+     */
+    public function cancel(Request $request, $id)
+    {
+        $user   = Auth::user();
+        $member = $user->member;
+
+        if (!$member) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data anggota tidak ditemukan.',
+                ], 404);
+            }
+
+            return back()->with('error', 'Data anggota tidak ditemukan.');
+        }
+
+        $reservation = Reservation::where('member_id', $member->id)
+            ->findOrFail($id);
+
+        if (!in_array($reservation->status, ['menunggu', 'disetujui', 'siap_diambil'], true)) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Reservasi ini tidak dapat dibatalkan karena statusnya sudah ' . $reservation->display_status . '.',
+                ], 422);
+            }
+
+            return back()->with('error', 'Reservasi tidak dapat dibatalkan.');
+        }
+
+        DB::transaction(function () use ($reservation, $user) {
+            $lockedReservation = Reservation::lockForUpdate()->findOrFail($reservation->id);
+
+            // Lepaskan BookCopy yang di-reserve jika ada
+            if ($lockedReservation->book_copy_id) {
+                $bookCopy = BookCopy::lockForUpdate()->find($lockedReservation->book_copy_id);
+                if ($bookCopy && $bookCopy->status === 'reserved') {
+                    $bookCopy->update([
+                        'status' => 'available',
+                    ]);
+                }
+            }
+
+            // Kembalikan stok buku
+            $book = Book::lockForUpdate()->find($lockedReservation->book_id);
+            if ($book) {
+                $book->increment('stok');
+            }
+
+            // Update status reservasi
+            $lockedReservation->update([
+                'status'           => 'dibatalkan',
+                'rejection_reason' => 'Dibatalkan oleh Pengguna',
+            ]);
+
+            // Sinkronisasi status member jika aktif
+            if ($lockedReservation->member) {
+                app(\App\Services\MemberStatusService::class)->sync($lockedReservation->member);
+            }
+
+            // Notifikasi ke Admin
+            AppNotification::notifyAdmin(
+                'reservation_cancelled',
+                'Reservasi Dibatalkan',
+                "{$user->name} membatalkan reservasi buku \"{$book?->title}\".",
+                [
+                    'reservation_id' => $lockedReservation->id,
+                    'book_id'        => $lockedReservation->book_id,
+                ]
+            );
+        });
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Reservasi berhasil dibatalkan.',
+                'status'  => 'dibatalkan',
+            ]);
+        }
+
+        return redirect()
+            ->route('user.reservations.show', $reservation->id)
+            ->with('success', 'Reservasi berhasil dibatalkan.');
     }
 
     /**

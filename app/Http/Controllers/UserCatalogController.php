@@ -200,13 +200,13 @@ class UserCatalogController extends Controller
         match ($sort) {
             'az'      => $query->orderBy('judul_buku', 'asc'),
             'za'      => $query->orderBy('judul_buku', 'desc'),
-            'terlama' => $query->oldest(),
+            'terlama' => $query->orderByRaw('created_at ASC NULLS LAST, id ASC'),
 
             default => $query
                 ->orderByRaw(
                     "CASE WHEN NULLIF(TRIM(cover), '') IS NOT NULL THEN 0 ELSE 1 END"
                 )
-                ->latest(),
+                ->orderByRaw('created_at DESC NULLS LAST, id DESC'),
         };
 
         $books = $query->paginate(20)->withQueryString();

@@ -4,6 +4,17 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/premium-dropdown.css') }}">
+<style>
+    .status-badge.status-ditolak {
+        background: rgba(239, 68, 68, 0.12) !important;
+        color: #b91c1c !important;
+        border: 1px solid rgba(239, 68, 68, 0.28) !important;
+    }
+    .status-badge.status-ditolak .status-badge-icon svg {
+        color: #b91c1c !important;
+        stroke: #b91c1c !important;
+    }
+</style>
 @endpush
 
 @section('content')
@@ -101,6 +112,13 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                     </span>
                     <span class="pd-item-label">Ditolak</span>
+                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                </div>
+                <div class="pd-item status-red {{ request('status') === 'dibatalkan' ? 'is-selected' : '' }}" role="option" data-value="dibatalkan" data-label="Dibatalkan">
+                    <span class="pd-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg>
+                    </span>
+                    <span class="pd-item-label">Dibatalkan</span>
                     <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                 </div>
             </div>
@@ -224,17 +242,18 @@
                     $book = $res->book;
                     $status = strtolower($res->status);
                     $badgeClass = match($status) {
-                        'menunggu'     => 'status-menunggu',
-                        'disetujui'    => 'status-disetujui',
-                        'siap_diambil' => 'status-siap_diambil',
-                        'ditolak'      => 'status-ditolak',
-                        default        => 'status-menunggu',
+                        'menunggu'              => 'status-menunggu',
+                        'disetujui'             => 'status-disetujui',
+                        'siap_diambil'          => 'status-siap_diambil',
+                        'ditolak', 'dibatalkan' => 'status-ditolak',
+                        default                 => 'status-menunggu',
                     };
                     $statusLabel = match($status) {
                         'menunggu'     => 'Menunggu',
                         'disetujui'    => 'Disetujui',
                         'siap_diambil' => 'Siap Diambil',
                         'ditolak'      => 'Ditolak',
+                        'dibatalkan'   => 'Dibatalkan',
                         default        => ucfirst($res->status),
                     };
                 @endphp
@@ -300,10 +319,14 @@
                                 <span class="status-badge-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                                 </span>
+                            @elseif($status === 'dibatalkan')
+                                <span class="status-badge-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg>
+                                </span>
                             @endif
                             <span>{{ $statusLabel }}</span>
                         </span>
-                        @if($res->rejection_reason && $status === 'ditolak')
+                        @if($res->rejection_reason && in_array($status, ['ditolak', 'dibatalkan']))
                             <div style="font-size: 11px; color: #dc2626; margin-top: 4px;" title="{{ $res->rejection_reason }}">
                                 Ket: {{ Str::limit($res->rejection_reason, 24) }}
                             </div>
@@ -374,13 +397,14 @@
                             const badge = row.querySelector('.status-badge');
                             if (badge) {
                                 // Clear old status classes
-                                badge.className = `status-badge status-${newStatus}`;
+                                badge.className = (newStatus === 'dibatalkan' || newStatus === 'ditolak') ? 'status-badge status-ditolak' : `status-badge status-${newStatus}`;
 
                                 const icons = {
                                     'menunggu': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>',
                                     'disetujui': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg></span>',
                                     'siap_diambil': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></span>',
-                                    'ditolak': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>'
+                                    'ditolak': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>',
+                                    'dibatalkan': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg></span>'
                                 };
 
                                 const iconHtml = icons[newStatus] || icons['menunggu'];
@@ -388,8 +412,8 @@
                                 badge.innerHTML = `${iconHtml}<span>${label}</span>`;
                             }
 
-                            // If rejected and note exists, append/update note
-                            if (newStatus === 'ditolak' && item.rejection_reason) {
+                            // If rejected or cancelled and note exists, append/update note
+                            if ((newStatus === 'ditolak' || newStatus === 'dibatalkan') && item.rejection_reason) {
                                 let noteEl = row.querySelector('.rejection-note');
                                 if (!noteEl) {
                                     noteEl = document.createElement('div');

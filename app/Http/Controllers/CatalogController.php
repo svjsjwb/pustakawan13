@@ -44,7 +44,7 @@ class CatalogController extends Controller
                     $q->where('status', 'reserved');
                 },
             ])
-            ->latest();
+            ->orderByRaw('created_at DESC NULLS LAST, id DESC');
 
 
         /*

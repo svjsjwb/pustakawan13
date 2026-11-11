@@ -614,6 +614,77 @@
             copyDeleteModal?.addEventListener('click', event => {
                 if (event.target.id === 'copyDeleteModal') window.closeCopyDeleteModal();
             });
+
+            // ── BOOK DELETE MODAL (GLOBAL FALLBACK) ────────────────
+            let activeBookDeleteForm = null;
+            window.openBookDeleteModal = function (button) {
+                activeBookDeleteForm = button.closest('.delete-book-form');
+                if (!activeBookDeleteForm) return;
+
+                const row = button.closest('tr');
+                const titleElement = row ? row.querySelector('td:nth-child(1) strong') : null;
+                const bookName = titleElement ? titleElement.textContent.trim() : 'buku ini';
+                const stockElement = row ? row.querySelector('td:nth-child(5)') : null;
+                const bookStock = stockElement ? stockElement.textContent.trim() : '-';
+
+                const modal = document.getElementById('bookDeleteModal');
+                const modalBookName = document.getElementById('deleteBookName') || document.getElementById('modalBookName');
+                const modalBookStock = document.getElementById('deleteBookStock');
+                const reasonInput = document.getElementById('bookDeleteReason');
+
+                if (modalBookName) modalBookName.textContent = bookName;
+                if (modalBookStock) modalBookStock.textContent = bookStock;
+                if (reasonInput) reasonInput.value = '';
+
+                if (modal) {
+                    modal.classList.add('show', 'is-open');
+                    modal.setAttribute('aria-hidden', 'false');
+                    document.body.style.overflow = 'hidden';
+                    setTimeout(() => reasonInput?.focus(), 100);
+                }
+            };
+
+            window.closeBookDeleteModal = function () {
+                const modal = document.getElementById('bookDeleteModal');
+                if (modal) {
+                    modal.classList.remove('show', 'is-open');
+                    modal.setAttribute('aria-hidden', 'true');
+                    document.body.style.overflow = '';
+                }
+                activeBookDeleteForm = null;
+            };
+
+            window.confirmBookDelete = function () {
+                const reasonInput = document.getElementById('bookDeleteReason');
+                const reason = reasonInput ? reasonInput.value.trim() : '';
+
+                if (!reason) {
+                    alert('Silakan masukkan alasan penarikan buku.');
+                    reasonInput?.focus();
+                    return;
+                }
+
+                if (!activeBookDeleteForm) return;
+
+                let hiddenInput = activeBookDeleteForm.querySelector('input[name="reason"]');
+                if (!hiddenInput) {
+                    hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'reason';
+                    activeBookDeleteForm.appendChild(hiddenInput);
+                }
+                hiddenInput.value = reason;
+
+                activeBookDeleteForm.submit();
+            };
+
+            const bookDeleteModalEl = document.getElementById('bookDeleteModal');
+            if (bookDeleteModalEl) {
+                document.body.appendChild(bookDeleteModalEl);
+                bookDeleteModalEl.addEventListener('click', event => {
+                    if (event.target === bookDeleteModalEl) window.closeBookDeleteModal();
+                });
+            }
         </script>
     @endpush
 

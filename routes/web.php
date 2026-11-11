@@ -247,6 +247,7 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     Route::get('/user/reservations-feed', [UserReservationController::class, 'statusFeed'])->name('user.reservations.statusFeed');
     Route::get('/user/reservations/{reservation}', [UserReservationController::class, 'show'])->name('user.reservations.show');
     Route::post('/user/reservations', [UserReservationController::class, 'store'])->name('user.reservations.store');
+    Route::post('/user/reservations/{reservation}/cancel', [UserReservationController::class, 'cancel'])->name('user.reservations.cancel');
 
     // PENGUMUMAN
     Route::get('/user/announcements', [UserAnnouncementController::class, 'index'])->name('user.announcements');

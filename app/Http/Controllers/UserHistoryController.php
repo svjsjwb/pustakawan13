@@ -117,7 +117,8 @@ class UserHistoryController extends Controller
                 $statusLabel = match($statusRaw) {
                     'menunggu'                  => 'Menunggu Persetujuan',
                     'disetujui', 'siap_diambil' => 'Disetujui',
-                    'ditolak', 'dibatalkan'     => 'Ditolak',
+                    'ditolak'                   => 'Ditolak',
+                    'dibatalkan'                => 'Dibatalkan',
                     'selesai'                   => 'Selesai',
                     default                     => ucfirst($r->status),
                 };

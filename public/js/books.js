@@ -110,13 +110,20 @@ function openBookDeleteModal(button) {
 
     const titleElement = row.querySelector('td:nth-child(1) strong');
     const bookName = titleElement ? titleElement.textContent.trim() : 'buku ini';
+    const stockElement = row.querySelector('td:nth-child(5)');
+    const bookStock = stockElement ? stockElement.textContent.trim() : '-';
 
     const modal = document.getElementById('bookDeleteModal');
-    const modalBookName = document.getElementById('modalBookName');
+    const modalBookName = document.getElementById('deleteBookName') || document.getElementById('modalBookName');
+    const modalBookStock = document.getElementById('deleteBookStock');
     const reasonInput = document.getElementById('bookDeleteReason');
 
     if (modalBookName) {
         modalBookName.textContent = bookName;
+    }
+
+    if (modalBookStock) {
+        modalBookStock.textContent = bookStock;
     }
 
     if (reasonInput) {
@@ -124,8 +131,9 @@ function openBookDeleteModal(button) {
     }
 
     if (modal) {
-        modal.classList.add('is-open');
+        modal.classList.add('show', 'is-open');
         modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
         if (reasonInput) {
             setTimeout(function () {
                 reasonInput.focus();
@@ -137,8 +145,9 @@ function openBookDeleteModal(button) {
 function closeBookDeleteModal() {
     const modal = document.getElementById('bookDeleteModal');
     if (modal) {
-        modal.classList.remove('is-open');
+        modal.classList.remove('show', 'is-open');
         modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
     }
     bookDeleteForm = null;
 }
@@ -179,6 +188,17 @@ function confirmBookDelete() {
 
     bookDeleteForm.submit();
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const bookDeleteModal = document.getElementById('bookDeleteModal');
+    if (bookDeleteModal) {
+        bookDeleteModal.addEventListener('click', function (event) {
+            if (event.target === bookDeleteModal) {
+                closeBookDeleteModal();
+            }
+        });
+    }
+});
 
 document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {

@@ -140,7 +140,8 @@ class ActivityController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $books = Book::latest()
+        $books = Book::whereNotNull('created_at')
+            ->orderBy('created_at', 'desc')
             ->take(100)
             ->get();
 

@@ -1394,7 +1394,8 @@
         visibility 0.2s ease;
 }
 
-.book-delete-modal-overlay.show {
+.book-delete-modal-overlay.show,
+.book-delete-modal-overlay.is-open {
     opacity: 1;
     visibility: visible;
 }
@@ -1421,7 +1422,8 @@
         transform 0.25s ease;
 }
 
-.book-delete-modal-overlay.show .book-delete-modal {
+.book-delete-modal-overlay.show .book-delete-modal,
+.book-delete-modal-overlay.is-open .book-delete-modal {
     transform: translateY(0) scale(1);
 }
 
@@ -2704,7 +2706,8 @@
     box-sizing: border-box;
 }
 
-.book-delete-modal-overlay.show {
+.book-delete-modal-overlay.show,
+.book-delete-modal-overlay.is-open {
     opacity: 1;
     visibility: visible;
 }
@@ -2734,7 +2737,8 @@
         transform .2s ease;
 }
 
-.book-delete-modal-overlay.show .book-delete-modal {
+.book-delete-modal-overlay.show .book-delete-modal,
+.book-delete-modal-overlay.is-open .book-delete-modal {
     transform: translateY(0) scale(1);
 }
 
