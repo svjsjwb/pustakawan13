@@ -92,6 +92,15 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="alert-error" style="display: flex; align-items: center; gap: 10px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13.5px; font-weight: 500;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0; color: #dc2626;">
+                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
 
         {{-- =====================================================
     MEMBER CONTENT CARD
@@ -771,28 +780,53 @@
                 }
 
                 const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
-                const rows = table.querySelectorAll('tbody tr');
+                const rows = table.querySelectorAll('tbody tr:not(.empty-search-row)');
+                let visibleCount = 0;
 
                 rows.forEach(function(row) {
                     if (row.querySelector('.empty-data')) {
                         return;
                     }
 
-                    const rowText = row.innerText.toLowerCase();
+                    const rowText = (row.textContent || row.innerText).toLowerCase();
                     const statusBadge = row.querySelector('.status-active, .status-inactive');
-                    const matchesSearch = rowText.includes(keyword);
+                    const matchesSearch = !keyword || rowText.includes(keyword);
                     const matchesStatus = !selectedStatus || (
                         selectedStatus === 'aktif'
                             ? statusBadge && statusBadge.classList.contains('status-active')
                             : statusBadge && statusBadge.classList.contains('status-inactive')
                     );
 
-                    row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+                    const isMatch = matchesSearch && matchesStatus;
+                    row.style.display = isMatch ? '' : 'none';
+                    if (isMatch) visibleCount++;
                 });
+
+                // Tampilkan pesan kosong jika tidak ada yang cocok
+                let noResultRow = table.querySelector('.empty-search-row');
+                if (visibleCount === 0 && keyword) {
+                    if (!noResultRow) {
+                        const tbody = table.querySelector('tbody');
+                        if (tbody) {
+                            noResultRow = document.createElement('tr');
+                            noResultRow.className = 'empty-search-row';
+                            noResultRow.innerHTML = '<td colspan="7" style="text-align: center; padding: 32px; color: #94a3b8; font-weight: 500;">Tidak ada data anggota yang sesuai dengan kata kunci "' + keyword + '".</td>';
+                            tbody.appendChild(noResultRow);
+                        }
+                    } else {
+                        noResultRow.style.display = '';
+                        const td = noResultRow.querySelector('td');
+                        if (td) td.textContent = 'Tidak ada data anggota yang sesuai dengan kata kunci "' + keyword + '".';
+                    }
+                } else if (noResultRow) {
+                    noResultRow.style.display = 'none';
+                }
             }
 
             if (searchInput && table) {
                 searchInput.addEventListener('input', filterMemberRows);
+                searchInput.addEventListener('keyup', filterMemberRows);
+                searchInput.addEventListener('search', filterMemberRows);
             }
 
             if (statusFilter && statusMenu && statusLabel) {

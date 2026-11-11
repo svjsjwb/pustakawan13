@@ -64,6 +64,15 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="alert-error" style="display: flex; align-items: center; gap: 10px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13.5px; font-weight: 500;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; flex-shrink: 0; color: #dc2626;">
+                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
 
         <div class="books-content-card">
 
@@ -685,6 +694,76 @@
                     if (event.target === bookDeleteModalEl) window.closeBookDeleteModal();
                 });
             }
+
+            // ── AUTOMATIC SEARCH BOOKS (FALLBACK) ────────────────
+            (() => {
+                const searchInput = document.getElementById('books-search');
+                const filterForm = document.getElementById('books-filter-form');
+                if (!searchInput || !filterForm) return;
+
+                let timer = null;
+                const liveSearch = () => {
+                    const url = new URL(filterForm.action || window.location.href, window.location.origin);
+                    const formData = new FormData(filterForm);
+                    for (const [k, v] of formData.entries()) {
+                        if (v) url.searchParams.set(k, v);
+                        else url.searchParams.delete(k);
+                    }
+                    window.history.replaceState({}, '', url.toString());
+
+                    const tbody = document.getElementById('books-table-body');
+                    if (tbody) tbody.style.opacity = '0.5';
+
+                    fetch(url.toString(), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' }
+                    })
+                    .then(r => r.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newTbody = doc.getElementById('books-table-body');
+                        if (newTbody && tbody) tbody.innerHTML = newTbody.innerHTML;
+
+                        const newPag = doc.getElementById('books-pagination');
+                        const curPag = document.getElementById('books-pagination');
+                        if (curPag) {
+                            if (newPag) {
+                                curPag.innerHTML = newPag.innerHTML;
+                                curPag.style.display = '';
+                            } else {
+                                curPag.style.display = 'none';
+                            }
+                        }
+                    })
+                    .catch(e => console.error(e))
+                    .finally(() => {
+                        if (tbody) tbody.style.opacity = '1';
+                    });
+                };
+
+                searchInput.addEventListener('input', function () {
+                    const kw = this.value.toLowerCase().trim();
+                    const rows = document.querySelectorAll('#books-table-body tr:not(#no-search-results)');
+                    if (kw) {
+                        rows.forEach(r => {
+                            const txt = (r.dataset.search || r.textContent).toLowerCase();
+                            r.style.display = txt.includes(kw) ? '' : 'none';
+                        });
+                    } else {
+                        rows.forEach(r => r.style.display = '');
+                    }
+                    clearTimeout(timer);
+                    timer = setTimeout(liveSearch, 350);
+                });
+
+                searchInput.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        clearTimeout(timer);
+                        liveSearch();
+                    }
+                });
+            })();
         </script>
     @endpush
 

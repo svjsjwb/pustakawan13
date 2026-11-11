@@ -181,7 +181,7 @@ class MemberController extends Controller
             ->route('members.index')
             ->with(
                 'success',
-                'Karyawan berhasil ditambahkan.'
+                'Data anggota berhasil ditambahkan.'
             );
     }
 

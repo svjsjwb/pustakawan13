@@ -54,7 +54,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 categoryTrigger.classList.remove('is-open');
                 categoryTrigger.setAttribute('aria-expanded', 'false');
 
-                if (filterForm) {
+                if (typeof performLiveSearch === 'function') {
+                    performLiveSearch();
+                } else if (filterForm) {
                     filterForm.submit();
                 }
             });
@@ -71,21 +73,107 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /* =========================================================
-       SEARCH
+       SEARCH (AUTOMATIC LIVE SEARCH)
     ========================================================= */
 
+    let searchDebounceTimer = null;
+
+    window.performLiveSearch = function () {
+        if (!filterForm) return;
+
+        const url = new URL(filterForm.action || window.location.href, window.location.origin);
+        const formData = new FormData(filterForm);
+        for (const [key, value] of formData.entries()) {
+            if (value) {
+                url.searchParams.set(key, value);
+            } else {
+                url.searchParams.delete(key);
+            }
+        }
+
+        // Update URL browser tanpa reload
+        window.history.replaceState({}, '', url.toString());
+
+        const tbody = document.getElementById('books-table-body');
+        if (tbody) {
+            tbody.style.opacity = '0.5';
+        }
+
+        fetch(url.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const newTbody = doc.getElementById('books-table-body');
+            const currentTbody = document.getElementById('books-table-body');
+            if (newTbody && currentTbody) {
+                currentTbody.innerHTML = newTbody.innerHTML;
+            }
+
+            const newPagination = doc.getElementById('books-pagination');
+            const currentPagination = document.getElementById('books-pagination');
+            if (currentPagination) {
+                if (newPagination) {
+                    currentPagination.innerHTML = newPagination.innerHTML;
+                    currentPagination.style.display = '';
+                } else {
+                    currentPagination.style.display = 'none';
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Live search error:', err);
+        })
+        .finally(() => {
+            if (tbody) {
+                tbody.style.opacity = '1';
+            }
+        });
+    };
+
     if (searchInput && filterForm) {
+        searchInput.addEventListener('input', function () {
+            // Filter instan lokal pada baris yang sedang tampil
+            const keyword = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('#books-table-body tr:not(#no-search-results)');
+            let anyMatch = false;
+
+            if (keyword) {
+                rows.forEach(function (row) {
+                    const searchData = (row.dataset.search || row.textContent).toLowerCase();
+                    const matches = searchData.includes(keyword);
+                    row.style.display = matches ? '' : 'none';
+                    if (matches) anyMatch = true;
+                });
+            } else {
+                rows.forEach(r => r.style.display = '');
+            }
+
+            // Jalankan pencarian server setelah jeda ketik 350ms
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(window.performLiveSearch, 350);
+        });
+
         searchInput.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                filterForm.submit();
+                clearTimeout(searchDebounceTimer);
+                window.performLiveSearch();
             }
         });
     }
 
     if (searchButton && filterForm) {
-        searchButton.addEventListener('click', function () {
-            filterForm.submit();
+        searchButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            clearTimeout(searchDebounceTimer);
+            window.performLiveSearch();
         });
     }
 

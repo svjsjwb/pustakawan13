@@ -624,7 +624,7 @@ class BookController extends Controller
             ->route('books.index')
             ->with(
                 'success',
-                'Buku berhasil ditambahkan.'
+                'Data buku berhasil ditambahkan.'
             );
     }
 
