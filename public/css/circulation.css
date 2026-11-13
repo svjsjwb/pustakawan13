@@ -2322,15 +2322,14 @@ input[type="number"] {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    padding: 18px 20px;
-    border-bottom: 1px solid #edf2f2;
+    padding: 22px 24px 16px 24px;
 }
 
 .extension-requests-label {
     display: block;
     margin-bottom: 5px;
     color: #287f80;
-    font-size: 9px;
+    font-size: 9.5px;
     font-weight: 800;
     letter-spacing: 1.4px;
 }
@@ -2338,140 +2337,247 @@ input[type="number"] {
 .extension-requests-header h3 {
     margin: 0 0 4px;
     color: #173f40;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 800;
 }
 
 .extension-requests-header p {
     margin: 0;
     color: #718080;
-    font-size: 11px;
+    font-size: 11.5px;
     line-height: 1.5;
 }
 
 .extension-requests-count {
     flex-shrink: 0;
-    padding: 6px 10px;
+    padding: 6px 14px;
     border: 1px solid #b9dddd;
     border-radius: 999px;
     background: #eef8f7;
     color: #287b7b;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
 }
 
 .extension-requests-list {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 4px 24px 20px 24px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #b9dddd #f1f7f7;
+}
+
+.extension-requests-list::-webkit-scrollbar {
+    height: 6px;
+}
+
+.extension-requests-list::-webkit-scrollbar-track {
+    background: #f1f7f7;
+    border-radius: 8px;
+    margin: 0 24px;
+}
+
+.extension-requests-list::-webkit-scrollbar-thumb {
+    background: #b9dddd;
+    border-radius: 8px;
+}
+
+.extension-requests-list::-webkit-scrollbar-thumb:hover {
+    background: #95c5c5;
 }
 
 .extension-request-item {
+    flex: 0 0 calc((100% - 32px) / 3);
+    min-width: 275px;
+    background: #ffffff;
+    border: 1px solid #dce8e8;
+    border-top: 4px solid #1f5757;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(22, 63, 63, 0.03);
+    box-sizing: border-box;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.extension-request-item:hover {
+    box-shadow: 0 4px 14px rgba(22, 63, 63, 0.08);
+}
+
+.extension-request-user-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    padding: 17px 20px;
-    border-bottom: 1px solid #edf2f2;
+    gap: 12px;
 }
 
-.extension-request-item:last-child {
-    border-bottom: none;
-}
-
-.extension-request-main {
-    min-width: 0;
-    flex: 1;
+.extension-request-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    background: #e3f2ef;
+    color: #1f5757;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
 }
 
 .extension-request-member {
-    margin-bottom: 3px;
     color: #173f40;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
+    letter-spacing: 0.2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .extension-request-book {
-    margin-bottom: 8px;
-    color: #4d6262;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    background: #f1f6f6;
+    border-radius: 6px;
+    color: #1f5757;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .extension-request-dates {
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    color: #718080;
-    font-size: 10px;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
 }
 
-.extension-request-dates strong {
-    color: #334b4b;
+.extension-request-date-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10.5px;
+    gap: 8px;
+}
+
+.extension-request-date-label {
+    color: #718080;
+    white-space: nowrap;
+}
+
+.extension-request-date-current {
+    color: #c53030;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.extension-request-date-requested-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.extension-request-date-requested {
+    color: #173f40;
     font-weight: 700;
 }
 
-.extension-request-arrow {
-    color: #9aabab;
-    font-size: 12px;
-}
-
-.extension-request-new-date strong {
-    color: #287b7b;
+.extension-request-days-badge {
+    padding: 2px 6px;
+    background: #e6f7ec;
+    color: #15803d;
+    border-radius: 4px;
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
 .extension-request-reason {
-    margin-top: 7px;
-    color: #879595;
+    margin-top: 4px;
+    margin-bottom: 14px;
+    color: #718080;
     font-size: 10px;
-    line-height: 1.5;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .extension-request-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 4px;
 }
 
-.extension-request-actions form {
+.extension-request-form {
+    flex: 1;
     margin: 0;
 }
 
 .extension-request-btn {
-    min-width: 82px;
-    height: 34px;
-    padding: 0 13px;
+    width: 100%;
+    height: 35px;
+    padding: 0 10px;
     border-radius: 7px;
     font-family: inherit;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     cursor: pointer;
     transition: all .2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 .extension-request-btn-reject {
-    border: 1px solid #e1c7c7;
+    border: 1px solid #d4dede;
     background: #ffffff;
-    color: #9a4444;
+    color: #334b4b;
 }
 
 .extension-request-btn-reject:hover {
-    background: #fdf1f1;
-    border-color: #d9a9a9;
+    background: #f8fafc;
+    border-color: #cbd5e1;
 }
 
 .extension-request-btn-approve {
-    border: 1px solid #287f80;
-    background: #287f80;
+    border: 1px solid #1f5757;
+    background: #1f5757;
     color: #ffffff;
-    box-shadow: 0 4px 10px rgba(40, 127, 128, .15);
+    box-shadow: 0 2px 6px rgba(31, 87, 87, 0.15);
 }
 
 .extension-request-btn-approve:hover {
-    background: #236f70;
-    border-color: #236f70;
-    transform: translateY(-1px);
+    background: #174444;
+    border-color: #174444;
+}
+
+@media (max-width: 900px) {
+    .extension-request-item {
+        flex: 0 0 270px;
+        min-width: 270px;
+    }
 }
 
 @media (max-width: 700px) {

@@ -137,7 +137,7 @@
                 </div>
 
                 <span class="extension-requests-count">
-                    {{ $pendingExtensionRequests->count() }} Pengajuan
+                    {{ $pendingExtensionRequests->count() }} Pengajuan Baru
                 </span>
             </div>
 
@@ -151,43 +151,64 @@
                         $currentDue = $request->due_at
                             ? \Carbon\Carbon::parse($request->due_at)
                             : null;
+
+                        $memberName = $request->member->name ?? 'Anggota';
+                        $nameParts = preg_split('/\s+/', trim($memberName));
+                        if (count($nameParts) >= 2) {
+                            $initials = strtoupper(mb_substr($nameParts[0], 0, 1) . mb_substr($nameParts[1], 0, 1));
+                        } else {
+                            $initials = strtoupper(mb_substr($memberName, 0, 2));
+                        }
+
+                        $daysDiff = ($currentDue && $requestedDue)
+                            ? max(1, (int) round($currentDue->diffInDays($requestedDue, false)))
+                            : null;
                     @endphp
 
                     <div class="extension-request-item">
-                        <div class="extension-request-main">
-                            <div class="extension-request-member">
-                                {{ $request->member->name ?? '-' }}
+                        <div class="extension-request-user-row">
+                            <div class="extension-request-avatar">{{ $initials }}</div>
+                            <div class="extension-request-member" title="{{ $memberName }}">
+                                {{ strtoupper($memberName) }}
                             </div>
-
-                            <div class="extension-request-book">
-                                {{ $requestBook->title ?? 'Buku' }}
-                            </div>
-
-                            <div class="extension-request-dates">
-                                <span>
-                                    Jatuh tempo:
-                                    <strong>{{ $currentDue?->format('d/m/Y') ?? '-' }}</strong>
-                                </span>
-
-                                <span class="extension-request-arrow">→</span>
-
-                                <span class="extension-request-new-date">
-                                    Meminta sampai:
-                                    <strong>{{ $requestedDue?->format('d/m/Y') ?? '-' }}</strong>
-                                </span>
-                            </div>
-
-                            @if($request->extension_reason)
-                                <div class="extension-request-reason">
-                                    Alasan: {{ $request->extension_reason }}
-                                </div>
-                            @endif
                         </div>
+
+                        <div class="extension-request-book" title="{{ $requestBook->title ?? $requestBook->judul_buku ?? 'Buku' }}">
+                            {{ $requestBook->title ?? $requestBook->judul_buku ?? 'Buku' }}
+                        </div>
+
+                        <div class="extension-request-dates">
+                            <div class="extension-request-date-row">
+                                <span class="extension-request-date-label">Jatuh tempo:</span>
+                                <span class="extension-request-date-current">
+                                    {{ $currentDue?->format('d/m/Y') ?? '-' }}
+                                </span>
+                            </div>
+
+                            <div class="extension-request-date-row">
+                                <span class="extension-request-date-label">Meminta sampai:</span>
+                                <div class="extension-request-date-requested-group">
+                                    <span class="extension-request-date-requested">
+                                        {{ $requestedDue?->format('d/m/Y') ?? '-' }}
+                                    </span>
+                                    @if($daysDiff)
+                                        <span class="extension-request-days-badge">+{{ $daysDiff }} hari</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        @if($request->extension_reason)
+                            <div class="extension-request-reason" title="{{ $request->extension_reason }}">
+                                Alasan: {{ $request->extension_reason }}
+                            </div>
+                        @endif
 
                         <div class="extension-request-actions">
                             <form
                                 action="{{ route('borrowings.rejectExtension', $request) }}"
                                 method="POST"
+                                class="extension-request-form"
                             >
                                 @csrf
                                 @method('PATCH')
@@ -200,6 +221,7 @@
                             <form
                                 action="{{ route('borrowings.approveExtension', $request) }}"
                                 method="POST"
+                                class="extension-request-form"
                             >
                                 @csrf
                                 @method('PATCH')
