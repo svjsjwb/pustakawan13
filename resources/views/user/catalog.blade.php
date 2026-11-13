@@ -3,8 +3,8 @@
 @section('content_class', 'catalog-content-override')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/user-catalog.css') }}">
-<link rel="stylesheet" href="{{ asset('css/premium-dropdown.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user-catalog.css') }}?v={{ file_exists(public_path('css/user-catalog.css')) ? filemtime(public_path('css/user-catalog.css')) : time() }}">
+<link rel="stylesheet" href="{{ asset('css/premium-dropdown.css') }}?v={{ file_exists(public_path('css/premium-dropdown.css')) ? filemtime(public_path('css/premium-dropdown.css')) : time() }}">
 @endpush
 
 @section('content')
@@ -390,6 +390,10 @@
                     <div class="saas-modal-meta-item">
                         <span class="saas-modal-meta-label">ISBN</span>
                         <span class="saas-modal-meta-val" id="modalBookIsbn" style="font-family: monospace;">-</span>
+                    </div>
+                    <div class="saas-modal-meta-item">
+                        <span class="saas-modal-meta-label">Kode DDC</span>
+                        <span class="saas-modal-meta-val" id="modalBookDdc" style="font-family: monospace;">-</span>
                     </div>
                     <div class="saas-modal-meta-item">
                         <span class="saas-modal-meta-label">Lokasi Rak</span>
@@ -932,6 +936,9 @@ function openCatalogModal(el) {
     document.getElementById('modalBookPublisher').textContent = d.publisher || '-';
     document.getElementById('modalBookYear').textContent = d.year || '-';
     document.getElementById('modalBookIsbn').textContent = d.isbn || '-';
+    if (document.getElementById('modalBookDdc')) {
+        document.getElementById('modalBookDdc').textContent = d.ddc || '-';
+    }
     document.getElementById('modalBookRak').textContent = d.rak || '-';
     document.getElementById('modalBookDescription').textContent = d.description || 'Deskripsi belum tersedia.';
 

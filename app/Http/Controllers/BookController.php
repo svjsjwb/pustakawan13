@@ -135,7 +135,8 @@ class BookController extends Controller
                 $q
                     ->where('judul_buku', 'ilike', "%{$search}%")
                     ->orWhere('penulis', 'ilike', "%{$search}%")
-                    ->orWhere('isbn', 'ilike', "%{$search}%");
+                    ->orWhere('isbn', 'ilike', "%{$search}%")
+                    ->orWhere('ddc', 'ilike', "%{$search}%");
             });
         }
 
@@ -368,11 +369,6 @@ class BookController extends Controller
                 'string',
                 'max:255',
             ],
-            'kode_buku' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
             'ddc' => [
                 'nullable',
                 'string',
@@ -526,8 +522,6 @@ class BookController extends Controller
                         'Tersedia',
                     'no_iventaris' =>
                         $request->no_iventaris,
-                    'kode_buku' =>
-                        $request->kode_buku,
                     'ddc' =>
                         $request->ddc,
                     'edition' =>
@@ -763,11 +757,6 @@ class BookController extends Controller
                 'string',
                 'max:255',
             ],
-            'kode_buku' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
             'ddc' => [
                 'nullable',
                 'string',
@@ -957,8 +946,6 @@ class BookController extends Controller
                         $request->sku,
                     'no_iventaris' =>
                         $request->no_iventaris,
-                    'kode_buku' =>
-                        $request->kode_buku,
                     'ddc' =>
                         $request->ddc,
                     'edition' =>

@@ -199,15 +199,6 @@
                         @enderror
                     </div>
 
-                    <div class="book-form-group">
-                        <label for="kode_buku">Kode Buku</label>
-                        <input type="text" id="kode_buku" name="kode_buku"
-                            class="input @error('kode_buku') is-invalid @enderror" value="{{ old('kode_buku') }}"
-                            placeholder="Contoh: BK-001">
-                        @error('kode_buku')
-                            <span class="form-error">{{ $message }}</span>
-                        @enderror
-                    </div>
 
                     {{-- Rak --}}
                     <div class="book-form-group">

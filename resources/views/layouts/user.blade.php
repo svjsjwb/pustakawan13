@@ -44,6 +44,8 @@
         })();
     </script>
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/responsive-overrides.css') }}?v={{ file_exists(public_path('css/responsive-overrides.css')) ? filemtime(public_path('css/responsive-overrides.css')) : time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dark-theme.css') }}?v={{ file_exists(public_path('css/dark-theme.css')) ? filemtime(public_path('css/dark-theme.css')) : time() }}">
 </head>
 
 <body>
@@ -170,6 +172,12 @@
                 .catch(() => showToast('Gagal mengubah favorit', 'error'));
         };
     </script>
+
+    @if (session('cancellation_request_pending'))
+        <script>window.setTimeout(() => window.showToast('Permintaan pembatalan telah dikirim dan menunggu persetujuan admin.', 'warning'), 0);</script>
+    @elseif (session('reservation_cancelled'))
+        <script>window.setTimeout(() => window.showToast('Reservasi berhasil dibatalkan.', 'success'), 0);</script>
+    @endif
 
     @stack('scripts')
 </body>

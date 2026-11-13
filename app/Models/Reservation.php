@@ -17,12 +17,14 @@ class Reservation extends Model
         'expires_at',
         'status',
         'rejection_reason',
+        'cancellation_requested_at',
         'seat_number',
     ];
 
     protected $casts = [
         'reserved_at' => 'date',
         'expires_at' => 'date',
+        'cancellation_requested_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -52,6 +54,10 @@ class Reservation extends Model
 
     public function getDisplayStatusAttribute(): string
     {
+        if ($this->cancellation_requested_at) {
+            return 'Menunggu Persetujuan Pembatalan';
+        }
+
         return match ($this->status) {
             'menunggu'   => 'Menunggu Persetujuan',
             'disetujui'  => 'Disetujui',

@@ -142,7 +142,13 @@ class UserCatalogController extends Controller
         $search = trim((string) $request->input('search', ''));
 
         if ($search !== '') {
-            $query->where('judul_buku', 'ilike', "{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('judul_buku', 'ilike', "%{$search}%")
+                    ->orWhere('penulis', 'ilike', "%{$search}%")
+                    ->orWhere('publisher', 'ilike', "%{$search}%")
+                    ->orWhere('isbn', 'ilike', "%{$search}%")
+                    ->orWhere('ddc', 'ilike', "%{$search}%");
+            });
         }
 
         // ── Filter Kategori & Subkategori berbasis ID ─────────

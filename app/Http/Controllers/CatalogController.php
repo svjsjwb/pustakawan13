@@ -205,7 +205,7 @@ class CatalogController extends Controller
                         )
 
                         ->orWhere(
-                            'kode_buku',
+                            'ddc',
                             'ilike',
                             "%{$search}%"
                         )
@@ -250,25 +250,11 @@ class CatalogController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $perPage =
-            (int) $request->input(
-                'per_page',
-                25
-            );
+        $perPage = (int) $request->input('per_page', 25);
 
-
-        if (
-            !in_array(
-                $perPage,
-                [10, 25, 50, 100],
-                true
-            )
-        ) {
-
+        if (!in_array($perPage, [10, 25, 50, 100], true)) {
             $perPage = 25;
-
         }
-
 
         $books =
             $query

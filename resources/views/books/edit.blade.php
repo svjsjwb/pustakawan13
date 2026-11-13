@@ -212,18 +212,6 @@
                         @enderror
                     </div>
 
-                    {{-- Kode Buku --}}
-                    <div class="book-form-group">
-                        <label for="edit-kode_buku">
-                            Kode Buku
-                        </label>
-                        <input type="text" id="edit-kode_buku" name="kode_buku"
-                            class="input @error('kode_buku') is-invalid @enderror"
-                            value="{{ old('kode_buku', $book->kode_buku) }}" placeholder="cth. BK-001">
-                        @error('kode_buku')
-                            <span class="form-error">{{ $message }}</span>
-                        @enderror
-                    </div>
 
                     {{-- DDC --}}
                     <div class="book-form-group">
@@ -501,7 +489,6 @@
                         field('edit-subcategory_id'),
                         field('edit-sku'),
                         field('edit-no_iventaris'),
-                        field('edit-kode_buku'),
                         field('edit-shelf_id'),
                         field('edit-stock'),
                         headings[3],

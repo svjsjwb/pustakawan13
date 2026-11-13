@@ -95,13 +95,80 @@
     align-items: center;
     gap: 6px;
     padding: 4px 12px;
-    background: var(--primary-light);
-    color: var(--primary);
-    border: 1px solid rgba(15, 118, 110, 0.22);
+    background: rgba(15, 118, 110, .12);
+    color: #0f766e;
+    border: 1px solid rgba(15, 118, 110, .32);
     border-radius: 9999px;
-    font-size: 11.5px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 800;
     margin-bottom: 10px;
+}
+[data-theme="dark"] .rsv-detail-container .rsv-category-pill {
+    background: rgba(57, 143, 136, .24);
+    color: #b7f0e9;
+    border-color: rgba(166, 232, 223, .48);
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-menunggu {
+    background: rgba(245, 158, 11, .16);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, .42);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, .16);
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-menunggu .status-badge-icon {
+    background: rgba(245, 158, 11, .24);
+    color: #fbbf24;
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-disetujui {
+    background: rgba(22, 163, 74, .18);
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, .44);
+    box-shadow: 0 2px 8px rgba(22, 163, 74, .18);
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-disetujui .status-badge-icon {
+    background: rgba(74, 222, 128, .22);
+    color: #4ade80;
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-siap_diambil {
+    background: rgba(45, 212, 191, .18);
+    color: #5eead4;
+    border-color: rgba(94, 234, 212, .44);
+    box-shadow: 0 2px 8px rgba(45, 212, 191, .18);
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-siap_diambil .status-badge-icon {
+    background: rgba(45, 212, 191, .22);
+    color: #5eead4;
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-ditolak {
+    background: rgba(239, 68, 68, .2);
+    color: #ff6b72;
+    border-color: rgba(255, 107, 114, .52);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, .2);
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-ditolak .status-badge-icon {
+    background: rgba(255, 107, 114, .24);
+    color: #ff6b72;
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-dikembalikan,
+[data-theme="dark"] .rsv-detail-container .status-badge.status-selesai {
+    background: rgba(56, 189, 248, .18);
+    color: #7dd3fc;
+    border-color: rgba(125, 211, 252, .44);
+    box-shadow: 0 2px 8px rgba(56, 189, 248, .16);
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-dikembalikan .status-badge-icon,
+[data-theme="dark"] .rsv-detail-container .status-badge.status-selesai .status-badge-icon {
+    background: rgba(56, 189, 248, .22);
+    color: #7dd3fc;
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-dipinjam {
+    background: rgba(129, 140, 248, .18);
+    color: #c4b5fd;
+    border-color: rgba(196, 181, 253, .4);
+    box-shadow: 0 2px 8px rgba(129, 140, 248, .16);
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.status-dipinjam .status-badge-icon {
+    background: rgba(196, 181, 253, .2);
+    color: #c4b5fd;
 }
 .rsv-book-title {
     font-size: 24px;
@@ -154,18 +221,27 @@
 .rsv-btn-cancel-reservation:hover,
 .rsv-btn-cancel-reservation:focus-visible { outline: none; border-color: #b91c1c; background: rgba(185, 28, 28, .06); }
 .rsv-btn-cancel-reservation svg { width: 17px; height: 17px; flex: 0 0 auto; }
-.rsv-cancelled-badge,
-.status-badge.status-ditolak {
-    border-color: rgba(239, 68, 68, 0.35) !important;
-    color: #b91c1c !important;
-    background: rgba(239, 68, 68, 0.12) !important;
+[data-theme="dark"] .rsv-detail-container .rsv-btn-cancel-reservation {
+    border-color: rgba(248, 113, 113, .58);
+    background: rgba(220, 38, 38, .14);
+    color: #fca5a5;
 }
-.rsv-cancelled-badge .status-badge-icon,
-.status-badge.status-ditolak .status-badge-icon,
-.rsv-cancelled-badge .status-badge-icon svg,
-.status-badge.status-ditolak .status-badge-icon svg {
-    color: #b91c1c !important;
-    stroke: #b91c1c !important;
+[data-theme="dark"] .rsv-detail-container .rsv-btn-cancel-reservation:hover,
+[data-theme="dark"] .rsv-detail-container .rsv-btn-cancel-reservation:focus-visible {
+    border-color: #f87171;
+    background: rgba(220, 38, 38, .24);
+    color: #fecaca;
+}
+.rsv-cancelled-badge { border-color: rgba(185, 28, 28, .2) !important; color: #991b1b !important; background: rgba(220, 38, 38, .08) !important; }
+[data-theme="dark"] .rsv-detail-container .status-badge.rsv-cancelled-badge {
+    border-color: rgba(255, 107, 114, .62) !important;
+    color: #ff787f !important;
+    background: rgba(239, 68, 68, .24) !important;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, .24) !important;
+}
+[data-theme="dark"] .rsv-detail-container .status-badge.rsv-cancelled-badge .status-badge-icon {
+    color: #ff787f !important;
+    background: rgba(255, 107, 114, .24) !important;
 }
 .rsv-cancel-success {
     display: none;
@@ -177,6 +253,22 @@
     background: rgba(22, 163, 74, .08);
     font-size: 13.5px;
     font-weight: 700;
+}
+.rsv-cancel-success.is-visible { display: block; }
+.rsv-cancel-success.is-pending {
+    border-color: rgba(245, 158, 11, .38);
+    color: #92400e;
+    background: rgba(245, 158, 11, .1);
+}
+[data-theme="dark"] .rsv-cancel-success {
+    border-color: rgba(74, 222, 128, .42);
+    color: #bbf7d0;
+    background: rgba(22, 163, 74, .18);
+}
+[data-theme="dark"] .rsv-cancel-success.is-pending {
+    border-color: rgba(251, 191, 36, .44);
+    color: #fef3c7;
+    background: rgba(245, 158, 11, .16);
 }
 
 .rsv-cancel-dialog {
@@ -192,6 +284,11 @@
 .rsv-cancel-dialog::backdrop { background: rgba(12, 35, 34, .48); backdrop-filter: blur(3px); }
 .rsv-cancel-dialog-content { padding: 26px; }
 .rsv-cancel-dialog-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px; border: 1px solid rgba(185, 28, 28, .2); border-radius: 14px; color: #b91c1c; background: rgba(220, 38, 38, .07); }
+[data-theme="dark"] .rsv-cancel-dialog-icon {
+    border-color: rgba(248, 113, 113, .5);
+    color: #f87171;
+    background: rgba(220, 38, 38, .2);
+}
 .rsv-cancel-dialog-icon svg { width: 22px; height: 22px; }
 .rsv-cancel-dialog h2 { margin: 0 0 8px; color: var(--text); font: 800 18px/1.3 'Poppins', sans-serif; }
 .rsv-cancel-dialog p { margin: 0; color: var(--text-muted); font-size: 13.5px; line-height: 1.55; }
@@ -236,6 +333,12 @@
     align-items: center;
     gap: 8px;
 }
+.rsv-section-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    color: var(--primary);
+}
 .rsv-section-subtitle {
     font-size: 13px;
     color: var(--text-muted);
@@ -253,7 +356,73 @@
 .rsv-tracking-timeline.is-rejected-flow {
     grid-template-columns: repeat(2, 1fr);
     max-width: 520px;
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
 }
+.rsv-tracking-timeline.is-cancelled-before-approval-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #16a34a 0 calc(37.5% + 6px), var(--border) calc(37.5% + 6px));
+}
+[data-theme="dark"] .rsv-tracking-timeline.is-cancelled-before-approval-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #22c55e 0 calc(37.5% + 6px), #484d53 calc(37.5% + 6px));
+}
+.rsv-tracking-timeline.is-cancelled-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #16a34a 0 calc(62.5% + 6px), var(--border) calc(62.5% + 6px));
+}
+.rsv-tracking-timeline.is-cancellation-rejected-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #16a34a 0 calc(62.5% + 6px), var(--border) calc(62.5% + 6px));
+}
+.rsv-tracking-timeline.is-cancellation-rejected-at-pickup-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #16a34a 0 87.5%, var(--border) 87.5%);
+}
+.rsv-tracking-step.is-cancelled .rsv-step-node {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, .2);
+}
+.rsv-tracking-step.is-cancelled .rsv-step-label {
+    color: #b91c1c;
+    font-weight: 800;
+}
+[data-theme="dark"] .rsv-tracking-step.is-cancelled .rsv-step-label { color: #ff6b72; }
+[data-theme="dark"] .rsv-tracking-step.is-cancelled .rsv-step-desc { color: #f0fdfa; }
+[data-theme="dark"] .rsv-tracking-timeline.is-cancelled-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #22c55e 0 calc(62.5% + 6px), #484d53 calc(62.5% + 6px));
+}
+[data-theme="dark"] .rsv-tracking-timeline.is-cancellation-rejected-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #22c55e 0 calc(62.5% + 6px), #484d53 calc(62.5% + 6px));
+}
+[data-theme="dark"] .rsv-tracking-timeline.is-cancellation-rejected-at-pickup-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #22c55e 0 87.5%, #484d53 87.5%);
+}
+.rsv-tracking-timeline.is-cancellation-pending-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #16a34a 0 calc(62.5% + 6px), var(--border) calc(62.5% + 6px));
+}
+.rsv-tracking-timeline.is-cancellation-pending-at-pickup .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #16a34a 0 87.5%, var(--border) 87.5%);
+}
+.rsv-tracking-step.is-cancellation-pending .rsv-step-node {
+    background: #d97706;
+    border-color: #d97706;
+    color: #fff;
+    box-shadow: 0 0 0 6px rgba(217, 119, 6, .2);
+}
+.rsv-tracking-step.is-cancellation-pending .rsv-step-label {
+    color: #d97706;
+    font-weight: 800;
+}
+.rsv-tracking-step.is-cancellation-pending .rsv-step-desc {
+    color: var(--text-muted);
+}
+[data-theme="dark"] .rsv-tracking-timeline.is-cancellation-pending-flow .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #22c55e 0 calc(62.5% + 6px), #484d53 calc(62.5% + 6px));
+}
+[data-theme="dark"] .rsv-tracking-timeline.is-cancellation-pending-at-pickup .rsv-tracking-bar-bg {
+    background: linear-gradient(90deg, #22c55e 0 87.5%, #484d53 87.5%);
+}
+[data-theme="dark"] .rsv-tracking-step.is-cancellation-pending .rsv-step-label { color: #fbbf24; }
+[data-theme="dark"] .rsv-tracking-step.is-cancellation-pending .rsv-step-desc { color: var(--text-muted); }
 
 .rsv-tracking-bar-bg {
     position: absolute;
@@ -353,9 +522,21 @@
     color: #D97706;
 }
 .rsv-tracking-step.is-rejected .rsv-step-label {
-    color: #DC2626;
+    color: var(--text);
+    font-weight: 700;
+}
+.rsv-tracking-step.is-rejected .rsv-step-desc {
+    color: #dc2626;
     font-weight: 800;
 }
+.rsv-rejected-inline-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 3px;
+    vertical-align: -2px;
+}
+[data-theme="dark"] .rsv-tracking-step.is-rejected .rsv-step-desc { color: #ff4d55; }
 .rsv-tracking-step.is-upcoming .rsv-step-label {
     color: var(--text-muted);
 }
@@ -423,6 +604,18 @@
     align-items: center;
     gap: 6px;
 }
+.rsv-info-icon {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    color: var(--primary);
+}
+.rsv-info-icon-location {
+    color: #dc2626;
+}
+[data-theme="dark"] .rsv-info-icon-location {
+    color: #f87171;
+}
 .rsv-info-val {
     font-size: 14.5px;
     font-weight: 700;
@@ -447,6 +640,10 @@
     background: rgba(220, 38, 38, 0.06);
     border: 1.5px solid rgba(220, 38, 38, 0.25);
 }
+[data-theme="dark"] .rsv-admin-alert.alert-danger {
+    background: rgba(239, 68, 68, .12);
+    border-color: rgba(248, 113, 113, .36);
+}
 .rsv-admin-alert.alert-info {
     background: rgba(15, 118, 110, 0.06);
     border: 1.5px solid rgba(15, 118, 110, 0.25);
@@ -465,6 +662,9 @@
 }
 .rsv-admin-alert.alert-danger .rsv-admin-alert-title {
     color: #991B1B;
+}
+[data-theme="dark"] .rsv-admin-alert.alert-danger .rsv-admin-alert-title {
+    color: #fecaca;
 }
 .rsv-admin-alert.alert-info .rsv-admin-alert-title {
     color: #0F766E;
@@ -536,13 +736,21 @@
         default        => ucfirst($status),
     };
     $badgeClass = match($status) {
-        'menunggu'              => 'status-menunggu',
-        'disetujui'             => 'status-disetujui',
-        'siap_diambil'          => 'status-siap_diambil',
-        'ditolak', 'dibatalkan' => 'status-ditolak rsv-cancelled-badge',
-        'selesai'               => 'status-dikembalikan',
-        default                 => 'status-dipinjam',
+        'menunggu'     => 'status-menunggu',
+        'disetujui'    => 'status-disetujui',
+        'siap_diambil' => 'status-siap_diambil',
+        'ditolak', 'dibatalkan' => 'status-ditolak',
+        'selesai'      => 'status-dikembalikan',
+        default        => 'status-dipinjam',
     };
+    $cancellationRequestPending = $reservation->cancellation_requested_at !== null;
+    $cancellationRequestRejected = $cancellationRejectionNotification !== null
+        && !$cancellationRequestPending
+        && in_array($status, ['disetujui', 'siap_diambil'], true);
+    if ($cancellationRequestPending) {
+        $statusLabel = 'Menunggu Persetujuan Pembatalan';
+        $badgeClass = 'status-menunggu';
+    }
     $reservationCode = 'RSV-' . str_pad($reservation->id, 5, '0', STR_PAD_LEFT);
     $tanggalPengajuan = $reservation->reserved_at
         ? \Carbon\Carbon::parse($reservation->reserved_at)->format('d F Y')
@@ -550,11 +758,11 @@
     $tanggalPersetujuan = in_array($status, ['disetujui', 'siap_diambil', 'selesai'])
         ? $reservation->updated_at->format('d F Y')
         : null;
-    $canCancelReservation = in_array($status, ['menunggu', 'disetujui', 'siap_diambil'], true);
+    $canCancelReservation = in_array($status, ['menunggu', 'disetujui', 'siap_diambil'], true) && !$cancellationRequestPending;
 @endphp
 
 <div class="rsv-detail-container">
-    <div class="rsv-cancel-success" id="rsvCancelSuccess" role="status" aria-live="polite">Reservasi berhasil dibatalkan.</div>
+
 
     {{-- =========================================================================
          1. INFORMASI BUKU (Cover, Judul, Penulis, Kategori, Status)
@@ -591,14 +799,14 @@
                 {{-- Premium Status Badge --}}
                 <span class="status-badge {{ $badgeClass }}" id="rsvStatusBadge" style="padding: 6px 16px 6px 10px; font-size: 13px;">
                     <span class="status-badge-icon" style="width: 22px; height: 22px;">
-                        @if($status === 'menunggu')
+                        @if($cancellationRequestPending || $status === 'menunggu')
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         @elseif($status === 'disetujui')
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>
                         @elseif($status === 'siap_diambil')
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-                        @elseif($status === 'ditolak' || $status === 'dibatalkan')
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg>
+                        @elseif(in_array($status, ['ditolak', 'dibatalkan'], true))
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                         @else
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
                         @endif
@@ -611,7 +819,8 @@
                 </span>
             </div>
 
-            @if($canCancelReservation)
+            
+@if($canCancelReservation)
                 <div class="rsv-book-actions" id="rsvBookActions">
                     <button type="button" class="rsv-btn-cancel-reservation" id="rsvCancelTrigger" aria-haspopup="dialog">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -624,21 +833,25 @@
         </div>
     </div>
 
-    @if($canCancelReservation)
+    
+@if($canCancelReservation)
         <dialog class="rsv-cancel-dialog" id="rsvCancelDialog" aria-labelledby="rsvCancelTitle" aria-describedby="rsvCancelDescription">
-            <div class="rsv-cancel-dialog-content">
-                <div class="rsv-cancel-dialog-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/>
-                    </svg>
+            <form method="POST" action="{{ route('user.reservations.cancel', $reservation->id) }}">
+                @csrf
+                <div class="rsv-cancel-dialog-content">
+                    <div class="rsv-cancel-dialog-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/>
+                        </svg>
+                    </div>
+                    <h2 id="rsvCancelTitle">Batalkan Reservasi?</h2>
+                    <p id="rsvCancelDescription">Reservasi buku <strong>{{ $book?->title ?? 'ini' }}</strong> akan dibatalkan dan statusnya tersimpan.</p>
+                    <div class="rsv-cancel-dialog-actions">
+                        <button type="button" class="rsv-cancel-back" id="rsvCancelBack">Kembali</button>
+                        <button type="submit" class="rsv-cancel-confirm" id="rsvCancelConfirm">Ya, Batalkan Reservasi</button>
+                    </div>
                 </div>
-                <h2 id="rsvCancelTitle">Batalkan Reservasi?</h2>
-                <p id="rsvCancelDescription">Reservasi buku <strong>{{ $book?->title ?? 'ini' }}</strong> akan ditandai sebagai dibatalkan pada tampilan ini.</p>
-                <div class="rsv-cancel-dialog-actions">
-                    <button type="button" class="rsv-cancel-back" id="rsvCancelBack">Kembali</button>
-                    <button type="button" class="rsv-cancel-confirm" id="rsvCancelConfirm">Ya, Batalkan Reservasi</button>
-                </div>
-            </div>
+            </form>
         </dialog>
     @endif
 
@@ -647,7 +860,11 @@
          ========================================================================= --}}
     <div class="rsv-card rsv-section-card">
         <h2 class="rsv-section-title">
-            <span>⏱️</span> Tracking Status Reservasi
+            <svg class="rsv-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 7v5l3 2"></path>
+            </svg>
+            <span>Tracking Status Reservasi</span>
         </h2>
         <p class="rsv-section-subtitle">
             Pantau progres tahapan permohonan hingga buku siap diambil
@@ -658,14 +875,17 @@
             $isDisetujui = $status === 'disetujui';
             $isSiapDiambil = $status === 'siap_diambil';
             $isSelesai = $status === 'selesai';
+            $isDitolak = $status === 'ditolak';
             $isDibatalkan = $status === 'dibatalkan';
-            $isDitolak = in_array($status, ['ditolak', 'dibatalkan'], true);
-            $doneVerifikasi = in_array($status, ['disetujui', 'siap_diambil', 'selesai']);
+            $isCancelledBeforeApproval = $isDibatalkan && !$reservation->borrowing_id;
+            $isCancellationRejectedAtApproval = $cancellationRequestRejected && $isDisetujui;
+            $isCancellationPendingAtPickup = $cancellationRequestPending && $isSiapDiambil;
+            $doneVerifikasi = in_array($status, ['disetujui', 'siap_diambil', 'selesai', 'dibatalkan']);
             $donePersetujuan = in_array($status, ['siap_diambil', 'selesai']);
             $donePengambilan = $isSelesai;
         @endphp
 
-        <div class="rsv-tracking-timeline">
+        <div class="rsv-tracking-timeline {{ $cancellationRequestRejected ? 'is-cancellation-rejected-at-pickup-flow' : ($isCancelledBeforeApproval ? 'is-cancelled-before-approval-flow' : ($isDibatalkan ? 'is-cancelled-flow' : ($cancellationRequestPending ? 'is-cancellation-pending-flow' . ($isCancellationPendingAtPickup ? ' is-cancellation-pending-at-pickup' : '') : ''))) }}" data-status="{{ $status }}">
             <div class="rsv-tracking-bar-bg"></div>
 
             {{-- Langkah 1: Pengajuan Reservasi --}}
@@ -676,24 +896,24 @@
             </div>
 
             {{-- Langkah 2: Verifikasi Perpustakaan --}}
-            <div class="rsv-tracking-step {{ $isMenunggu ? 'is-active is-warning' : ($isDitolak ? 'is-rejected' : ($doneVerifikasi ? 'is-done' : 'is-upcoming')) }}">
-                <div class="rsv-step-node">@if($isDibatalkan || $isDitolak) ✕ @elseif($doneVerifikasi) ✓ @elseif($isMenunggu) ● @else ○ @endif</div>
-                <div class="rsv-step-label">@if($isDibatalkan) ✕ Dibatalkan @elseif($isDitolak) ✕ Ditolak @elseif($doneVerifikasi) ✓ Verifikasi Perpustakaan @elseif($isMenunggu) ● Verifikasi Perpustakaan @else ○ Verifikasi Perpustakaan @endif</div>
-                <p class="rsv-step-desc">@if($isDibatalkan) Dibatalkan oleh Pengguna @elseif($isDitolak) Ditolak @elseif($doneVerifikasi) Selesai @else Menunggu Persetujuan @endif</p>
+            <div class="rsv-tracking-step {{ $isMenunggu ? 'is-active is-warning' : (($isDitolak || $isCancelledBeforeApproval) ? 'is-cancelled' : ($doneVerifikasi ? 'is-done' : 'is-upcoming')) }}">
+                <div class="rsv-step-node">@if($isDitolak) ✕ @elseif($isCancelledBeforeApproval) ● @elseif($doneVerifikasi) ✓ @elseif($isMenunggu) ● @else ○ @endif</div>
+                <div class="rsv-step-label">@if($isDitolak) Verifikasi Perpustakaan @elseif($isCancelledBeforeApproval) ● Verifikasi Perpustakaan @elseif($doneVerifikasi) ✓ Verifikasi Perpustakaan @elseif($isMenunggu) ● Verifikasi Perpustakaan @else ○ Verifikasi Perpustakaan @endif</div>
+                <p class="rsv-step-desc">@if($isDitolak)<svg class="rsv-rejected-inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m9 9 6 6m0-6-6 6"></path></svg>Ditolak @elseif($isCancelledBeforeApproval) Dibatalkan oleh Anggota @elseif($doneVerifikasi) Selesai @else Menunggu Persetujuan @endif</p>
             </div>
 
             {{-- Langkah 3: Persetujuan Reservasi --}}
-            <div class="rsv-tracking-step {{ $isDisetujui ? 'is-active' : ($donePersetujuan ? 'is-done' : 'is-upcoming') }}">
-                <div class="rsv-step-node">@if($donePersetujuan) ✓ @elseif($isDisetujui) ● @else ○ @endif</div>
-                <div class="rsv-step-label">@if($donePersetujuan) ✓ Persetujuan Reservasi @elseif($isDisetujui) ● Persetujuan Reservasi @else ○ Persetujuan Reservasi @endif</div>
-                <p class="rsv-step-desc">@if($donePersetujuan) Selesai @elseif($isDisetujui) Sedang Diproses @else Belum Selesai @endif</p>
+            <div class="rsv-tracking-step {{ $isCancellationRejectedAtApproval ? 'is-done' : (($isDibatalkan && !$isCancelledBeforeApproval) ? 'is-cancelled' : ($cancellationRequestPending && !$isCancellationPendingAtPickup ? 'is-cancellation-pending' : ($isDisetujui ? 'is-active' : ($donePersetujuan ? 'is-done' : 'is-upcoming')))) }}">
+                <div class="rsv-step-node">@if($isCancellationRejectedAtApproval) &#10003; @elseif(($isDibatalkan && !$isCancelledBeforeApproval) || ($cancellationRequestPending && !$isCancellationPendingAtPickup)) ● @elseif($donePersetujuan) ✓ @elseif($isDisetujui) ● @else ○ @endif</div>
+                <div class="rsv-step-label">@if($isCancellationRejectedAtApproval) &#10003; Persetujuan Reservasi @elseif($cancellationRequestPending && !$isCancellationPendingAtPickup) Persetujuan Pembatalan @elseif($isDibatalkan) ○ Persetujuan Reservasi @elseif($donePersetujuan) ✓ Persetujuan Reservasi @elseif($isDisetujui) ● Persetujuan Reservasi @else ○ Persetujuan Reservasi @endif</div>
+                <p class="rsv-step-desc">@if($isCancellationRejectedAtApproval) Disetujui @elseif($cancellationRequestPending && !$isCancellationPendingAtPickup) Menunggu Persetujuan Admin @elseif($isDibatalkan) Dibatalkan oleh Anggota @elseif($donePersetujuan) Selesai @elseif($isDisetujui) Sedang Diproses @else Belum Selesai @endif</p>
             </div>
 
             {{-- Langkah 4: Pengambilan Buku --}}
-            <div class="rsv-tracking-step {{ $isSelesai ? 'is-done' : ($isSiapDiambil ? 'is-active' : 'is-upcoming') }}">
-                <div class="rsv-step-node">@if($donePengambilan) ✓ @elseif($isSiapDiambil) ● @else ○ @endif</div>
-                <div class="rsv-step-label">@if($donePengambilan) ✓ Pengambilan Buku @elseif($isSiapDiambil) ● Pengambilan Buku @else ○ Pengambilan Buku @endif</div>
-                <p class="rsv-step-desc">@if($donePengambilan) Selesai @elseif($isSiapDiambil) Menunggu Pengambilan @else Menunggu @endif</p>
+            <div class="rsv-tracking-step {{ $isCancellationPendingAtPickup ? 'is-cancellation-pending' : ($isSelesai ? 'is-done' : (($isSiapDiambil || $isCancellationRejectedAtApproval) ? 'is-active' : 'is-upcoming')) }}">
+                <div class="rsv-step-node">@if($isCancellationPendingAtPickup) ● @elseif($donePengambilan) ✓ @elseif($isSiapDiambil || $isCancellationRejectedAtApproval) ● @else ○ @endif</div>
+                <div class="rsv-step-label">@if($donePengambilan) ✓ Pengambilan Buku @elseif($isSiapDiambil || $isCancellationRejectedAtApproval) ● Pengambilan Buku @else ○ Pengambilan Buku @endif</div>
+                <p class="rsv-step-desc">@if($isCancellationPendingAtPickup) Menunggu Persetujuan Pembatalan @elseif($isDibatalkan) Dibatalkan @elseif($donePengambilan) Selesai @elseif($isSiapDiambil || $isCancellationRejectedAtApproval) Menunggu Pengambilan @else Menunggu @endif</p>
             </div>
         </div>
     </div>
@@ -703,7 +923,11 @@
          ========================================================================= --}}
     <div class="rsv-card rsv-section-card">
         <h2 class="rsv-section-title">
-            <span>📋</span> Informasi Reservasi
+            <svg class="rsv-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="5" y="3" width="14" height="18" rx="2"></rect>
+                <path d="M9 8h6M9 12h6M9 16h4"></path>
+            </svg>
+            <span>Informasi Reservasi</span>
         </h2>
         <p class="rsv-section-subtitle">
             Rincian data pengajuan permohonan koleksi perpustakaan
@@ -713,7 +937,12 @@
             {{-- ID Reservasi --}}
             <div class="rsv-info-box">
                 <div class="rsv-info-label">
-                    <span>🏷️</span> ID Reservasi
+                    <svg class="rsv-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                        <circle cx="8" cy="11" r="2"></circle>
+                        <path d="M6 16c.5-1.3 1.2-2 2-2s1.5.7 2 2M13 10h5M13 14h5"></path>
+                    </svg>
+                    ID Reservasi
                 </div>
                 <div class="rsv-info-val mono">
                     #{{ $reservationCode }}
@@ -736,14 +965,18 @@
                     <span>✓</span> Tanggal Persetujuan
                 </div>
                 <div class="rsv-info-val">
-                    {{ $tanggalPersetujuan ?? 'Belum disetujui' }}
+                    {{ $cancellationRequestPending ? 'Menunggu Persetujuan Admin' : ($status === 'dibatalkan' ? 'Dibatalkan oleh Anggota' : ($tanggalPersetujuan ?? 'Belum disetujui')) }}
                 </div>
             </div>
 
             {{-- Lokasi Pengambilan --}}
             <div class="rsv-info-box">
                 <div class="rsv-info-label">
-                    <span>📍</span> Lokasi Pengambilan
+                    <svg class="rsv-info-icon rsv-info-icon-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path>
+                        <circle cx="12" cy="10" r="2.5"></circle>
+                    </svg>
+                    Lokasi Pengambilan
                 </div>
                 <div class="rsv-info-val">
                     Meja Layanan Sirkulasi, Lantai 1
@@ -751,18 +984,7 @@
             </div>
         </div>
 
-        {{-- Catatan Admin (jika ada) --}}
-        @if($reservation->rejection_reason)
-            <div class="rsv-admin-alert alert-danger">
-                <div class="rsv-admin-alert-icon">⚠️</div>
-                <div>
-                    <div class="rsv-admin-alert-title">Catatan Petugas Admin:</div>
-                    <p class="rsv-admin-alert-desc">
-                        {{ $reservation->rejection_reason }}
-                    </p>
-                </div>
-            </div>
-        @elseif($status === 'siap_diambil')
+        @if($status === 'siap_diambil')
             <div class="rsv-admin-alert alert-info">
                 <div class="rsv-admin-alert-icon">ℹ️</div>
                 <div>
@@ -774,6 +996,16 @@
             </div>
         @endif
     </div>
+
+    @if($cancellationRequestRejected)
+        <div class="rsv-admin-alert alert-danger" role="status" aria-live="polite">
+            <div class="rsv-admin-alert-icon" aria-hidden="true">!</div>
+            <div>
+                <div class="rsv-admin-alert-title">Permintaan Pembatalan Ditolak oleh Admin</div>
+                <p class="rsv-admin-alert-desc">{{ $cancellationRejectionNotification->message }}</p>
+            </div>
+        </div>
+    @endif
 
     {{-- =========================================================================
          4. TOMBOL "KEMBALI KE RESERVASI" (SATU-SATUNYA TOMBOL DI PALING BAWAH)
@@ -790,13 +1022,13 @@
 
 </div>
 
+
 @if($canCancelReservation)
     @push('scripts')
     <script>
         const cancelReservationDialog = document.getElementById('rsvCancelDialog');
         const cancelReservationTrigger = document.getElementById('rsvCancelTrigger');
         const cancelReservationBack = document.getElementById('rsvCancelBack');
-        const cancelReservationConfirm = document.getElementById('rsvCancelConfirm');
 
         cancelReservationTrigger?.addEventListener('click', function() {
             cancelReservationDialog?.showModal();
@@ -809,59 +1041,6 @@
             if (event.target === cancelReservationDialog) {
                 cancelReservationDialog.close();
                 cancelReservationTrigger?.focus();
-            }
-        });
-        cancelReservationConfirm?.addEventListener('click', async function() {
-            cancelReservationConfirm.disabled = true;
-            const originalText = cancelReservationConfirm.textContent;
-            cancelReservationConfirm.textContent = 'Membatalkan...';
-
-            try {
-                const response = await fetch('{{ route('user.reservations.cancel', $reservation->id) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    const badge = document.getElementById('rsvStatusBadge');
-                    badge?.classList.remove('status-menunggu', 'status-disetujui', 'status-siap_diambil', 'status-ditolak', 'status-dikembalikan', 'status-dipinjam');
-                    badge?.classList.add('status-ditolak', 'rsv-cancelled-badge');
-                    const badgeIcon = badge?.querySelector('.status-badge-icon');
-                    if (badgeIcon) {
-                        badgeIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg>';
-                    }
-                    const statusLabel = document.getElementById('rsvStatusLabel');
-                    if (statusLabel) {
-                        statusLabel.textContent = 'Dibatalkan';
-                    }
-                    const successAlert = document.getElementById('rsvCancelSuccess');
-                    if (successAlert) {
-                        successAlert.textContent = data.message || 'Reservasi berhasil dibatalkan.';
-                        successAlert.style.display = 'block';
-                    }
-                    document.getElementById('rsvBookActions')?.remove();
-                    cancelReservationDialog.close();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 1200);
-                } else {
-                    alert(data.message || 'Gagal membatalkan reservasi. Silakan coba lagi.');
-                    cancelReservationConfirm.disabled = false;
-                    cancelReservationConfirm.textContent = originalText;
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Terjadi kesalahan jaringan saat membatalkan reservasi.');
-                cancelReservationConfirm.disabled = false;
-                cancelReservationConfirm.textContent = originalText;
             }
         });
     </script>

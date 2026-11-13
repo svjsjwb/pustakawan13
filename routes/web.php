@@ -174,6 +174,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
         'updateStatus'
     ])->name('reservations.updateStatus');
 
+    Route::patch('/reservations/{reservation}/cancellation', [ReservationController::class, 'resolveCancellationRequest'])
+        ->name('reservations.resolveCancellation');
+
     Route::delete('/reservations/{reservation}', [
         ReservationController::class,
         'destroy'
@@ -245,6 +248,7 @@ Route::middleware(['auth', 'role.user'])->group(function () {
     // RESERVASI
     Route::get('/user/reservations', [UserReservationController::class, 'index'])->name('user.reservations');
     Route::get('/user/reservations-feed', [UserReservationController::class, 'statusFeed'])->name('user.reservations.statusFeed');
+    Route::post('/user/reservations/{reservation}/cancel', [UserReservationController::class, 'cancel'])->name('user.reservations.cancel');
     Route::get('/user/reservations/{reservation}', [UserReservationController::class, 'show'])->name('user.reservations.show');
     Route::post('/user/reservations', [UserReservationController::class, 'store'])->name('user.reservations.store');
     Route::post('/user/reservations/{reservation}/cancel', [UserReservationController::class, 'cancel'])->name('user.reservations.cancel');

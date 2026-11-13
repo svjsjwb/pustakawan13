@@ -65,6 +65,19 @@
 .notif-mark-all-btn:active {
     transform: translateY(0);
 }
+[data-theme="dark"] .notif-mark-all-btn {
+    color: #a6e8df;
+    background: rgba(57, 143, 136, .2);
+    border-color: rgba(166, 232, 223, .42);
+}
+[data-theme="dark"] .notif-mark-all-btn:hover,
+[data-theme="dark"] .notif-mark-all-btn:focus-visible {
+    color: #ffffff;
+    background: #278f87;
+    border-color: #65d8ca;
+    box-shadow: 0 4px 14px rgba(45, 212, 191, .22);
+    outline: none;
+}
 
 /* Tabs */
 .notif-tabs {
@@ -215,6 +228,31 @@
     border: 1px solid rgba(37, 99, 235, 0.25);
 }
 
+[data-theme="dark"] .notif-card.status-approved .notif-icon-box,
+[data-theme="dark"] .notif-card.status-approved .notif-status-pill {
+    background: rgba(34, 197, 94, .18);
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, .38);
+}
+[data-theme="dark"] .notif-card.status-pending .notif-icon-box,
+[data-theme="dark"] .notif-card.status-pending .notif-status-pill {
+    background: rgba(245, 158, 11, .18);
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, .4);
+}
+[data-theme="dark"] .notif-card.status-rejected .notif-icon-box,
+[data-theme="dark"] .notif-card.status-rejected .notif-status-pill {
+    background: rgba(239, 68, 68, .18);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, .4);
+}
+[data-theme="dark"] .notif-card.status-info .notif-icon-box,
+[data-theme="dark"] .notif-card.status-info .notif-status-pill {
+    background: rgba(59, 130, 246, .18);
+    color: #93c5fd;
+    border-color: rgba(147, 197, 253, .38);
+}
+
 /* Icon Box */
 .notif-icon-box {
     width: 44px;
@@ -350,6 +388,15 @@
     display: flex;
     justify-content: center;
 }
+.notif-pagination .ucat-pagination-nav {
+    margin-top: 0;
+}
+.notif-pagination .ucat-pagination-nav > :first-child,
+.notif-pagination .ucat-pagination-nav > :last-child {
+    width: 92px;
+    padding: 0 14px;
+}
+
 
 .notif-back-wrap {
     display: flex;
@@ -369,6 +416,8 @@
     font-family: inherit;
     font-size: 13px;
     font-weight: 700;
+    text-decoration: none;
+    text-decoration: none;
     cursor: pointer;
     transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -501,7 +550,7 @@
         </div>
 
         <div class="notif-pagination">
-            {{ $notifications->links() }}
+            {{ $notifications->links('partials.user-catalog-pagination') }}
         </div>
     @else
         <div class="notif-empty-box">
@@ -519,10 +568,10 @@
     @endif
 
     <div class="notif-back-wrap">
-        <button type="button" class="notif-back-btn" onclick="history.back()">
+        <a href="{{ $returnUrl }}" class="notif-back-btn">
             <span aria-hidden="true">←</span>
             <span>Kembali</span>
-        </button>
+        </a>
     </div>
 </div>
 

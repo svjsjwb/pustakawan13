@@ -30,7 +30,6 @@ class Book extends Model
         'stok',
         'status',
         'no_iventaris',
-        'kode_buku',
         'sku',
     ];
 

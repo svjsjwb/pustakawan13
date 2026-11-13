@@ -196,7 +196,7 @@
     <section class="user-dashboard-widgets" style="margin: 32px 0 40px; padding: 0 24px;">
 
         <div style="margin-bottom: 18px;">
-            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #287879; text-transform: uppercase;">Aktivitas Terbaru</span>
+            <span class="user-dashboard-activity-label" style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #287879; text-transform: uppercase;">Aktivitas Terbaru</span>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
@@ -204,12 +204,12 @@
             {{-- 1. Peminjaman Aktif --}}
             <a href="{{ route('user.loans') }}" class="user-dashboard-stat-card" style="text-decoration: none; display: block; background: #ffffff; border: 1px solid #e2eeee; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(27, 42, 58, 0.04);">
                 <div>
-                    <span style="font-size: 11.5px; font-weight: 700; color: #648282; text-transform: uppercase;">Peminjaman Aktif</span>
+                    <span class="user-dashboard-stat-label" style="font-size: 11.5px; font-weight: 700; color: #648282; text-transform: uppercase;">Peminjaman Aktif</span>
                 </div>
-                <div style="font-size: 28px; font-weight: 800; color: #1e3d3d; margin: 10px 0 2px;">
+                <div class="user-dashboard-stat-value" style="font-size: 28px; font-weight: 800; color: #1e3d3d; margin: 10px 0 2px;">
                     {{ $activeLoansCount }}
                 </div>
-                <div style="font-size: 12px; color: #759292;">
+                <div class="user-dashboard-stat-description" style="font-size: 12px; color: #759292;">
                     {{ $activeLoansCount > 0 ? 'Buku sedang Anda pinjam' : 'Tidak ada buku dipinjam' }}
                 </div>
             </a>
@@ -217,12 +217,12 @@
             {{-- 2. Reservasi Aktif --}}
             <a href="{{ route('user.reservations') }}" class="user-dashboard-stat-card" style="text-decoration: none; display: block; background: #ffffff; border: 1px solid #e2eeee; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(27, 42, 58, 0.04);">
                 <div>
-                    <span style="font-size: 11.5px; font-weight: 700; color: #648282; text-transform: uppercase;">Reservasi Aktif</span>
+                    <span class="user-dashboard-stat-label" style="font-size: 11.5px; font-weight: 700; color: #648282; text-transform: uppercase;">Reservasi Aktif</span>
                 </div>
-                <div style="font-size: 28px; font-weight: 800; color: #1e3d3d; margin: 10px 0 2px;">
+                <div class="user-dashboard-stat-value" style="font-size: 28px; font-weight: 800; color: #1e3d3d; margin: 10px 0 2px;">
                     {{ $activeReservesCount }}
                 </div>
-                <div style="font-size: 12px; color: #759292;">
+                <div class="user-dashboard-stat-description" style="font-size: 12px; color: #759292;">
                     {{ $activeReservesCount > 0 ? 'Reservasi sedang berjalan' : 'Belum ada reservasi' }}
                 </div>
             </a>
@@ -230,12 +230,12 @@
             {{-- 3. Riwayat Peminjaman --}}
             <a href="{{ route('user.history') }}" class="user-dashboard-stat-card" style="text-decoration: none; display: block; background: #ffffff; border: 1px solid #e2eeee; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(27, 42, 58, 0.04);">
                 <div>
-                    <span style="font-size: 11.5px; font-weight: 700; color: #648282; text-transform: uppercase;">Riwayat Selesai</span>
+                    <span class="user-dashboard-stat-label" style="font-size: 11.5px; font-weight: 700; color: #648282; text-transform: uppercase;">Riwayat Selesai</span>
                 </div>
-                <div style="font-size: 28px; font-weight: 800; color: #1e3d3d; margin: 10px 0 2px;">
+                <div class="user-dashboard-stat-value" style="font-size: 28px; font-weight: 800; color: #1e3d3d; margin: 10px 0 2px;">
                     {{ $historyCount }}
                 </div>
-                <div style="font-size: 12px; color: #759292;">
+                <div class="user-dashboard-stat-description" style="font-size: 12px; color: #759292;">
                     Total buku selesai dibaca
                 </div>
             </a>
@@ -244,7 +244,7 @@
             <div class="user-dashboard-stat-card" style="background: #ffffff; border: 1px solid #e2eeee; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(27, 42, 58, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="font-size: 11px; font-weight: 700; color: #648282; text-transform: uppercase;">Status Permintaan Terakhir</span>
+                        <span class="user-dashboard-stat-label" style="font-size: 11px; font-weight: 700; color: #648282; text-transform: uppercase;">Status Permintaan Terakhir</span>
                         @if($latestRequest)
                             @php
                                 $badgeBg = match($latestRequest['status_raw'] ?? '') {
@@ -267,19 +267,19 @@
                     </div>
 
                     @if($latestRequest)
-                        <div style="font-size: 13px; font-weight: 700; color: #1e3d3d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 4px;">
+                        <div class="user-dashboard-request-title" style="font-size: 13px; font-weight: 700; color: #1e3d3d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 4px;">
                             {{ $latestRequest['title'] }}
                         </div>
-                        <div style="font-size: 11.5px; color: #759292; margin-top: 2px;">
+                        <div class="user-dashboard-request-meta" style="font-size: 11.5px; color: #759292; margin-top: 2px;">
                             {{ $latestRequest['type'] }} • {{ $latestRequest['date']?->diffForHumans() }}
                         </div>
                         @if(!empty($latestRequest['notes']))
-                            <div style="font-size: 11px; color: #c22c24; background: #fff5f5; padding: 4px 8px; border-radius: 6px; margin-top: 6px;">
+                            <div class="user-dashboard-request-note" style="font-size: 11px; color: #c22c24; background: #fff5f5; padding: 4px 8px; border-radius: 6px; margin-top: 6px;">
                                 Catatan: {{ Str::limit($latestRequest['notes'], 45) }}
                             </div>
                         @endif
                     @else
-                        <div style="font-size: 13px; color: #8ba2a2; font-weight: 500; margin-top: 8px;">
+                        <div class="user-dashboard-request-empty" style="font-size: 13px; color: #8ba2a2; font-weight: 500; margin-top: 8px;">
                             Belum ada aktivitas permintaan.
                         </div>
                     @endif

@@ -806,6 +806,83 @@ body.dark-theme {
     font-weight: 700 !important;
 }
 
+/* Dark Mode Overrides for Category Panel & Items */
+[data-theme="dark"] .pd-category-panel,
+body.dark-theme .pd-category-panel {
+    background: #303338 !important;
+    border-color: #484d53 !important;
+}
+
+[data-theme="dark"] .pd-category-panel .pd-panel-header,
+body.dark-theme .pd-category-panel .pd-panel-header {
+    color: #9ab4b3 !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option,
+body.dark-theme .pd-item.pd-category-option {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option .pd-item-label,
+body.dark-theme .pd-item.pd-category-option .pd-item-label {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option .pd-item-icon,
+body.dark-theme .pd-item.pd-category-option .pd-item-icon {
+    background: #3b4247 !important;
+    color: #b7d9d5 !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option .pd-category-count,
+body.dark-theme .pd-item.pd-category-option .pd-category-count {
+    background: #398f88 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option:hover,
+body.dark-theme .pd-item.pd-category-option:hover {
+    background: #3b4247 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option:hover .pd-item-label,
+body.dark-theme .pd-item.pd-category-option:hover .pd-item-label {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option.active-subcat,
+[data-theme="dark"] .pd-item.pd-category-option.is-selected,
+body.dark-theme .pd-item.pd-category-option.active-subcat,
+body.dark-theme .pd-item.pd-category-option.is-selected {
+    background: rgba(57, 143, 136, 0.22) !important;
+    color: #ffffff !important;
+    border: 1px solid #398f88 !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option.active-subcat .pd-item-label,
+[data-theme="dark"] .pd-item.pd-category-option.is-selected .pd-item-label,
+body.dark-theme .pd-item.pd-category-option.active-subcat .pd-item-label,
+body.dark-theme .pd-item.pd-category-option.is-selected .pd-item-label {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option.active-subcat .pd-item-icon,
+[data-theme="dark"] .pd-item.pd-category-option.is-selected .pd-item-icon,
+body.dark-theme .pd-item.pd-category-option.active-subcat .pd-item-icon,
+body.dark-theme .pd-item.pd-category-option.is-selected .pd-item-icon {
+    background: #398f88 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .pd-item.pd-category-option.active-subcat .pd-category-count,
+[data-theme="dark"] .pd-item.pd-category-option.is-selected .pd-category-count,
+body.dark-theme .pd-item.pd-category-option.active-subcat .pd-category-count,
+body.dark-theme .pd-item.pd-category-option.is-selected .pd-category-count {
+    background: #398f88 !important;
+    color: #ffffff !important;
+}
+
 /* Parent Dropdown Trigger when category is active */
 .pd-select-wrapper.has-active-category .pd-trigger {
     border-color: #0f766e;
