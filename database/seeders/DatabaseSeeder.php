@@ -15,9 +15,7 @@ class DatabaseSeeder extends Seeder
             LibraryFloorSeeder::class,
             LibraryZoneSeeder::class,
             ShelfSeeder::class,
-            BookSeeder::class,
             BookCopySeeder::class,
-            MemberSeeder::class,
         ]);
     }
 }
