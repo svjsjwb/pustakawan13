@@ -20,7 +20,7 @@ class UserCatalogSubcategoryFilterTest extends TestCase
             'TK',
             'SD/MI',
             'SMP/MTs',
-            'SMA/SMK/MA/SMAK/MAK',
+            'SMA/SMK/MA/SMAK/MAK',   
             'Referensi',
         ],
         'Buku Umum' => [

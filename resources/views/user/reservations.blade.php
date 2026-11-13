@@ -36,6 +36,175 @@
 .reservation-reset-link:hover span,
 .reservation-reset-link:focus-visible span { transform: rotate(90deg); }
 .reservation-reset-link:focus-visible { outline: 2px solid rgba(220, 38, 38, .24); outline-offset: 3px; border-radius: 3px; }
+.pd-select-wrapper[data-filter-key="status"] .pd-trigger {
+    width: 190px;
+    min-width: 190px;
+    max-width: 190px;
+    height: 50px;
+    padding: 0 18px;
+    box-sizing: border-box;
+    transition: background-color .24s ease, border-color .24s ease, color .24s ease, box-shadow .24s ease, transform .24s ease;
+}
+.reservation-category-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 700;
+}
+[data-theme="dark"] .reservation-category-pill {
+    background: rgba(57, 143, 136, .2);
+    color: #a6e8df;
+}
+[data-theme="dark"] .status-badge.status-menunggu {
+    background: rgba(245, 158, 11, .16);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, .42);
+}
+[data-theme="dark"] .status-badge.status-menunggu .status-badge-icon { background: rgba(245, 158, 11, .24); color: #fbbf24; }
+[data-theme="dark"] .status-badge.status-disetujui {
+    background: rgba(22, 163, 74, .16);
+    color: #4ade80;
+    border-color: rgba(22, 163, 74, .42);
+}
+[data-theme="dark"] .status-badge.status-disetujui .status-badge-icon { background: rgba(22, 163, 74, .24); color: #4ade80; }
+[data-theme="dark"] .status-badge.status-siap_diambil {
+    background: rgba(15, 118, 110, .2);
+    color: #5eead4;
+    border-color: rgba(45, 212, 191, .42);
+}
+[data-theme="dark"] .status-badge.status-siap_diambil .status-badge-icon { background: rgba(45, 212, 191, .2); color: #5eead4; }
+[data-theme="dark"] .status-badge.status-ditolak {
+    background: rgba(220, 38, 38, .17);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, .42);
+}
+[data-theme="dark"] .status-badge.status-ditolak .status-badge-icon { background: rgba(248, 113, 113, .2); color: #f87171; }
+[data-theme="dark"] #reservationFilterForm .pd-trigger:not([class*="reservation-status-"]) .pd-trigger-icon {
+    color: #5eead4;
+}
+[data-theme="dark"] #reservationFilterForm .pd-trigger-arrow {
+    display: flex;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    color: #d1faf4;
+    opacity: 1;
+    visibility: visible;
+}
+[data-theme="dark"] #reservationFilterForm .pd-trigger-arrow svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+[data-theme="dark"] #reservationFilterForm .pd-trigger.is-open .pd-trigger-arrow { transform: rotate(180deg); }
+[data-theme="dark"] #reservationFilterForm .pd-trigger.reservation-status-menunggu {
+    --status-trigger-color: #fbbf24;
+    --status-trigger-bg: rgba(245, 158, 11, .16);
+    --status-trigger-hover-bg: rgba(245, 158, 11, .24);
+    --status-trigger-border: rgba(245, 158, 11, .42);
+}
+[data-theme="dark"] #reservationFilterForm .pd-trigger.reservation-status-disetujui {
+    --status-trigger-color: #4ade80;
+    --status-trigger-bg: rgba(22, 163, 74, .16);
+    --status-trigger-hover-bg: rgba(22, 163, 74, .24);
+    --status-trigger-border: rgba(22, 163, 74, .42);
+}
+[data-theme="dark"] #reservationFilterForm .pd-trigger.reservation-status-siap {
+    --status-trigger-color: #5eead4;
+    --status-trigger-bg: rgba(15, 118, 110, .2);
+    --status-trigger-hover-bg: rgba(45, 212, 191, .24);
+    --status-trigger-border: rgba(45, 212, 191, .42);
+}
+[data-theme="dark"] #reservationFilterForm .pd-trigger.reservation-status-ditolak {
+    --status-trigger-color: #f87171;
+    --status-trigger-bg: rgba(220, 38, 38, .17);
+    --status-trigger-hover-bg: rgba(248, 113, 113, .25);
+    --status-trigger-border: rgba(248, 113, 113, .42);
+}
+[data-theme="dark"] #reservationFilterForm .pd-trigger[class*="reservation-status-"] {
+    background: var(--status-trigger-bg) !important;
+    border-color: var(--status-trigger-border) !important;
+    color: var(--status-trigger-color) !important;
+    box-shadow: 0 2px 10px var(--status-trigger-border) !important;
+}
+[data-theme="dark"] #reservationFilterForm .pd-trigger[class*="reservation-status-"]:hover,
+[data-theme="dark"] #reservationFilterForm .pd-trigger[class*="reservation-status-"].is-open {
+    background: var(--status-trigger-hover-bg) !important;
+    border-color: var(--status-trigger-border) !important;
+    color: var(--status-trigger-color) !important;
+}
+[data-theme="dark"] #reservationFilterForm .pd-item[data-value=""].is-selected {
+    background: rgba(45, 212, 191, .16);
+    color: #5eead4;
+    border-color: rgba(45, 212, 191, .3);
+}
+[data-theme="dark"] #reservationFilterForm .pd-item[data-value=""].is-selected .pd-item-icon {
+    background: rgba(45, 212, 191, .2);
+    color: #5eead4;
+}
+[data-theme="dark"] #reservationFilterForm .pd-item[data-value=""].is-selected .pd-item-check {
+    background: #2dd4bf;
+    color: #102323;
+}
+[data-theme="dark"] #reservationFilterForm .pd-item.status-warning:hover,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-warning.is-selected {
+    background: rgba(245, 158, 11, .16);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, .3);
+}
+[data-theme="dark"] #reservationFilterForm .pd-item.status-warning .pd-item-icon,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-warning:hover .pd-item-icon,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-warning.is-selected .pd-item-icon {
+    background: rgba(245, 158, 11, .2);
+    color: #fbbf24;
+}
+[data-theme="dark"] #reservationFilterForm .pd-item.status-warning.is-selected .pd-item-check { background: #f59e0b; color: #241a08; }
+[data-theme="dark"] #reservationFilterForm .pd-item.status-green:hover,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-green.is-selected {
+    background: rgba(22, 163, 74, .16);
+    color: #4ade80;
+    border-color: rgba(22, 163, 74, .3);
+}
+[data-theme="dark"] #reservationFilterForm .pd-item.status-green .pd-item-icon,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-green:hover .pd-item-icon,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-green.is-selected .pd-item-icon {
+    background: rgba(22, 163, 74, .2);
+    color: #4ade80;
+}
+[data-theme="dark"] #reservationFilterForm .pd-item.status-green.is-selected .pd-item-check { background: #22c55e; color: #102116; }
+[data-theme="dark"] #reservationFilterForm .pd-item.status-ready:hover,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-ready.is-selected {
+    background: rgba(45, 212, 191, .16);
+    color: #5eead4;
+    border-color: rgba(45, 212, 191, .3);
+}
+[data-theme="dark"] #reservationFilterForm .pd-item.status-ready .pd-item-icon,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-ready:hover .pd-item-icon,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-ready.is-selected .pd-item-icon {
+    background: rgba(45, 212, 191, .2);
+    color: #5eead4;
+}
+[data-theme="dark"] #reservationFilterForm .pd-item.status-ready.is-selected .pd-item-check { background: #2dd4bf; color: #102323; }
+[data-theme="dark"] #reservationFilterForm .pd-item.status-red:hover,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-red.is-selected {
+    background: rgba(220, 38, 38, .17);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, .3);
+}
+[data-theme="dark"] #reservationFilterForm .pd-item.status-red .pd-item-icon,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-red:hover .pd-item-icon,
+[data-theme="dark"] #reservationFilterForm .pd-item.status-red.is-selected .pd-item-icon {
+    background: rgba(248, 113, 113, .2);
+    color: #f87171;
+}
+[data-theme="dark"] #reservationFilterForm .pd-item.status-red.is-selected .pd-item-check { background: #ef4444; color: #fff; }
 </style>
 @endpush
 
@@ -77,6 +246,7 @@
                 'disetujui' => 'reservation-status-disetujui',
                 'siap_diambil' => 'reservation-status-siap',
                 'ditolak' => 'reservation-status-ditolak',
+                'dibatalkan' => 'reservation-status-ditolak',
                 default => '',
             };
         @endphp
@@ -89,7 +259,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     @elseif(request('status') === 'siap_diambil')
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-                    @elseif(request('status') === 'ditolak')
+                    @elseif(in_array(request('status'), ['ditolak', 'dibatalkan'], true))
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                     @else
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
@@ -100,6 +270,7 @@
                     @elseif(request('status') === 'disetujui') Disetujui
                     @elseif(request('status') === 'siap_diambil') Siap Diambil
                     @elseif(request('status') === 'ditolak') Ditolak
+                    @elseif(request('status') === 'dibatalkan') Dibatalkan
                     @else Semua Status
                     @endif
                 </span>
@@ -131,7 +302,7 @@
                     <span class="pd-item-label">Disetujui</span>
                     <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                 </div>
-                <div class="pd-item {{ request('status') === 'siap_diambil' ? 'is-selected' : '' }}" role="option" data-value="siap_diambil" data-label="Siap Diambil">
+                <div class="pd-item status-ready {{ request('status') === 'siap_diambil' ? 'is-selected' : '' }}" role="option" data-value="siap_diambil" data-label="Siap Diambil">
                     <span class="pd-item-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
                     </span>
@@ -143,6 +314,13 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                     </span>
                     <span class="pd-item-label">Ditolak</span>
+                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                </div>
+                <div class="pd-item status-red {{ request('status') === 'dibatalkan' ? 'is-selected' : '' }}" role="option" data-value="dibatalkan" data-label="Dibatalkan">
+                    <span class="pd-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    </span>
+                    <span class="pd-item-label">Dibatalkan</span>
                     <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                 </div>
             </div>
@@ -202,6 +380,13 @@
         var items   = wrapper.querySelectorAll('.pd-item');
         var formId  = wrapper.dataset.formId;
         var hiddenInputId = 'reservationStatusInput';
+        var statusClasses = {
+            menunggu: 'reservation-status-menunggu',
+            disetujui: 'reservation-status-disetujui',
+            siap_diambil: 'reservation-status-siap',
+            ditolak: 'reservation-status-ditolak',
+            dibatalkan: 'reservation-status-ditolak'
+        };
         if (!trigger) return;
         trigger.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -211,14 +396,26 @@
             item.addEventListener('click', function(e) {
                 e.stopPropagation();
                 var value = item.dataset.value;
-                // Update hidden input
+                var triggerLabel = trigger.querySelector('.pd-trigger-label');
+                var triggerIcon = trigger.querySelector('.pd-trigger-icon');
+                var itemIcon = item.querySelector('.pd-item-icon svg');
+
                 var hi = document.getElementById(hiddenInputId);
                 if (hi) hi.value = value;
+
+                trigger.classList.remove.apply(trigger.classList, Object.values(statusClasses));
+                if (statusClasses[value]) trigger.classList.add(statusClasses[value]);
+                trigger.classList.toggle('has-value', Boolean(value));
+                if (triggerLabel) triggerLabel.textContent = item.dataset.label || 'Semua Status';
+                if (triggerIcon && itemIcon) triggerIcon.replaceChildren(itemIcon.cloneNode(true));
+                items.forEach(function(option) {
+                    option.classList.toggle('is-selected', option === item);
+                });
+
                 closeAll();
-                // Submit the form
                 if (formId) {
                     var form = document.getElementById(formId);
-                    if (form) form.submit();
+                    if (form) window.setTimeout(function() { form.submit(); }, 260);
                 }
             });
         });
@@ -269,7 +466,7 @@
                         'menunggu'     => 'status-menunggu',
                         'disetujui'    => 'status-disetujui',
                         'siap_diambil' => 'status-siap_diambil',
-                        'ditolak'      => 'status-ditolak',
+                        'ditolak', 'dibatalkan' => 'status-ditolak',
                         default        => 'status-menunggu',
                     };
                     $statusLabel = match($status) {
@@ -277,10 +474,15 @@
                         'disetujui'    => 'Disetujui',
                         'siap_diambil' => 'Siap Diambil',
                         'ditolak'      => 'Ditolak',
+                        'dibatalkan'   => 'Dibatalkan',
                         default        => ucfirst($res->status),
                     };
+                    if ($res->cancellation_requested_at) {
+                        $badgeClass = 'status-menunggu';
+                        $statusLabel = 'Menunggu Persetujuan Pembatalan';
+                    }
                 @endphp
-                <tr data-res-id="{{ $res->id }}" data-status="{{ $status }}">
+                <tr data-res-id="{{ $res->id }}" data-status="{{ $status }}" data-cancellation-requested="{{ $res->cancellation_requested_at ? '1' : '0' }}">
                     {{-- 1. BUKU --}}
                     <td>
                         <div style="display: flex; align-items: center; gap: 14px;">
@@ -301,7 +503,7 @@
                                     {{ $book?->author ?? 'Penulis -' }}
                                 </p>
                                 @if($book?->category)
-                                    <span style="font-size: 11px; padding: 2px 8px; background: var(--primary-light); color: var(--primary); border-radius: 9999px; font-weight: 700;">
+                                    <span class="reservation-category-pill">
                                         {{ $book->category->name }}
                                     </span>
                                 @endif
@@ -324,7 +526,7 @@
                     {{-- 3. STATUS (BADGE: Menunggu, Disetujui, Siap Diambil, Ditolak) --}}
                     <td>
                         <span class="status-badge {{ $badgeClass }}">
-                            @if($status === 'menunggu')
+                            @if($res->cancellation_requested_at || $status === 'menunggu')
                                 <span class="status-badge-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                 </span>
@@ -336,18 +538,13 @@
                                 <span class="status-badge-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
                                 </span>
-                            @elseif($status === 'ditolak')
+                            @elseif(in_array($status, ['ditolak', 'dibatalkan'], true))
                                 <span class="status-badge-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                                 </span>
                             @endif
                             <span>{{ $statusLabel }}</span>
                         </span>
-                        @if($res->rejection_reason && $status === 'ditolak')
-                            <div style="font-size: 11px; color: #dc2626; margin-top: 4px;" title="{{ $res->rejection_reason }}">
-                                Ket: {{ Str::limit($res->rejection_reason, 24) }}
-                            </div>
-                        @endif
                     </td>
 
                     {{-- 4. AKSI: LIHAT DETAIL PERMINTAAN (HALAMAN KHUSUS DETAIL RESERVASI) --}}
@@ -368,12 +565,6 @@
         </table>
     </div>
 
-    {{-- Pagination --}}
-    @if($reservations->hasPages())
-        <div style="display: flex; justify-content: center; margin-top: 30px;">
-            {{ $reservations->links('partials.user-catalog-pagination') }}
-        </div>
-    @endif
 @endif
 
 @endsection
@@ -405,40 +596,34 @@
                     if (row) {
                         const currentStatus = row.getAttribute('data-status');
                         const newStatus = (item.status || '').toLowerCase();
+                        const cancellationPending = Boolean(item.cancellation_requested_at);
+                        const currentCancellationPending = row.dataset.cancellationRequested === '1';
 
-                        if (currentStatus !== newStatus) {
+                        if (currentStatus !== newStatus || currentCancellationPending !== cancellationPending) {
                             row.setAttribute('data-status', newStatus);
+                            row.dataset.cancellationRequested = cancellationPending ? '1' : '0';
 
                             // Find badge span
                             const badge = row.querySelector('.status-badge');
                             if (badge) {
                                 // Clear old status classes
-                                badge.className = `status-badge status-${newStatus}`;
+                                const badgeStatus = cancellationPending ? 'menunggu' : newStatus;
+                                badge.className = `status-badge status-${badgeStatus}`;
 
                                 const icons = {
                                     'menunggu': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>',
                                     'disetujui': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg></span>',
                                     'siap_diambil': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></span>',
-                                    'ditolak': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>'
+                                    'ditolak': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>',
+                                    'dibatalkan': '<span class="status-badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>'
                                 };
 
-                                const iconHtml = icons[newStatus] || icons['menunggu'];
+                                const iconHtml = icons[badgeStatus] || icons['menunggu'];
                                 const label = item.status_label || (newStatus.charAt(0).toUpperCase() + newStatus.slice(1));
                                 badge.innerHTML = `${iconHtml}<span>${label}</span>`;
                             }
 
-                            // If rejected and note exists, append/update note
-                            if (newStatus === 'ditolak' && item.rejection_reason) {
-                                let noteEl = row.querySelector('.rejection-note');
-                                if (!noteEl) {
-                                    noteEl = document.createElement('div');
-                                    noteEl.className = 'rejection-note';
-                                    noteEl.style.cssText = 'font-size: 11px; color: #dc2626; margin-top: 4px;';
-                                    badge.parentNode.appendChild(noteEl);
-                                }
-                                noteEl.textContent = 'Ket: ' + (item.rejection_reason.length > 24 ? item.rejection_reason.substring(0, 24) + '...' : item.rejection_reason);
-                                noteEl.title = item.rejection_reason;
-                            }
+                            row.querySelector('.rejection-note')?.remove();
                         }
                     } else {
                         // A new reservation exists that's not rendered on the current table page

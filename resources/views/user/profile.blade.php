@@ -356,7 +356,7 @@
                             <div class="uprof-meta-item" style="padding-top: 8px; border-top: 1px dashed var(--border-subtle);">
                                 <span class="uprof-meta-label">Status Akun</span>
                                 @if(($stats['accountStatus'] ?? 'aktif') === 'aktif')
-                                    <span class="uprof-status-pill aktif">🟢 Aktif</span>
+                                    <span class="uprof-status-pill aktif"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>Aktif</span>
                                 @elseif(($stats['accountStatus'] ?? '') === 'ditangguhkan')
                                     <span class="uprof-status-pill ditangguhkan">🔴 Ditangguhkan</span>
                                 @else
@@ -492,7 +492,7 @@
                         <div class="uprof-theme-cards">
                             {{-- Light Mode Card --}}
                             <div class="uprof-theme-card {{ ($user->theme ?? 'light') === 'light' ? 'active' : '' }}" id="themeCardLight" onclick="selectTheme('light')">
-                                <span class="uprof-theme-badge-active">Sedang Digunakan</span>
+                                <span class="uprof-theme-badge-active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Sedang Digunakan</span>
                                 <div class="uprof-theme-card-icon">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <circle cx="12" cy="12" r="5"></circle>
@@ -512,7 +512,7 @@
 
                             {{-- Dark Mode Card --}}
                             <div class="uprof-theme-card {{ ($user->theme ?? 'light') === 'dark' ? 'active' : '' }}" id="themeCardDark" onclick="selectTheme('dark')">
-                                <span class="uprof-theme-badge-active">Sedang Digunakan</span>
+                                <span class="uprof-theme-badge-active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>Sedang Digunakan</span>
                                 <div class="uprof-theme-card-icon">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>

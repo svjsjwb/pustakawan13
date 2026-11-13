@@ -29,10 +29,30 @@
     <div class="ul-card"><div class="ul-empty-state"><h3>Data anggota tidak ditemukan</h3><p>Akun Anda belum terdaftar sebagai anggota perpustakaan.</p></div></div>
 @else
     <div class="loans-stat-grid">
-        <div class="loans-stat-card is-green"><span class="loans-stat-icon">↻</span><strong data-stat="active">{{ $activeCount }}</strong><small>Sedang Dipinjam</small></div>
-        <div class="loans-stat-card is-yellow"><span class="loans-stat-icon">◷</span><strong data-stat="near">{{ $nearDueCount }}</strong><small>Mendekati Batas Pengembalian</small></div>
-        <div class="loans-stat-card is-red"><span class="loans-stat-icon">!</span><strong data-stat="overdue">{{ $overdueCount }}</strong><small>Terlambat</small></div>
-        <div class="loans-stat-card is-slate"><span class="loans-stat-icon">✓</span><strong>{{ $completedCount }}</strong><small>Selesai</small></div>
+        <div class="loans-stat-card is-green">
+            <span class="loans-stat-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </span>
+            <strong data-stat="active">{{ $activeCount }}</strong><small>Sedang Dipinjam</small>
+        </div>
+        <div class="loans-stat-card is-yellow">
+            <span class="loans-stat-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <strong data-stat="near">{{ $nearDueCount }}</strong><small>Mendekati Batas Pengembalian</small>
+        </div>
+        <div class="loans-stat-card is-red">
+            <span class="loans-stat-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </span>
+            <strong data-stat="overdue">{{ $overdueCount }}</strong><small>Terlambat</small>
+        </div>
+        <div class="loans-stat-card is-slate">
+            <span class="loans-stat-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </span>
+            <strong>{{ $completedCount }}</strong><small>Selesai</small>
+        </div>
     </div>
 
     <div class="loans-layout">
@@ -74,7 +94,7 @@
                                     <div class="loan-book-info"><p class="loan-book-title">{{ $book?->title ?? 'Buku' }}</p><p class="loan-book-author">{{ $book?->author ?? '-' }}</p><span class="loan-category">{{ $book?->category?->name ?? 'Umum' }}</span></div>
                                 </div>
                                 <div class="loan-progress-wrap"><div class="loan-progress-label"><span>Progress pengembalian</span><strong class="days-remaining">{{ $overdue ? 'Terlambat ' . abs($days) . ' hari' : max(0, $days) . ' hari tersisa' }}</strong></div><div class="loan-progress"><span class="progress-fill {{ $overdue ? 'is-danger' : ($nearDue ? 'is-warning' : 'is-safe') }}" style="width:{{ $progress }}%"></span></div></div>
-                                <div class="loan-card-actions"><span class="loan-extension-note">{{ $borrowing->has_reservation_queue ? 'Tidak tersedia: ada antrean reservasi.' : '' }}</span><button type="button" class="loans-action-btn" data-borrowing-id="{{ $borrowing->id }}" data-borrowing-title="{{ $book?->title ?? 'Buku' }}" data-borrowing-borrowed="{{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }}" data-borrowing-due="{{ $borrowing->due_at?->format('d M Y') ?? '-' }}" data-borrowing-due-iso="{{ $borrowing->due_at?->format('Y-m-d') ?? '' }}" data-extend-action="{{ route('borrowings.extend', $borrowing->id) }}" {{ $canExtend ? '' : 'disabled title="' . $disabledTitle . '"' }} onclick="openBorrowingExtend(this)">↻ Perpanjang</button></div>
+                                <div class="loan-card-actions"><span class="loan-extension-note">{{ $borrowing->has_reservation_queue ? 'Tidak tersedia: ada antrean reservasi.' : '' }}</span><button type="button" class="loans-action-btn" data-borrowing-id="{{ $borrowing->id }}" data-borrowing-title="{{ $book?->title ?? 'Buku' }}" data-borrowing-borrowed="{{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }}" data-borrowing-due="{{ $borrowing->due_at?->format('d M Y') ?? '-' }}" data-borrowing-due-iso="{{ $borrowing->due_at?->format('Y-m-d') ?? '' }}" data-extend-action="{{ route('borrowings.extend', $borrowing->id) }}" {{ $canExtend ? '' : 'disabled title="' . $disabledTitle . '"' }} onclick="openBorrowingExtend(this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Perpanjang</button></div>
                             </div>
                         </article>
                     @endforeach
@@ -82,7 +102,40 @@
             @endif
         </main>
 
-        <aside class="loans-sidebar"><div class="loans-side-panel"><div class="loans-side-heading"><span>✦</span><h3>Aksi Cepat</h3></div><button type="button" class="loans-side-action loans-side-button" onclick="openQuickBorrowingExtend(event)">↻ <span>Perpanjang Peminjaman</span></button><a href="{{ route('history') }}" class="loans-side-action">◷ <span>Lihat Semua Peminjaman</span></a></div><div class="loans-side-panel loans-important"><div class="loans-side-heading"><span>ⓘ</span><h3>Informasi Penting</h3></div><ul><li>Maksimal peminjaman 5 buku per anggota</li><li>Lama peminjaman 14 hari</li><li>Dapat diperpanjang jika tidak ada antrian</li></ul></div></aside>
+        <aside class="loans-sidebar">
+            <div class="loans-side-panel">
+                <div class="loans-side-heading">
+                    <span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </span>
+                    <h3>Aksi Cepat</h3>
+                </div>
+                <button type="button" class="loans-side-action loans-side-button" onclick="openQuickBorrowingExtend(event)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="loans-action-icon">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <polyline points="1 20 1 14 7 14"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                    <span>Perpanjang Peminjaman</span>
+                </button>
+                <a href="{{ route('user.loans') }}" class="loans-side-action">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="loans-action-icon">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>Lihat Semua Peminjaman</span>
+                </a>
+            </div>
+            <div class="loans-side-panel loans-important">
+                <div class="loans-side-heading">
+                    <span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </span>
+                    <h3>Informasi Penting</h3>
+                </div>
+                <ul><li>Maksimal peminjaman 5 buku per anggota</li><li>Lama peminjaman 14 hari</li><li>Dapat diperpanjang jika tidak ada antrian</li></ul>
+            </div>
+        </aside>
     </div>
 @endif
 
@@ -285,12 +338,12 @@ function openBorrowingExtend(button) {
 function openQuickBorrowingExtend(event) {
     event.preventDefault();
     const eligible = Array.from(document.querySelectorAll('#borrowingList .loans-action-btn')).filter(button => !button.disabled);
-    const list = document.getElementById('borrowingPickerList');
-    list.replaceChildren();
     if (!eligible.length) {
         showBorrowingModal('borrowingInfoModal');
         return;
     }
+    const list = document.getElementById('borrowingPickerList');
+    list.replaceChildren();
     eligible.forEach(function (button) {
         const item = document.createElement('button');
         item.type = 'button';

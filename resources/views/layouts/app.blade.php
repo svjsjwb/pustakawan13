@@ -23,7 +23,7 @@
 
     <link rel="stylesheet" href="{{ asset('css/footer.css') }}?v={{ file_exists(public_path('css/footer.css')) ? filemtime(public_path('css/footer.css')) : time() }}">
 
-    {{-- Pastikan admin tidak mewarisi preferensi tema atau density user dari localStorage --}}
+    {{-- Admin pages keep the default light theme; user theme preference is separate. --}}
     <script>
         document.documentElement.removeAttribute('data-theme');
         document.documentElement.removeAttribute('data-density');
@@ -31,6 +31,7 @@
 
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('css/responsive-overrides.css') }}?v={{ file_exists(public_path('css/responsive-overrides.css')) ? filemtime(public_path('css/responsive-overrides.css')) : time() }}">
+    <link rel="stylesheet" href="{{ asset('css/dark-theme.css') }}?v={{ file_exists(public_path('css/dark-theme.css')) ? filemtime(public_path('css/dark-theme.css')) : time() }}">
 
 </head>
 

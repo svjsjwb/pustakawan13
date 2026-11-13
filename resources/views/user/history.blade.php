@@ -4,16 +4,25 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/premium-dropdown.css') }}">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
 .eg-history-filter-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .eg-history-filter-controls .pd-select-wrapper { flex: 0 0 auto; }
 .eg-history-filter-controls .pd-trigger { min-width: 174px; }
-.eg-history-filter-controls .history-period-filter .pd-trigger { min-width: 158px; }
-.history-range-wrap { display: none; width: 230px; }
-.history-range-wrap.is-visible { display: block; }
-.history-range-input { width: 100%; height: 42px; padding: 0 12px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
-.history-range-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-subtle); }
+.eg-history-filter-controls .history-filter-dropdown .pd-trigger {
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
+    height: 50px;
+    padding: 0 18px;
+    box-sizing: border-box;
+}
+.history-pagination-nav { margin-top: 24px; }
+.history-pagination-nav > :first-child,
+.history-pagination-nav > :last-child {
+    width: 92px;
+    padding: 0 14px;
+}
+.history-pagination-nav[hidden] { display: none; }
 .history-filter-empty[hidden] { display: none; }
 .history-filter-empty { margin-top: 12px; }
 .history-reset-link {
@@ -70,6 +79,98 @@
 .history-activity-trigger.activity-selected.is-open { color: var(--activity-color); background: var(--activity-soft); border-color: var(--activity-border); }
 .history-activity-trigger.activity-selected .pd-trigger-icon,
 .history-activity-trigger.activity-selected .pd-trigger-arrow { color: inherit; }
+.history-book-category {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border: 1px solid rgba(15, 118, 110, .28);
+    border-radius: 9999px;
+    background: rgba(15, 118, 110, .12);
+    color: #0f766e;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+.history-type-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.history-type-pill-borrowing {
+    background: rgba(39, 132, 130, .12);
+    color: #0f766e;
+    border-color: rgba(39, 132, 130, .25);
+}
+.history-type-pill-reservation {
+    background: rgba(124, 58, 237, .1);
+    color: #7c3aed;
+    border-color: rgba(124, 58, 237, .22);
+}
+[data-theme="dark"] #historyActivityTable .history-book-category {
+    background: rgba(57, 143, 136, .2);
+    color: #b7f0e9;
+    border-color: rgba(166, 232, 223, .4);
+}
+[data-theme="dark"] #historyActivityTable .history-type-pill-borrowing {
+    background: rgba(45, 212, 191, .16);
+    color: #5eead4;
+    border-color: rgba(94, 234, 212, .36);
+}
+[data-theme="dark"] #historyActivityTable .history-type-pill-reservation {
+    background: rgba(139, 92, 246, .18);
+    color: #c4b5fd;
+    border-color: rgba(196, 181, 253, .38);
+}
+[data-theme="dark"] #historyActivityTable .status-badge.status-menunggu {
+    background: rgba(245, 158, 11, .16);
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, .42);
+}
+[data-theme="dark"] #historyActivityTable .status-badge.status-disetujui {
+    background: rgba(22, 163, 74, .16);
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, .4);
+}
+[data-theme="dark"] #historyActivityTable .status-badge.status-dipinjam,
+[data-theme="dark"] #historyActivityTable .status-badge.status-siap_diambil {
+    background: rgba(45, 212, 191, .16);
+    color: #5eead4;
+    border-color: rgba(94, 234, 212, .38);
+}
+[data-theme="dark"] #historyActivityTable .status-badge.status-terlambat,
+[data-theme="dark"] #historyActivityTable .status-badge.status-ditolak {
+    background: rgba(239, 68, 68, .17);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, .4);
+}
+[data-theme="dark"] #historyActivityTable .status-badge.status-selesai,
+[data-theme="dark"] #historyActivityTable .status-badge.status-dikembalikan {
+    background: rgba(56, 189, 248, .16);
+    color: #7dd3fc;
+    border-color: rgba(125, 211, 252, .38);
+}
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-all { --activity-color: #5eead4; --activity-soft: rgba(45, 212, 191, .16); --activity-border: rgba(45, 212, 191, .36); }
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-borrowing { --activity-color: #5eead4; --activity-soft: rgba(45, 212, 191, .16); --activity-border: rgba(45, 212, 191, .36); }
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-reservation { --activity-color: #c4b5fd; --activity-soft: rgba(139, 92, 246, .18); --activity-border: rgba(196, 181, 253, .38); }
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-return { --activity-color: #4ade80; --activity-soft: rgba(34, 197, 94, .16); --activity-border: rgba(74, 222, 128, .36); }
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-extension { --activity-color: #fbbf24; --activity-soft: rgba(245, 158, 11, .16); --activity-border: rgba(251, 191, 36, .38); }
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-selected,
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-selected:hover,
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-selected.is-open {
+    color: var(--activity-color) !important;
+    background: var(--activity-soft) !important;
+    border-color: var(--activity-border) !important;
+    box-shadow: 0 2px 10px var(--activity-border) !important;
+}
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-selected .pd-trigger-icon,
+[data-theme="dark"] #historyFilterForm .history-activity-trigger.activity-selected .pd-trigger-arrow {
+    color: var(--activity-color) !important;
+}
 .flatpickr-calendar.history-range-calendar {
     border: 1px solid rgba(15, 118, 110, .15);
     border-radius: 16px;
@@ -289,18 +390,8 @@
                 'return' => 'Pengembalian',
                 'extension' => 'Perpanjangan',
             ];
-            $periodLabels = [
-                'all' => 'Semua Waktu',
-                'month' => 'Bulan Ini',
-                '3months' => '3 Bulan Terakhir',
-                '6months' => '6 Bulan Terakhir',
-                'year' => 'Tahun Ini',
-                'custom' => 'Pilih Rentang Tanggal',
-            ];
             $activeActivity = request('activity', 'all');
             $activeActivity = isset($activityLabels[$activeActivity]) ? $activeActivity : 'all';
-            $activePeriod = request('period', 'all');
-            $activePeriod = isset($periodLabels[$activePeriod]) ? $activePeriod : 'all';
         @endphp
             <div class="pd-select-wrapper history-filter-dropdown" data-filter="activity">
                 <button type="button" class="pd-trigger history-activity-trigger activity-selected activity-{{ $activeActivity }}" aria-haspopup="listbox" aria-expanded="false">
@@ -320,35 +411,11 @@
                 </div>
             </div>
 
-            <div class="pd-select-wrapper history-filter-dropdown history-period-filter" data-filter="period">
-                <button type="button" class="pd-trigger" aria-haspopup="listbox" aria-expanded="false">
-                    <span class="pd-trigger-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-                    <span class="pd-trigger-label">{{ $periodLabels[$activePeriod] }}</span>
-                    <span class="pd-trigger-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </button>
-                <input type="hidden" name="period" value="{{ $activePeriod }}">
-                <div class="pd-panel" role="listbox" aria-label="Periode Riwayat">
-                    @foreach($periodLabels as $periodValue => $periodLabel)
-                    <div class="pd-item {{ $activePeriod === $periodValue ? 'is-selected' : '' }}" role="option" data-value="{{ $periodValue }}" data-label="{{ $periodLabel }}">
-                        <span class="pd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-                        <span class="pd-item-label">{{ $periodLabel }}</span>
-                        <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <input type="hidden" name="date_from" id="historyDateFrom" value="{{ request('date_from') }}">
-            <input type="hidden" name="date_to" id="historyDateTo" value="{{ request('date_to') }}">
-            <div class="history-range-wrap {{ $activePeriod === 'custom' ? 'is-visible' : '' }}">
-                <input type="text" id="historyRangePicker" class="history-range-input" placeholder="Pilih rentang tanggal" readonly autocomplete="off" aria-label="Pilih rentang tanggal">
-            </div>
-
         <button type="submit" class="eg-btn-block" style="width: auto; height: 42px; padding: 0 18px;">
             Filter
         </button>
 
-        <a id="historyResetFilter" class="history-reset-link" href="{{ route('user.history') }}" @if(!request('search') && $activeActivity === 'all' && $activePeriod === 'all') hidden @endif>
+        <a id="historyResetFilter" class="history-reset-link" href="{{ route('user.history') }}" @if(!request('search') && $activeActivity === 'all') hidden @endif>
             <span aria-hidden="true">&times;</span> Reset Filter
         </a>
     </div>
@@ -375,9 +442,9 @@
                 <line x1="8" y1="17" x2="16" y2="17"></line>
             </svg>
         </div>
-        <h3 class="eg-empty-title">{{ request('search') || (request('activity') && request('activity') !== 'all') || (request('period') && request('period') !== 'all') ? 'Tidak ada aktivitas ditemukan' : 'Belum ada riwayat' }}</h3>
+        <h3 class="eg-empty-title">{{ request('search') || (request('activity') && request('activity') !== 'all') ? 'Tidak ada aktivitas ditemukan' : 'Belum ada riwayat' }}</h3>
         <p class="eg-empty-desc">
-            {{ request('search') || (request('activity') && request('activity') !== 'all') || (request('period') && request('period') !== 'all')
+            {{ request('search') || (request('activity') && request('activity') !== 'all')
                 ? 'Tidak ditemukan riwayat yang sesuai dengan filter yang dipilih.'
                 : 'Riwayat akan muncul secara otomatis setelah Anda melakukan peminjaman atau reservasi buku.' }}
         </p>
@@ -420,7 +487,7 @@
                                     {{ $book?->author ?? 'Penulis Anonim' }}
                                 </p>
                                 @if($book?->category)
-                                    <span style="font-size: 11px; padding: 2px 8px; background: var(--primary-light); color: var(--primary); border-radius: 9999px; font-weight: 700;">
+                                    <span class="history-book-category">
                                         {{ $book->category->name }}
                                     </span>
                                 @endif
@@ -436,9 +503,9 @@
                     {{-- Jenis Aktivitas --}}
                     <td style="text-align: center;">
                         @if($item->type === 'borrowing')
-                            <span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 9999px; background: rgba(39,132,130,0.12); color: var(--primary); white-space: nowrap;">Peminjaman</span>
+                            <span class="history-type-pill history-type-pill-borrowing">Peminjaman</span>
                         @else
-                            <span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 9999px; background: rgba(124,58,237,0.10); color: #7c3aed; white-space: nowrap;">Reservasi</span>
+                            <span class="history-type-pill history-type-pill-reservation">Reservasi</span>
                         @endif
                     </td>
 
@@ -451,6 +518,7 @@
             </tbody>
         </table>
     </div>
+    <nav class="ucat-pagination-nav history-pagination-nav" id="historyPagination" role="navigation" aria-label="Navigasi halaman riwayat" hidden></nav>
     <div class="eg-empty-state history-filter-empty" id="historyFilterEmpty" hidden>
         <h3 class="eg-empty-title">Tidak ada aktivitas ditemukan</h3>
         <p class="eg-empty-desc">Tidak ditemukan riwayat yang sesuai dengan filter yang dipilih.</p>
@@ -458,8 +526,6 @@
 @endif
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
 (function() {
     'use strict';
@@ -470,22 +536,28 @@
         pdBackdrop.className = 'pd-backdrop';
         document.body.appendChild(pdBackdrop);
     }
-    var historyDateFrom = document.getElementById('historyDateFrom');
-    var historyDateTo = document.getElementById('historyDateTo');
-    var rangeWrap = document.querySelector('.history-range-wrap');
-    var rangeInput = document.getElementById('historyRangePicker');
+    var rangeInput = null;
     var rangePicker = null;
     var historySearchInput = document.querySelector('#historyFilterForm [name="search"]');
     var historyResetLink = document.getElementById('historyResetFilter');
+    var historyPagination = document.getElementById('historyPagination');
+    var pageSize = 10;
+    var currentPage = 1;
 
     function syncHistoryResetLink() {
         var form = document.getElementById('historyFilterForm');
         if (!form || !historyResetLink) return;
         var search = form.querySelector('[name="search"]')?.dataset.appliedValue?.trim() || '';
         var activity = form.querySelector('[name="activity"]')?.value || 'all';
-        var period = form.querySelector('[name="period"]')?.value || 'all';
-        historyResetLink.hidden = !search && activity === 'all' && period === 'all';
+        historyResetLink.hidden = !search && activity === 'all';
     }
+
+    historyPagination?.addEventListener('click', function(event) {
+        var button = event.target.closest('button[data-page]');
+        if (!button || button.classList.contains('disabled')) return;
+        currentPage = Number(button.dataset.page);
+        applyHistoryFilters();
+    });
 
     historySearchInput?.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') event.preventDefault();
@@ -703,14 +775,9 @@
                     }
                     closeAll();
 
-                    if (filterType === 'period' && rangeWrap) {
-                        rangeWrap.classList.toggle('is-visible', value === 'custom');
-                        if (value === 'custom' && rangePicker) rangePicker.open();
-                    }
+                    currentPage = 1;
                     syncHistoryResetLink();
-                    if (filterType !== 'period' || value !== 'custom' || !rangePicker || rangePicker.selectedDates.length === 2) {
-                        applyHistoryFilters();
-                    }
+                    applyHistoryFilters();
                     return;
                 }
                 var hi = inputId ? document.getElementById(inputId) : null;
@@ -729,52 +796,68 @@
         if (!form || !table) return;
 
         var activity = form.querySelector('[name="activity"]')?.value || 'all';
-        var period = form.querySelector('[name="period"]')?.value || 'all';
-        var dateFromValue = historyDateFrom?.value || '';
-        var dateToValue = historyDateTo?.value || '';
-        var today = new Date();
-        today.setHours(0, 0, 0, 0);
-        var periodStart = new Date(today);
-
-        if (period === 'month') periodStart.setDate(1);
-        if (period === '3months' || period === '6months') {
-            var dayOfMonth = periodStart.getDate();
-            var monthsBack = period === '3months' ? 3 : 6;
-            periodStart.setDate(1);
-            periodStart.setMonth(periodStart.getMonth() - monthsBack);
-            var lastDayOfTargetMonth = new Date(periodStart.getFullYear(), periodStart.getMonth() + 1, 0).getDate();
-            periodStart.setDate(Math.min(dayOfMonth, lastDayOfTargetMonth));
-        }
-        if (period === 'year') periodStart.setMonth(0, 1);
-
-        var visibleCount = 0;
-        table.querySelectorAll('tbody tr').forEach(function(row) {
+        var rows = Array.from(table.querySelectorAll('tbody tr'));
+        var matchingRows = rows.filter(function(row) {
             var rowActivity = row.dataset.activity || '';
-            var activityMatches = activity === 'all' || rowActivity === activity;
-            var rowDate = row.dataset.activityDate ? new Date(row.dataset.activityDate + 'T00:00:00') : null;
-            var periodMatches = true;
-
-            if (rowDate && !Number.isNaN(rowDate.getTime())) {
-                if (period === 'month') {
-                    periodMatches = rowDate.getFullYear() === today.getFullYear() && rowDate.getMonth() === today.getMonth();
-                } else if (period === '3months' || period === '6months' || period === 'year') {
-                    periodMatches = rowDate >= periodStart && rowDate <= today;
-                } else if (period === 'custom' && dateFromValue) {
-                    var dateFrom = new Date(dateFromValue + 'T00:00:00');
-                    var dateTo = dateToValue ? new Date(dateToValue + 'T23:59:59') : null;
-                    periodMatches = rowDate >= dateFrom && (!dateTo || rowDate <= dateTo);
-                }
-            }
-
-            row.hidden = !(activityMatches && periodMatches);
-            if (!row.hidden) visibleCount++;
+            return activity === 'all' || rowActivity === activity;
         });
+        var pageCount = Math.ceil(matchingRows.length / pageSize);
+        currentPage = Math.min(currentPage, Math.max(pageCount, 1));
+        var startIndex = (currentPage - 1) * pageSize;
+        var visibleRows = new Set(matchingRows.slice(startIndex, startIndex + pageSize));
+
+        rows.forEach(function(row) { row.hidden = !visibleRows.has(row); });
 
         var emptyState = document.getElementById('historyFilterEmpty');
         var countLabel = document.getElementById('historyActivityCount');
-        table.hidden = visibleCount === 0;
-        if (emptyState) emptyState.hidden = visibleCount !== 0;
-        if (countLabel) countLabel.textContent = visibleCount + ' aktivitas';
+        table.hidden = matchingRows.length === 0;
+        if (emptyState) emptyState.hidden = matchingRows.length !== 0;
+        if (countLabel) countLabel.textContent = matchingRows.length + ' aktivitas';
+        renderHistoryPagination(pageCount);
+    }
+
+    function renderHistoryPagination(pageCount) {
+        if (!historyPagination) return;
+        historyPagination.replaceChildren();
+        historyPagination.hidden = pageCount === 0;
+        if (pageCount === 0) return;
+
+        function addPageButton(label, page, options) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'ucat-page-btn' + (options.active ? ' active' : '') + (options.disabled ? ' disabled' : '');
+            button.textContent = label;
+            button.dataset.page = String(page);
+            if (options.active) button.setAttribute('aria-current', 'page');
+            if (options.disabled) button.setAttribute('aria-disabled', 'true');
+            historyPagination.appendChild(button);
+        }
+
+        addPageButton('Previous', currentPage - 1, { disabled: currentPage === 1 });
+
+        var pageSet = new Set([1, pageCount]);
+        for (var page = Math.max(2, currentPage - 1); page <= Math.min(pageCount - 1, currentPage + 1); page++) {
+            pageSet.add(page);
+        }
+        var pageNumbers = Array.from(pageSet).sort(function(a, b) { return a - b; });
+        var pages = [];
+        pageNumbers.forEach(function(page, index) {
+            if (index > 0 && page - pageNumbers[index - 1] > 1) pages.push('...');
+            pages.push(page);
+        });
+
+        pages.forEach(function(page) {
+            if (page === '...') {
+                var dots = document.createElement('span');
+                dots.className = 'ucat-page-dots';
+                dots.textContent = '...';
+                historyPagination.appendChild(dots);
+            } else {
+                addPageButton(String(page), page, { active: page === currentPage });
+            }
+        });
+
+        addPageButton('Next', currentPage + 1, { disabled: currentPage === pageCount });
     }
 
     document.addEventListener('DOMContentLoaded', function() {

@@ -54,7 +54,28 @@ class NotificationController extends Controller
 
         $notifications = $query->latest()->paginate(15)->withQueryString();
 
-        return view('user.notifications', compact('notifications', 'totalCount', 'unreadCount', 'readCount', 'tab'));
+        $returnPath = $request->query('from');
+        $returnPathName = is_string($returnPath) ? parse_url($returnPath, PHP_URL_PATH) : null;
+        $validReturnPath = is_string($returnPath)
+            && str_starts_with($returnPath, '/')
+            && !str_starts_with($returnPath, '//')
+            && !parse_url($returnPath, PHP_URL_HOST)
+            && !parse_url($returnPath, PHP_URL_SCHEME)
+            && $returnPathName !== '/notifications';
+
+        if ($validReturnPath) {
+            $returnUrl = url($returnPath);
+        } else {
+            $returnUrl = url()->previous();
+            if (
+                parse_url($returnUrl, PHP_URL_HOST) !== $request->getHost()
+                || parse_url($returnUrl, PHP_URL_PATH) === '/notifications'
+            ) {
+                $returnUrl = route('user.home');
+            }
+        }
+
+        return view('user.notifications', compact('notifications', 'totalCount', 'unreadCount', 'readCount', 'tab', 'returnUrl'));
     }
 
     public function markAsRead($id)

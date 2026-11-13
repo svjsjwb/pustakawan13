@@ -24,8 +24,8 @@
 .ext-picker-card {
     display: flex;
     flex-direction: column;
-    width: min(440px, 100%);
-    max-height: min(560px, calc(100dvh - 32px));
+    width: min(500px, 100%);
+    max-height: min(580px, calc(100dvh - 32px));
     overflow: hidden;
     border: 1px solid #e0eeec;
     border-radius: 20px;
@@ -35,22 +35,25 @@
 }
 
 .ext-picker-header {
-    min-height: 76px;
-    padding: 14px 18px;
-    background: linear-gradient(110deg, #0D7F82 0%, #18A39C 100%);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 22px;
+    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
     color: #fff;
 }
 
-.ext-picker-header h3 { margin: 0 0 4px; font-size: 18px; line-height: 1.25; font-weight: 750; }
-.ext-picker-header p { margin: 0; color: rgba(255,255,255,.82); font-size: 13px; }
+.ext-picker-header h3 { margin: 0 0 4px; font-size: 17px; line-height: 1.25; font-weight: 750; color: #fff; }
+.ext-picker-header p { margin: 0; color: rgba(255,255,255,.85); font-size: 12.5px; }
 
 .ext-picker-list {
-    display: grid;
-    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
     min-height: 0;
-    max-height: min(360px, calc(100dvh - 220px));
-    padding: 12px 10px;
+    max-height: min(380px, calc(100dvh - 200px));
+    padding: 16px 18px;
     overflow-y: auto;
 }
 
@@ -58,83 +61,162 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    width: 100%;
-    min-height: 68px;
-    padding: 9px 14px;
-    border: 2px solid #C7E3E0;
-    border-radius: 16px;
-    background: #fff;
-    color: #1B4347;
-    text-align: left;
-    cursor: default;
-    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    gap: 14px;
+    padding: 13px 16px;
+    border: 1.5px solid #d4ece8;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #173c3b;
+    cursor: pointer;
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
 .ext-picker-book:hover {
-    transform: translateY(-1px);
-    border-color: #18A39C;
-    box-shadow: 0 4px 14px rgba(24, 163, 156, 0.1);
+    transform: translateY(-2px);
+    border-color: #20B2AA;
+    background: #f2fbfa;
+    box-shadow: 0 6px 18px rgba(24, 163, 156, 0.14);
 }
 
-.ext-picker-book > span { min-width: 0; }
-.ext-picker-book-title {
-    display: block;
-    font-size: 15px;
-    line-height: 1.3;
-    font-weight: 650;
+.ext-picker-book:focus-visible {
+    outline: 2px solid #20B2AA;
+    outline-offset: 2px;
 }
-.ext-picker-book-meta { display: block; margin-top: 3px; color: #829795; font-size: 12px; line-height: 1.3; overflow-wrap: anywhere; }
-.ext-picker-book-status {
+
+.ext-picker-book.is-selected {
+    border-color: #168F88;
+    background: #e6f7f5;
+    box-shadow: 0 0 0 2px rgba(22, 143, 136, 0.3);
+}
+
+.ext-picker-book-info-col {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.ext-picker-book-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.ext-picker-book-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #173c3b;
+}
+
+.ext-picker-book-badge {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    min-height: 32px;
-    padding: 0 12px;
+    padding: 3px 8px;
     border-radius: 999px;
-    background: #EEF7F6;
+    font-size: 10.5px;
+    font-weight: 700;
+}
+.ext-picker-book-badge.is-safe {
+    background: #e8f8f0;
+    color: #0b8247;
+}
+.ext-picker-book-badge.is-warning {
+    background: #fff6e7;
+    color: #b86200;
+}
+
+.ext-picker-book-dates-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: #64748b;
+    flex-wrap: wrap;
+}
+
+.ext-picker-book-dates-row svg {
+    vertical-align: -2px;
+    color: #45B8B0;
+    margin-right: 2px;
+}
+
+.ext-picker-dot {
+    color: #cbd5e1;
+}
+
+.ext-picker-book-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #20B2AA;
+    background: #f0faf9;
     color: #148A84;
     font-size: 12px;
     font-weight: 700;
-    white-space: nowrap;
-}
-.ext-picker-book-action {
-    border: 0;
-    font-family: inherit;
     cursor: pointer;
-    transition: transform .22s ease, box-shadow .22s ease, background-color .22s ease, color .22s ease;
+    font-family: inherit;
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
 }
-.ext-picker-book-action:hover {
-    transform: translateY(-1px);
-    background: #0D7F82;
+.ext-picker-book-btn * {
+    pointer-events: none;
+}
+
+.ext-picker-book:hover .ext-picker-book-btn {
+    background: #168F88;
     color: #fff;
-    box-shadow: 0 4px 12px rgba(13, 127, 130, 0.22);
+    border-color: #168F88;
+    transform: translateX(3px);
 }
-.ext-picker-book-action:focus-visible { outline: 3px solid rgba(24, 163, 156, 0.3); outline-offset: 2px; }
-.ext-picker-book-arrow {
-    display: inline-block;
-    margin-left: 3px;
-    transition: transform .22s ease;
+
+.ext-picker-empty {
+    text-align: center;
+    padding: 36px 16px;
 }
-.ext-picker-book-action:hover .ext-picker-book-arrow { transform: translateX(3px); }
-.ext-picker-book-status.is-pending { background: #edf1f0; color: #778684; }
+.ext-picker-empty-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: rgba(32, 178, 170, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #20B2AA;
+}
+.ext-picker-empty h4 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #173c3b;
+}
+.ext-picker-empty p {
+    margin: 0;
+    font-size: 12.5px;
+    color: #64748b;
+    line-height: 1.5;
+}
 
 .ext-picker-footer {
     display: flex;
     justify-content: flex-end;
-    padding: 10px 12px 12px;
+    padding: 12px 18px 14px;
     border-top: 1px solid #e6efee;
 }
 
 .ext-picker-cancel {
-    padding: 11px 22px;
+    padding: 10px 20px;
     border: 1.5px solid var(--border, #e2e8f0);
     border-radius: 12px;
     background: var(--background, #f8fafc);
     color: var(--text-muted, #64748b);
     font-family: inherit;
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.18s ease;
@@ -143,6 +225,48 @@
 .ext-picker-cancel:hover {
     background: var(--border, #e2e8f0);
     color: var(--text, #0f172a);
+}
+
+.ext-modal-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+    margin-right: 2px;
+}
+.ext-modal-back-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateX(-2px);
+}
+
+.ext-btn-back-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: auto;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #0f766e;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+    white-space: nowrap;
+}
+.ext-btn-back-text:hover {
+    background: rgba(32, 178, 170, 0.12);
+    color: #148A84;
 }
 
 @media (max-width: 480px) {
@@ -493,10 +617,11 @@
 
 /* Footer */
 .ext-modal-footer {
-    padding: 16px 28px 24px;
+    padding: 10px 18px;
     display: flex;
     flex-shrink: 0;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
     justify-content: flex-end;
     border-top: 1px solid var(--border, #e2e8f0);
 }
@@ -510,12 +635,13 @@
     .ext-modal-header h3 { font-size: 15px; }
     .ext-modal-header p { font-size: 11.5px; }
     .ext-modal-body { padding: 16px 18px; }
-    .ext-modal-footer { padding: 12px 18px max(12px, env(safe-area-inset-bottom)); gap: 8px; }
-    .ext-btn-cancel, .ext-btn-submit { padding: 10px 14px; }
+    .ext-modal-footer { padding: 10px 14px; gap: 8px; }
+    .ext-btn-cancel, .ext-btn-submit { padding: 8px 12px; }
 }
 
 .ext-btn-cancel {
-    padding: 11px 22px;
+    padding: 9px 18px;
+    min-height: 38px;
     border-radius: 12px;
     background: var(--background, #f8fafc);
     border: 1.5px solid var(--border, #e2e8f0);
@@ -533,7 +659,8 @@
 }
 
 .ext-btn-submit {
-    padding: 11px 24px;
+    padding: 9px 20px;
+    min-height: 38px;
     border-radius: 12px;
     background: linear-gradient(135deg, #0f766e, #14b8a6);
     border: none;
@@ -837,10 +964,43 @@
 @else
 
 <div class="loans-stat-grid">
-    <div class="loans-stat-card is-green"><span class="loans-stat-icon">↻</span><strong>{{ $activeCount }}</strong><small>Sedang Dipinjam</small></div>
-    <div class="loans-stat-card is-yellow"><span class="loans-stat-icon">◷</span><strong>{{ $nearDueCount }}</strong><small>Mendekati Batas Pengembalian</small></div>
-    <div class="loans-stat-card is-red"><span class="loans-stat-icon">!</span><strong>{{ $overdueCount }}</strong><small>Terlambat</small></div>
-    <div class="loans-stat-card is-slate"><span class="loans-stat-icon">✓</span><strong>{{ $completedCount }}</strong><small>Selesai</small></div>
+    <div class="loans-stat-card is-green">
+        <span class="loans-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+            </svg>
+        </span>
+        <strong>{{ $activeCount }}</strong><small>Sedang Dipinjam</small>
+    </div>
+    <div class="loans-stat-card is-yellow">
+        <span class="loans-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+        </span>
+        <strong>{{ $nearDueCount }}</strong><small>Mendekati Batas Pengembalian</small>
+    </div>
+    <div class="loans-stat-card is-red">
+        <span class="loans-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        </span>
+        <strong>{{ $overdueCount }}</strong><small>Terlambat</small>
+    </div>
+    <div class="loans-stat-card is-slate">
+        <span class="loans-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        </span>
+        <strong>{{ $completedCount }}</strong><small>Selesai</small>
+    </div>
 </div>
 
 <div class="loans-layout">
@@ -964,8 +1124,6 @@
                     <div class="loan-extension-note is-rejected">
                         ✕ Permintaan perpanjangan ditolak {{ $borrowing->extension_admin_notes ? '('.$borrowing->extension_admin_notes.')' : '' }}
                     </div>
-                @else
-                    <div class="loan-extension-note"></div>
                 @endif
 
                 @if($borrowing->extension_status !== 'menunggu')
@@ -977,7 +1135,11 @@
                         data-due-formatted="{{ $borrowing->due_at?->format('d M Y') }}"
                         data-borrowed-formatted="{{ $borrowing->borrowed_at?->format('d M Y') }}"
                         data-borrowed-date="{{ $borrowing->borrowed_at?->format('Y-m-d') }}">
-                        ↻ Ajukan Perpanjangan
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                        </svg>
+                        Ajukan Perpanjangan
                     </button>
                 @endif
             </div>
@@ -1024,16 +1186,46 @@
 
 <aside class="loans-sidebar">
     <div class="loans-side-panel">
-        <div class="loans-side-heading"><span>✦</span><h3>Aksi Cepat</h3></div>
+        <div class="loans-side-heading">
+            <span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </span>
+            <h3>Aksi Cepat</h3>
+        </div>
         @if($borrowings->isNotEmpty())
-            <a href="#extensionPickerOverlay" class="loans-side-action" onclick="openExtendPicker(); return false;">↻ <span>Perpanjang Peminjaman</span></a>
+            <button type="button" class="loans-side-action loans-side-button" id="btnQuickExtend" onclick="openExtendPicker(); return false;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="loans-action-icon">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <polyline points="1 20 1 14 7 14"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                <span>Perpanjang Peminjaman</span>
+            </button>
         @else
-            <a href="{{ route('user.catalog') }}" class="loans-side-action">↻ <span>Perpanjang Peminjaman</span></a>
+            <a href="{{ route('user.catalog') }}" class="loans-side-action">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="loans-action-icon">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <polyline points="1 20 1 14 7 14"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                <span>Perpanjang Peminjaman</span>
+            </a>
         @endif
-        <a href="{{ route('user.history') }}" class="loans-side-action">◷ <span>Lihat Semua Peminjaman</span></a>
+        <a href="{{ route('user.loans') }}" class="loans-side-action" id="btnViewAllLoans">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="loans-action-icon">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Lihat Semua Peminjaman</span>
+        </a>
     </div>
     <div class="loans-side-panel loans-important">
-        <div class="loans-side-heading"><span>ⓘ</span><h3>Informasi Penting</h3></div>
+        <div class="loans-side-heading">
+            <span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </span>
+            <h3>Informasi Penting</h3>
+        </div>
         <ul>
             <li>Maksimal peminjaman 5 buku per anggota</li>
             <li>Lama peminjaman 14 hari</li>
@@ -1047,39 +1239,77 @@
 <div class="ext-picker-overlay" id="extensionPickerOverlay" role="dialog" aria-modal="true" aria-labelledby="extPickerTitle">
     <div class="ext-picker-card">
         <div class="ext-picker-header">
-            <h3 id="extPickerTitle">Pilih Buku untuk Diperpanjang</h3>
-            <p>Pilih judul buku yang ingin Anda perpanjang.</p>
+            <div>
+                <h3 id="extPickerTitle">Pilih Buku untuk Diperpanjang</h3>
+                <p>Pilih salah satu judul buku yang sedang Anda pinjam.</p>
+            </div>
         </div>
         <div class="ext-picker-list">
-            @forelse($borrowings as $borrowing)
+            @php
+                $eligibleLoans = $borrowings->filter(function($b) {
+                    $days = $b->days_remaining ?? 0;
+                    return $b->status === 'dipinjam' 
+                        && $b->extension_status !== 'menunggu' 
+                        && $days >= 0 
+                        && empty($b->has_reservation_queue);
+                });
+            @endphp
+
+            @forelse($eligibleLoans as $borrowing)
                 @foreach($borrowing->details as $detail)
                     @php
-                        $pickerBookTitle = $detail->book?->title ?? 'Judul Tidak Diketahui';
-                        $pickerPending = $borrowing->extension_status === 'menunggu';
+                        $bookTitle = $detail->book?->title ?? 'Judul Buku';
+                        $daysLeft = $borrowing->days_remaining ?? null;
+                        $isNear = $daysLeft !== null && $daysLeft <= 3;
                     @endphp
-                    <div class="ext-picker-book">
-                        <span>
-                            <span class="ext-picker-book-title">{{ $pickerBookTitle }}</span>
-                            <span class="ext-picker-book-meta">Dipinjam {{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }} · Jatuh tempo {{ $borrowing->due_at?->format('d M Y') ?? '-' }}</span>
-                        </span>
-                        @if($pickerPending)
-                            <span class="ext-picker-book-status is-pending">Menunggu persetujuan</span>
-                        @else
-                            <button type="button"
-                                    class="ext-picker-book-status ext-picker-book-action js-extension-picker-button"
-                                    data-extension-url="{{ route('user.loans.extend', $borrowing->id) }}"
-                                    data-book-title="{{ $pickerBookTitle }}"
-                                    data-due-date="{{ $borrowing->due_at?->format('Y-m-d') }}"
-                                    data-due-formatted="{{ $borrowing->due_at?->format('d M Y') }}"
-                                    data-borrowed-formatted="{{ $borrowing->borrowed_at?->format('d M Y') }}"
-                                    data-borrowed-date="{{ $borrowing->borrowed_at?->format('Y-m-d') }}">
-                                <span>Pilih Buku</span><span class="ext-picker-book-arrow" aria-hidden="true">→</span>
-                            </button>
-                        @endif
+                    <div class="ext-picker-book js-extension-picker-item"
+                         tabindex="0"
+                         role="button"
+                         onclick="selectExtensionBookItem(this)"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectExtensionBookItem(this);}"
+                         data-extension-url="{{ route('user.loans.extend', $borrowing->id) }}"
+                         data-book-title="{{ $bookTitle }}"
+                         data-due-date="{{ $borrowing->due_at?->format('Y-m-d') }}"
+                         data-due-formatted="{{ $borrowing->due_at?->format('d M Y') }}"
+                         data-borrowed-formatted="{{ $borrowing->borrowed_at?->format('d M Y') }}"
+                         data-borrowed-date="{{ $borrowing->borrowed_at?->format('Y-m-d') }}">
+                        <div class="ext-picker-book-info-col">
+                            <div class="ext-picker-book-title-row">
+                                <span class="ext-picker-book-title">{{ $bookTitle }}</span>
+                                <span class="ext-picker-book-badge {{ $isNear ? 'is-warning' : 'is-safe' }}">
+                                    {{ $isNear ? ($daysLeft == 0 ? 'Jatuh tempo hari ini' : 'Mendekati batas (' . $daysLeft . ' hari lagi)') : 'Sedang Dipinjam (' . $daysLeft . ' hari lagi)' }}
+                                </span>
+                            </div>
+                            <div class="ext-picker-book-dates-row">
+                                <span>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    Dipinjam: <strong>{{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }}</strong>
+                                </span>
+                                <span class="ext-picker-dot">•</span>
+                                <span>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    Jatuh tempo: <strong>{{ $borrowing->due_at?->format('d M Y') ?? '-' }}</strong>
+                                </span>
+                            </div>
+                        </div>
+                        <button type="button" class="ext-picker-book-btn" tabindex="-1" aria-hidden="true">
+                            <span>Pilih Buku</span>
+                            <span class="ext-picker-book-arrow">→</span>
+                        </button>
                     </div>
                 @endforeach
             @empty
-                <p style="margin:8px;color:#718080;font-size:13px">Tidak ada buku yang sedang dipinjam.</p>
+                <div class="ext-picker-empty">
+                    <div class="ext-picker-empty-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <h4>Tidak Ada Buku yang Dapat Diperpanjang</h4>
+                    <p>Hanya peminjaman aktif yang belum melewati batas pengembalian, tidak memiliki antrean reservasi, dan belum mengajukan perpanjangan yang dapat diperpanjang.</p>
+                </div>
             @endforelse
         </div>
         <div class="ext-picker-footer">
@@ -1126,9 +1356,9 @@
                     <div class="ext-info-box-label">Jatuh Tempo Saat Ini</div>
                     <div class="ext-info-box-value" id="extCurrentDue">—</div>
                 </div>
-                <div class="ext-info-box is-full is-warning">
+                <div class="ext-info-box is-full is-warning" id="extNewDueBox">
                     <div class="ext-info-box-label">Tanggal Pengembalian Baru</div>
-                    <div class="ext-info-box-value">Pilih tanggal setelah jatuh tempo saat ini</div>
+                    <div class="ext-info-box-value" id="extNewDueValue">Pilih tanggal setelah jatuh tempo saat ini</div>
                 </div>
             </div>
 
@@ -1190,6 +1420,7 @@
 
         {{-- Footer --}}
         <div class="ext-modal-footer">
+            <button type="button" class="ext-btn-back-text" onclick="backToExtendPicker()">← Pilih Buku Lain</button>
             <button type="button" class="ext-btn-cancel" onclick="closeExtendModal()">Batal</button>
             <button type="button" class="ext-btn-submit" id="extBtnSubmit" disabled onclick="submitExtendForm()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
@@ -1313,8 +1544,11 @@ function addExtensionCalendarNavigation(instance) {
 }
 
 function openExtendPicker() {
-    updateExtensionCalendarHeader(instance);
-    document.body.style.overflow = 'hidden';
+    const pickerOverlay = document.getElementById('extensionPickerOverlay');
+    if (pickerOverlay) {
+        pickerOverlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeExtendPicker() {
@@ -1322,6 +1556,30 @@ function closeExtendPicker() {
     if (!document.getElementById('extendModalOverlay')?.classList.contains('open')) {
         document.body.style.overflow = '';
     }
+}
+
+function selectExtensionBookItem(element) {
+    if (!element) return;
+    document.querySelectorAll('.js-extension-picker-item').forEach(function(el) {
+        el.classList.remove('is-selected');
+    });
+    element.classList.add('is-selected');
+
+    const data = element.dataset;
+    closeExtendPicker();
+    openExtendModal(
+        data.extensionUrl,
+        data.bookTitle,
+        data.dueDate,
+        data.dueFormatted,
+        data.borrowedFormatted,
+        data.borrowedDate
+    );
+}
+
+function backToExtendPicker() {
+    closeExtendModal();
+    openExtendPicker();
 }
 
 function openExtendModalFromButton(button) {
@@ -1336,20 +1594,9 @@ function openExtendModalFromButton(button) {
     );
 }
 
-function selectExtensionBookFromButton(button) {
-    closeExtendPicker();
-    openExtendModalFromButton(button);
-}
-
 document.querySelectorAll('.js-extension-card-button').forEach(function(button) {
     button.addEventListener('click', function() {
         openExtendModalFromButton(button);
-    });
-});
-
-document.querySelectorAll('.js-extension-picker-button:not(:disabled)').forEach(function(button) {
-    button.addEventListener('click', function() {
-        selectExtensionBookFromButton(button);
     });
 });
 
@@ -1408,7 +1655,9 @@ function openExtendModal(actionUrl, bookTitle, dueDateISO, dueDateFormatted, bor
 function closeExtendModal() {
     const overlay = document.getElementById('extendModalOverlay');
     overlay.classList.remove('open');
-    document.body.style.overflow = '';
+    if (!document.getElementById('extensionPickerOverlay')?.classList.contains('open')) {
+        document.body.style.overflow = '';
+    }
     if (EXT_PICKER) { EXT_PICKER.clear(); }
     resetPreview();
 }
@@ -1435,6 +1684,10 @@ function onDateSelected(dateStr) {
         btnSubmit.disabled = true;
         pickerInput.classList.add('is-error');
         previewCard.classList.remove('show');
+        const newDueVal = document.getElementById('extNewDueValue');
+        const newDueBox = document.getElementById('extNewDueBox');
+        if (newDueVal) newDueVal.textContent = 'Pilih tanggal setelah jatuh tempo saat ini';
+        if (newDueBox) newDueBox.classList.remove('has-selected-date');
         return;
     }
 
@@ -1443,12 +1696,19 @@ function onDateSelected(dateStr) {
     validationMsg.classList.remove('show', 'is-error');
     validationMsg.classList.add('show', 'is-success');
     validationText.textContent = `Tanggal valid. Perpanjangan ${diffDays} hari dari jatuh tempo saat ini.`;
+    validationMsg.querySelector('svg').innerHTML = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
 
     // Update preview
     const formattedDate = selected.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
     document.getElementById('extPreviewDate').textContent = formattedDate;
     document.getElementById('extPreviewDays').textContent = `+${diffDays} Hari`;
     previewCard.classList.add('show');
+
+    // Update tanggal pengembalian baru pada bagian informasi
+    const newDueVal = document.getElementById('extNewDueValue');
+    const newDueBox = document.getElementById('extNewDueBox');
+    if (newDueVal) newDueVal.textContent = formattedDate;
+    if (newDueBox) newDueBox.classList.add('has-selected-date');
 
     // Aktifkan tombol submit
     btnSubmit.disabled = false;
@@ -1457,18 +1717,29 @@ function onDateSelected(dateStr) {
 function showError(msg) {
     const validationMsg  = document.getElementById('extValidationMsg');
     const validationText = document.getElementById('extValidationText');
+    if (!validationMsg || !validationText) return;
     validationMsg.classList.remove('is-success');
     validationMsg.classList.add('show', 'is-error');
     validationText.textContent = msg;
     // Update icon ke X circle
     validationMsg.querySelector('svg').innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>';
+    const newDueVal = document.getElementById('extNewDueValue');
+    const newDueBox = document.getElementById('extNewDueBox');
+    if (newDueVal) newDueVal.textContent = 'Pilih tanggal setelah jatuh tempo saat ini';
+    if (newDueBox) newDueBox.classList.remove('has-selected-date');
 }
 
 function resetPreview() {
-    document.getElementById('extValidationMsg').classList.remove('show', 'is-error', 'is-success');
-    document.getElementById('extPreviewCard').classList.remove('show');
-    document.getElementById('extBtnSubmit').disabled = true;
+    const validationMsg = document.getElementById('extValidationMsg');
+    if (validationMsg) validationMsg.classList.remove('show', 'is-error', 'is-success');
+    document.getElementById('extPreviewCard')?.classList.remove('show');
+    const btnSubmit = document.getElementById('extBtnSubmit');
+    if (btnSubmit) btnSubmit.disabled = true;
     document.getElementById('extDatePicker')?.classList.remove('is-error');
+    const newDueVal = document.getElementById('extNewDueValue');
+    const newDueBox = document.getElementById('extNewDueBox');
+    if (newDueVal) newDueVal.textContent = 'Pilih tanggal setelah jatuh tempo saat ini';
+    if (newDueBox) newDueBox.classList.remove('has-selected-date');
 }
 
 function submitExtendForm() {

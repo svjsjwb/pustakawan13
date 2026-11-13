@@ -26,6 +26,7 @@ class UserReservationController extends Controller
             'disetujui'    => 0,
             'siap_diambil' => 0,
             'ditolak'      => 0,
+            'dibatalkan'   => 0,
         ];
 
         if ($member) {
@@ -48,8 +49,7 @@ class UserReservationController extends Controller
 
             $reservations = $query
                 ->orderByDesc('created_at')
-                ->paginate(10)
-                ->withQueryString();
+                ->get();
 
             // Hitungan status untuk tab / badge
             $allRes = Reservation::where('member_id', $member->id)->get();
@@ -78,6 +78,10 @@ class UserReservationController extends Controller
 
             $statusCounts['ditolak'] = $allRes
                 ->where('status', 'ditolak')
+                ->count();
+
+            $statusCounts['dibatalkan'] = $allRes
+                ->where('status', 'dibatalkan')
                 ->count();
         }
 
@@ -108,10 +112,85 @@ class UserReservationController extends Controller
             ->where('member_id', $member->id)
             ->findOrFail($id);
 
+        $cancellationRejectionNotification = AppNotification::query()
+            ->where('user_id', $user->id)
+            ->where('role', 'user')
+            ->where('type', 'reservation_cancellation_rejected')
+            ->whereJsonContains('data->reservation_id', (int) $reservation->id)
+            ->latest()
+            ->first();
+
         return view(
             'user.reservation-detail',
-            compact('reservation', 'member')
+            compact('reservation', 'member', 'cancellationRejectionNotification')
         );
+    }
+
+    /**
+     * Cancel a reservation owned by the authenticated member.
+     */
+    public function cancel($id)
+    {
+        $member = Auth::user()->member;
+
+        if (!$member) {
+            return redirect()
+                ->route('user.reservations')
+                ->with('error', 'Data anggota tidak ditemukan.');
+        }
+
+        $cancellationState = DB::transaction(function () use ($member, $id) {
+            $reservation = Reservation::where('member_id', $member->id)
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            if ($reservation->status === 'dibatalkan') {
+                return 'cancelled';
+            }
+
+            if (!in_array($reservation->status, ['menunggu', 'disetujui', 'siap_diambil'], true)) {
+                abort(422, 'Reservasi ini tidak dapat dibatalkan.');
+            }
+
+            if ($reservation->cancellation_requested_at) {
+                return 'pending';
+            }
+
+            if (in_array($reservation->status, ['disetujui', 'siap_diambil'], true)) {
+                $reservation->update(['cancellation_requested_at' => now()]);
+
+                return 'pending_requested';
+            }
+
+            if ($reservation->book_copy_id) {
+                $bookCopy = BookCopy::lockForUpdate()->find($reservation->book_copy_id);
+                if ($bookCopy && in_array($bookCopy->status, ['reserved', 'borrowed'], true)) {
+                    $bookCopy->update(['status' => 'available']);
+                }
+            }
+
+            $book = Book::lockForUpdate()->findOrFail($reservation->book_id);
+            $book->increment('stok');
+
+            $reservation->update(['status' => 'dibatalkan']);
+
+            return 'cancelled';
+        });
+
+        if ($cancellationState === 'pending_requested') {
+            $reservation = Reservation::with('book')->findOrFail($id);
+            AppNotification::notifyAdmin(
+                'reservation_cancellation_request',
+                'Permintaan Pembatalan Reservasi',
+                Auth::user()->name . ' meminta pembatalan reservasi buku "' . ($reservation->book?->title ?? 'Buku') . '".',
+                ['reservation_id' => $reservation->id]
+            );
+        }
+
+        return redirect()
+            ->route('user.reservations.show', $id)
+            ->with('cancellation_request_pending', in_array($cancellationState, ['pending', 'pending_requested'], true))
+            ->with('reservation_cancelled', $cancellationState === 'cancelled');
     }
 
     /**
@@ -310,6 +389,8 @@ class UserReservationController extends Controller
             return [
                 'id' => $r->id,
                 'status' => strtolower($r->status),
+                'status_label' => $r->display_status,
+                'cancellation_requested_at' => $r->cancellation_requested_at?->toISOString(),
                 'rejection_reason' => $r->rejection_reason,
                 'updated_at' => $r->updated_at
                     ? $r->updated_at->toISOString()

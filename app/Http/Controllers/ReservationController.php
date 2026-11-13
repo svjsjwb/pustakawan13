@@ -8,6 +8,7 @@ use App\Models\Member;
 use App\Models\Reservation;
 use App\Models\Borrowing;
 use App\Models\BorrowingDetail;
+use App\Models\AppNotification;
 use App\Services\NotificationService;
 use App\Services\MemberStatusService;
 use Illuminate\Http\Request;
@@ -467,6 +468,10 @@ class ReservationController extends Controller
                 return;
             }
 
+            if ($reservation->cancellation_requested_at) {
+                abort(409, 'Selesaikan permintaan pembatalan melalui aksi Setujui atau Tolak Pembatalan.');
+            }
+
 
             /*
              * =================================================
@@ -789,6 +794,85 @@ class ReservationController extends Controller
             );
     }
 
+
+    public function resolveCancellationRequest(Request $request, Reservation $reservation)
+    {
+        $validated = $request->validate([
+            'decision' => ['required', 'in:approve,reject'],
+        ]);
+
+        $approved = $validated['decision'] === 'approve';
+
+        DB::transaction(function () use ($reservation, $approved) {
+            $lockedReservation = Reservation::lockForUpdate()->findOrFail($reservation->id);
+
+            if (!$lockedReservation->cancellation_requested_at) {
+                abort(409, 'Tidak ada permintaan pembatalan yang menunggu.');
+            }
+
+            if (!$approved) {
+                if (!in_array($lockedReservation->status, ['disetujui', 'siap_diambil'], true)) {
+                    abort(422, 'Status reservasi tidak valid untuk penolakan pembatalan.');
+                }
+
+                $lockedReservation->update([
+                    'status' => $lockedReservation->status,
+                    'cancellation_requested_at' => null,
+                ]);
+                return;
+            }
+
+            if (!in_array($lockedReservation->status, ['disetujui', 'siap_diambil'], true)) {
+                abort(422, 'Status reservasi tidak dapat dibatalkan.');
+            }
+
+            if ($lockedReservation->book_copy_id) {
+                $bookCopy = BookCopy::lockForUpdate()->find($lockedReservation->book_copy_id);
+                if ($bookCopy && in_array($bookCopy->status, ['reserved', 'borrowed'], true)) {
+                    $bookCopy->update(['status' => 'available']);
+                }
+            }
+
+            Book::lockForUpdate()
+                ->findOrFail($lockedReservation->book_id)
+                ->increment('stok');
+
+            Borrowing::where('reservation_id', $lockedReservation->id)
+                ->where('status', 'dipinjam')
+                ->update(['status' => 'ditolak']);
+
+            $lockedReservation->update([
+                'status' => 'dibatalkan',
+                'cancellation_requested_at' => null,
+            ]);
+
+            if ($lockedReservation->member) {
+                app(MemberStatusService::class)->sync($lockedReservation->member);
+            }
+        });
+
+        $reservation->refresh()->loadMissing(['book', 'member']);
+        $userId = $reservation->user_id ?? $reservation->member?->user_id;
+
+        if ($userId) {
+            $bookTitle = $reservation->book?->title ?? 'Buku';
+            AppNotification::notifyUser(
+                $userId,
+                $approved ? 'reservation_cancelled' : 'reservation_cancellation_rejected',
+                $approved ? 'Pembatalan Reservasi Disetujui' : 'Pembatalan Reservasi Ditolak',
+                $approved
+                    ? "Admin menyetujui pembatalan reservasi buku \"{$bookTitle}\"."
+                    : "Admin menolak permintaan pembatalan buku \"{$bookTitle}\". Status reservasi tetap {$reservation->display_status} dan proses pengambilan buku dapat dilanjutkan.",
+                ['reservation_id' => $reservation->id, 'decision' => $approved ? 'approved' : 'rejected']
+            );
+        }
+
+        return redirect()
+            ->route('reservations.index')
+            ->with('success', $approved
+                ? 'Permintaan pembatalan reservasi disetujui.'
+                : 'Permintaan pembatalan reservasi ditolak.');
+    }
 
     /**
      * Endpoint polling status reservasi untuk Admin (realtime update)

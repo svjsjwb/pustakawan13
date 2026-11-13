@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Book;
 use App\Models\BookCopy;
 use App\Models\Category;
+use App\Models\AppNotification;
 use App\Models\Member;
 use App\Models\Reservation;
 use App\Models\User;
@@ -32,7 +33,7 @@ class UserReservationAnomalyFixTest extends TestCase
         ]);
 
         $this->regularUser = User::factory()->create([
-            'role' => 'user',
+            'role' => 'member',
             'name' => 'Budi Santoso',
             'email' => 'budi@pustakawan.test',
         ]);
@@ -116,6 +117,208 @@ class UserReservationAnomalyFixTest extends TestCase
         $this->assertDatabaseMissing('members', [
             'user_id' => $this->adminUser->id,
         ]);
+    }
+
+    public function test_cancellation_of_approved_reservation_waits_for_admin_approval(): void
+    {
+        $member = Member::create([
+            'user_id'  => $this->regularUser->id,
+            'name'     => $this->regularUser->name,
+            'email'    => $this->regularUser->email,
+            'phone'    => '08123456789',
+            'division' => 'Anggota',
+            'status'   => 'aktif',
+        ]);
+
+        $this->book->update(['stok' => 2]);
+        $this->bookCopy->update(['status' => 'borrowed']);
+        $reservation = Reservation::create([
+            'user_id'      => $this->regularUser->id,
+            'member_id'    => $member->id,
+            'book_id'      => $this->book->id,
+            'book_copy_id' => $this->bookCopy->id,
+            'reserved_at'  => now(),
+            'status'       => 'disetujui',
+        ]);
+
+        $this->actingAs($this->regularUser)
+            ->post(route('user.reservations.cancel', $reservation->id))
+            ->assertRedirect(route('user.reservations.show', $reservation->id))
+            ->assertSessionHas('cancellation_request_pending', true);
+
+        $this->assertDatabaseHas('reservations', [
+            'id'     => $reservation->id,
+            'status' => 'disetujui',
+        ]);
+        $this->assertNotNull($reservation->fresh()->cancellation_requested_at);
+        $this->assertDatabaseHas('book_copies', [
+            'id'     => $this->bookCopy->id,
+            'status' => 'borrowed',
+        ]);
+        $this->assertDatabaseHas('books', [
+            'id'   => $this->book->id,
+            'stok' => 2,
+        ]);
+
+        $this->get(route('user.reservations.show', $reservation->id))
+            ->assertOk()
+            ->assertSee('window.showToast', false)
+            ->assertSee('Menunggu Persetujuan Pembatalan')
+            ->assertSee('Menunggu Persetujuan Admin')
+            ->assertDontSee('Dibatalkan oleh Anggota');
+
+        $this->get(route('user.reservations'))
+            ->assertOk()
+            ->assertSee('Menunggu Persetujuan Pembatalan');
+
+        $this->actingAs($this->adminUser)
+            ->patch(route('reservations.resolveCancellation', $reservation->id), [
+                'decision' => 'approve',
+            ])
+            ->assertRedirect(route('reservations.index'));
+
+        $this->assertDatabaseHas('reservations', [
+            'id'     => $reservation->id,
+            'status' => 'dibatalkan',
+            'cancellation_requested_at' => null,
+        ]);
+        $this->assertDatabaseHas('book_copies', [
+            'id'     => $this->bookCopy->id,
+            'status' => 'available',
+        ]);
+        $this->assertDatabaseHas('books', [
+            'id'   => $this->book->id,
+            'stok' => 3,
+        ]);
+        $approvalNotice = AppNotification::query()
+            ->where('user_id', $this->regularUser->id)
+            ->where('type', 'reservation_cancelled')
+            ->firstOrFail();
+        $this->assertSame('approved', $approvalNotice->data['decision']);
+
+        $this->actingAs($this->regularUser)
+            ->get(route('user.reservations.show', $reservation->id))
+            ->assertOk()
+            ->assertSee('Dibatalkan oleh Anggota')
+            ->assertDontSee('Menunggu Persetujuan Pembatalan');
+    }
+
+    public function test_admin_can_reject_cancellation_request_without_changing_approved_status(): void
+    {
+        $member = Member::create([
+            'user_id'  => $this->regularUser->id,
+            'name'     => $this->regularUser->name,
+            'email'    => $this->regularUser->email,
+            'phone'    => '08123456789',
+            'division' => 'Anggota',
+            'status'   => 'aktif',
+        ]);
+
+        $this->book->update(['stok' => 2]);
+        $this->bookCopy->update(['status' => 'borrowed']);
+
+        $reservation = Reservation::create([
+            'user_id'      => $this->regularUser->id,
+            'member_id'    => $member->id,
+            'book_id'      => $this->book->id,
+            'book_copy_id' => $this->bookCopy->id,
+            'reserved_at'  => now(),
+            'status'       => 'disetujui',
+        ]);
+
+        $this->actingAs($this->regularUser)
+            ->post(route('user.reservations.cancel', $reservation->id))
+            ->assertRedirect(route('user.reservations.show', $reservation->id))
+            ->assertSessionHas('cancellation_request_pending', true);
+
+        $this->assertDatabaseHas('reservations', [
+            'id' => $reservation->id,
+            'status' => 'disetujui',
+        ]);
+        $this->assertNotNull($reservation->fresh()->cancellation_requested_at);
+
+        $this->actingAs($this->adminUser)
+            ->patch(route('reservations.resolveCancellation', $reservation->id), [
+                'decision' => 'reject',
+            ])
+            ->assertRedirect(route('reservations.index'));
+
+        $this->assertDatabaseHas('reservations', [
+            'id'     => $reservation->id,
+            'status' => 'disetujui',
+            'cancellation_requested_at' => null,
+        ]);
+        $this->assertDatabaseHas('book_copies', [
+            'id' => $this->bookCopy->id,
+            'status' => 'borrowed',
+        ]);
+        $this->assertDatabaseHas('books', [
+            'id' => $this->book->id,
+            'stok' => 2,
+        ]);
+
+        $rejectionNotice = AppNotification::query()
+            ->where('user_id', $this->regularUser->id)
+            ->where('type', 'reservation_cancellation_rejected')
+            ->firstOrFail();
+        $this->assertSame('rejected', $rejectionNotice->data['decision']);
+        $this->assertSame($reservation->id, $rejectionNotice->data['reservation_id']);
+
+        $this->actingAs($this->regularUser)
+            ->get(route('user.reservations.show', $reservation->id))
+            ->assertOk()
+            ->assertSee('Disetujui')
+            ->assertSee('Permintaan Pembatalan Ditolak oleh Admin')
+            ->assertSee('Status reservasi tetap Disetujui dan proses pengambilan buku dapat dilanjutkan.')
+            ->assertSeeInOrder([
+                'Tracking Status Reservasi',
+                'Informasi Reservasi',
+                'Permintaan Pembatalan Ditolak oleh Admin',
+            ])
+            ->assertSee('&#10003; Persetujuan Reservasi', false)
+            ->assertSee('rsv-tracking-step is-done', false)
+            ->assertSee('rsv-tracking-step is-active', false)
+            ->assertSee('Menunggu Pengambilan')
+            ->assertSee('Batalkan Reservasi')
+            ->assertDontSee('Menunggu Persetujuan Pembatalan');
+
+        $this->getJson(route('user.reservations.statusFeed'))
+            ->assertOk()
+            ->assertJsonPath('reservations.0.status', 'disetujui');
+    }
+
+    public function test_admin_cannot_change_main_status_while_cancellation_request_is_pending(): void
+    {
+        $member = Member::create([
+            'user_id'  => $this->regularUser->id,
+            'name'     => $this->regularUser->name,
+            'email'    => $this->regularUser->email,
+            'phone'    => '08123456789',
+            'division' => 'Anggota',
+            'status'   => 'aktif',
+        ]);
+
+        $reservation = Reservation::create([
+            'user_id' => $this->regularUser->id,
+            'member_id' => $member->id,
+            'book_id' => $this->book->id,
+            'book_copy_id' => $this->bookCopy->id,
+            'reserved_at' => now(),
+            'status' => 'disetujui',
+            'cancellation_requested_at' => now(),
+        ]);
+
+        $this->actingAs($this->adminUser)
+            ->patch(route('reservations.updateStatus', $reservation->id), [
+                'status' => 'dibatalkan',
+            ])
+            ->assertStatus(409);
+
+        $this->assertDatabaseHas('reservations', [
+            'id' => $reservation->id,
+            'status' => 'disetujui',
+        ]);
+        $this->assertNotNull($reservation->fresh()->cancellation_requested_at);
     }
 
     /**

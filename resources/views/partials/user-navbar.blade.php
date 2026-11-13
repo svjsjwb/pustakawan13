@@ -81,7 +81,12 @@
                     </div>
 
                     {{-- Bottom Footer --}}
-                    <a href="{{ route('user.notifications') }}" class="eg-notif-footer" id="egNotifFooterLink">
+                    @php
+    $notificationsReturnPath = request()->routeIs('user.notifications')
+        ? request()->query('from')
+        : request()->getRequestUri();
+@endphp
+<a href="{{ route('user.notifications', ['from' => $notificationsReturnPath]) }}" class="eg-notif-footer" id="egNotifFooterLink">
                         <span>Lihat Semua Notifikasi &rarr;</span>
                     </a>
                 </div>

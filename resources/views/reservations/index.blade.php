@@ -697,6 +697,10 @@
                                             </span>
                                         @endif
 
+                                        @if($reservation->cancellation_requested_at)
+                                            <small class="reservation-cancellation-request-pending">Menunggu Persetujuan Pembatalan</small>
+                                        @endif
+
                                     </td>
 
 
@@ -707,6 +711,21 @@
                                     <td>
 
                                         <div class="reservation-actions">
+
+                                            @if($reservation->cancellation_requested_at)
+                                                <form action="{{ route('reservations.resolveCancellation', $reservation) }}" method="POST">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="decision" value="approve">
+                                                    <button type="submit" class="btn-approve">Setujui Pembatalan</button>
+                                                </form>
+                                                <form action="{{ route('reservations.resolveCancellation', $reservation) }}" method="POST">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="decision" value="reject">
+                                                    <button type="submit" class="btn-reject">Tolak Pembatalan</button>
+                                                </form>
+                                            @endif
 
 
                                             {{-- =================================
