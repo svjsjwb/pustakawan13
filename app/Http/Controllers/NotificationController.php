@@ -41,19 +41,19 @@ class NotificationController extends Controller
 
             $activeBorrowingIds = $user->isAdmin()
                 ? Borrowing::query()
-                    ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
-                    ->whereNull('returned_at')
-                    ->pluck('id')
-                    ->map(fn($id) => (string) $id)
-                    ->all()
+                ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
+                ->whereNull('returned_at')
+                ->pluck('id')
+                ->map(fn($id) => (string) $id)
+                ->all()
                 : [];
 
             $pendingBorrowingNotifications = ($user->isAdmin() && !empty($activeBorrowingIds))
                 ? AppNotification::where('role', 'admin')
-                    ->where('type', 'borrowing_new')
-                    ->where('is_read', false)
-                    ->whereIn('data->borrowing_id', $activeBorrowingIds)
-                    ->pluck('id')
+                ->where('type', 'borrowing_new')
+                ->where('is_read', false)
+                ->whereRaw("(data->>'borrowing_id')::bigint IN (" . implode(',', array_fill(0, count($activeBorrowingIds), '?')) . ')', $activeBorrowingIds)
+                ->pluck('id')
                 : collect();
             $pendingReservationsCount = $user->isAdmin()
                 ? Reservation::where('status', 'menunggu')->count()

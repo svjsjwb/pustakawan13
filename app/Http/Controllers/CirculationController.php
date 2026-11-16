@@ -25,9 +25,11 @@ class CirculationController extends Controller
 
         $extensionRequests = Borrowing::with([
             'member:id,member_number,name',
-            'details:id,borrowing_id,book_id,quantity',
-            'details.book:id,judul_buku,isbn',
+            'detail:id,borrowing_id,book_id,book_copy_id,quantity',
+            'detail.book:id,judul_buku,isbn',
+            'detail.bookCopy',
         ])
+            ->whereIn('status', ['dipinjam', 'diperpanjang'])
             ->where('extension_status', 'menunggu')
             ->latest()
             ->get();
@@ -114,8 +116,9 @@ class CirculationController extends Controller
 
         $borrowings = Borrowing::with([
             'member:id,member_number,name',
-            'details:id,borrowing_id,book_id,quantity',
-            'details.book:id,judul_buku,isbn',
+            'detail:id,borrowing_id,book_id,book_copy_id,quantity',
+            'detail.book:id,judul_buku,isbn',
+            'detail.bookCopy',
         ])
             ->whereYear('borrowed_at', $year)
             ->whereMonth('borrowed_at', $month)
@@ -146,10 +149,7 @@ class CirculationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'reservation_id' => [
-                'nullable',
-                'exists:reservations,id'
-            ],
+            'reservation_id' => ['prohibited'],
 
             'member_id' => [
                 'required',
@@ -180,33 +180,12 @@ class CirculationController extends Controller
             $book = Book::lockForUpdate()->findOrFail($validated['book_id']);
             $member = Member::findOrFail($validated['member_id']);
 
-            $reservation = null;
-            if (!empty($validated['reservation_id'])) {
-                $reservation = Reservation::lockForUpdate()->find($validated['reservation_id']);
-            }
+            $bookCopy = BookCopy::where('book_id', $book->id)
+                ->where('status', 'available')
+                ->lockForUpdate()
+                ->first();
 
-            $bookCopy = null;
-            if ($reservation && $reservation->book_copy_id) {
-                $bookCopy = BookCopy::where('id', $reservation->book_copy_id)
-                    ->where('book_id', $book->id)
-                    ->where('status', 'reserved')
-                    ->lockForUpdate()
-                    ->first();
-            }
-
-            if (!$bookCopy) {
-                $bookCopy = BookCopy::where('book_id', $book->id)
-                    ->where('status', 'available')
-                    ->lockForUpdate()
-                    ->first();
-            }
-
-            if (!$bookCopy) {
-                abort(422, 'Eksemplar buku tidak tersedia.');
-            }
-
-            // Cek ketersediaan jika peminjaman baru (bukan dari reservasi)
-            if (!$reservation && $book->available_stock < 1) {
+            if (!$bookCopy || $book->available_stock < 1) {
                 abort(422, 'Buku sedang tidak tersedia.');
             }
 
@@ -214,7 +193,7 @@ class CirculationController extends Controller
              * Buat transaksi peminjaman.
              */
             $createdBorrowing = Borrowing::create([
-                'user_id'        => $reservation?->user_id ?? $member->user_id,
+                'user_id' => $member->user_id,
                 'member_id'      => $validated['member_id'],
                 'book_id'        => $book->id,
                 'borrowed_at'    => $validated['borrowed_at'],
@@ -237,18 +216,7 @@ class CirculationController extends Controller
              */
             $bookCopy->update(['status' => 'borrowed']);
 
-            /*
-             * Jika peminjaman biasa (bukan dari reservasi), kurangi stok buku.
-             * Jika dari reservasi, stok sudah dikurangi saat reservasi dibuat.
-             */
-            if (!$reservation) {
-                $book->decrement('stok');
-            } else {
-                $reservation->update([
-                    'status'       => 'selesai',
-                    'borrowing_id' => $createdBorrowing->id,
-                ]);
-            }
+            $book->decrement('stok');
 
             /*
              * Sinkronisasi status member.
@@ -266,77 +234,71 @@ class CirculationController extends Controller
     }
 
 
+
     public function returnBook(Borrowing $borrowing)
     {
-        if ($borrowing->status === 'dikembalikan') {
-            return back()->with('error', 'Peminjaman ini sudah dikembalikan.');
-        }
-
         DB::transaction(function () use ($borrowing) {
 
-            $borrowing->load('details');
+            // Ambil ulang transaksi dan kunci agar tidak diproses bersamaan.
+            $lockedBorrowing = Borrowing::whereKey($borrowing->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-            foreach ($borrowing->details as $detail) {
-
-                if ($detail->book_copy_id) {
-
-                    $bookCopy = BookCopy::lockForUpdate()
-                        ->find($detail->book_copy_id);
-
-                    if ($bookCopy) {
-
-                        $newStatus = $bookCopy->condition === 'rusak'
-                            ? 'maintenance'
-                            : 'available';
-
-                        $bookCopy->update([
-                            'status' => $newStatus,
-                        ]);
-
-                        if ($newStatus === 'available') {
-                            $book = Book::lockForUpdate()
-                                ->findOrFail($detail->book_id);
-
-                            $book->increment('stok', $detail->quantity);
-                        }
-                    }
-                } else {
-
-                    $book = Book::lockForUpdate()
-                        ->findOrFail($detail->book_id);
-
-                    $book->increment('stok', $detail->quantity);
-                }
+            if ($lockedBorrowing->status === 'dikembalikan') {
+                abort(422, 'Peminjaman ini sudah dikembalikan.');
             }
 
-            /*
-             * Update status peminjaman.
-             */
-            $borrowing->update([
-                'returned_at' => now()->toDateString(),
-                'status'      => 'dikembalikan',
-            ]);
+            if (in_array($lockedBorrowing->status, ['dibatalkan', 'ditolak'], true)) {
+                abort(422, 'Transaksi ini sudah dibatalkan atau tidak aktif.');
+            }
 
-            /*
-             * Update status reservasi terkait menjadi selesai jika ada.
-             */
-            $reservation = Reservation::where('borrowing_id', $borrowing->id)
-                ->whereNotIn('status', ['ditolak', 'dibatalkan'])
+            // Ambil satu detail sesuai relasi HasOne.
+            $detail = $lockedBorrowing->detail()
+                ->lockForUpdate()
                 ->first();
 
-            if ($reservation) {
-                $reservation->update([
-                    'status' => 'selesai',
-                ]);
+            if (!$detail || !$detail->book_copy_id) {
+                abort(422, 'Detail atau eksemplar fisik peminjaman tidak ditemukan.');
             }
 
-            /*
-             * Sinkronisasi status member.
-             */
+            // Kunci eksemplar fisik yang benar-benar dipinjam.
+            $bookCopy = BookCopy::whereKey($detail->book_copy_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$bookCopy || $bookCopy->status !== 'borrowed') {
+                abort(422, 'Status eksemplar tidak sesuai dengan transaksi peminjaman.');
+            }
+
+            // Tentukan status berdasarkan kondisi fisik buku.
+            $bookCopy->update([
+                'status' => 'available',
+            ]);
+
+            $bookCopy->syncStatus();
+
+            // Stok hanya bertambah jika eksemplar benar-benar tersedia.
+            if ($bookCopy->status === 'available') {
+                $book = Book::whereKey($detail->book_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $book->increment('stok', $detail->quantity ?? 1);
+            }
+
+            // Tandai peminjaman sudah dikembalikan.
+            $lockedBorrowing->update([
+                'returned_at' => now()->toDateString(),
+                'status' => 'dikembalikan',
+            ]);
+
+            // Sinkronisasi status anggota.
             app(MemberStatusService::class)->sync(
-                Member::findOrFail($borrowing->member_id)
+                Member::findOrFail($lockedBorrowing->member_id)
             );
         });
+
+        $borrowing->refresh();
 
         NotificationService::borrowingReturned($borrowing);
 
@@ -345,17 +307,30 @@ class CirculationController extends Controller
             ->with('success', 'Buku berhasil dikembalikan.');
     }
 
+
     public function extend(Request $request, Borrowing $borrowing)
     {
+
         /*
-     * Peminjaman yang sudah dikembalikan tidak dapat diperpanjang.
-     */
-        if ($borrowing->status === 'dikembalikan') {
+ * Hanya peminjaman aktif yang dapat diperpanjang.
+ */
+        if (!in_array($borrowing->status, ['dipinjam', 'diperpanjang'], true)) {
             return back()->with(
                 'error',
-                'Peminjaman sudah selesai dan tidak dapat diperpanjang.'
+                'Peminjaman sudah tidak aktif dan tidak dapat diperpanjang.'
             );
         }
+
+        /*
+ * Cegah pengajuan perpanjangan ganda.
+ */
+        if ($borrowing->extension_status === 'menunggu') {
+            return back()->with(
+                'error',
+                'Permintaan perpanjangan masih menunggu persetujuan Admin.'
+            );
+        }
+
 
         /*
      * Validasi jumlah hari perpanjangan.
@@ -450,6 +425,13 @@ class CirculationController extends Controller
      */
     public function approveExtension(Borrowing $borrowing)
     {
+        if (!in_array($borrowing->status, ['dipinjam', 'diperpanjang'], true)) {
+            return back()->with(
+                'error',
+                'Peminjaman sudah tidak aktif. Perpanjangan tidak dapat disetujui.'
+            );
+        }
+
         if ($borrowing->extension_status !== 'menunggu') {
             return back()->with(
                 'error',
@@ -547,6 +529,13 @@ class CirculationController extends Controller
      */
     public function rejectExtension(Request $request, Borrowing $borrowing)
     {
+        if (!in_array($borrowing->status, ['dipinjam', 'diperpanjang'], true)) {
+            return back()->with(
+                'error',
+                'Peminjaman sudah tidak aktif. Permintaan perpanjangan tidak dapat diproses.'
+            );
+        }
+
         if ($borrowing->extension_status !== 'menunggu') {
             return back()->with('error', 'Tidak ada permintaan perpanjangan yang menunggu.');
         }

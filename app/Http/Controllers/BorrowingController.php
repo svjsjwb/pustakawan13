@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BookCopy;
 use App\Models\Book;
 use App\Models\Member;
 use App\Models\Borrowing;
@@ -129,7 +130,8 @@ class BorrowingController extends Controller
 
         $query = Borrowing::with([
             'member',
-            'details.book'
+            'detail.book',
+            'detail.bookCopy'
         ])->select([
             'id',
             'member_id',
@@ -223,141 +225,82 @@ class BorrowingController extends Controller
     |--------------------------------------------------------------------------
     */
 
+
     public function store(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI
-        |--------------------------------------------------------------------------
-        */
-
         $validated = $request->validate([
             'member_id' => [
                 'required',
-                'exists:members,id'
+                'exists:members,id',
             ],
-
             'book_id' => [
                 'required',
-                'exists:books,id'
+                'exists:books,id',
             ],
-
             'borrowed_at' => [
                 'required',
-                'date'
+                'date',
             ],
-
             'due_at' => [
                 'required',
                 'date',
-                'after_or_equal:borrowed_at'
+                'after_or_equal:borrowed_at',
             ],
-
             'seat_number' => [
                 'required',
                 'string',
-                'regex:/^[ABC][1-8]$/'
+                'regex:/^[ABC][1-8]$/',
             ],
         ]);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK KURSI
-        |--------------------------------------------------------------------------
-        */
-
-        $seatAlreadyUsed = Borrowing::whereDate('borrowed_at', $validated['borrowed_at'])
-            ->where('seat_number', $validated['seat_number'])
-            ->where('status', 'dipinjam')
-            ->exists();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK KURSI RESERVASI
-        |--------------------------------------------------------------------------
-        */
-
-        $seatReserved = Reservation::whereDate('reserved_at', $validated['borrowed_at'])
-            ->where('seat_number', $validated['seat_number'])
-            ->whereIn('status', ['menunggu', 'disetujui'])
-            ->exists();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | JIKA KURSI TERPAKAI
-        |--------------------------------------------------------------------------
-        */
-
-        if ($seatAlreadyUsed || $seatReserved) {
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    'Kursi ' .
-                        $validated['seat_number'] .
-                        ' sudah digunakan atau dipesan pada tanggal tersebut.'
-                );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | TRANSACTION
-        |--------------------------------------------------------------------------
-        */
-
         DB::transaction(function () use ($validated) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | KUNCI BUKU
-            |--------------------------------------------------------------------------
-            */
+            // Kunci data buku agar stok tidak berubah bersamaan.
+            $book = Book::lockForUpdate()
+                ->findOrFail($validated['book_id']);
 
-            $book = Book::lockForUpdate()->findOrFail($validated['book_id']);
+            // Kunci satu eksemplar fisik yang tersedia.
+            $bookCopy = BookCopy::where('book_id', $book->id)
+                ->where('status', 'available')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->first();
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | CEK STOK
-            |--------------------------------------------------------------------------
-            */
-
-            if ($book->available_stock < 1) {
+            if (!$bookCopy || $book->available_stock < 1) {
                 abort(422, 'Buku sedang tidak tersedia.');
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | CEK KURSI LAGI (dalam transaction)
-            |--------------------------------------------------------------------------
-            */
-
-            $seatAlreadyUsed = Borrowing::whereDate('borrowed_at', $validated['borrowed_at'])
+            // Periksa kursi yang sudah digunakan.
+            $seatAlreadyUsed = Borrowing::whereDate(
+                'borrowed_at',
+                $validated['borrowed_at']
+            )
                 ->where('seat_number', $validated['seat_number'])
                 ->where('status', 'dipinjam')
                 ->exists();
 
-            $seatReserved = Reservation::whereDate('reserved_at', $validated['borrowed_at'])
+            $seatReserved = Reservation::whereDate(
+                'reserved_at',
+                $validated['borrowed_at']
+            )
                 ->where('seat_number', $validated['seat_number'])
                 ->whereIn('status', ['menunggu', 'disetujui'])
                 ->exists();
 
             if ($seatAlreadyUsed || $seatReserved) {
-                abort(422, 'Kursi ' . $validated['seat_number'] . ' baru saja digunakan atau dipesan.');
+                abort(
+                    422,
+                    'Kursi ' . $validated['seat_number'] .
+                        ' sudah digunakan atau dipesan pada tanggal tersebut.'
+                );
             }
 
+            // Tandai eksemplar sebagai sedang dipinjam.
+            $bookCopy->update([
+                'status' => 'borrowed',
+            ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | BUAT PEMINJAMAN
-            |--------------------------------------------------------------------------
-            */
-
+            // Buat transaksi peminjaman.
             $borrowing = Borrowing::create([
                 'member_id'   => $validated['member_id'],
                 'borrowed_at' => $validated['borrowed_at'],
@@ -366,34 +309,17 @@ class BorrowingController extends Controller
                 'status'      => 'dipinjam',
             ]);
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | DETAIL BUKU
-            |--------------------------------------------------------------------------
-            */
-
-            $borrowing->details()->create([
-                'book_id'  => $validated['book_id'],
-                'quantity' => 1,
+            // Hubungkan transaksi dengan satu eksemplar fisik.
+            $borrowing->detail()->create([
+                'book_id'      => $book->id,
+                'book_copy_id' => $bookCopy->id,
+                'quantity'     => 1,
             ]);
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | KURANGI STOK
-            |--------------------------------------------------------------------------
-            */
-
+            // Kurangi stok buku.
             $book->decrement('stok');
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | MEMBER MENJADI AKTIF
-            |--------------------------------------------------------------------------
-            */
-
+            // Sinkronisasi status member.
             $this->syncMemberStatus(
                 Member::findOrFail($validated['member_id'])
             );
@@ -411,53 +337,61 @@ class BorrowingController extends Controller
     |--------------------------------------------------------------------------
     */
 
+
     public function returnBook(Borrowing $borrowing)
     {
         DB::transaction(function () use ($borrowing) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | JANGAN PROSES ULANG
-            |--------------------------------------------------------------------------
-            */
+            // Ambil ulang dan kunci transaksi peminjaman.
+            $borrowing = Borrowing::lockForUpdate()
+                ->findOrFail($borrowing->id);
 
             if ($borrowing->status === 'dikembalikan') {
                 abort(422, 'Buku sudah dikembalikan.');
             }
 
+            // Ambil detail peminjaman beserta eksemplar fisiknya.
+            $detail = $borrowing->detail()
+                ->lockForUpdate()
+                ->first();
 
-            /*
-            |--------------------------------------------------------------------------
-            | KEMBALIKAN STOK
-            |--------------------------------------------------------------------------
-            */
-
-            $details = $borrowing->details;
-
-            foreach ($details as $detail) {
-                $book = Book::lockForUpdate()->findOrFail($detail->book_id);
-                $book->increment('stok', $detail->quantity ?? 1);
+            if (!$detail) {
+                abort(422, 'Detail peminjaman tidak ditemukan.');
             }
 
+            if (!$detail->book_copy_id) {
+                abort(422, 'Eksemplar fisik buku tidak terhubung.');
+            }
 
-            /*
-            |--------------------------------------------------------------------------
-            | UPDATE PEMINJAMAN
-            |--------------------------------------------------------------------------
-            */
+            // Kunci eksemplar fisik.
+            $bookCopy = BookCopy::lockForUpdate()
+                ->findOrFail($detail->book_copy_id);
 
+            if ($bookCopy->status !== 'borrowed') {
+                abort(422, 'Status eksemplar tidak sesuai dengan transaksi peminjaman.');
+            }
+
+            // Kembalikan status eksemplar sesuai kondisinya.
+            $bookCopy->update([
+                'status' => 'available',
+            ]);
+
+            // Sinkronkan status berdasarkan kondisi fisik buku.
+            $bookCopy->syncStatus();
+
+            // Tambahkan stok kembali.
+            $book = Book::lockForUpdate()
+                ->findOrFail($detail->book_id);
+
+            $book->increment('stok', $detail->quantity ?? 1);
+
+            // Tandai transaksi sudah dikembalikan.
             $borrowing->update([
                 'status'      => 'dikembalikan',
                 'returned_at' => now()->toDateString(),
             ]);
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | SINKRONISASI MEMBER
-            |--------------------------------------------------------------------------
-            */
-
+            // Sinkronisasi status member.
             $this->syncMemberStatus(
                 Member::findOrFail($borrowing->member_id)
             );
@@ -469,46 +403,80 @@ class BorrowingController extends Controller
     }
 
 
+
     /*
     |--------------------------------------------------------------------------
     | HAPUS PEMINJAMAN
     |--------------------------------------------------------------------------
     */
 
+
     public function destroy(Borrowing $borrowing)
     {
         DB::transaction(function () use ($borrowing) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | KEMBALIKAN STOK JIKA MASIH DIPINJAM
-            |--------------------------------------------------------------------------
-            */
+            // Kunci transaksi peminjaman.
+            $borrowing = Borrowing::lockForUpdate()
+                ->findOrFail($borrowing->id);
 
+            // Cegah penghapusan peminjaman yang terhubung reservasi.
+            $hasReservation = Reservation::where(
+                'borrowing_id',
+                $borrowing->id
+            )->lockForUpdate()->exists();
+
+            if ($hasReservation) {
+                abort(
+                    422,
+                    'Peminjaman yang berasal dari reservasi tidak dapat dihapus.'
+                );
+            }
+
+            // Ambil satu detail peminjaman.
+            $detail = $borrowing->detail()
+                ->lockForUpdate()
+                ->first();
+
+            if (!$detail) {
+                abort(422, 'Detail peminjaman tidak ditemukan.');
+            }
+
+            // Jika masih dipinjam, pulihkan eksemplar dan stok.
             if ($borrowing->status === 'dipinjam') {
-                foreach ($borrowing->details as $detail) {
-                    $book = Book::lockForUpdate()->findOrFail($detail->book_id);
-                    $book->increment('stok', $detail->quantity ?? 1);
+
+                if (!$detail->book_copy_id) {
+                    abort(422, 'Eksemplar fisik buku tidak terhubung.');
                 }
+
+                $bookCopy = BookCopy::lockForUpdate()
+                    ->findOrFail($detail->book_copy_id);
+
+                if ($bookCopy->status !== 'borrowed') {
+                    abort(
+                        422,
+                        'Status eksemplar tidak sesuai dengan transaksi peminjaman.'
+                    );
+                }
+
+                $bookCopy->update([
+                    'status' => 'available',
+                ]);
+
+                $bookCopy->syncStatus();
+
+                $book = Book::lockForUpdate()
+                    ->findOrFail($detail->book_id);
+
+                $book->increment('stok', $detail->quantity ?? 1);
             }
 
             $memberId = $borrowing->member_id;
 
-            /*
-            |--------------------------------------------------------------------------
-            | HAPUS DETAIL & PEMINJAMAN
-            |--------------------------------------------------------------------------
-            */
-
-            $borrowing->details()->delete();
+            // Hapus detail dan transaksi.
+            $detail->delete();
             $borrowing->delete();
 
-            /*
-            |--------------------------------------------------------------------------
-            | SINKRONISASI MEMBER
-            |--------------------------------------------------------------------------
-            */
-
+            // Sinkronisasi status member.
             $this->syncMemberStatus(
                 Member::findOrFail($memberId)
             );

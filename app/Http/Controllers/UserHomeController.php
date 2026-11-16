@@ -43,13 +43,13 @@ class UserHomeController extends Controller
             // Kumpulkan permohonan terakhir (Peminjaman, Reservasi, atau Usulan Buku)
             $requests = collect();
 
-            $lastBorrow = Borrowing::with('details.book')
+            $lastBorrow = Borrowing::with('detail.book')
                 ->where('member_id', $member->id)
                 ->latest()
                 ->first();
 
             if ($lastBorrow) {
-                $bookTitle = $lastBorrow->details->first()?->book?->title ?? 'Buku';
+                $bookTitle = $lastBorrow->detail?->book?->title ?? 'Buku';
 
                 $requests->push([
                     'type'       => $lastBorrow->extension_status === 'menunggu'

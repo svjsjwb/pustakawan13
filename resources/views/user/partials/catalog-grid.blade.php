@@ -33,7 +33,7 @@
                  data-subcategory-id="{{ $book->subcategory_id }}"
                  data-title="{{ $book->title }}"
                  data-author="{{ $book->author ?? '-' }}"
-                 data-category="{{ $badgeText }}"
+                 data-category="{{ $catName  }}"
                  data-main-category="{{ $catName }}"
                  data-sub-category="{{ $subCatName ?? '' }}"
                  data-education-level="{{ $book->education_level ?? '' }}"
@@ -66,7 +66,7 @@
 
                     {{-- Category Badge --}}
                     <div class="saas-card-badges">
-                        <span class="saas-card-badge" title="{{ $categoryLabel }}">
+                        <span class="saas-card-badge">
                             <span class="saas-card-badge-track">
                                 <span class="saas-card-badge-copy">
                                     <span class="saas-card-badge-copy-text">{{ $categoryLabel }}</span>

@@ -42,7 +42,7 @@ class UserHistoryController extends Controller
             $stats['total_reservations'] = Reservation::where('member_id', $member->id)->count();
 
             // -- Ambil semua Borrowing user (semua status) --
-            $borrowingQuery = Borrowing::with(['details.book.category'])
+            $borrowingQuery = Borrowing::with(['detail.book.category'])
                 ->where('member_id', $member->id);
 
             if ($month) {
@@ -52,28 +52,43 @@ class UserHistoryController extends Controller
                 $borrowingQuery->whereYear('created_at', $year);
             }
             if ($search !== '') {
-                $borrowingQuery->whereHas('details.book', fn($q) =>
+                $borrowingQuery->whereHas(
+                    'detail.book',
+                    fn($q) =>
                     $q->where('judul_buku', 'ilike', "{$search}%")
-                      ->orWhere('penulis', 'ilike', "{$search}%")
+                        ->orWhere('penulis', 'ilike', "{$search}%")
                 );
             }
 
+
             $borrowings = $borrowingQuery->get()->map(function ($b) {
-                $detail = $b->details->first();
+                $detail = $b->detail;
                 $book   = $detail?->book;
 
                 $statusRaw = strtolower($b->status ?? '');
-                $isReturned = !empty($b->returned_at) || $statusRaw === 'dikembalikan' || $statusRaw === 'selesai';
-                $isOverdue  = !$isReturned && (($b->due_at && now()->gt($b->due_at)) || $statusRaw === 'terlambat');
 
-                if ($isReturned) {
+                $isReturned = !empty($b->returned_at)
+                    || in_array($statusRaw, ['dikembalikan', 'selesai'], true);
+
+                $isCancelled = $statusRaw === 'dibatalkan';
+
+                $isOverdue = !$isReturned
+                    && !$isCancelled
+                    && (
+                        ($b->due_at && now()->gt($b->due_at))
+                        || $statusRaw === 'terlambat'
+                    );
+
+                if ($isCancelled) {
+                    $statusLabel = 'Dibatalkan';
+                    $badgeClass  = 'status-ditolak';
+                } elseif ($isReturned) {
                     $statusLabel = 'Selesai';
                     $badgeClass  = 'status-selesai';
                 } elseif ($isOverdue) {
                     $statusLabel = 'Terlambat';
                     $badgeClass  = 'status-terlambat';
                 } else {
-                    // Peminjaman otomatis diproses saat user meminjam, tidak boleh 'menunggu'
                     $statusLabel = 'Dipinjam';
                     $badgeClass  = 'status-dipinjam';
                 }
@@ -84,16 +99,21 @@ class UserHistoryController extends Controller
                     'book'         => $book,
                     'date'         => $b->created_at,
                     'date_label'   => $b->borrowed_at
-                                    ? \Carbon\Carbon::parse($b->borrowed_at)->format('d M Y')
-                                    : $b->created_at->format('d M Y'),
-                    'extra'        => $b->returned_at
-                                    ? 'Dikembalikan ' . \Carbon\Carbon::parse($b->returned_at)->format('d M Y')
-                                    : ($b->due_at ? 'Batas: ' . \Carbon\Carbon::parse($b->due_at)->format('d M Y') : '-'),
+                        ? \Carbon\Carbon::parse($b->borrowed_at)->format('d M Y')
+                        : $b->created_at->format('d M Y'),
+                    'extra'        => $isCancelled
+                        ? 'Peminjaman dibatalkan'
+                        : ($b->returned_at
+                            ? 'Dikembalikan ' . \Carbon\Carbon::parse($b->returned_at)->format('d M Y')
+                            : ($b->due_at
+                                ? 'Batas: ' . \Carbon\Carbon::parse($b->due_at)->format('d M Y')
+                                : '-')),
                     'status_raw'   => $b->status,
                     'status_label' => $statusLabel,
                     'badge_class'  => $badgeClass,
                 ];
             });
+
 
             // -- Ambil semua Reservasi user (semua status) --
             $reservationQuery = Reservation::with('book.category')
@@ -106,15 +126,17 @@ class UserHistoryController extends Controller
                 $reservationQuery->whereYear('created_at', $year);
             }
             if ($search !== '') {
-                $reservationQuery->whereHas('book', fn($q) =>
+                $reservationQuery->whereHas(
+                    'book',
+                    fn($q) =>
                     $q->where('judul_buku', 'ilike', "{$search}%")
-                      ->orWhere('penulis', 'ilike', "{$search}%")
+                        ->orWhere('penulis', 'ilike', "{$search}%")
                 );
             }
 
             $reservations = $reservationQuery->get()->map(function ($r) {
                 $statusRaw = strtolower($r->status ?? '');
-                $statusLabel = match($statusRaw) {
+                $statusLabel = match ($statusRaw) {
                     'menunggu'                  => 'Menunggu Persetujuan',
                     'disetujui', 'siap_diambil' => 'Disetujui',
                     'ditolak'                   => 'Ditolak',
@@ -122,7 +144,7 @@ class UserHistoryController extends Controller
                     'selesai'                   => 'Selesai',
                     default                     => ucfirst($r->status),
                 };
-                $badgeClass = match($statusRaw) {
+                $badgeClass = match ($statusRaw) {
                     'menunggu'                  => 'status-menunggu',   // oranye/kuning
                     'disetujui', 'siap_diambil' => 'status-disetujui',  // hijau
                     'ditolak', 'dibatalkan'     => 'status-ditolak',    // merah
@@ -136,8 +158,8 @@ class UserHistoryController extends Controller
                     'date'         => $r->created_at,
                     'date_label'   => $r->created_at?->format('d M Y') ?? '-',
                     'extra'        => $r->expires_at
-                                        ? 'Berlaku s/d: ' . \Carbon\Carbon::parse($r->expires_at)->format('d M Y')
-                                        : '-',
+                        ? 'Berlaku s/d: ' . \Carbon\Carbon::parse($r->expires_at)->format('d M Y')
+                        : '-',
                     'status_raw'   => $r->status,
                     'status_label' => $statusLabel,
                     'badge_class'  => $badgeClass,

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Borrowing extends Model
@@ -46,9 +45,9 @@ class Borrowing extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function details(): HasMany
+    public function detail(): HasOne
     {
-        return $this->hasMany(BorrowingDetail::class);
+        return $this->hasOne(BorrowingDetail::class);
     }
 
     public function reservation(): HasOne

@@ -19,7 +19,7 @@ class SendBorrowingDueReminders extends Command
     {
         $sent = 0;
 
-        Borrowing::with(['user', 'member', 'details.book'])
+        Borrowing::with(['user', 'member', 'detail.book'])
             ->whereDate('due_at', now()->addDay()->toDateString())
             ->whereIn('status', ['dipinjam', 'diperpanjang'])
             ->where('is_reminder_sent', false)
@@ -33,7 +33,7 @@ class SendBorrowingDueReminders extends Command
 
                 $user = $borrowing->user ?: User::where('email', $email)->first();
 
-                $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+                $bookTitle = $borrowing->detail?->book?->title ?? 'Buku';
 
                 $dueDate = $borrowing->due_at
                     ? $borrowing->due_at->format('d M Y')

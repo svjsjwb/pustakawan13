@@ -32,7 +32,7 @@ class UserBorrowingController extends Controller
                 ->count();
 
             $completedBorrowings = Borrowing::with([
-                'details.book.category'
+                'detail.book.category'
             ])
                 ->where('member_id', $member->id)
                 ->where('status', 'dikembalikan')
@@ -41,7 +41,7 @@ class UserBorrowingController extends Controller
                 ->get();
 
             $rawBorrowings = Borrowing::with([
-                'details.book.category'
+                'detail.book.category'
             ])
                 ->where('member_id', $member->id)
                 ->whereIn('status', [
@@ -53,14 +53,19 @@ class UserBorrowingController extends Controller
                 ->get();
 
             // Kumpulkan seluruh book_id aktif untuk mengecek antrean reservasi dalam 1 query (eliminasi N+1)
-            $allActiveBookIds = $rawBorrowings->flatMap(fn($b) => $b->details->pluck('book_id'))->unique()->filter()->values()->all();
+            $allActiveBookIds = $rawBorrowings
+                ->map(fn($b) => $b->detail?->book_id)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
 
             $reservedBookIds = !empty($allActiveBookIds)
                 ? Reservation::whereIn('book_id', $allActiveBookIds)
-                    ->where('member_id', '!=', $member->id)
-                    ->whereIn('status', ['menunggu', 'disetujui'])
-                    ->pluck('book_id')
-                    ->flip()
+                ->where('member_id', '!=', $member->id)
+                ->whereIn('status', ['menunggu', 'disetujui'])
+                ->pluck('book_id')
+                ->flip()
                 : collect();
 
             $borrowings = $rawBorrowings->map(function (Borrowing $borrowing) use ($reservedBookIds) {
@@ -68,7 +73,9 @@ class UserBorrowingController extends Controller
                     ? (int) now()->diffInDays($borrowing->due_at, false)
                     : null;
 
-                $bookIds = $borrowing->details->pluck('book_id');
+                $bookIds = collect([
+                    $borrowing->detail?->book_id
+                ])->filter();
                 $borrowing->has_reservation_queue = $bookIds->contains(fn($id) => $reservedBookIds->has($id));
 
                 return $borrowing;
@@ -182,7 +189,7 @@ class UserBorrowingController extends Controller
                         'terlambat'
                     ])
                     ->whereHas(
-                        'details',
+                        'detail',
                         fn($query) => $query->where(
                             'book_id',
                             $book->id
@@ -347,10 +354,10 @@ class UserBorrowingController extends Controller
                 ?? "Perpanjangan peminjaman {$extensionDays} hari",
         ]);
 
-        $borrowing->load('details.book');
+        $borrowing->load('detail.book');
 
         $bookTitle =
-            $borrowing->details->first()?->book?->title
+            $borrowing->detail?->book?->title
             ?? 'Buku';
 
         // Notifikasi ke Admin
@@ -397,9 +404,9 @@ class UserBorrowingController extends Controller
             ], 422);
         }
 
-        $bookIds = $borrowing
-            ->details()
-            ->pluck('book_id');
+        $bookIds = collect([
+            $borrowing->detail?->book_id
+        ])->filter();
 
         $hasQueue = Reservation::whereIn(
             'book_id',
@@ -465,10 +472,10 @@ class UserBorrowingController extends Controller
             "Perpanjangan mandiri oleh pengguna (+{$extensionDays} hari)",
         ]);
 
-        $borrowing->load('details.book');
+        $borrowing->load('detail.book');
 
         $bookTitle =
-            $borrowing->details->first()?->book?->title
+            $borrowing->detail?->book?->title
             ?? 'Buku';
 
         $user = Auth::user();

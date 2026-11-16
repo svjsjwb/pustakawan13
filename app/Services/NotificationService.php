@@ -181,13 +181,13 @@ class NotificationService
      */
     public static function borrowingSubmitted(Borrowing $borrowing, ?User $user = null): void
     {
-        $borrowing->loadMissing(['details.book', 'member']);
+        $borrowing->loadMissing(['detail.book', 'member']);
         $user = self::resolveUser($borrowing, $user);
         if (!$user) {
             return;
         }
 
-        $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+        $bookTitle = $borrowing->detail?->book?->title ?? 'Buku';
 
         // 1. In-app notification
         AppNotification::notifyUser(
@@ -223,10 +223,10 @@ class NotificationService
      */
     public static function borrowingReturned(Borrowing $borrowing, ?User $user = null): void
     {
-        $borrowing->loadMissing(['details.book', 'member']);
+        $borrowing->loadMissing(['detail.book', 'member']);
         $user = self::resolveUser($borrowing, $user);
 
-        $bookTitle = $borrowing->details->first()?->book?->title ?? $borrowing->book?->title ?? 'Buku Perpustakaan';
+        $bookTitle = $borrowing->detail?->book?->title ?? 'Buku Perpustakaan';
         $userName  = $user?->name ?? $borrowing->member?->name ?? 'Pengguna';
 
         // 1. In-app & Email ke User jika ada
@@ -274,13 +274,13 @@ class NotificationService
      */
     public static function borrowingApproved(Borrowing $borrowing, ?User $user = null): void
     {
-        $borrowing->loadMissing(['details.book', 'member']);
+        $borrowing->loadMissing(['detail.book', 'member']);
         $user = self::resolveUser($borrowing, $user);
         if (!$user) {
             return;
         }
 
-        $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+        $bookTitle = $borrowing->detail?->book?->title ?? 'Buku';
         $dueAt = $borrowing->due_at ? $borrowing->due_at->format('d M Y') : '-';
 
         // 1. In-app notification
@@ -303,13 +303,13 @@ class NotificationService
      */
     public static function borrowingRejected(Borrowing $borrowing, ?User $user = null, string $reason = 'Ditolak oleh Admin'): void
     {
-        $borrowing->loadMissing(['details.book', 'member']);
+        $borrowing->loadMissing(['detail.book', 'member']);
         $user = self::resolveUser($borrowing, $user);
         if (!$user) {
             return;
         }
 
-        $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+        $bookTitle = $borrowing->detail?->book?->title ?? 'Buku';
 
         // 1. In-app notification
         AppNotification::notifyUser(
@@ -430,13 +430,13 @@ class NotificationService
      */
     public static function extensionApproved(Borrowing $borrowing, ?User $user = null): void
     {
-        $borrowing->loadMissing(['details.book', 'member']);
+        $borrowing->loadMissing(['detail.book', 'member']);
         $user = self::resolveUser($borrowing, $user);
         if (!$user) {
             return;
         }
 
-        $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+        $bookTitle = $borrowing->detail?->book?->title ?? 'Buku';
         $dueAt = $borrowing->due_at ? $borrowing->due_at->format('d M Y') : '-';
 
         // 1. In-app notification
@@ -459,13 +459,13 @@ class NotificationService
      */
     public static function extensionRejected(Borrowing $borrowing, ?User $user = null, string $notes = 'Ditolak oleh Admin'): void
     {
-        $borrowing->loadMissing(['details.book', 'member']);
+        $borrowing->loadMissing(['detail.book', 'member']);
         $user = self::resolveUser($borrowing, $user);
         if (!$user) {
             return;
         }
 
-        $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+        $bookTitle = $borrowing->detail?->book?->title ?? 'Buku';
 
         // 1. In-app notification
         AppNotification::notifyUser(
@@ -487,13 +487,13 @@ class NotificationService
      */
     public static function extensionSelfApproved(Borrowing $borrowing, ?User $user = null): void
     {
-        $borrowing->loadMissing(['details.book', 'member']);
+        $borrowing->loadMissing(['detail.book', 'member']);
         $user = self::resolveUser($borrowing, $user);
         if (!$user) {
             return;
         }
 
-        $bookTitle = $borrowing->details->first()?->book?->title ?? 'Buku';
+        $bookTitle = $borrowing->detail?->book?->title ?? 'Buku';
         $dueAt = $borrowing->due_at ? $borrowing->due_at->format('d M Y') : '-';
 
         // 1. In-app notification
@@ -518,4 +518,3 @@ class NotificationService
      */
 
 }
-

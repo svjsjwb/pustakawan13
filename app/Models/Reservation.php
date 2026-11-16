@@ -18,6 +18,7 @@ class Reservation extends Model
         'status',
         'rejection_reason',
         'cancellation_requested_at',
+        'cancellation_request_used_at',
         'seat_number',
     ];
 
@@ -25,6 +26,7 @@ class Reservation extends Model
         'reserved_at' => 'date',
         'expires_at' => 'date',
         'cancellation_requested_at' => 'datetime',
+        'cancellation_request_used_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -59,12 +61,13 @@ class Reservation extends Model
         }
 
         return match ($this->status) {
-            'menunggu'   => 'Menunggu Persetujuan',
-            'disetujui'  => 'Disetujui',
-            'ditolak'    => 'Ditolak',
-            'dibatalkan' => 'Dibatalkan',
-            'selesai'    => 'Selesai',
-            default      => ucfirst($this->status),
+            'menunggu'      => 'Menunggu Persetujuan',
+            'disetujui'     => 'Disetujui',
+            'siap_diambil'  => 'Siap Diambil',
+            'ditolak'       => 'Ditolak',
+            'dibatalkan'    => 'Dibatalkan',
+            'selesai'       => 'Selesai',
+            default         => ucfirst($this->status),
         };
     }
 }

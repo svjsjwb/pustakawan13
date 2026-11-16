@@ -451,18 +451,6 @@ class EmailNotificationSystemTest extends TestCase
 
         NotificationService::userRegistered($newUser);
 
-        dump(
-            Queue::pushed(SendNotificationEmailJob::class)->map(function ($job) {
-                return [
-                    'email' => $job->email,
-                    'mailable' => get_class($job->mailable),
-                    'mailable_email' => property_exists($job->mailable, 'user')
-                        ? ($job->mailable->user?->email ?? null)
-                        : null,
-                ];
-            })->all()
-        );
-
         Queue::assertPushed(
             SendNotificationEmailJob::class,
             function ($job) use ($uniqueEmail) {
@@ -535,14 +523,26 @@ class EmailNotificationSystemTest extends TestCase
         $pendingMembersCount = Member::whereHas('user', function ($query) {
             $query->where('role', 'guest');
         })->count();
-        $pendingBorrowingsCount = AppNotification::where('role', 'admin')
+        $activeBorrowingIds = Borrowing::query()
+            ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
+            ->whereNull('returned_at')
+            ->pluck('id')
+            ->map(fn($id) => (string) $id)
+            ->all();
+
+        $pendingBorrowingsCount = empty($activeBorrowingIds)
+            ? 0
+            : AppNotification::where('role', 'admin')
             ->where('type', 'borrowing_new')
             ->where('is_read', false)
-            ->whereIn('data->borrowing_id', Borrowing::query()
-                ->whereIn('status', ['dipinjam', 'diperpanjang', 'terlambat'])
-                ->whereNull('returned_at')
-                ->select('id'))
+            ->whereRaw(
+                "(data->>'borrowing_id')::bigint IN (" .
+                    implode(',', array_fill(0, count($activeBorrowingIds), '?')) .
+                    ')',
+                $activeBorrowingIds
+            )
             ->count();
+
         $pendingReservationsCount = Reservation::where('status', 'menunggu')->count();
 
         $feed->assertOk()

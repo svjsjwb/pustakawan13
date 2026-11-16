@@ -82,11 +82,12 @@
 
                     {{-- Bottom Footer --}}
                     @php
-    $notificationsReturnPath = request()->routeIs('user.notifications')
-        ? request()->query('from')
-        : request()->getRequestUri();
-@endphp
-<a href="{{ route('user.notifications', ['from' => $notificationsReturnPath]) }}" class="eg-notif-footer" id="egNotifFooterLink">
+                        $notificationsReturnPath = request()->routeIs('user.notifications')
+                            ? request()->query('from')
+                            : request()->getRequestUri();
+                    @endphp
+                    <a href="{{ route('user.notifications', ['from' => $notificationsReturnPath]) }}"
+                        class="eg-notif-footer" id="egNotifFooterLink">
                         <span>Lihat Semua Notifikasi &rarr;</span>
                     </a>
                 </div>
@@ -102,7 +103,7 @@
                     <div class="eg-user-meta">
                         <span class="name">{{ Str::limit(Auth::user()->name ?? 'Pengguna', 15) }}</span>
                         <span class="role">
-                            {{ Auth::user()->role === 'guest' ? 'Menunggu Persetujuan' : 'Anggota' }}
+                            {{ Auth::user()?->role === 'guest' ? 'Menunggu Persetujuan' : (Auth::check() ? 'Anggota' : 'Pengunjung') }}
                         </span>
                     </div>
                     <svg class="eg-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -128,8 +129,7 @@
                     <ul class="eg-drop-menu-list">
                         {{-- 1. My Profile --}}
                         <li>
-                            <a href="{{ route('user.profile') }}"
-                                class="eg-drop-menu-item">
+                            <a href="{{ route('user.profile') }}" class="eg-drop-menu-item">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -146,8 +146,7 @@
 
                         {{-- 2. Favorit Saya --}}
                         <li>
-                            <a href="{{ route('user.favorites') }}"
-                                class="eg-drop-menu-item">
+                            <a href="{{ route('user.favorites') }}" class="eg-drop-menu-item">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -165,8 +164,7 @@
 
                         {{-- 3. Reservasi Saya --}}
                         <li>
-                            <a href="{{ route('user.reservations') }}"
-                                class="eg-drop-menu-item">
+                            <a href="{{ route('user.reservations') }}" class="eg-drop-menu-item">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -189,8 +187,7 @@
 
                         {{-- 4. Riwayat Aktivitas --}}
                         <li>
-                            <a href="{{ route('user.history') }}"
-                                class="eg-drop-menu-item">
+                            <a href="{{ route('user.history') }}" class="eg-drop-menu-item">
                                 <div class="eg-drop-menu-item-left">
                                     <div class="eg-drop-menu-icon">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"

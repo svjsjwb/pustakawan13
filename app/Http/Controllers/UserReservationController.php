@@ -129,6 +129,7 @@ class UserReservationController extends Controller
     /**
      * Cancel a reservation owned by the authenticated member.
      */
+
     public function cancel($id)
     {
         $member = Auth::user()->member;
@@ -152,19 +153,30 @@ class UserReservationController extends Controller
                 abort(422, 'Reservasi ini tidak dapat dibatalkan.');
             }
 
+            // Jika permintaan masih menunggu keputusan admin.
             if ($reservation->cancellation_requested_at) {
                 return 'pending';
             }
 
+            // Pembatalan reservasi yang sudah disetujui hanya boleh diajukan sekali.
             if (in_array($reservation->status, ['disetujui', 'siap_diambil'], true)) {
-                $reservation->update(['cancellation_requested_at' => now()]);
+                if ($reservation->cancellation_request_used_at) {
+                    return 'already_used';
+                }
+
+                $reservation->update([
+                    'cancellation_requested_at' => now(),
+                    'cancellation_request_used_at' => now(),
+                ]);
 
                 return 'pending_requested';
             }
 
+            // Reservasi berstatus menunggu dapat dibatalkan langsung oleh pengguna.
             if ($reservation->book_copy_id) {
                 $bookCopy = BookCopy::lockForUpdate()->find($reservation->book_copy_id);
-                if ($bookCopy && in_array($bookCopy->status, ['reserved', 'borrowed'], true)) {
+
+                if ($bookCopy && $bookCopy->status === 'reserved') {
                     $bookCopy->update(['status' => 'available']);
                 }
             }
@@ -172,13 +184,16 @@ class UserReservationController extends Controller
             $book = Book::lockForUpdate()->findOrFail($reservation->book_id);
             $book->increment('stok');
 
-            $reservation->update(['status' => 'dibatalkan']);
+            $reservation->update([
+                'status' => 'dibatalkan',
+            ]);
 
             return 'cancelled';
         });
 
         if ($cancellationState === 'pending_requested') {
             $reservation = Reservation::with('book')->findOrFail($id);
+
             AppNotification::notifyAdmin(
                 'reservation_cancellation_request',
                 'Permintaan Pembatalan Reservasi',
@@ -187,11 +202,21 @@ class UserReservationController extends Controller
             );
         }
 
+        if ($cancellationState === 'already_used') {
+            return redirect()
+                ->route('user.reservations.show', $id)
+                ->with('error', 'Anda sudah pernah mengajukan pembatalan untuk reservasi ini. Pengajuan ulang tidak diperbolehkan.');
+        }
+
         return redirect()
             ->route('user.reservations.show', $id)
-            ->with('cancellation_request_pending', in_array($cancellationState, ['pending', 'pending_requested'], true))
+            ->with(
+                'cancellation_request_pending',
+                in_array($cancellationState, ['pending', 'pending_requested'], true)
+            )
             ->with('reservation_cancelled', $cancellationState === 'cancelled');
     }
+
 
     /**
      * User mengajukan reservasi buku dari katalog

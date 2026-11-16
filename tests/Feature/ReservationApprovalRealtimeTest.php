@@ -86,7 +86,7 @@ class ReservationApprovalRealtimeTest extends TestCase
         ]);
 
         $response->assertRedirect(route('user.reservations'));
-        
+
         $this->assertDatabaseHas('reservations', [
             'user_id' => $this->regularUser->id,
             'book_id' => $this->book->id,
@@ -95,7 +95,6 @@ class ReservationApprovalRealtimeTest extends TestCase
 
         // AC-2: Data reservasi TIDAK MASUK ke Tabel Data Pinjam (Borrowing)
         $this->assertEquals(0, Borrowing::count());
-
     }
 
     /**
@@ -104,6 +103,11 @@ class ReservationApprovalRealtimeTest extends TestCase
      */
     public function test_admin_approval_creates_borrowing_with_14_days_due_date(): void
     {
+        // BookCopy yang dialokasikan harus berstatus reserved
+        $this->bookCopy->update([
+            'status' => 'reserved',
+        ]);
+        
         // Buat reservasi berstatus menunggu
         $reservation = Reservation::create([
             'user_id'      => $this->regularUser->id,
@@ -154,6 +158,80 @@ class ReservationApprovalRealtimeTest extends TestCase
         $this->assertEquals('borrowed', $this->bookCopy->status);
 
         Carbon::setTestNow(); // reset time
+    }
+
+    public function test_admin_approval_uses_reserved_book_copy_linked_to_reservation(): void
+    {
+        $this->bookCopy->update([
+            'status' => 'reserved',
+        ]);
+
+        $reservation = Reservation::create([
+            'user_id'      => $this->regularUser->id,
+            'member_id'    => $this->member->id,
+            'book_id'      => $this->book->id,
+            'book_copy_id' => $this->bookCopy->id,
+            'reserved_at'  => now()->toDateString(),
+            'status'       => 'menunggu',
+        ]);
+
+        $this->actingAs($this->adminUser);
+
+        $response = $this->patch(
+            route('reservations.updateStatus', $reservation->id),
+            ['status' => 'disetujui']
+        );
+
+        $response->assertRedirect(route('reservations.index'));
+
+        $this->assertDatabaseHas('borrowing_details', [
+            'borrowing_id' => $reservation->fresh()->borrowing_id,
+            'book_copy_id' => $this->bookCopy->id,
+        ]);
+
+        $this->assertDatabaseHas('book_copies', [
+            'id'     => $this->bookCopy->id,
+            'status' => 'borrowed',
+        ]);
+    }
+
+    public function test_admin_approval_does_not_use_another_book_copy_when_reserved_copy_is_invalid(): void
+    {
+        $this->bookCopy->update([
+            'status' => 'available',
+        ]);
+
+        $reservation = Reservation::create([
+            'user_id'      => $this->regularUser->id,
+            'member_id'    => $this->member->id,
+            'book_id'      => $this->book->id,
+            'book_copy_id' => $this->bookCopy->id,
+            'reserved_at'  => now()->toDateString(),
+            'status'       => 'menunggu',
+        ]);
+
+        $this->actingAs($this->adminUser);
+
+        $response = $this->patch(
+            route('reservations.updateStatus', $reservation->id),
+            ['status' => 'disetujui']
+        );
+
+        $response->assertStatus(422);
+
+        $this->assertDatabaseHas('reservations', [
+            'id'     => $reservation->id,
+            'status' => 'menunggu',
+        ]);
+
+        $this->assertDatabaseMissing('borrowings', [
+            'book_id' => $this->book->id,
+        ]);
+
+        $this->assertDatabaseHas('book_copies', [
+            'id'     => $this->bookCopy->id,
+            'status' => 'available',
+        ]);
     }
 
     /**

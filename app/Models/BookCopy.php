@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BookCopy extends Model
 {
@@ -40,14 +40,14 @@ class BookCopy extends Model
         return $this->belongsTo(Shelf::class);
     }
 
-    public function borrowingDetail(): HasOne
+    public function borrowingDetails(): HasMany
     {
-        return $this->hasOne(BorrowingDetail::class);
+        return $this->hasMany(BorrowingDetail::class);
     }
 
-    public function reservation(): HasOne
+    public function reservations(): HasMany
     {
-        return $this->hasOne(Reservation::class);
+        return $this->hasMany(Reservation::class);
     }
 
     public function syncStatus(): void

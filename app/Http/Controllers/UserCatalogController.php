@@ -160,13 +160,20 @@ class UserCatalogController extends Controller
             $cat = $categories->firstWhere('name', $request->input('main_category'));
             $categoryId = $cat?->id;
         }
+        $invalidSubcategory = false;
+
         if (!$subcategoryId && $request->filled('sub_category')) {
             $subQuery = Subcategory::where('name', $request->input('sub_category'));
+
             if ($categoryId) {
                 $subQuery->where('category_id', $categoryId);
             }
+
             $sub = $subQuery->first();
             $subcategoryId = $sub?->id;
+
+            // Jangan abaikan filter jika nama subkategori tidak ditemukan.
+            $invalidSubcategory = !$sub;
         }
 
         $categoryId = is_numeric($categoryId) ? (int) $categoryId : null;
@@ -185,7 +192,9 @@ class UserCatalogController extends Controller
             $query->where('category_id', $categoryId);
         }
 
-        if ($subcategoryId) {
+        if ($invalidSubcategory) {
+            $query->whereRaw('1 = 0');
+        } elseif ($subcategoryId) {
             $query->where('subcategory_id', $subcategoryId);
         }
 
