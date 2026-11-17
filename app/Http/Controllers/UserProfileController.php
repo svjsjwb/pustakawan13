@@ -204,7 +204,7 @@ class UserProfileController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (is_null($user->password)) {
+        if (empty($user->password)) {
             $request->validate(
                 [
                     'password' => 'required|string|min:8|confirmed',
@@ -222,10 +222,10 @@ class UserProfileController extends Controller
 
             $user->save();
 
-            return back()->with(
-                'success',
-                'Kata sandi berhasil dibuat. Sekarang Anda dapat login menggunakan email dan kata sandi.'
-            );
+            return redirect()->to(route('user.profile') . '#security')->with([
+                'success' => 'Kata sandi berhasil dibuat. Sekarang Anda dapat login secara manual menggunakan email dan kata sandi baru.',
+                'tab'     => 'security',
+            ]);
         }
 
         /*
@@ -250,11 +250,12 @@ class UserProfileController extends Controller
             $request->input('current_password'),
             $user->password
         )) {
-            return back()
+            return redirect()->to(route('user.profile') . '#security')
                 ->withErrors([
                     'current_password' => 'Kata sandi lama tidak sesuai.',
                 ])
-                ->withInput();
+                ->withInput()
+                ->with('tab', 'security');
         }
 
         $user->password = Hash::make(
@@ -263,10 +264,10 @@ class UserProfileController extends Controller
 
         $user->save();
 
-        return back()->with(
-            'success',
-            'Kata sandi berhasil diubah.'
-        );
+        return redirect()->to(route('user.profile') . '#security')->with([
+            'success' => 'Kata sandi berhasil diubah.',
+            'tab'     => 'security',
+        ]);
     }
 
     /**

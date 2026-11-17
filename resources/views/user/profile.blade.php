@@ -293,39 +293,48 @@
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                             </svg>
-                            <span>Keamanan & Perubahan Kata Sandi</span>
+                            <span>{{ empty($user->password) ? 'Buat Kata Sandi Akun' : 'Keamanan & Perubahan Kata Sandi' }}</span>
                         </div>
 
                         <form method="POST" action="{{ route('user.profile.password') }}">
                             @csrf
-                            <div class="uprof-form-row">
-                                <div class="uprof-form-group" style="grid-column: 1 / -1;">
-                                    <label>Password Lama</label>
+                            @if (!empty($user->password))
+                                {{-- USER SUDAH MEMILIKI PASSWORD: Tampilkan input Password Lama --}}
+                                <div class="uprof-form-row">
+                                    <div class="uprof-form-group" style="grid-column: 1 / -1;">
+                                        <label>Password Lama <span style="color: #ef4444;">*</span></label>
+                                        <input type="password" name="current_password" required
+                                            placeholder="Masukkan kata sandi saat ini"
+                                            autocomplete="current-password">
 
-                                    @if (!$user->password)
-                                        <small class="uprof-info">
-                                            Akun Anda menggunakan Login dengan Google. Password lama tidak diperlukan. Silakan langsung buat password baru.
-                                        </small>
-                                    @endif
-
-                                    <input type="password" name="current_password"
-                                        {{ $user->password ? 'required' : '' }} placeholder="Masukkan kata sandi saat ini"
-                                        autocomplete="current-password">
-
-                                    @error('current_password')
-                                        <span class="uprof-error">{{ $message }}</span>
-                                    @enderror
+                                        @error('current_password')
+                                            <span class="uprof-error">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                 </div>
-                            </div>
+                            @else
+                                {{-- USER LOGIN GOOGLE BELUM PERNAH BUAT PASSWORD: Sembunyikan Password Lama & Beri Petunjuk --}}
+                                <div class="uprof-google-banner">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                    <div class="uprof-banner-body">
+                                        <span class="uprof-banner-title">Akun Terhubung dengan Google</span>
+                                        Akun Anda didaftarkan via Google dan belum memiliki kata sandi lokal. <strong>Password lama tidak diperlukan</strong>. Silakan langsung tentukan <strong>Password Baru</strong> di bawah agar dapat login manual menggunakan email dan password.
+                                    </div>
+                                </div>
+                            @endif
 
                             <div class="uprof-form-row">
                                 <div class="uprof-form-group">
-                                    <label>Password Baru</label>
+                                    <label>{{ empty($user->password) ? 'Buat Password Baru' : 'Password Baru' }} <span style="color: #ef4444;">*</span></label>
                                     <input type="password" name="password" required placeholder="Minimal 8 karakter"
                                         autocomplete="new-password" minlength="8">
                                 </div>
                                 <div class="uprof-form-group">
-                                    <label>Konfirmasi Password Baru</label>
+                                    <label>Konfirmasi Password Baru <span style="color: #ef4444;">*</span></label>
                                     <input type="password" name="password_confirmation" required
                                         placeholder="Ketik ulang kata sandi baru" autocomplete="new-password">
                                 </div>
@@ -342,7 +351,7 @@
                                             ry="2" />
                                         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                                     </svg>
-                                    <span>Simpan Password</span>
+                                    <span>{{ empty($user->password) ? 'Buat Password Manual' : 'Simpan Perubahan' }}</span>
                                 </button>
                             </div>
                         </form>
@@ -1068,7 +1077,7 @@
                 // Check URL hash for direct tab navigation
                 if (window.location.hash === '#pref') {
                     switchProfileTab('pref');
-                } else if (window.location.hash === '#security') {
+                } else if (window.location.hash === '#security' || {{ ($errors->has('current_password') || $errors->has('password') || session('tab') === 'security') ? 'true' : 'false' }}) {
                     switchProfileTab('security');
                 }
 

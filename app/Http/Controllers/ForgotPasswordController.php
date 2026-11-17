@@ -6,6 +6,7 @@ use App\Mail\PasswordResetOtpMail;
 use App\Models\PasswordResetOtp;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
@@ -212,6 +213,27 @@ class ForgotPasswordController extends Controller
             'password_reset_verified',
         ]);
 
-        return redirect()->route('login')->with('success', 'Password berhasil diubah. Silakan login dengan password baru.');
+        // Auto login user ("digunakan untuk masuk serta pergantian password baru")
+        $isFirstLogin = is_null($user->last_login_at);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+        $request->session()->flash('just_logged_in', true);
+        $request->session()->put('just_logged_in', true);
+
+        if ($user->role === 'guest') {
+            $request->session()->put('show_guest_approval_popup', true);
+        }
+
+        if ($isFirstLogin) {
+            \App\Services\NotificationService::firstLogin($user, $request->ip(), $request->userAgent());
+        }
+
+        $user->forceFill(['last_login_at' => now()])->save();
+
+        return redirect()->route('dashboard')->with(
+            'success',
+            'Password baru berhasil disimpan. Anda telah otomatis masuk ke sistem.'
+        );
     }
 }

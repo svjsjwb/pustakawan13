@@ -73,7 +73,7 @@
     <div class="auth-card-panel">
         <div class="auth-header">
             <h2>PASSWORD BARU</h2>
-            <p>Buat password baru untuk akunmu. Gunakan minimal 8 karakter.</p>
+            <p>Buat kata sandi baru untuk akun Anda. Setelah disimpan, Anda akan langsung masuk ke sistem.</p>
         </div>
 
         @if ($errors->any())
@@ -130,7 +130,7 @@
             </div>
 
             <button type="submit" class="login-button" style="margin-top: 10px;">
-                <span>UBAH PASSWORD</span>
+                <span>SIMPAN PASSWORD & MASUK</span>
             </button>
         </form>
     </div>

@@ -134,7 +134,7 @@
     <div class="auth-card-panel">
         <div class="auth-header">
             <h2>VERIFIKASI OTP</h2>
-            <p>Kode OTP telah dikirim ke <strong>{{ $email }}</strong>. Kode berlaku selama 5 menit.</p>
+            <p>Kode OTP telah dikirim ke <strong>{{ $email }}</strong>. Kode berlaku selama 5 menit untuk mengatur ulang kata sandi dan masuk ke akun.</p>
         </div>
 
         @if ($errors->any())

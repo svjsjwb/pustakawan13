@@ -46,7 +46,24 @@ class LoginController extends Controller
             ->orWhereRaw('LOWER(name) = ?', [strtolower($loginInput)])
             ->first();
 
-        if (!$user || !$user->password || !Hash::check($credentials['password'], $user->password)) {
+        if (!$user) {
+            return back()
+                ->withErrors([
+                    'email' => 'Email/username atau password salah.',
+                ])
+                ->withInput($request->only('email'));
+        }
+
+        // Jika user Google belum pernah membuat password lokal
+        if (empty($user->password)) {
+            return back()
+                ->withErrors([
+                    'email' => 'Akun ini terdaftar melalui Google dan belum memiliki kata sandi manual. Silakan masuk menggunakan tombol "Masuk dengan Google" atau buat kata sandi terlebih dahulu di menu Profil > Keamanan.',
+                ])
+                ->withInput($request->only('email'));
+        }
+
+        if (!Hash::check($credentials['password'], $user->password)) {
             return back()
                 ->withErrors([
                     'email' => 'Email/username atau password salah.',

@@ -1263,3 +1263,45 @@ select.uprof-select {
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Google Account Password Banner ──────────────────────────── */
+.uprof-google-banner {
+    margin-bottom: 20px;
+    padding: 16px 18px;
+    background: rgba(15, 118, 110, 0.08);
+    border: 1.5px solid rgba(15, 118, 110, 0.22);
+    border-radius: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: var(--transition, all 0.2s ease);
+}
+
+.uprof-google-banner svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--primary, #0f766e);
+}
+
+.uprof-google-banner .uprof-banner-body {
+    font-size: 13.5px;
+    color: var(--text, #1e293b);
+    line-height: 1.55;
+}
+
+.uprof-google-banner .uprof-banner-title {
+    font-weight: 700;
+    color: var(--primary, #0f766e);
+    display: block;
+    margin-bottom: 3px;
+    font-size: 14px;
+}
+
+[data-theme="dark"] .uprof-google-banner {
+    background: rgba(20, 184, 166, 0.12);
+    border-color: rgba(20, 184, 166, 0.3);
+}
+
+[data-theme="dark"] .uprof-google-banner .uprof-banner-title {
+    color: #2dd4bf;
+}

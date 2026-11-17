@@ -3,7 +3,7 @@
 @section('title', 'Sirkulasi Peminjaman Buku')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/circulation.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/circulation.css') }}?v={{ filemtime(public_path('css/circulation.css')) }}">
 @endpush
 
 @section('content')
@@ -1149,43 +1149,14 @@
                 ===================================================== */
 
                 const searchInput =
-
                     document.getElementById(
-
                         'borrowingSearch'
-
                     );
 
                 const rows =
                     document.querySelectorAll(
                         '#borrowingTable tbody tr.borrowing-row'
                     );
-                const tableWrap = document.querySelector('#page-circulation .table-wrap');
-                const borrowingTable = document.getElementById('borrowingTable');
-                const fitBorrowingTableViewport = function() {
-                    if (!tableWrap || !borrowingTable) {
-                        return;
-                    }
-
-                    const header = borrowingTable.querySelector('thead');
-                    const visibleRows = Array.from(borrowingTable.querySelectorAll('tbody tr.borrowing-row'))
-                        .filter(function(row) {
-                            return row.style.display !== 'none';
-                        })
-                        .slice(0, 10);
-                    if (!header) {
-                        return;
-                    }
-
-                    const visibleHeight = header.getBoundingClientRect().height +
-                        visibleRows.reduce(function(total, row) {
-                            return total + row.getBoundingClientRect().height;
-                        }, 0);
-
-                    tableWrap.style.maxHeight = Math.ceil(visibleHeight) + 'px';
-                };
-                fitBorrowingTableViewport();
-                window.addEventListener('resize', fitBorrowingTableViewport);
 
                 const returnModal =
                     document.getElementById(
@@ -1248,7 +1219,6 @@
                                 }
 
                             );
-                            fitBorrowingTableViewport();
 
                         }
 
