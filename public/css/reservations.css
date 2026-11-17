@@ -1680,3 +1680,102 @@
         max-width: 100%;
     }
 }
+
+/* Daftar Reservasi: gaya panel dan tabel mengikuti Daftar Peminjaman. */
+#page-reservations .reservation-list-top {
+    padding: 18px 20px 10px;
+    border-bottom: 0;
+}
+
+#page-reservations .reservation-list-top h3 {
+    color: #173f40;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+#page-reservations .reservation-list-subtitle {
+    color: #627474;
+    font-size: 12px;
+}
+
+#page-reservations .reservation-filter-bar {
+    gap: 12px;
+    margin: 0 18px 12px;
+    padding: 12px 14px;
+    border: 1px solid #e1eaea;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(22, 63, 63, .04);
+}
+
+#page-reservations .reservation-table-wrap {
+    width: calc(100% - 36px);
+    max-height: 430px;
+    margin: 0 18px 18px;
+    border: 1px solid #e4e9e9;
+    border-radius: 10px;
+    background: #fff;
+    scrollbar-width: thin;
+    scrollbar-color: #a7caca #f3f6f6;
+}
+
+#page-reservations .reservation-table {
+    min-width: 920px;
+    font-size: 12px;
+}
+
+#page-reservations .reservation-table th {
+    padding: 13px 12px;
+    border-bottom: 0;
+    background: #287f80;
+    color: #fff;
+    font-size: 11px;
+    letter-spacing: .025em;
+}
+
+#page-reservations .reservation-table th:first-child {
+    border-top-left-radius: 9px;
+}
+
+#page-reservations .reservation-table th:last-child {
+    border-top-right-radius: 9px;
+}
+
+#page-reservations .reservation-table th:nth-child(n + 3),
+#page-reservations .reservation-table td:nth-child(n + 3) {
+    text-align: center;
+}
+
+#page-reservations .reservation-table td {
+    padding: 14px 12px;
+    border-bottom-color: #edf1f1;
+    color: #4a5f5f;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+#page-reservations .reservation-table td:first-child {
+    color: #294949;
+    font-weight: 700;
+}
+
+#page-reservations .reservation-table td:nth-child(2) {
+    min-width: 250px;
+    color: #526565;
+    white-space: normal;
+}
+
+#page-reservations .reservation-table tbody tr {
+    transition: background-color .15s ease;
+}
+
+#page-reservations .reservation-table tbody tr:hover {
+    background: #f5fafa;
+}
+
+#page-reservations .reservation-status {
+    min-height: 25px;
+    padding: 5px 12px;
+    font-size: 10px;
+    font-weight: 700;
+}

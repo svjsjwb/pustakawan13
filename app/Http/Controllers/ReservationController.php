@@ -67,7 +67,8 @@ class ReservationController extends Controller
                 $query->where('status', 'menunggu')
                     ->orWhereNotNull('cancellation_requested_at');
             })
-            ->latest('reserved_at')
+            ->orderByRaw('COALESCE(cancellation_requested_at, created_at) DESC')
+            ->orderByDesc('id')
             ->get();
 
         // Kolom batas waktu reservasi resmi pada skema adalah expires_at.
@@ -102,7 +103,8 @@ class ReservationController extends Controller
         }
 
         $reservations = $query
-            ->latest('reserved_at')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->get();
 
         /*
