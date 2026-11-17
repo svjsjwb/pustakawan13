@@ -73,7 +73,7 @@ class DashboardController extends Controller
             'book:id,judul_buku'
         ])
             ->latest()
-            ->take(20)
+            ->take(10)
             ->get();
 
 

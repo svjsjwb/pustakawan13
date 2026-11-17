@@ -718,7 +718,20 @@
 
                         <div>
 
-                            {{ $reservation->created_at ? $reservation->created_at->format('H.i') : '-' }}
+                            @if ($reservation->created_at)
+                                <span class="reservation-time">
+                                    {{ $reservation->created_at->format('H.i') }}
+                                </span>
+                                @if ($reservation->created_at->isToday())
+                                    <span class="reservation-time-context">hari ini</span>
+                                @elseif ($reservation->created_at->isYesterday())
+                                    <span class="reservation-time-context">kemarin</span>
+                                @else
+                                    <span class="reservation-time-context">{{ $reservation->created_at->format('d M Y') }}</span>
+                                @endif
+                            @else
+                                -
+                            @endif
 
                         </div>
 
