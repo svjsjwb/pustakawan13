@@ -942,15 +942,6 @@
     color: #29485a;
 }
 
-.reservation-cancellation-request-pending {
-    display: block;
-    margin-top: 5px;
-    color: #8a5a00;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-
 /* =========================================================
    ACTION
 ========================================================= */
@@ -1374,5 +1365,318 @@
     .reservation-hero p {
         font-size: 14px;
         line-height: 1.55;
+    }
+}
+
+/* =========================================================
+   PERMINTAAN RESERVASI
+========================================================= */
+
+.reservation-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reservation-requests-card {
+    min-width: 0;
+    padding: 18px 22px 10px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e1e7e7;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+}
+
+.reservation-requests-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.reservation-section-eyebrow {
+    display: block;
+    margin-bottom: 4px;
+    color: #82919d;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.reservation-requests-header h2 {
+    margin: 0;
+    color: #172b3b;
+    font-size: 20px;
+    line-height: 1.25;
+}
+
+.reservation-requests-header p {
+    margin: 4px 0 0;
+    color: #788794;
+    font-size: 11px;
+}
+
+.reservation-request-count {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    border-radius: 18px;
+    background: #ddf2eb;
+    color: #24675d;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.reservation-request-track {
+    display: flex;
+    gap: 12px;
+    max-width: 100%;
+    padding: 4px 0 10px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-color: #a7caca #f3f6f6;
+    scrollbar-width: thin;
+}
+
+.reservation-request-track::-webkit-scrollbar {
+    height: 7px;
+}
+
+.reservation-request-track::-webkit-scrollbar-track {
+    background: #f3f6f6;
+    border-radius: 8px;
+}
+
+.reservation-request-track::-webkit-scrollbar-thumb {
+    background: #a7caca;
+    border-radius: 8px;
+}
+
+.reservation-request-item {
+    position: relative;
+    display: flex;
+    flex: 0 0 calc((100% - 24px) / 3);
+    flex-direction: column;
+    box-sizing: border-box;
+    gap: 13px;
+    min-width: 290px;
+    min-height: 238px;
+    padding: 21px 18px 16px;
+    overflow: hidden;
+    background: #fbfcfd;
+    border: 1px solid #e7ebee;
+    border-radius: 11px;
+    scroll-snap-align: start;
+}
+
+.reservation-request-item::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 4px;
+    background: #d78a28;
+    content: "";
+}
+
+.reservation-request-item.cancellation::before {
+    background: #7456bb;
+}
+
+.reservation-request-type {
+    color: #bf7622;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.reservation-request-item.cancellation .reservation-request-type {
+    color: #7456bb;
+}
+
+.reservation-request-member {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+}
+
+.reservation-member-avatar {
+    display: flex;
+    flex: 0 0 40px;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #d9efeb;
+    color: #287b7b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.reservation-request-member div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.reservation-member-number {
+    color: #8995a0;
+    font-size: 10px;
+}
+
+.reservation-request-member strong {
+    overflow: hidden;
+    color: #253340;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reservation-request-book {
+    align-self: flex-start;
+    max-width: 100%;
+    padding: 4px 8px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #e6f4f1;
+    color: #287b7b;
+    font-size: 10px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reservation-request-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 10px;
+    border: 1px solid #edf0f2;
+    border-radius: 8px;
+    background: #f7f9fa;
+}
+
+.reservation-request-dates span {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: #84919b;
+    font-size: 10px;
+}
+
+.reservation-request-dates strong {
+    color: #34414d;
+    font-size: 10px;
+}
+
+.reservation-request-actions {
+    display: flex;
+    gap: 7px;
+    margin-top: auto;
+}
+
+.reservation-request-actions form {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+}
+
+.request-button {
+    width: 100%;
+    min-height: 37px;
+    padding: 6px 9px;
+    border: 1px solid #dfe5e8;
+    border-radius: 8px;
+    background: #fff;
+    color: #46545f;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.request-button-primary {
+    border-color: #205951;
+    background: #205951;
+    color: #fff;
+}
+
+.request-button-primary:hover {
+    border-color: #174940;
+    background: #174940;
+}
+
+.request-button-secondary:hover {
+    background: #f3f6f7;
+}
+
+.reservation-requests-empty {
+    margin: 0 0 10px;
+    padding: 18px;
+    border: 1px dashed #dce5e6;
+    border-radius: 9px;
+    color: #788794;
+    font-size: 11px;
+    text-align: center;
+}
+
+.reservation-table {
+    font-size: 11px;
+}
+
+.reservation-table th {
+    padding: 12px 14px;
+    background: #205f59;
+    color: #fff;
+    font-size: 9px;
+    letter-spacing: .04em;
+}
+
+.reservation-table td {
+    padding: 13px 14px;
+}
+
+.reservation-status.cancellation-pending {
+    border: 1px solid #f1d387;
+    background: #fff0c2;
+    color: #9a5d00;
+}
+
+@media (max-width: 700px) {
+    .reservation-requests-card {
+        padding: 16px 14px 8px;
+    }
+
+    .reservation-requests-header {
+        align-items: flex-start;
+    }
+
+    .reservation-requests-header h2 {
+        font-size: 18px;
+    }
+
+    .reservation-requests-header p {
+        max-width: 28ch;
+        line-height: 1.45;
+    }
+
+    .reservation-request-count {
+        padding: 5px 8px;
+        font-size: 8px;
+    }
+
+    .reservation-request-item {
+        flex-basis: 290px;
+    }
+
+    .reservation-request-track {
+        max-width: 100%;
     }
 }

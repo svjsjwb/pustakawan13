@@ -449,6 +449,94 @@
 
         <div class="reservation-layout">
 
+            <section class="reservation-requests-card" aria-labelledby="reservation-requests-title">
+                <div class="reservation-requests-header">
+                    <div>
+                        <span class="reservation-section-eyebrow">Perlu Persetujuan</span>
+                        <h2 id="reservation-requests-title">Permintaan Reservasi</h2>
+                        <p>Reservasi baru dan pengajuan pembatalan dari anggota yang menunggu keputusan Admin.</p>
+                    </div>
+                    <span class="reservation-request-count">
+                        {{ $reservationRequests->count() }} Pengajuan Baru
+                    </span>
+                </div>
+
+                @if ($reservationRequests->isNotEmpty())
+                    <div class="reservation-request-track" aria-label="Daftar permintaan reservasi">
+                        @foreach ($reservationRequests as $reservation)
+                            @php
+                                $cancellationPending = (bool) $reservation->cancellation_requested_at;
+                                $memberName = $reservation->member->name ?? '-';
+                            @endphp
+                            <article class="reservation-request-item {{ $cancellationPending ? 'cancellation' : '' }}">
+                                <span class="reservation-request-type">
+                                    {{ $cancellationPending ? 'Pengajuan Pembatalan' : 'Reservasi Baru' }}
+                                </span>
+
+                                <div class="reservation-request-member">
+                                    <span class="reservation-member-avatar">
+                                        {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($memberName, 0, 1)) }}
+                                    </span>
+                                    <div>
+                                        <span class="reservation-member-number">
+                                            {{ $reservation->member->member_number ?? 'Anggota' }}
+                                        </span>
+                                        <strong>{{ $memberName }}</strong>
+                                    </div>
+                                </div>
+
+                                <span class="reservation-request-book">
+                                    {{ $reservation->book->title ?? 'Buku tidak tersedia' }}
+                                </span>
+
+                                <div class="reservation-request-dates">
+                                    <span>
+                                        <span>Tanggal reservasi</span>
+                                        <strong>{{ $reservation->reserved_at ? \Carbon\Carbon::parse($reservation->reserved_at)->format('d/m/Y') : '-' }}</strong>
+                                    </span>
+                                    <span>
+                                        <span>Berlaku sampai</span>
+                                        <strong>{{ $reservation->expires_at ? \Carbon\Carbon::parse($reservation->expires_at)->format('d/m/Y') : '-' }}</strong>
+                                    </span>
+                                </div>
+
+                                <div class="reservation-request-actions">
+                                    @if ($cancellationPending)
+                                        <form action="{{ route('reservations.resolveCancellation', $reservation) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="decision" value="reject">
+                                            <button type="submit" class="request-button request-button-secondary">Tolak Pembatalan</button>
+                                        </form>
+                                        <form action="{{ route('reservations.resolveCancellation', $reservation) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="decision" value="approve">
+                                            <button type="submit" class="request-button request-button-primary">Setuju Pembatalan</button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('reservations.updateStatus', $reservation) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="ditolak">
+                                            <button type="submit" class="request-button request-button-secondary">Tolak</button>
+                                        </form>
+                                        <form action="{{ route('reservations.updateStatus', $reservation) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="disetujui">
+                                            <button type="submit" class="request-button request-button-primary">Setuju</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="reservation-requests-empty">Tidak ada permintaan reservasi yang menunggu persetujuan.</p>
+                @endif
+            </section>
+
             {{-- =================================================
              DAFTAR RESERVASI
         ================================================== --}}
@@ -598,10 +686,6 @@
                                     STATUS
                                 </th>
 
-                                <th>
-                                    AKSI
-                                </th>
-
                             </tr>
 
                         </thead>
@@ -669,7 +753,11 @@
 
                                     <td>
 
-                                        @if ($reservation->status === 'menunggu')
+                                        @if ($reservation->cancellation_requested_at)
+                                            <span class="reservation-status cancellation-pending">
+                                                Menunggu Pembatalan
+                                            </span>
+                                        @elseif ($reservation->status === 'menunggu')
                                             <span class="reservation-status waiting">
                                                 Menunggu
                                             </span>
@@ -697,100 +785,8 @@
                                             </span>
                                         @endif
 
-                                        @if($reservation->cancellation_requested_at)
-                                            <small class="reservation-cancellation-request-pending">Menunggu Persetujuan Pembatalan</small>
-                                        @endif
-
                                     </td>
 
-
-                                    {{-- =========================
-         AKSI
-    ========================== --}}
-
-                                    <td>
-
-                                        <div class="reservation-actions">
-
-                                            @if($reservation->cancellation_requested_at)
-                                                <form action="{{ route('reservations.resolveCancellation', $reservation) }}" method="POST">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <input type="hidden" name="decision" value="approve">
-                                                    <button type="submit" class="btn-approve">Setujui Pembatalan</button>
-                                                </form>
-                                                <form action="{{ route('reservations.resolveCancellation', $reservation) }}" method="POST">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <input type="hidden" name="decision" value="reject">
-                                                    <button type="submit" class="btn-reject">Tolak Pembatalan</button>
-                                                </form>
-                                            @endif
-
-
-                                            {{-- =================================
-                 SETUJUI
-            ================================== --}}
-
-                                            @if ($reservation->status === 'menunggu')
-                                                <form action="{{ route('reservations.updateStatus', $reservation) }}"
-                                                    method="POST">
-
-                                                    @csrf
-
-                                                    @method('PATCH')
-
-                                                    <input type="hidden" name="status" value="disetujui">
-
-                                                    <button type="submit" class="btn-approve">
-
-                                                        Setujui
-
-                                                    </button>
-
-                                                </form>
-                                            @endif
-
-
-                                            {{-- =================================
-                 TOLAK
-            ================================== --}}
-
-                                            @if ($reservation->status === 'menunggu')
-                                                <form action="{{ route('reservations.updateStatus', $reservation) }}"
-                                                    method="POST">
-
-                                                    @csrf
-
-                                                    @method('PATCH')
-
-                                                    <input type="hidden" name="status" value="ditolak">
-
-                                                    <button type="submit" class="btn-reject">
-
-                                                        Tolak
-
-                                                    </button>
-
-                                                </form>
-                                            @endif
-
-                                            @if (
-                                                $reservation->status !== 'menunggu' &&
-                                                    !(
-                                                        $reservation->book_copy_id &&
-                                                        $reservation->bookCopy?->shelf_id &&
-                                                        in_array($reservation->status, ['menunggu', 'disetujui'])
-                                                    ))
-                                                <span class="action-done">
-                                                    -
-                                                </span>
-                                            @endif
-
-
-                                        </div>
-
-                                    </td>
 
                                 </tr>
 
@@ -799,7 +795,7 @@
 
                                 <tr>
 
-                                    <td colspan="6" class="reservation-empty">
+                                    <td colspan="5" class="reservation-empty">
 
                                         @if (request('start_date') && request('end_date'))
                                             Tidak ada data reservasi pada

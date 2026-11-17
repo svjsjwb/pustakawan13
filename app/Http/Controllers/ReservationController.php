@@ -62,6 +62,14 @@ class ReservationController extends Controller
             'bookCopy.shelf.zone.floor',
         ]);
 
+        $reservationRequests = Reservation::with(['member', 'book'])
+            ->where(function ($query) {
+                $query->where('status', 'menunggu')
+                    ->orWhereNotNull('cancellation_requested_at');
+            })
+            ->latest('reserved_at')
+            ->get();
+
         // Kolom batas waktu reservasi resmi pada skema adalah expires_at.
         $dueColumn = 'expires_at';
 
@@ -120,6 +128,7 @@ class ReservationController extends Controller
                 'members',
                 'books',
                 'reservations',
+                'reservationRequests',
                 'bookedSeats',
                 'selectedDate'
             )
