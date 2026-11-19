@@ -32,23 +32,21 @@
 .brand {
     display: flex;
     align-items: center;
-
-    gap: 8px;
-
-    width: 190px;
-    min-width: 190px;
-
+    gap: 12px;
     text-decoration: none;
-
     color: #fff;
 }
 
 
 .brand-logo {
-    width: 42px;
-    height: 42px;
-
+    width: 55px;
+    height: 55px;
+    border-radius: 15px;
+    background: #116862;
+    padding: 3px;
     object-fit: contain;
+    box-sizing: border-box;
+    box-shadow: 0 4px 14px rgba(17, 104, 98, 0.28);
 }
 
 

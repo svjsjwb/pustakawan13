@@ -387,8 +387,6 @@
                 'all' => 'Semua Aktivitas',
                 'borrowing' => 'Peminjaman',
                 'reservation' => 'Reservasi',
-                'return' => 'Pengembalian',
-                'extension' => 'Perpanjangan',
             ];
             $activeActivity = request('activity', 'all');
             $activeActivity = isset($activityLabels[$activeActivity]) ? $activeActivity : 'all';

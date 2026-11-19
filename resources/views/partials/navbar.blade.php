@@ -9,13 +9,12 @@
         <a href="{{ route('dashboard') }}" class="brand">
 
             <img
-                src="{{ asset('images/logo-tiga-serangkai.png') }}"
+                src="{{ asset('images/logo-ts-white.png') }}"
                 alt="Tiga Serangkai"
                 class="brand-logo">
 
             <div class="brand-text">
-                <span>PERPUSTAKAAN</span>
-                <strong>TIGA SERANGKAI</strong>
+                <span class="title" style="font-size: 15px; font-weight: 800; letter-spacing: -0.01em; color: #fff; text-transform: uppercase; white-space: nowrap;">PERPUSTAKAAN TIGA SERANGKAI</span>
             </div>
 
         </a>

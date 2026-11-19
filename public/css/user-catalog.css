@@ -1395,3 +1395,534 @@ animation: saasPulse 2s infinite;
         width: min(235px, calc(100vw - 48px));
     }
 }
+
+/* ==========================================================================
+   MODAL KONFIRMASI RESERVASI & PILIH TANGGAL (OPSI 3 - QUICK PRESETS)
+   ========================================================================== */
+.res-date-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 2500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.res-date-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.res-date-modal-card {
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28), 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(18px) scale(0.96);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: visible;
+}
+
+.res-date-modal-overlay.active .res-date-modal-card {
+    transform: translateY(0) scale(1);
+}
+
+.res-date-modal-header {
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+    position: relative;
+    background: var(--surface, #ffffff);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.res-date-modal-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(40, 123, 123, 0.12);
+    color: #287b7b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.res-date-modal-header-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.res-date-modal-header-text h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text, #111827);
+    line-height: 1.3;
+}
+
+.res-date-modal-header-text p {
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: var(--text-muted, #6b7280);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.res-date-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-muted, #9ca3af);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    padding: 0;
+}
+
+.res-date-modal-close:hover {
+    background: var(--surface-secondary, #f3f4f6);
+    color: var(--text, #111827);
+}
+
+.res-date-modal-body {
+    padding: 20px 22px;
+}
+
+.res-date-section-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text, #374151);
+    margin-bottom: 10px;
+}
+
+.res-presets-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.res-preset-btn {
+    background: var(--surface, #ffffff);
+    border: 1.5px solid var(--border, #e5e7eb);
+    border-radius: 12px;
+    padding: 11px 10px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    position: relative;
+    user-select: none;
+    outline: none;
+}
+
+.res-preset-btn:hover {
+    border-color: #287b7b;
+    background: rgba(40, 123, 123, 0.04);
+}
+
+.res-preset-btn.active {
+    border-color: #287b7b;
+    background: rgba(40, 123, 123, 0.09);
+    box-shadow: 0 0 0 2px rgba(40, 123, 123, 0.22);
+}
+
+.res-preset-badge {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #287b7b;
+    margin-bottom: 2px;
+}
+
+.res-preset-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text, #111827);
+    line-height: 1.2;
+}
+
+.res-preset-btn.active .res-preset-title {
+    color: #174a4c;
+}
+
+.res-preset-sub {
+    font-size: 11px;
+    color: var(--text-muted, #6b7280);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.res-presets-wrapper {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+/* ==========================================================================
+   MODERN FLOATING CALENDAR POPOVER (TETAP POPUP, KARTU TIDAK MEMBESAR)
+   ========================================================================== */
+.res-cal-popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 290px;
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #cbd5e1);
+    border-radius: 18px;
+    padding: 14px 16px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(15, 118, 110, 0.12);
+    z-index: 200;
+    user-select: none;
+    animation: resCalPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes resCalPopIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.res-cal-popover-arrow {
+    position: absolute;
+    top: -6px;
+    right: 48px;
+    width: 12px;
+    height: 12px;
+    background: var(--surface, #ffffff);
+    border-left: 1px solid var(--border, #cbd5e1);
+    border-top: 1px solid var(--border, #cbd5e1);
+    transform: rotate(45deg);
+}
+
+.res-cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 2px;
+}
+
+.res-cal-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text, #0f172a);
+    letter-spacing: -0.01em;
+}
+
+.res-cal-nav-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    border: 1px solid var(--border, #e2e8f0);
+    background: var(--surface-secondary, #f8fafc);
+    color: var(--text, #334155);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.res-cal-nav-btn:hover:not(:disabled) {
+    background: #287b7b;
+    border-color: #287b7b;
+    color: #ffffff;
+    transform: scale(1.06);
+}
+
+.res-cal-nav-btn:disabled {
+    opacity: 0.32;
+    cursor: not-allowed;
+}
+
+.res-cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0f766e;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.res-cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    row-gap: 5px;
+}
+
+.res-cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 10px;
+    border: 1.5px solid transparent;
+    background: transparent;
+    color: var(--text, #1e293b);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+    padding: 0;
+    user-select: none;
+}
+
+.res-cal-day:hover:not(.disabled):not(.selected) {
+    background: rgba(40, 123, 123, 0.12);
+    color: #0f766e;
+    transform: translateY(-1px);
+}
+
+.res-cal-day.today:not(.selected) {
+    border-color: #14b8a6;
+    color: #0f766e;
+    font-weight: 700;
+    background: rgba(20, 184, 166, 0.08);
+}
+
+.res-cal-day.today:not(.selected)::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #14b8a6;
+}
+
+.res-cal-day.selected {
+    background: #287b7b !important;
+    border-color: #287b7b !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(40, 123, 123, 0.35);
+    transform: scale(1.04);
+}
+
+.res-cal-day.disabled {
+    opacity: 0.28;
+    color: var(--text-muted, #94a3b8);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.res-cal-day.empty {
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.res-cal-footer {
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px solid var(--border, #e2e8f0);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+}
+
+.res-cal-today-shortcut {
+    background: none;
+    border: none;
+    color: #0f766e;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    transition: background 0.15s;
+}
+
+.res-cal-today-shortcut:hover {
+    background: rgba(15, 118, 110, 0.08);
+    text-decoration: underline;
+}
+
+.res-cal-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted, #64748b);
+    font-weight: 600;
+    font-size: 11.5px;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 6px;
+    transition: all 0.15s;
+}
+
+.res-cal-close-btn:hover {
+    background: var(--surface-secondary, #f1f5f9);
+    color: var(--text, #111827);
+}
+
+.res-deadline-box {
+    background: linear-gradient(135deg, rgba(40, 123, 123, 0.08) 0%, rgba(20, 184, 166, 0.06) 100%);
+    border: 1px solid rgba(40, 123, 123, 0.22);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.res-deadline-icon {
+    color: #287b7b;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.res-deadline-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.res-deadline-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #287b7b;
+    margin-bottom: 2px;
+}
+
+.res-deadline-date {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text, #111827);
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.res-deadline-note {
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--text-muted, #4b5563);
+}
+
+.res-date-modal-footer {
+    padding: 14px 22px;
+    border-top: 1px solid var(--border, #e5e7eb);
+    background: var(--surface-secondary, #fafafa);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.res-btn-secondary {
+    padding: 9px 16px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1px solid var(--border, #d1d5db);
+    color: var(--text, #374151);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.res-btn-secondary:hover {
+    background: var(--surface, #ffffff);
+    border-color: #9ca3af;
+}
+
+.res-btn-primary {
+    padding: 9px 20px;
+    border-radius: 10px;
+    background: #287b7b;
+    border: 1px solid #287b7b;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s;
+    box-shadow: 0 4px 12px rgba(40, 123, 123, 0.25);
+}
+
+.res-btn-primary:hover:not(:disabled) {
+    background: #1f6464;
+    border-color: #1f6464;
+    box-shadow: 0 6px 16px rgba(40, 123, 123, 0.35);
+}
+
+.res-btn-primary:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+    .res-presets-grid {
+        grid-template-columns: 1fr;
+    }
+    .res-cal-popover {
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        max-width: 285px;
+    }
+    .res-cal-popover-arrow {
+        right: 50%;
+        margin-right: -6px;
+    }
+    .res-date-modal-footer {
+        flex-direction: column-reverse;
+    }
+    .res-btn-secondary,
+    .res-btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@keyframes resSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

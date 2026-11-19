@@ -415,10 +415,10 @@
 
                 {{-- Action Buttons: Reservasi, Pinjam, Kembali --}}
                 <div class="saas-modal-actions">
-                    <form method="POST" action="{{ route('user.reservations.store') }}" id="modalReserveForm">
+                    <form method="POST" action="{{ route('user.reservations.store') }}" id="modalReserveForm" onsubmit="event.preventDefault(); openReservationDateModal();">
                         @csrf
                         <input type="hidden" name="book_id" id="modalReserveBookId">
-                        <button type="submit" class="saas-btn-primary" id="modalReserveBtn">
+                        <button type="button" class="saas-btn-primary" id="modalReserveBtn" onclick="openReservationDateModal()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -429,7 +429,7 @@
                         </button>
                         <div class="saas-reservation-feedback" id="modalReserveFeedback" hidden>
                             Buku telah masuk ke daftar reservasi Anda.
-                            <a href="{{ route('reservations.index') }}">Lihat Reservasi</a>
+                            <a href="{{ route('user.reservations') }}">Lihat Reservasi</a>
                         </div>
                     </form>
 
@@ -455,6 +455,118 @@
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- ==========================================================================
+     6. MODAL KONFIRMASI RESERVASI & PILIH TANGGAL (OPSI 3 - QUICK PRESETS)
+     ========================================================================== --}}
+<div class="res-date-modal-overlay" id="reservationDateModal" onclick="handleResDateBackdropClick(event)">
+    <div class="res-date-modal-card" role="dialog" aria-modal="true" aria-labelledby="resModalTitle">
+        <div class="res-date-modal-header">
+            <div class="res-date-modal-header-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </div>
+            <div class="res-date-modal-header-text">
+                <h3 id="resModalTitle">Pilih Tanggal Reservasi</h3>
+                <p id="resModalBookTitle">Buku</p>
+            </div>
+            <button type="button" class="res-date-modal-close" onclick="closeReservationDateModal()" aria-label="Tutup">
+                &times;
+            </button>
+        </div>
+
+        <div class="res-date-modal-body">
+            <span class="res-date-section-label">Pilih Rencana Waktu Pengambilan Buku:</span>
+
+            {{-- 3 Quick Presets Grid with Floating Calendar Popover --}}
+            <div class="res-presets-wrapper">
+                <div class="res-presets-grid">
+                    <button type="button" class="res-preset-btn active" id="btnPresetToday" onclick="selectReservationPreset('today')">
+                        <span class="res-preset-badge">Cepat</span>
+                        <span class="res-preset-title">Hari Ini</span>
+                        <span class="res-preset-sub" id="presetTodayLabel">-</span>
+                    </button>
+
+                    <button type="button" class="res-preset-btn" id="btnPresetTomorrow" onclick="selectReservationPreset('tomorrow')">
+                        <span class="res-preset-badge">Besok</span>
+                        <span class="res-preset-title">Besok</span>
+                        <span class="res-preset-sub" id="presetTomorrowLabel">-</span>
+                    </button>
+
+                    <button type="button" class="res-preset-btn" id="btnPresetCustom" onclick="selectReservationPreset('custom')">
+                        <span class="res-preset-badge">Kustom</span>
+                        <span class="res-preset-title">Pilih Tanggal</span>
+                        <span class="res-preset-sub" id="presetCustomLabel">Kalender</span>
+                    </button>
+                </div>
+
+                {{-- Modern Interactive Floating Calendar Popover (Tetap Popup) --}}
+                <div class="res-cal-popover" id="resCalendarPopover" style="display: none;">
+                    <div class="res-cal-popover-arrow"></div>
+                    <div class="res-cal-header">
+                        <button type="button" class="res-cal-nav-btn" id="resCalPrevBtn" onclick="navigateCalendarMonth(-1)" title="Bulan Sebelumnya" aria-label="Bulan Sebelumnya">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <div class="res-cal-title" id="resCalMonthYearTitle">November 2026</div>
+                        <button type="button" class="res-cal-nav-btn" id="resCalNextBtn" onclick="navigateCalendarMonth(1)" title="Bulan Berikutnya" aria-label="Bulan Berikutnya">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </div>
+
+                    <div class="res-cal-weekdays">
+                        <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
+                    </div>
+
+                    <div class="res-cal-days" id="resCalDaysGrid">
+                        {{-- Injected dynamically --}}
+                    </div>
+
+                    <div class="res-cal-footer">
+                        <button type="button" class="res-cal-today-shortcut" onclick="selectCalendarDate(toISODateString(new Date()))">
+                            Hari Ini
+                        </button>
+                        <button type="button" class="res-cal-close-btn" onclick="toggleCalendarPopover(false)">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Deadline Card (3 Hari) --}}
+            <div class="res-deadline-box">
+                <div class="res-deadline-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="res-deadline-info">
+                    <div class="res-deadline-label">Batas Akhir Reservasi (3 Hari)</div>
+                    <div class="res-deadline-date" id="resDeadlineFormatted">-</div>
+                    <div class="res-deadline-note">
+                        Buku akan disiapkan dan disimpan untuk Anda hingga batas akhir di atas. Jika tidak diambil di perpustakaan dalam 3 hari, reservasi otomatis dibatalkan.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="res-date-modal-footer">
+            <button type="button" class="res-btn-secondary" onclick="closeReservationDateModal()">
+                Kembali
+            </button>
+            <button type="button" class="res-btn-primary" id="resConfirmSubmitBtn" onclick="submitReservationWithOptions()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Ajukan Reservasi</span>
+            </button>
         </div>
     </div>
 </div>
@@ -1058,6 +1170,7 @@ function setReservationSuccess() {
 }
 
 function closeCatalogModal() {
+    closeReservationDateModal();
     const backdrop = document.getElementById('saasBookModalBackdrop');
     backdrop?.classList.remove('active');
     document.body.style.overflow = '';
@@ -1118,42 +1231,310 @@ function toggleModalFavorite() {
 }
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeCatalogModal();
+    if (e.key === 'Escape') {
+        const resDateModal = document.getElementById('reservationDateModal');
+        if (resDateModal && resDateModal.classList.contains('active')) {
+            closeReservationDateModal();
+        } else {
+            closeCatalogModal();
+        }
+    }
 });
 
-document.getElementById('modalReserveForm')?.addEventListener('submit', async function (event) {
-    event.preventDefault();
+/* ==========================================================================
+   LOGIKA PILIH TANGGAL RESERVASI (OPSI 3 - QUICK PRESETS)
+   ========================================================================== */
+let selectedReservationDate = null;
+let currentReservationPreset = 'today';
 
+function toISODateString(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function parseISODate(str) {
+    if (!str) return new Date();
+    const parts = str.split('-');
+    return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+}
+
+function formatIndoDate(d, withDayName = true) {
+    const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const day = d.getDate();
+    const month = monthNames[d.getMonth()];
+    const year = d.getFullYear();
+    if (withDayName) {
+        return `${dayNames[d.getDay()]}, ${day} ${month} ${year}`;
+    }
+    return `${day} ${month} ${year}`;
+}
+
+function updateReservationDeadlineDisplay() {
+    if (!selectedReservationDate) {
+        selectedReservationDate = toISODateString(new Date());
+    }
+    const dateObj = parseISODate(selectedReservationDate);
+    const deadlineObj = new Date(dateObj);
+    deadlineObj.setDate(deadlineObj.getDate() + 3);
+
+    const deadlineFormatted = formatIndoDate(deadlineObj, true);
+    const deadlineEl = document.getElementById('resDeadlineFormatted');
+    if (deadlineEl) {
+        deadlineEl.textContent = deadlineFormatted;
+    }
+}
+
+function openReservationDateModal() {
+    if (!activeBookId) return;
     const reserveBtn = document.getElementById('modalReserveBtn');
     if (!reserveBtn || reserveBtn.disabled) return;
 
-    reserveBtn.disabled = true;
+    const bookTitleEl = document.getElementById('modalBookTitle');
+    const resBookTitle = document.getElementById('resModalBookTitle');
+    if (resBookTitle && bookTitleEl) {
+        resBookTitle.textContent = bookTitleEl.textContent.trim();
+    }
+
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    const todayLabel = document.getElementById('presetTodayLabel');
+    const tomorrowLabel = document.getElementById('presetTomorrowLabel');
+    if (todayLabel) todayLabel.textContent = formatIndoDate(today, false);
+    if (tomorrowLabel) tomorrowLabel.textContent = formatIndoDate(tomorrow, false);
+
+    calendarViewDate = new Date();
+    selectReservationPreset('today');
+
+    const dateModal = document.getElementById('reservationDateModal');
+    if (dateModal) {
+        dateModal.classList.add('active');
+    }
+}
+
+function closeReservationDateModal() {
+    toggleCalendarPopover(false);
+    const dateModal = document.getElementById('reservationDateModal');
+    if (dateModal) {
+        dateModal.classList.remove('active');
+    }
+}
+
+function handleResDateBackdropClick(event) {
+    if (event.target === document.getElementById('reservationDateModal')) {
+        closeReservationDateModal();
+    }
+}
+
+/* ==========================================================================
+   INTERACTIVE MODERN FLOATING CALENDAR POPOVER LOGIC
+   ========================================================================== */
+let calendarViewDate = new Date();
+
+function toggleCalendarPopover(show) {
+    const popover = document.getElementById('resCalendarPopover');
+    if (!popover) return;
+    const isVisible = popover.style.display === 'block';
+    const targetState = typeof show === 'boolean' ? show : !isVisible;
+    popover.style.display = targetState ? 'block' : 'none';
+    if (targetState) {
+        renderModernCalendar();
+    }
+}
+
+function renderModernCalendar() {
+    const grid = document.getElementById('resCalDaysGrid');
+    const titleEl = document.getElementById('resCalMonthYearTitle');
+    const prevBtn = document.getElementById('resCalPrevBtn');
+    if (!grid || !titleEl) return;
+
+    const indonesianMonths = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    const currentYear = calendarViewDate.getFullYear();
+    const currentMonth = calendarViewDate.getMonth();
+
+    titleEl.textContent = `${indonesianMonths[currentMonth]} ${currentYear}`;
+
+    // Cek tombol bulan sebelumnya (disable jika di bulan dan tahun berjalan)
+    const today = new Date();
+    const isCurrentOrPastMonth = (currentYear < today.getFullYear()) ||
+        (currentYear === today.getFullYear() && currentMonth <= today.getMonth());
+    if (prevBtn) {
+        prevBtn.disabled = isCurrentOrPastMonth;
+    }
+
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay(); // 0: Min, 1: Sen, ...
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const selectedIso = selectedReservationDate || toISODateString(today);
+
+    grid.innerHTML = '';
+
+    // Slot kosong sebelum tanggal 1
+    for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'res-cal-day empty';
+        grid.appendChild(emptyCell);
+    }
+
+    // Hari 1 s.d. akhir bulan
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dayDate = new Date(currentYear, currentMonth, d);
+        const dayIso = toISODateString(dayDate);
+        const isPast = dayDate.getTime() < todayMidnight;
+        const isToday = dayDate.getTime() === todayMidnight;
+        const isSelected = dayIso === selectedIso;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'res-cal-day';
+        if (isPast) btn.classList.add('disabled');
+        if (isToday) btn.classList.add('today');
+        if (isSelected) btn.classList.add('selected');
+
+        btn.textContent = d;
+
+        if (isPast) {
+            btn.disabled = true;
+        } else {
+            btn.onclick = function () {
+                selectCalendarDate(dayIso);
+            };
+        }
+
+        grid.appendChild(btn);
+    }
+}
+
+function navigateCalendarMonth(delta) {
+    calendarViewDate.setMonth(calendarViewDate.getMonth() + delta);
+    renderModernCalendar();
+}
+
+function selectCalendarDate(isoString) {
+    selectedReservationDate = isoString;
+    const dateObj = parseISODate(isoString);
+
+    const customLabel = document.getElementById('presetCustomLabel');
+    if (customLabel) {
+        customLabel.textContent = formatIndoDate(dateObj, false);
+    }
+
+    // Pastikan kalender sinkron dengan bulan tanggal yang dipilih
+    calendarViewDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1);
+
+    updateReservationDeadlineDisplay();
+    renderModernCalendar();
+
+    // Tutup popover kalender otomatis setelah tanggal dipilih
+    setTimeout(function() {
+        toggleCalendarPopover(false);
+    }, 150);
+}
+
+function selectReservationPreset(preset) {
+    currentReservationPreset = preset;
+    const today = new Date();
+
+    document.getElementById('btnPresetToday')?.classList.toggle('active', preset === 'today');
+    document.getElementById('btnPresetTomorrow')?.classList.toggle('active', preset === 'tomorrow');
+    document.getElementById('btnPresetCustom')?.classList.toggle('active', preset === 'custom');
+
+    if (preset === 'today') {
+        toggleCalendarPopover(false);
+        selectedReservationDate = toISODateString(today);
+        calendarViewDate = new Date();
+    } else if (preset === 'tomorrow') {
+        toggleCalendarPopover(false);
+        const tomorrow = new Date();
+        tomorrow.setDate(today.getDate() + 1);
+        selectedReservationDate = toISODateString(tomorrow);
+        calendarViewDate = new Date(tomorrow);
+    } else if (preset === 'custom') {
+        const popover = document.getElementById('resCalendarPopover');
+        const isAlreadyOpen = popover && popover.style.display === 'block';
+        if (!selectedReservationDate) {
+            selectedReservationDate = toISODateString(today);
+        }
+        calendarViewDate = parseISODate(selectedReservationDate);
+        toggleCalendarPopover(!isAlreadyOpen);
+    }
+
+    updateReservationDeadlineDisplay();
+}
+
+// Tutup popover kalender jika klik di luar popover
+document.addEventListener('click', function(e) {
+    const popover = document.getElementById('resCalendarPopover');
+    const customBtn = document.getElementById('btnPresetCustom');
+    if (!popover || popover.style.display !== 'block') return;
+    if (!popover.contains(e.target) && !customBtn?.contains(e.target)) {
+        toggleCalendarPopover(false);
+    }
+});
+
+async function submitReservationWithOptions() {
+    if (!activeBookId) return;
+    const submitBtn = document.getElementById('resConfirmSubmitBtn');
+    if (!submitBtn || submitBtn.disabled) return;
+
+    if (!selectedReservationDate) {
+        selectedReservationDate = toISODateString(new Date());
+    }
+
+    submitBtn.disabled = true;
+    const originalContent = submitBtn.innerHTML;
+    submitBtn.innerHTML = `
+        <span style="display:inline-block; width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:resSpin 0.6s linear infinite; margin-right:6px;"></span>
+        <span>Menyimpan...</span>
+    `;
 
     try {
-        const response = await fetch(this.action, {
+        const response = await fetch("{{ route('user.reservations.store') }}", {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
             },
-            body: JSON.stringify({ book_id: document.getElementById('modalReserveBookId').value })
+            body: JSON.stringify({
+                book_id: activeBookId,
+                reserved_at: selectedReservationDate
+            })
         });
+
         const data = await response.json();
 
         if (!response.ok) {
-            reserveBtn.disabled = false;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalContent;
             window.showToast?.(data.message || 'Reservasi tidak dapat diproses.', 'error');
             return;
         }
 
+        closeReservationDateModal();
         setReservationSuccess();
-        window.showToast?.('Reservasi berhasil disimpan.', 'success');
+        const successMsg = data.expires_at 
+            ? 'Reservasi berhasil! Batas pengambilan s.d. ' + data.expires_at 
+            : 'Reservasi buku berhasil diajukan.';
+        window.showToast?.(successMsg, 'success');
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalContent;
     } catch (error) {
-        reserveBtn.disabled = false;
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalContent;
         window.showToast?.('Gagal menyimpan reservasi. Coba lagi.', 'error');
     }
-});
+}
 
 document.getElementById('modalBorrowForm')?.addEventListener('submit', async function (event) {
     event.preventDefault();

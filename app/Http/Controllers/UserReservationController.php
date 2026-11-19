@@ -225,8 +225,11 @@ class UserReservationController extends Controller
     {
         $validated = $request->validate([
             'book_id' => 'required|exists:books,id',
-            'reserved_at' => 'nullable|date',
+            'reserved_at' => 'nullable|date|after_or_equal:today',
             'seat_number' => 'nullable|string|max:10',
+        ], [
+            'reserved_at.after_or_equal' => 'Tanggal reservasi tidak boleh sebelum hari ini.',
+            'reserved_at.date' => 'Format tanggal reservasi tidak valid.',
         ]);
 
         $user = Auth::user();
@@ -257,19 +260,28 @@ class UserReservationController extends Controller
         }
 
         if ($book->available_stock < 1) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Maaf, stok buku ini sedang habis sehingga tidak dapat direservasi.',
+                ], 422);
+            }
             return back()->with(
                 'error',
                 'Maaf, stok buku ini sedang habis sehingga tidak dapat direservasi.'
             );
         }
 
-        $reservedAt = $validated['reserved_at'] ?? now()->toDateString();
+        $reservedAt = !empty($validated['reserved_at'])
+            ? \Carbon\Carbon::parse($validated['reserved_at'])->toDateString()
+            : now()->toDateString();
+        $expiresAt = \Carbon\Carbon::parse($reservedAt)->addDays(3)->toDateString();
         $createdReservation = null;
 
         DB::transaction(function () use (
             $member,
             $book,
             $reservedAt,
+            $expiresAt,
             $validated,
             $user,
             &$createdReservation
@@ -317,10 +329,7 @@ class UserReservationController extends Controller
                 'book_id' => $lockedBook->id,
                 'book_copy_id' => $bookCopy?->id,
                 'reserved_at' => $reservedAt,
-                'expires_at' => now()
-                    ->parse($reservedAt)
-                    ->addDays(3)
-                    ->toDateString(),
+                'expires_at' => $expiresAt,
                 'seat_number' => $validated['seat_number'] ?? null,
                 'status' => 'menunggu',
             ]);
@@ -347,7 +356,9 @@ class UserReservationController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Reservasi buku berhasil diajukan.',
-                'reservation_url' => route('reservations.index'),
+                'reservation_url' => route('user.reservations'),
+                'reserved_at' => \Carbon\Carbon::parse($createdReservation->reserved_at)->translatedFormat('d M Y'),
+                'expires_at' => \Carbon\Carbon::parse($createdReservation->expires_at)->translatedFormat('d M Y'),
             ]);
         }
 

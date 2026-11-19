@@ -109,25 +109,22 @@ body {
 }
 
 .eg-brand-badge {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-    box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35);
+    width: 55px;
+    height: 55px;
+    border-radius: 15px;
+    background: #116862;
+    padding: 3px;
+    display: block;
+    object-fit: contain;
+    box-sizing: border-box;
+    box-shadow: 0 4px 14px rgba(17, 104, 98, 0.28);
     flex-shrink: 0;
     transition: var(--transition);
 }
 
 .eg-brand:hover .eg-brand-badge {
-    transform: scale(1.06) rotate(-3deg);
-    box-shadow: 0 6px 20px rgba(20, 184, 166, 0.45);
+    transform: scale(1.04);
+    box-shadow: 0 6px 18px rgba(17, 104, 98, 0.38);
 }
 
 .eg-brand-text {
@@ -137,11 +134,13 @@ body {
 }
 
 .eg-brand-text .title {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 800;
-    font-family: 'Poppins', sans-serif;
-    letter-spacing: -0.02em;
-    color: var(--text);
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: -0.01em;
+    color: var(--text, #0f172a);
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .eg-brand-text .sub {
