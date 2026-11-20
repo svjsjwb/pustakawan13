@@ -349,115 +349,53 @@ class DashboardController extends Controller
      * ========================================================
      */
 
+
     private function generateBorrowChart(
         Carbon $startDate,
         Carbon $endDate
     ) {
-
-        $labels = [];
-
-        $counts = [];
-
-        $cursor =
-            $startDate->copy();
-
-        $weekNumber = 1;
-
-        $borrowings = Borrowing::select(['created_at'])
+        // Hitung jumlah peminjaman langsung di PostgreSQL
+        $borrowings = Borrowing::query()
+            ->selectRaw("
+            FLOOR((EXTRACT(DAY FROM created_at) - 1) / 7) + 1
+            AS week_number,
+            COUNT(*) AS total
+        ")
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereIn('status', ['dipinjam', 'dikembalikan'])
-            ->get();
+            ->groupByRaw(
+                "FLOOR((EXTRACT(DAY FROM created_at) - 1) / 7)"
+            )
+            ->pluck('total', 'week_number');
 
-        while (
-            $cursor->lte($endDate)
-        ) {
+        $chart = [];
+        $cursor = $startDate->copy();
+        $weekNumber = 1;
+        $max = 0;
 
-            $weekStart =
-                $cursor
-                ->copy()
-                ->startOfDay();
+        // Siapkan jumlah peminjaman setiap minggu
+        while ($cursor->lte($endDate)) {
+            $count = (int) ($borrowings[$weekNumber] ?? 0);
 
+            $chart[] = [
+                'label' => 'M' . $weekNumber,
+                'count' => $count,
+            ];
 
-            $weekEnd =
-                $cursor
-                ->copy()
-                ->addDays(6)
-                ->endOfDay();
+            $max = max($max, $count);
 
-
-            if (
-                $weekEnd->gt(
-                    $endDate
-                )
-            ) {
-
-                $weekEnd =
-                    $endDate->copy();
-            }
-
-
-            $labels[] =
-                'M' . $weekNumber;
-
-
-            $counts[] =
-                $borrowings->filter(function ($b) use ($weekStart, $weekEnd) {
-                    return $b->created_at && $b->created_at->between($weekStart, $weekEnd);
-                })->count();
-
-
-            $cursor =
-                $weekEnd
-                ->copy()
-                ->addSecond();
-
-
+            $cursor->addDays(7);
             $weekNumber++;
         }
 
-
-        $max =
-            !empty($counts)
-            ? max($counts)
-            : 0;
-
-
-        $chart = [];
-
-
-        foreach (
-            $labels
-            as $index => $label
-        ) {
-
-            $count =
-                $counts[$index] ?? 0;
-
-
-            $height =
-                $max > 0
-                ? max(
-                    8,
-                    round(
-                        ($count / $max)
-                            * 100
-                    )
-                )
+        // Hitung tinggi grafik
+        foreach ($chart as &$item) {
+            $item['height'] = $max > 0
+                ? max(8, round(($item['count'] / $max) * 100))
                 : 8;
-
-
-            $chart[] = [
-                'label' =>
-                $label,
-
-                'count' =>
-                $count,
-
-                'height' =>
-                $height,
-            ];
         }
 
+        unset($item);
 
         return $chart;
     }

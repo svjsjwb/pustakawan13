@@ -9,24 +9,27 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserMiddleware
 {
+
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        if (Auth::user()->role !== 'member' && Auth::user()->role !== 'admin') {
+        $user = Auth::user();
+        $role = $user->role;
+
+        if ($role !== 'member' && $role !== 'admin') {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => 'Akun Anda belum disetujui sebagai member.'
                 ], 403);
             }
 
-            return redirect('/catalog')
-                ->with(
-                    'error',
-                    'Akun Anda belum disetujui sebagai member.'
-                );
+            return redirect('/catalog')->with(
+                'error',
+                'Akun Anda belum disetujui sebagai member.'
+            );
         }
 
         return $next($request);
