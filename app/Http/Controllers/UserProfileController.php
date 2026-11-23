@@ -376,4 +376,175 @@ class UserProfileController extends Controller
             'Preferensi berhasil diperbarui.'
         );
     }
+
+    /**
+     * Kirim kode OTP 6-digit untuk fitur Lupa Password di tab Keamanan profil
+     */
+    public function sendSecurityOtp(Request $request)
+    {
+        $user = Auth::user();
+        $email = strtolower(trim($request->input('email', $user->email)));
+
+        if ($email !== strtolower(trim($user->email))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email yang dimasukkan tidak cocok dengan email akun Anda.',
+            ], 422);
+        }
+
+        $otp = (string) random_int(100000, 999999);
+
+        \App\Models\PasswordResetOtp::where('email', $email)->delete();
+
+        \App\Models\PasswordResetOtp::create([
+            'email'      => $email,
+            'otp_hash'   => Hash::make($otp),
+            'attempts'   => 0,
+            'expires_at' => now()->addMinutes(5),
+        ]);
+
+        try {
+            app(\App\Services\OtpMailService::class)->sendPasswordResetOtp($email, $otp, 5);
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim email OTP. Silakan periksa koneksi internet atau coba sesaat lagi.',
+            ], 500);
+        }
+
+        $request->session()->put('profile_reset_email', $email);
+        $request->session()->forget('profile_reset_verified');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP 6-digit berhasil dikirim ke ' . $email,
+            'email'   => $email,
+        ]);
+    }
+
+    /**
+     * Verifikasi kode OTP 6-digit
+     */
+    public function verifySecurityOtp(Request $request)
+    {
+        $user = Auth::user();
+        $email = $request->session()->get('profile_reset_email', $user->email);
+
+        $request->validate([
+            'otp' => ['required', 'digits:6'],
+        ], [
+            'otp.required' => 'Kode OTP wajib diisi.',
+            'otp.digits'   => 'Kode OTP harus berupa 6 digit angka.',
+        ]);
+
+        $reset = \App\Models\PasswordResetOtp::where('email', $email)
+            ->latest('id')
+            ->first();
+
+        if (!$reset || $reset->isExpired()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode OTP sudah kedaluwarsa. Silakan kirim ulang kode baru.',
+            ], 422);
+        }
+
+        if ($reset->attempts >= 5) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terlalu banyak percobaan salah. Silakan kirim ulang kode baru.',
+            ], 422);
+        }
+
+        if (!Hash::check($request->input('otp'), $reset->otp_hash)) {
+            $reset->increment('attempts');
+            $remaining = max(0, 5 - $reset->attempts);
+            return response()->json([
+                'success' => false,
+                'message' => $remaining > 0
+                    ? "Kode OTP salah. Sisa percobaan: {$remaining}."
+                    : 'Kode OTP salah dan batas percobaan sudah habis. Silakan kirim ulang kode baru.',
+            ], 422);
+        }
+
+        $reset->update(['verified_at' => now()]);
+        $request->session()->put('profile_reset_verified', true);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP berhasil diverifikasi.',
+        ]);
+    }
+
+    /**
+     * Kirim ulang kode OTP
+     */
+    public function resendSecurityOtp(Request $request)
+    {
+        $user = Auth::user();
+        $email = $request->session()->get('profile_reset_email', $user->email);
+
+        $otp = (string) random_int(100000, 999999);
+
+        \App\Models\PasswordResetOtp::where('email', $email)->delete();
+
+        \App\Models\PasswordResetOtp::create([
+            'email'      => $email,
+            'otp_hash'   => Hash::make($otp),
+            'attempts'   => 0,
+            'expires_at' => now()->addMinutes(5),
+        ]);
+
+        try {
+            app(\App\Services\OtpMailService::class)->sendPasswordResetOtp($email, $otp, 5);
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim ulang OTP. Silakan coba sesaat lagi.',
+            ], 500);
+        }
+
+        $request->session()->forget('profile_reset_verified');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP baru telah berhasil dikirimkan.',
+        ]);
+    }
+
+    /**
+     * Simpan kata sandi baru setelah OTP berhasil diverifikasi
+     */
+    public function resetSecurityPassword(Request $request)
+    {
+        if (!$request->session()->get('profile_reset_verified')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesi verifikasi OTP tidak valid atau sudah kedaluwarsa. Silakan ulangi proses verifikasi.',
+            ], 403);
+        }
+
+        $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'password.required'  => 'Kata sandi baru wajib diisi.',
+            'password.min'       => 'Kata sandi baru minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+        ]);
+
+        $user = Auth::user();
+        $user->password = Hash::make($request->input('password'));
+        $user->save();
+
+        $email = $request->session()->get('profile_reset_email', $user->email);
+        \App\Models\PasswordResetOtp::where('email', $email)->delete();
+
+        $request->session()->forget(['profile_reset_email', 'profile_reset_verified']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kata sandi baru berhasil disimpan! Keamanan akun Anda telah diperbarui.',
+        ]);
+    }
 }

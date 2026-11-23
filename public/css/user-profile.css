@@ -1305,3 +1305,245 @@ select.uprof-select {
 [data-theme="dark"] .uprof-google-banner .uprof-banner-title {
     color: #2dd4bf;
 }
+
+/* ════════════════════════════════════════════════════════════
+   KEAMANAN: LUPA PASSWORD STEPPER (ATUR ULANG KATA SANDI)
+════════════════════════════════════════════════════════════ */
+.uprof-forgot-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f766e;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.uprof-forgot-link:hover {
+    color: #0d5f58;
+    text-decoration: underline;
+}
+
+.uprof-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-decoration: none;
+    margin-bottom: 14px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.uprof-back-link:hover {
+    color: #0f766e;
+}
+
+.uprof-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 18px 0 22px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.uprof-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.uprof-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1.5px solid #cbd5e1;
+    transition: all 0.25s ease;
+}
+
+.uprof-step-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.25s ease;
+}
+
+.uprof-step.active .uprof-step-num {
+    background: #0f5b53;
+    border-color: #0f5b53;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(15, 91, 83, 0.25);
+}
+
+.uprof-step.active .uprof-step-label {
+    color: var(--text, #0f172a);
+    font-weight: 700;
+}
+
+.uprof-step.completed .uprof-step-num {
+    background: #0f5b53;
+    border-color: #0f5b53;
+    color: #ffffff;
+}
+
+.uprof-step.completed .uprof-step-label {
+    color: #0f5b53;
+    font-weight: 700;
+}
+
+.uprof-step-line {
+    flex: 1;
+    height: 2px;
+    background: #e2e8f0;
+    margin: 0 16px;
+    border-radius: 99px;
+    transition: background 0.3s ease;
+}
+
+.uprof-step-line.completed {
+    background: #0f5b53;
+}
+
+.uprof-step-desc {
+    font-size: 13.5px;
+    color: var(--text-muted, #64748b);
+    line-height: 1.6;
+    margin: 0 0 20px;
+}
+
+.uprof-btn-primary {
+    background: #0f5b53;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(15, 91, 83, 0.25);
+}
+
+.uprof-btn-primary:hover {
+    background: #0d4e47;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(15, 91, 83, 0.35);
+}
+
+.uprof-btn-primary:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.uprof-btn-secondary {
+    background: var(--surface, #ffffff);
+    color: var(--text, #334155);
+    border: 1.5px solid var(--border, #cbd5e1);
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.uprof-btn-secondary:hover {
+    background: var(--background, #f8fafc);
+    border-color: #94a3b8;
+}
+
+.uprof-otp-field {
+    width: 100% !important;
+    max-width: 340px;
+    margin: 0 auto;
+    display: block;
+    height: 52px !important;
+    text-align: center !important;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    letter-spacing: 12px !important;
+    padding-left: 12px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    background: var(--background, #f8fafc) !important;
+    color: var(--text, #0f172a) !important;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.uprof-otp-field:focus {
+    border-color: #0f5b53 !important;
+    background: var(--surface, #ffffff) !important;
+    box-shadow: 0 0 0 3px rgba(15, 91, 83, 0.15) !important;
+}
+
+.uprof-link-button {
+    background: none;
+    border: none;
+    color: #0f766e;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+}
+
+.uprof-link-button:hover {
+    color: #0d5f58;
+}
+
+.uprof-link-button:disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.uprof-pass-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.uprof-pass-wrap input {
+    padding-right: 42px !important;
+}
+
+.uprof-eye-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.uprof-eye-btn:hover {
+    color: #0f766e;
+}
+
+.uprof-eye-btn svg {
+    width: 18px;
+    height: 18px;
+}

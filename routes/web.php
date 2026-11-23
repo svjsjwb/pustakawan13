@@ -279,6 +279,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/user/profile/password', [UserProfileController::class, 'changePassword'])
         ->name('user.profile.password');
 
+    // Reset password via OTP di dalam halaman profil pengguna
+    Route::post('/user/profile/security/otp/send', [UserProfileController::class, 'sendSecurityOtp'])
+        ->name('user.profile.security.otp.send');
+    Route::post('/user/profile/security/otp/verify', [UserProfileController::class, 'verifySecurityOtp'])
+        ->name('user.profile.security.otp.verify');
+    Route::post('/user/profile/security/otp/resend', [UserProfileController::class, 'resendSecurityOtp'])
+        ->name('user.profile.security.otp.resend');
+    Route::post('/user/profile/security/otp/reset', [UserProfileController::class, 'resetSecurityPassword'])
+        ->name('user.profile.security.otp.reset');
+
     Route::post('/user/profile/preferences', [UserProfileController::class, 'updatePreferences'])
         ->name('user.profile.preferences');
 });

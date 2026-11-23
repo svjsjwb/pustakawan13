@@ -287,7 +287,8 @@
                 </div>
 
                 <div class="uprof-right">
-                    <div class="uprof-section-card">
+                    {{-- CARD 1: FORM KEAMANAN STANDAR (PERSIS GAMBAR 1) --}}
+                    <div class="uprof-section-card" id="cardNormalSecurity">
                         <div class="uprof-section-head">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -296,16 +297,26 @@
                             <span>{{ empty($user->password) ? 'Buat Kata Sandi Akun' : 'Keamanan & Perubahan Kata Sandi' }}</span>
                         </div>
 
+                        @if (session('success') && session('tab') === 'security')
+                            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; padding: 12px 16px; border-radius: 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 20px;">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
                         <form method="POST" action="{{ route('user.profile.password') }}">
                             @csrf
                             @if (!empty($user->password))
-                                {{-- USER SUDAH MEMILIKI PASSWORD: Tampilkan input Password Lama --}}
+                                {{-- USER SUDAH MEMILIKI PASSWORD: Tampilkan input Password Lama & Link Lupa Password --}}
                                 <div class="uprof-form-row">
                                     <div class="uprof-form-group" style="grid-column: 1 / -1;">
                                         <label>Password Lama <span style="color: #ef4444;">*</span></label>
                                         <input type="password" name="current_password" required
                                             placeholder="Masukkan kata sandi saat ini"
                                             autocomplete="current-password">
+
+                                        <div style="margin-top: 6px;">
+                                            <a href="javascript:void(0)" class="uprof-forgot-link" onclick="toggleSecurityView('forgot')">Lupa password?</a>
+                                        </div>
 
                                         @error('current_password')
                                             <span class="uprof-error">{{ $message }}</span>
@@ -343,18 +354,129 @@
                                 <span class="uprof-error">{{ $message }}</span>
                             @enderror
 
-                            <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-                                <button type="submit" class="eg-btn-block" style="width: auto; padding: 12px 28px;">
-                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="11" width="18" height="11" rx="2"
-                                            ry="2" />
-                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                    </svg>
-                                    <span>{{ empty($user->password) ? 'Buat Password Manual' : 'Simpan Perubahan' }}</span>
+                            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+                                <button type="submit" class="uprof-btn-primary">
+                                    <span>Simpan Perubahan</span>
                                 </button>
                             </div>
                         </form>
+                    </div>
+
+                    {{-- CARD 2: ALUR ATUR ULANG KATA SANDI (PERSIS GAMBAR 2) --}}
+                    <div class="uprof-section-card" id="cardResetPassword" style="display: none;">
+                        {{-- Link Kembali ke Keamanan --}}
+                        <div>
+                            <a href="javascript:void(0)" class="uprof-back-link" onclick="toggleSecurityView('normal')">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                                    <polyline points="12 19 5 12 12 5"></polyline>
+                                </svg>
+                                Kembali ke Keamanan
+                            </a>
+                        </div>
+
+                        {{-- Judul Atur Ulang Kata Sandi --}}
+                        <div class="uprof-section-head" style="margin-bottom: 14px; border-bottom: none; padding-bottom: 0;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                                <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                                <path d="m21 2-9.6 9.6"></path>
+                                <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+                            </svg>
+                            <span style="font-size: 18px; font-weight: 800; color: var(--text, #0f172a);">Atur Ulang Kata Sandi</span>
+                        </div>
+
+                        {{-- Stepper 3 Tahap --}}
+                        <div class="uprof-stepper">
+                            <div class="uprof-step active" id="uprofStep1">
+                                <div class="uprof-step-num" id="uprofStepNum1">1</div>
+                                <span class="uprof-step-label">Verifikasi</span>
+                            </div>
+                            <div class="uprof-step-line" id="uprofLine1"></div>
+                            <div class="uprof-step" id="uprofStep2">
+                                <div class="uprof-step-num" id="uprofStepNum2">2</div>
+                                <span class="uprof-step-label">Kode</span>
+                            </div>
+                            <div class="uprof-step-line" id="uprofLine2"></div>
+                            <div class="uprof-step" id="uprofStep3">
+                                <div class="uprof-step-num" id="uprofStepNum3">3</div>
+                                <span class="uprof-step-label">Sandi baru</span>
+                            </div>
+                        </div>
+
+                        {{-- Alert Box untuk feedback respon AJAX --}}
+                        <div id="uprofOtpAlert" style="display: none; padding: 12px 16px; border-radius: 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 18px;"></div>
+
+                        {{-- TAHAP 1: Verifikasi Email (Persis Gambar 2) --}}
+                        <div class="uprof-step-content" id="uprofStepContent1">
+                            <p class="uprof-step-desc">
+                                Masukkan email yang terdaftar di akun anggota Anda. Kami akan mengirim kode 6 digit untuk memastikan ini benar-benar Anda.
+                            </p>
+                            <div class="uprof-form-group" style="margin-bottom: 24px;">
+                                <label>Email Terdaftar <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="uprofInputEmail" value="{{ $user->email }}" placeholder="hama@email.com" required>
+                            </div>
+                            <div style="display: flex; justify-content: flex-end; gap: 12px; align-items: center;">
+                                <button type="button" class="uprof-btn-secondary" onclick="toggleSecurityView('normal')">Batal</button>
+                                <button type="button" class="uprof-btn-primary" id="btnSendOtp" onclick="handleSendOtp()">
+                                    <span id="btnSendOtpText">Kirim Kode</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- TAHAP 2: Masukkan Kode OTP --}}
+                        <div class="uprof-step-content" id="uprofStepContent2" style="display: none;">
+                            <p class="uprof-step-desc">
+                                Kode 6 digit telah dikirimkan ke email <strong id="uprofOtpEmailTarget" style="color: var(--text, #0f172a);">{{ $user->email }}</strong>. Masukkan kode tersebut di bawah ini:
+                            </p>
+                            <div class="uprof-form-group" style="margin-bottom: 14px;">
+                                <label style="text-align: center; display: block;">Masukkan 6 Digit Kode OTP <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="uprofInputOtp" maxlength="6" inputmode="numeric" placeholder="------" class="uprof-otp-field" autocomplete="one-time-code" required>
+                            </div>
+                            <div style="text-align: center; margin-bottom: 24px; font-size: 13px; color: var(--text-muted, #64748b);">
+                                Tidak menerima kode? 
+                                <button type="button" id="btnResendOtp" onclick="handleResendOtp()" class="uprof-link-button">Kirim ulang kode</button>
+                                <span id="resendCountdown" style="color: #94a3b8; font-size: 12px; margin-left: 4px;"></span>
+                            </div>
+                            <div style="display: flex; justify-content: flex-end; gap: 12px; align-items: center;">
+                                <button type="button" class="uprof-btn-secondary" onclick="setOtpStep(1)">Kembali</button>
+                                <button type="button" class="uprof-btn-primary" id="btnVerifyOtp" onclick="handleVerifyOtp()">
+                                    <span id="btnVerifyOtpText">Verifikasi Kode</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- TAHAP 3: Sandi Baru --}}
+                        <div class="uprof-step-content" id="uprofStepContent3" style="display: none;">
+                            <p class="uprof-step-desc">
+                                Kode berhasil diverifikasi. Silakan masukkan kata sandi baru untuk akun Anda (minimal 8 karakter).
+                            </p>
+                            <div class="uprof-form-row">
+                                <div class="uprof-form-group">
+                                    <label>Password Baru <span style="color: #ef4444;">*</span></label>
+                                    <div class="uprof-pass-wrap">
+                                        <input type="password" id="uprofNewPassword" placeholder="Minimal 8 karakter" minlength="8" required autocomplete="new-password">
+                                        <button type="button" class="uprof-eye-btn" onclick="togglePassEye('uprofNewPassword', this)" aria-label="Tampilkan password">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="uprof-form-group">
+                                    <label>Konfirmasi Password Baru <span style="color: #ef4444;">*</span></label>
+                                    <div class="uprof-pass-wrap">
+                                        <input type="password" id="uprofConfirmPassword" placeholder="Ketik ulang kata sandi baru" minlength="8" required autocomplete="new-password">
+                                        <button type="button" class="uprof-eye-btn" onclick="togglePassEye('uprofConfirmPassword', this)" aria-label="Tampilkan konfirmasi password">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: flex-end; gap: 12px; align-items: center; margin-top: 14px;">
+                                <button type="button" class="uprof-btn-secondary" onclick="toggleSecurityView('normal')">Batal</button>
+                                <button type="button" class="uprof-btn-primary" id="btnSubmitNewPass" onclick="handleResetPassword()">
+                                    <span id="btnSubmitNewPassText">Simpan Perubahan</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1071,6 +1193,329 @@
                         btn.innerHTML = originalBtnHtml;
                     }
                 }
+            }
+
+            /* ════════════════════════════════════════════════════════════
+               ALUR ATUR ULANG KATA SANDI (STEPPER DI PROFIL KEAMANAN)
+            ════════════════════════════════════════════════════════════ */
+            let currentOtpStep = 1;
+            let resendCooldownInterval = null;
+
+            function toggleSecurityView(view) {
+                const cardNormal = document.getElementById('cardNormalSecurity');
+                const cardReset = document.getElementById('cardResetPassword');
+                hideOtpAlert();
+
+                if (view === 'forgot') {
+                    if (cardNormal) cardNormal.style.display = 'none';
+                    if (cardReset) {
+                        cardReset.style.display = 'block';
+                        cardReset.style.animation = 'uprofFadeIn 0.25s ease forwards';
+                    }
+                    setOtpStep(1);
+                } else {
+                    if (cardReset) cardReset.style.display = 'none';
+                    if (cardNormal) {
+                        cardNormal.style.display = 'block';
+                        cardNormal.style.animation = 'uprofFadeIn 0.25s ease forwards';
+                    }
+                    if (resendCooldownInterval) {
+                        clearInterval(resendCooldownInterval);
+                        resendCooldownInterval = null;
+                    }
+                }
+            }
+
+            function setOtpStep(step) {
+                currentOtpStep = step;
+                hideOtpAlert();
+
+                // Toggle step content
+                for (let i = 1; i <= 3; i++) {
+                    const content = document.getElementById('uprofStepContent' + i);
+                    const indicator = document.getElementById('uprofStep' + i);
+                    const stepNum = document.getElementById('uprofStepNum' + i);
+
+                    if (content) {
+                        content.style.display = (i === step) ? 'block' : 'none';
+                        if (i === step) {
+                            content.style.animation = 'uprofFadeIn 0.25s ease forwards';
+                        }
+                    }
+
+                    if (indicator && stepNum) {
+                        indicator.classList.remove('active', 'completed');
+                        if (i < step) {
+                            indicator.classList.add('completed');
+                            stepNum.innerHTML = '✓';
+                        } else if (i === step) {
+                            indicator.classList.add('active');
+                            stepNum.innerHTML = i;
+                        } else {
+                            stepNum.innerHTML = i;
+                        }
+                    }
+                }
+
+                // Toggle lines
+                const line1 = document.getElementById('uprofLine1');
+                const line2 = document.getElementById('uprofLine2');
+                if (line1) {
+                    if (step >= 2) line1.classList.add('completed');
+                    else line1.classList.remove('completed');
+                }
+                if (line2) {
+                    if (step >= 3) line2.classList.add('completed');
+                    else line2.classList.remove('completed');
+                }
+
+                if (step === 2) {
+                    const otpInput = document.getElementById('uprofInputOtp');
+                    if (otpInput) {
+                        otpInput.value = '';
+                        setTimeout(() => otpInput.focus(), 100);
+                    }
+                } else if (step === 3) {
+                    const passInput = document.getElementById('uprofNewPassword');
+                    if (passInput) {
+                        passInput.value = '';
+                        document.getElementById('uprofConfirmPassword').value = '';
+                        setTimeout(() => passInput.focus(), 100);
+                    }
+                }
+            }
+
+            function showOtpAlert(msg, type = 'error') {
+                const box = document.getElementById('uprofOtpAlert');
+                if (!box) return;
+                box.style.display = 'block';
+                if (type === 'success') {
+                    box.style.background = '#f0fdf4';
+                    box.style.color = '#16a34a';
+                    box.style.border = '1px solid #bbf7d0';
+                } else {
+                    box.style.background = '#fef2f2';
+                    box.style.color = '#dc2626';
+                    box.style.border = '1px solid #fecaca';
+                }
+                box.textContent = msg;
+            }
+
+            function hideOtpAlert() {
+                const box = document.getElementById('uprofOtpAlert');
+                if (box) box.style.display = 'none';
+            }
+
+            async function handleSendOtp() {
+                const emailInput = document.getElementById('uprofInputEmail');
+                const email = emailInput ? emailInput.value.trim() : '';
+                const btn = document.getElementById('btnSendOtp');
+                const btnText = document.getElementById('btnSendOtpText');
+
+                if (!email) {
+                    showOtpAlert('Silakan masukkan email yang terdaftar.');
+                    return;
+                }
+
+                hideOtpAlert();
+                if (btn) btn.disabled = true;
+                if (btnText) btnText.textContent = 'Mengirim...';
+
+                try {
+                    const res = await fetch('{{ route('user.profile.security.otp.send') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ email: email })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || 'Gagal mengirim kode OTP.');
+                    }
+
+                    const targetEl = document.getElementById('uprofOtpEmailTarget');
+                    if (targetEl) targetEl.textContent = email;
+
+                    setOtpStep(2);
+                    startResendCooldown();
+                } catch (err) {
+                    showOtpAlert(err.message, 'error');
+                } finally {
+                    if (btn) btn.disabled = false;
+                    if (btnText) btnText.textContent = 'Kirim Kode';
+                }
+            }
+
+            async function handleVerifyOtp() {
+                const otpInput = document.getElementById('uprofInputOtp');
+                const otp = otpInput ? otpInput.value.trim() : '';
+                const btn = document.getElementById('btnVerifyOtp');
+                const btnText = document.getElementById('btnVerifyOtpText');
+
+                if (!otp || otp.length !== 6) {
+                    showOtpAlert('Masukkan 6 digit kode OTP yang benar.');
+                    return;
+                }
+
+                hideOtpAlert();
+                if (btn) btn.disabled = true;
+                if (btnText) btnText.textContent = 'Memverifikasi...';
+
+                try {
+                    const res = await fetch('{{ route('user.profile.security.otp.verify') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ otp: otp })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || 'Verifikasi OTP gagal.');
+                    }
+
+                    setOtpStep(3);
+                } catch (err) {
+                    showOtpAlert(err.message, 'error');
+                } finally {
+                    if (btn) btn.disabled = false;
+                    if (btnText) btnText.textContent = 'Verifikasi Kode';
+                }
+            }
+
+            async function handleResendOtp() {
+                const btn = document.getElementById('btnResendOtp');
+                if (btn && btn.disabled) return;
+
+                hideOtpAlert();
+                if (btn) btn.disabled = true;
+
+                try {
+                    const res = await fetch('{{ route('user.profile.security.otp.resend') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || 'Gagal mengirim ulang OTP.');
+                    }
+
+                    showOtpAlert(data.message || 'Kode OTP baru telah dikirimkan ke email Anda.', 'success');
+                    startResendCooldown();
+                } catch (err) {
+                    showOtpAlert(err.message, 'error');
+                    if (btn) btn.disabled = false;
+                }
+            }
+
+            function startResendCooldown(seconds = 60) {
+                const btn = document.getElementById('btnResendOtp');
+                const timerSpan = document.getElementById('resendCountdown');
+                if (!btn || !timerSpan) return;
+
+                if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+
+                btn.disabled = true;
+                let remaining = seconds;
+                timerSpan.textContent = `(${remaining}s)`;
+
+                resendCooldownInterval = setInterval(() => {
+                    remaining--;
+                    if (remaining <= 0) {
+                        clearInterval(resendCooldownInterval);
+                        resendCooldownInterval = null;
+                        btn.disabled = false;
+                        timerSpan.textContent = '';
+                    } else {
+                        timerSpan.textContent = `(${remaining}s)`;
+                    }
+                }, 1000);
+            }
+
+            async function handleResetPassword() {
+                const passInput = document.getElementById('uprofNewPassword');
+                const confirmInput = document.getElementById('uprofConfirmPassword');
+                const password = passInput ? passInput.value : '';
+                const password_confirmation = confirmInput ? confirmInput.value : '';
+                const btn = document.getElementById('btnSubmitNewPass');
+                const btnText = document.getElementById('btnSubmitNewPassText');
+
+                if (!password || password.length < 8) {
+                    showOtpAlert('Password baru minimal 8 karakter.');
+                    return;
+                }
+                if (password !== password_confirmation) {
+                    showOtpAlert('Konfirmasi password baru tidak cocok.');
+                    return;
+                }
+
+                hideOtpAlert();
+                if (btn) btn.disabled = true;
+                if (btnText) btnText.textContent = 'Menyimpan...';
+
+                try {
+                    const res = await fetch('{{ route('user.profile.security.otp.reset') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            password: password,
+                            password_confirmation: password_confirmation
+                        })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok || !data.success) {
+                        throw new Error(data.message || 'Gagal mengubah kata sandi.');
+                    }
+
+                    showOtpAlert(data.message || 'Kata sandi Anda berhasil diperbarui!', 'success');
+
+                    setTimeout(() => {
+                        toggleSecurityView('normal');
+                        // Bersihkan input normal form
+                        const currentInput = document.querySelector('input[name="current_password"]');
+                        if (currentInput) currentInput.value = '';
+                        const pInput = document.querySelector('input[name="password"]');
+                        if (pInput) pInput.value = '';
+                        const pcInput = document.querySelector('input[name="password_confirmation"]');
+                        if (pcInput) pcInput.value = '';
+                        
+                        if (window.showToast) {
+                            window.showToast(data.message || 'Kata sandi berhasil diperbarui!', 'success');
+                        }
+                    }, 1800);
+                } catch (err) {
+                    showOtpAlert(err.message, 'error');
+                } finally {
+                    if (btn) btn.disabled = false;
+                    if (btnText) btnText.textContent = 'Simpan Perubahan';
+                }
+            }
+
+            function togglePassEye(inputId, btn) {
+                const input = document.getElementById(inputId);
+                if (!input || !btn) return;
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                btn.innerHTML = isPassword
+                    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8s-4 8-11 8-11-8-11-8"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+                    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
             }
 
             document.addEventListener('DOMContentLoaded', () => {
