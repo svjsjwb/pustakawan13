@@ -246,7 +246,7 @@ class BookController extends Controller
             return response()->json([
                 'success' => false,
                 'message' =>
-                    'Format ISBN tidak valid. Masukkan ISBN-10 atau ISBN-13.',
+                'Format ISBN tidak valid. Masukkan ISBN-10 atau ISBN-13.',
             ], 422);
         }
 
@@ -256,7 +256,7 @@ class BookController extends Controller
             return response()->json([
                 'success' => false,
                 'message' =>
-                    'Data buku dengan ISBN tersebut tidak ditemukan. ISBN tetap dapat digunakan untuk pengisian manual.',
+                'Data buku dengan ISBN tersebut tidak ditemukan. ISBN tetap dapat digunakan untuk pengisian manual.',
                 'data' => [
                     'isbn' => $isbn,
                 ],
@@ -266,7 +266,7 @@ class BookController extends Controller
         return response()->json([
             'success' => true,
             'message' =>
-                'Metadata buku berhasil ditemukan dari '
+            'Metadata buku berhasil ditemukan dari '
                 . $metadata['source']
                 . '.',
             'data' => $metadata,
@@ -414,7 +414,7 @@ class BookController extends Controller
                     ->withInput()
                     ->withErrors([
                         'subcategory_id' =>
-                            'Subkategori tidak sesuai dengan kategori yang dipilih.',
+                        'Subkategori tidak sesuai dengan kategori yang dipilih.',
                     ]);
             }
         }
@@ -441,8 +441,8 @@ class BookController extends Controller
 
         $educationLevel =
             $mainCategory === 'Buku Pelajaran'
-                ? $subCategoryName
-                : null;
+            ? $subCategoryName
+            : null;
 
         /*
          * =========================================================
@@ -488,44 +488,44 @@ class BookController extends Controller
 
                 $book = Book::create([
                     'category_id' =>
-                        $request->category_id,
+                    $request->category_id,
                     'subcategory_id' =>
-                        $request->subcategory_id,
+                    $request->subcategory_id,
                     'education_level' =>
-                        $educationLevel,
+                    $educationLevel,
                     'judul_buku' =>
-                        $request->title,
+                    $request->title,
                     'penulis' =>
-                        $request->author,
+                    $request->author,
                     'isbn' =>
-                        $request->filled('isbn')
-                            ? preg_replace(
-                                '/[^0-9Xx]/',
-                                '',
-                                strtoupper(
-                                    $request->isbn
-                                )
+                    $request->filled('isbn')
+                        ? preg_replace(
+                            '/[^0-9Xx]/',
+                            '',
+                            strtoupper(
+                                $request->isbn
                             )
-                            : null,
+                        )
+                        : null,
                     'publisher' =>
-                        $request->publisher,
+                    $request->publisher,
                     'publication_year' =>
-                        $request->publication_year,
+                    $request->publication_year,
                     'description' =>
-                        $request->description,
+                    $request->description,
                     'cover' =>
-                        $coverPath,
+                    $coverPath,
                     'sku' =>
-                        $request->sku,
+                    $request->sku,
                     'stok' => 0,
                     'status' =>
-                        'Tersedia',
+                    'Tersedia',
                     'no_iventaris' =>
-                        $request->no_iventaris,
+                    $request->no_iventaris,
                     'ddc' =>
-                        $request->ddc,
+                    $request->ddc,
                     'edition' =>
-                        $request->edition,
+                    $request->edition,
                 ]);
 
                 /*
@@ -557,32 +557,32 @@ class BookController extends Controller
                     if (!$position) {
                         throw new \Exception(
                             'Rak '
-                            . $shelf->name
-                            . ' sudah penuh.'
+                                . $shelf->name
+                                . ' sudah penuh.'
                         );
                     }
 
                     BookCopy::create([
                         'book_id' =>
-                            $book->id,
+                        $book->id,
                         'copy' =>
-                            $this->generateNextCopyNumber(
-                                $book
-                            ),
+                        $this->generateNextCopyNumber(
+                            $book
+                        ),
                         'status' =>
-                            'available',
+                        'available',
                         'condition' =>
-                            'baik',
+                        'baik',
                         'shelf_id' =>
-                            $shelf->id,
+                        $shelf->id,
                         'section' =>
-                            $position['section'],
+                        $position['section'],
                         'side' =>
-                            $position['side'],
+                        $position['side'],
                         'row' =>
-                            $position['row'],
+                        $position['row'],
                         'column' =>
-                            $position['column'],
+                        $position['column'],
                     ]);
                 }
 
@@ -597,19 +597,19 @@ class BookController extends Controller
                         'book_id',
                         $book->id
                     )
-                        ->where(
-                            'status',
-                            'available'
-                        )
-                        ->count();
+                    ->where(
+                        'status',
+                        'available'
+                    )
+                    ->count();
 
                 $book->update([
                     'stok' =>
-                        $availableCount,
+                    $availableCount,
                     'status' =>
-                        $availableCount > 0
-                            ? 'Tersedia'
-                            : 'Dipinjam',
+                    $availableCount > 0
+                        ? 'Tersedia'
+                        : 'Dipinjam',
                 ]);
             }
         );
@@ -658,143 +658,64 @@ class BookController extends Controller
      * |--------------------------------------------------------------------------
      */
 
-    public function update(
-        Request $request,
-        Book $book
-    ) {
-        /*
-         * =========================================================
-         * NORMALISASI ISBN
-         * =========================================================
-         */
 
+    public function update(Request $request, Book $book)
+    {
         if ($request->filled('isbn')) {
             $request->merge([
                 'isbn' => preg_replace(
                     '/[^0-9Xx]/',
                     '',
-                    strtoupper(
-                        $request->input('isbn')
-                    )
+                    strtoupper($request->input('isbn'))
                 ),
             ]);
         }
 
-        /*
-         * =========================================================
-         * VALIDASI
-         * =========================================================
-         */
-
         $request->validate([
-            'category_id' => [
-                'required',
-                'exists:categories,id',
-            ],
-            'subcategory_id' => [
-                'nullable',
-                'exists:subcategories,id',
-            ],
+            'category_id' => ['required', 'exists:categories,id'],
+            'subcategory_id' => ['nullable', 'exists:subcategories,id'],
             'isbn' => [
                 'nullable',
                 'string',
                 'max:20',
-                Rule::unique(
-                    'books',
-                    'isbn'
-                )->ignore($book->id),
+                Rule::unique('books', 'isbn')->ignore($book->id),
             ],
-            'title' => [
-                'required',
-                'string',
-                'max:255',
-            ],
+            'title' => ['required', 'string', 'max:255'],
             'sku' => [
                 'required',
                 'string',
                 'max:100',
-                Rule::unique(
-                    'books',
-                    'sku'
-                )->ignore($book->id),
+                Rule::unique('books', 'sku')->ignore($book->id),
             ],
-            'author' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'publisher' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
+            'author' => ['required', 'string', 'max:255'],
+            'publisher' => ['nullable', 'string', 'max:255'],
             'publication_year' => [
                 'nullable',
                 'integer',
                 'min:1000',
                 'max:' . (date('Y') + 1),
             ],
-            'description' => [
-                'nullable',
-                'string',
-            ],
-            'stock' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
-
-            /*
-             * Rak adalah rak utama buku.
-             * Jika rak diganti, seluruh eksemplar buku dipindahkan.
-             */
-            'shelf_id' => [
-                'required',
-                'exists:shelves,id',
-            ],
-            'no_iventaris' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-            'ddc' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-            'edition' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
+            'description' => ['nullable', 'string'],
+            'stock' => ['required', 'integer', 'min:1'],
+            'shelf_id' => ['required', 'exists:shelves,id'],
+            'no_iventaris' => ['nullable', 'string', 'max:255'],
+            'ddc' => ['nullable', 'string', 'max:255'],
+            'edition' => ['nullable', 'string', 'max:255'],
             'cover' => [
                 'nullable',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
                 'max:2048',
             ],
-            'cover_url' => [
-                'nullable',
-                'url',
-                'max:2048',
-            ],
+            'cover_url' => ['nullable', 'url', 'max:2048'],
         ]);
-
-        /*
-         * =========================================================
-         * VALIDASI SUBKATEGORI
-         * =========================================================
-         */
 
         if ($request->filled('subcategory_id')) {
             $validSubcategory = Subcategory::where(
                 'id',
                 $request->subcategory_id
             )
-                ->where(
-                    'category_id',
-                    $request->category_id
-                )
+                ->where('category_id', $request->category_id)
                 ->exists();
 
             if (!$validSubcategory) {
@@ -802,178 +723,82 @@ class BookController extends Controller
                     ->withInput()
                     ->withErrors([
                         'subcategory_id' =>
-                            'Subkategori tidak sesuai dengan kategori yang dipilih.',
+                        'Subkategori tidak sesuai dengan kategori yang dipilih.',
                     ]);
             }
         }
 
-        /*
-         * =========================================================
-         * HITUNG STOK AVAILABLE SAAT INI
-         * =========================================================
-         *
-         * books.stok = jumlah copy AVAILABLE.
-         *
-         * BookCopy tetap menjadi sumber data fisik.
-         */
+        $category = Category::findOrFail($request->category_id);
 
-        $copyQuery = BookCopy::where(
-            'book_id',
-            $book->id
-        );
+        $subcategory = $request->filled('subcategory_id')
+            ? Subcategory::find($request->subcategory_id)
+            : null;
 
-        $availableCountBeforeUpdate =
-            (clone $copyQuery)
-                ->where(
-                    'status',
-                    'available'
-                )
+        $educationLevel = $category->name === 'Buku Pelajaran'
+            ? $subcategory?->name
+            : null;
+
+        $oldCoverPath = $book->cover;
+        $newCoverPath = null;
+
+        try {
+            if ($request->hasFile('cover')) {
+                $newCoverPath = $request->file('cover')
+                    ->store('covers', 'public');
+            } elseif ($request->filled('cover_url')) {
+                $newCoverPath = $this->downloadRemoteCover(
+                    $request->string('cover_url')->toString(),
+                    $request->input('isbn')
+                );
+            }
+
+            $copyQuery = BookCopy::where('book_id', $book->id);
+
+            $availableCountBeforeUpdate = (clone $copyQuery)
+                ->where('status', 'available')
                 ->count();
 
-        /*
-         * Rak aktif buku saat ini.
-         * Lokasi fisik tetap bersumber dari BookCopy.
-         */
-        $currentShelfId =
-            $book
-                ->copies()
+            $currentShelfId = $book->copies()
                 ->whereNotNull('shelf_id')
                 ->orderBy('id')
                 ->value('shelf_id');
 
-        /*
-         * =========================================================
-         * CATEGORY
-         * =========================================================
-         */
-
-        $category = Category::findOrFail(
-            $request->category_id
-        );
-
-        $subcategory =
-            $request->filled('subcategory_id')
-                ? Subcategory::find(
-                    $request->subcategory_id
-                )
-                : null;
-
-        $mainCategory =
-            $category->name;
-
-        $subCategoryName =
-            $subcategory?->name;
-
-        $educationLevel =
-            $mainCategory === 'Buku Pelajaran'
-                ? $subCategoryName
-                : null;
-
-        /*
-         * =========================================================
-         * COVER
-         * =========================================================
-         */
-
-        $coverPath = null;
-
-        if ($request->hasFile('cover')) {
-            $coverPath = $request
-                ->file('cover')
-                ->store(
-                    'covers',
-                    'public'
-                );
-        } elseif ($request->filled('cover_url')) {
-            $coverPath =
-                $this->downloadRemoteCover(
-                    $request
-                        ->string('cover_url')
-                        ->toString(),
-                    $request->input('isbn')
-                );
-        }
-
-        /*
-         * =========================================================
-         * UPDATE BOOK + STOCK
-         * =========================================================
-         */
-
-        DB::transaction(
-            function () use (
+            DB::transaction(function () use (
                 $request,
                 $book,
-                $coverPath,
+                $newCoverPath,
                 $availableCountBeforeUpdate,
                 $currentShelfId,
                 $educationLevel
             ) {
-                /*
-                 * -------------------------------------------------
-                 * UPDATE INFORMASI BUKU
-                 * -------------------------------------------------
-                 */
-
                 $book->update([
-                    'category_id' =>
-                        $request->category_id,
-                    'subcategory_id' =>
-                        $request->subcategory_id,
-                    'education_level' =>
-                        $educationLevel,
-                    'judul_buku' =>
-                        $request->title,
-                    'penulis' =>
-                        $request->author,
-                    'isbn' =>
-                        $request->filled('isbn')
-                            ? preg_replace(
-                                '/[^0-9Xx]/',
-                                '',
-                                strtoupper(
-                                    $request->isbn
-                                )
-                            )
-                            : null,
-                    'publisher' =>
-                        $request->publisher,
-                    'publication_year' =>
-                        $request->publication_year,
-                    'description' =>
-                        $request->description,
-                    'sku' =>
-                        $request->sku,
-                    'no_iventaris' =>
-                        $request->no_iventaris,
-                    'ddc' =>
-                        $request->ddc,
-                    'edition' =>
-                        $request->edition,
+                    'category_id' => $request->category_id,
+                    'subcategory_id' => $request->subcategory_id,
+                    'education_level' => $educationLevel,
+                    'judul_buku' => $request->title,
+                    'penulis' => $request->author,
+                    'isbn' => $request->filled('isbn')
+                        ? preg_replace(
+                            '/[^0-9Xx]/',
+                            '',
+                            strtoupper($request->isbn)
+                        )
+                        : null,
+                    'publisher' => $request->publisher,
+                    'publication_year' => $request->publication_year,
+                    'description' => $request->description,
+                    'sku' => $request->sku,
+                    'no_iventaris' => $request->no_iventaris,
+                    'ddc' => $request->ddc,
+                    'edition' => $request->edition,
                     ...(
-                        $coverPath
-                            ? [
-                                'cover' =>
-                                    $coverPath
-                            ]
-                            : []
+                        $newCoverPath
+                        ? ['cover' => $newCoverPath]
+                        : []
                     ),
                 ]);
 
-                /*
-                 * -------------------------------------------------
-                 * RAK UTAMA BUKU
-                 * -------------------------------------------------
-                 *
-                 * Satu judul buku hanya boleh memiliki satu rak.
-                 * Jika rak pada Edit Buku berubah, SEMUA BookCopy
-                 * dipindahkan ke rak baru dan posisi fisiknya dihitung
-                 * ulang.
-                 */
-
-                $targetShelf = Shelf::findOrFail(
-                    $request->shelf_id
-                );
+                $targetShelf = Shelf::findOrFail($request->shelf_id);
 
                 $targetShelfId = (int) $targetShelf->id;
                 $oldShelfId = $currentShelfId !== null
@@ -984,24 +809,19 @@ class BookController extends Controller
                     $oldShelfId === null ||
                     $oldShelfId !== $targetShelfId
                 ) {
-                    $bookCopies = BookCopy::where(
-                        'book_id',
-                        $book->id
-                    )
+                    $bookCopies = BookCopy::where('book_id', $book->id)
                         ->orderBy('id')
                         ->get();
 
                     foreach ($bookCopies as $copy) {
-                        $position =
-                            $this->findBookCopyPosition(
-                                $targetShelfId
-                            );
+                        $position = $this->findBookCopyPosition(
+                            $targetShelfId
+                        );
 
                         if (!$position) {
                             throw new \Exception(
-                                'Rak '
-                                . $targetShelf->name
-                                . ' tidak memiliki kapasitas yang cukup untuk memindahkan seluruh eksemplar buku ini.'
+                                'Rak ' . $targetShelf->name .
+                                    ' tidak memiliki kapasitas yang cukup untuk memindahkan seluruh eksemplar buku ini.'
                             );
                         }
 
@@ -1015,166 +835,98 @@ class BookController extends Controller
                     }
                 }
 
-                /*
-                 * -------------------------------------------------
-                 * STOK BERTAMBAH
-                 * -------------------------------------------------
-                 *
-                 * Copy baru selalu mengikuti rak utama buku.
-                 * Tidak ada lagi pemilihan rak khusus untuk copy baru.
-                 */
+                if ($request->stock > $availableCountBeforeUpdate) {
+                    $difference = $request->stock -
+                        $availableCountBeforeUpdate;
 
-                if (
-                    $request->stock >
-                    $availableCountBeforeUpdate
-                ) {
-                    $difference =
-                        $request->stock
-                        - $availableCountBeforeUpdate;
-
-                    for (
-                        $i = 0;
-                        $i < $difference;
-                        $i++
-                    ) {
-                        $position =
-                            $this->findBookCopyPosition(
-                                $targetShelfId
-                            );
+                    for ($i = 0; $i < $difference; $i++) {
+                        $position = $this->findBookCopyPosition(
+                            $targetShelfId
+                        );
 
                         if (!$position) {
                             throw new \Exception(
-                                'Rak '
-                                . $targetShelf->name
-                                . ' sudah penuh.'
+                                'Rak ' . $targetShelf->name . ' sudah penuh.'
                             );
                         }
 
                         BookCopy::create([
-                            'book_id' =>
-                                $book->id,
-                            'copy' =>
-                                $this->generateNextCopyNumber(
-                                    $book
-                                ),
-                            'status' =>
-                                'available',
-                            'condition' =>
-                                'baik',
-                            'shelf_id' =>
-                                $targetShelfId,
-                            'section' =>
-                                $position['section'],
-                            'side' =>
-                                $position['side'],
-                            'row' =>
-                                $position['row'],
-                            'column' =>
-                                $position['column'],
+                            'book_id' => $book->id,
+                            'copy' => $this->generateNextCopyNumber($book),
+                            'status' => 'available',
+                            'condition' => 'baik',
+                            'shelf_id' => $targetShelfId,
+                            'section' => $position['section'],
+                            'side' => $position['side'],
+                            'row' => $position['row'],
+                            'column' => $position['column'],
                         ]);
                     }
+                } elseif ($request->stock < $availableCountBeforeUpdate) {
+                    $difference = $availableCountBeforeUpdate -
+                        $request->stock;
 
-                    /*
-                     * -------------------------------------------------
-                     * STOK BERKURANG
-                     * -------------------------------------------------
-                     *
-                     * Hanya copy AVAILABLE yang boleh dihapus.
-                     *
-                     * Borrowed / Reserved / Maintenance / Lost
-                     * tetap dipertahankan.
-                     */
-                } elseif (
-                    $request->stock <
-                    $availableCountBeforeUpdate
-                ) {
-                    $difference =
-                        $availableCountBeforeUpdate
-                        - $request->stock;
+                    $copiesToDelete = BookCopy::where('book_id', $book->id)
+                        ->where('status', 'available')
+                        ->latest('id')
+                        ->take($difference)
+                        ->get();
 
-                    $copiesToDelete =
-                        BookCopy::where(
-                            'book_id',
-                            $book->id
-                        )
-                            ->where(
-                                'status',
-                                'available'
-                            )
-                            ->latest('id')
-                            ->take($difference)
-                            ->get();
-
-                    if (
-                        $copiesToDelete->count() <
-                        $difference
-                    ) {
+                    if ($copiesToDelete->count() < $difference) {
                         throw new \Exception(
                             'Jumlah copy yang dapat dihapus tidak mencukupi karena sebagian eksemplar sedang tidak tersedia.'
                         );
                     }
 
-                    foreach (
-                        $copiesToDelete as $copy
-                    ) {
+                    foreach ($copiesToDelete as $copy) {
                         CollectionWithdrawal::create([
-                            'type' =>
-                                'copy',
-                            'book_id' =>
-                                $book->id,
-                            'book_copy_id' =>
-                                $copy->id,
-                            'book_title' =>
-                                $book->judul_buku,
-                            'copy' =>
-                                $copy->copy,
-                            'quantity' =>
-                                1,
+                            'type' => 'copy',
+                            'book_id' => $book->id,
+                            'book_copy_id' => $copy->id,
+                            'book_title' => $book->judul_buku,
+                            'copy' => $copy->copy,
+                            'quantity' => 1,
                             'reason' =>
-                                'Pengurangan jumlah eksemplar melalui pengaturan stok buku.',
-                            'withdrawn_at' =>
-                                now(),
+                            'Pengurangan jumlah eksemplar melalui pengaturan stok buku.',
+                            'withdrawn_at' => now(),
                         ]);
 
                         $copy->delete();
                     }
                 }
 
-                /*
-                 * -------------------------------------------------
-                 * SYNC STOCK
-                 * -------------------------------------------------
-                 */
-
-                $availableCount =
-                    BookCopy::where(
-                        'book_id',
-                        $book->id
-                    )
-                        ->where(
-                            'status',
-                            'available'
-                        )
-                        ->count();
+                $availableCount = BookCopy::where('book_id', $book->id)
+                    ->where('status', 'available')
+                    ->count();
 
                 $book->update([
-                    'stok' =>
-                        $availableCount,
-                    'status' =>
-                        $availableCount > 0
-                            ? 'Tersedia'
-                            : 'Dipinjam',
+                    'stok' => $availableCount,
+                    'status' => $availableCount > 0
+                        ? 'Tersedia'
+                        : 'Dipinjam',
                 ]);
+            });
+
+            if (
+                $newCoverPath &&
+                $oldCoverPath &&
+                $oldCoverPath !== $newCoverPath
+            ) {
+                Storage::disk('public')->delete($oldCoverPath);
             }
-        );
+        } catch (\Throwable $e) {
+            if ($newCoverPath) {
+                Storage::disk('public')->delete($newCoverPath);
+            }
+
+            throw $e;
+        }
 
         return redirect()
             ->route('books.index')
-            ->with(
-                'success',
-                'Buku berhasil diperbarui.'
-            );
+            ->with('success', 'Buku berhasil diperbarui.');
     }
+
 
     /*
      * |--------------------------------------------------------------------------
@@ -1276,10 +1028,10 @@ class BookController extends Controller
                 'covers/'
                 . (
                     $isbn
-                        ?: uniqid(
-                            'book_',
-                            true
-                        )
+                    ?: uniqid(
+                        'book_',
+                        true
+                    )
                 )
                 . '.'
                 . $extension;
@@ -1326,8 +1078,8 @@ class BookController extends Controller
             ->whereHas('borrowing', fn($q) => $q->whereIn('status', ['menunggu', 'dipinjam', 'diperpanjang', 'terlambat']))
             ->exists() ||
             Borrowing::where('book_id', $book->id)
-                ->whereIn('status', ['menunggu', 'dipinjam', 'diperpanjang', 'terlambat'])
-                ->exists();
+            ->whereIn('status', ['menunggu', 'dipinjam', 'diperpanjang', 'terlambat'])
+            ->exists();
 
         $hasActiveReservations = Reservation::where('book_id', $book->id)
             ->whereIn('status', ['menunggu', 'disetujui', 'siap_diambil'])
@@ -1378,21 +1130,21 @@ class BookController extends Controller
 
                 CollectionWithdrawal::create([
                     'type' =>
-                        'book',
+                    'book',
                     'book_id' =>
-                        $book->id,
+                    $book->id,
                     'book_copy_id' =>
-                        null,
+                    null,
                     'book_title' =>
-                        $book->judul_buku,
+                    $book->judul_buku,
                     'copy' =>
-                        null,
+                    null,
                     'quantity' =>
-                        1,
+                    1,
                     'reason' =>
-                        $validated['reason'],
+                    $validated['reason'],
                     'withdrawn_at' =>
-                        now(),
+                    now(),
                 ]);
 
                 /*
@@ -1418,21 +1170,21 @@ class BookController extends Controller
                 if ($copyCount > 0) {
                     CollectionWithdrawal::create([
                         'type' =>
-                            'copy',
+                        'copy',
                         'book_id' =>
-                            $book->id,
+                        $book->id,
                         'book_copy_id' =>
-                            null,
+                        null,
                         'book_title' =>
-                            $book->judul_buku,
+                        $book->judul_buku,
                         'copy' =>
-                            null,
+                        null,
                         'quantity' =>
-                            $copyCount,
+                        $copyCount,
                         'reason' =>
-                            $validated['reason'],
+                        $validated['reason'],
                         'withdrawn_at' =>
-                            now(),
+                        now(),
                     ]);
                 }
 

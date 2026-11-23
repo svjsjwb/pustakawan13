@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\PasswordResetOtpMail;
 use App\Models\PasswordResetOtp;
 use App\Models\User;
+use App\Services\OtpMailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
-use App\Services\OtpMailService;
 
 class ForgotPasswordController extends Controller
 {
@@ -21,10 +20,50 @@ class ForgotPasswordController extends Controller
         private OtpMailService $otpMailService
     ) {}
 
+    /**
+     * Mengambil OTP yang sudah diverifikasi dan masih berlaku.
+     * Database menjadi sumber kebenaran, bukan session boolean.
+     */
+    private function getVerifiedResetOtp(Request $request): ?PasswordResetOtp
+    {
+        $email = $request->session()->get('password_reset_email');
+        $otpId = $request->session()->get('password_reset_otp_id');
+
+        if (!$email || !$otpId) {
+            return null;
+        }
+
+        $reset = PasswordResetOtp::where('id', $otpId)
+            ->where('email', $email)
+            ->first();
+
+        if (
+            !$reset ||
+            !$reset->isVerified() ||
+            $reset->isExpired()
+        ) {
+            return null;
+        }
+
+        return $reset;
+    }
+
+    private function clearResetSession(Request $request): void
+    {
+        $request->session()->forget([
+            'password_reset_email',
+            'password_reset_otp_id',
+            'password_reset_verified',
+        ]);
+    }
+
     public function showEmailForm()
     {
         return view('auth.forgot-password');
     }
+
+
+
 
     public function sendOtp(Request $request)
     {
@@ -33,87 +72,213 @@ class ForgotPasswordController extends Controller
         ]);
 
         $email = strtolower(trim($data['email']));
-        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
-        if (!$user) {
-            return back()
-                ->withErrors(['email' => 'Email tersebut tidak terdaftar dalam sistem.'])
-                ->withInput();
-        }
+        $this->clearResetSession($request);
 
-        $otp = (string) random_int(100000, 999999);
-
-        PasswordResetOtp::where('email', $email)->delete();
-
-        $reset = PasswordResetOtp::create([
-            'email' => $email,
-            'otp_hash' => Hash::make($otp),
-            'attempts' => 0,
-            'expires_at' => now()->addMinutes(self::OTP_TTL_MINUTES),
-        ]);
+        $genericMessage = 'Jika email terdaftar, kode verifikasi akan dikirim. Silakan periksa kotak masuk Anda.';
 
         try {
+            // Penerbitan OTP dilakukan dalam transaksi.
+            $result = DB::transaction(function () use ($email) {
+                $user = User::whereRaw('LOWER(email) = ?', [$email])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$user) {
+                    return null;
+                }
+
+                // Invalidasi OTP sebelumnya.
+                PasswordResetOtp::where('email', $email)->delete();
+
+                $otp = (string) random_int(100000, 999999);
+
+                $reset = PasswordResetOtp::create([
+                    'email' => $email,
+                    'otp_hash' => Hash::make($otp),
+                    'attempts' => 0,
+                    'expires_at' => now()->addMinutes(self::OTP_TTL_MINUTES),
+                ]);
+
+                return [
+                    'id' => $reset->id,
+                    'otp' => $otp,
+                ];
+            });
+
+            // Email tidak terdaftar: tetap gunakan respons umum.
+            if (!$result) {
+                $request->session()->put([
+                    'password_reset_email' => $email,
+                    'password_reset_otp_id' => null,
+                ]);
+
+                return redirect()
+                    ->route('password.otp')
+                    ->with('success', $genericMessage);
+            }
+
+            // Pengiriman email dilakukan setelah transaksi selesai.
             $this->otpMailService->sendPasswordResetOtp(
                 $email,
-                $otp,
+                $result['otp'],
                 self::OTP_TTL_MINUTES
             );
+
+            // Pastikan OTP belum digantikan request lain.
+            $stillActive = PasswordResetOtp::where('id', $result['id'])
+                ->where('email', $email)
+                ->exists();
+
+            if (!$stillActive) {
+                $this->clearResetSession($request);
+
+                return redirect()
+                    ->route('password.request')
+                    ->with('status', $genericMessage);
+            }
+
+            $request->session()->put([
+                'password_reset_email' => $email,
+                'password_reset_otp_id' => $result['id'],
+            ]);
         } catch (\Throwable $e) {
             report($e);
-            return back()
-                ->withErrors(['email' => 'Gagal mengirim email OTP. Silakan periksa koneksi internet atau coba sesaat lagi.'])
-                ->withInput();
+
+            if (isset($result['id'])) {
+                PasswordResetOtp::where('id', $result['id'])
+                    ->where('email', $email)
+                    ->delete();
+            }
+
+            $request->session()->put([
+                'password_reset_email' => $email,
+                'password_reset_otp_id' => null,
+            ]);
         }
 
-        $request->session()->put('password_reset_email', $email);
-        $request->session()->forget('password_reset_verified');
-
-        return redirect()->route('password.otp')->with('success', 'Kode OTP telah dikirim ke email Anda.');
+        return redirect()
+            ->route('password.otp')
+            ->with('success', $genericMessage);
     }
 
     public function showOtpForm(Request $request)
     {
-        if (!$request->session()->has('password_reset_email')) {
+        $email = $request->session()->get('password_reset_email');
+        $otpId = $request->session()->get('password_reset_otp_id');
+
+        if (!$email) {
+            $this->clearResetSession($request);
+
             return redirect()->route('password.request');
         }
 
+        // Jika ada ID OTP, pastikan record masih berlaku.
+        if ($otpId) {
+            $reset = PasswordResetOtp::where('id', $otpId)
+                ->where('email', $email)
+                ->first();
+
+            if (!$reset || $reset->isExpired()) {
+                $this->clearResetSession($request);
+
+                return redirect()
+                    ->route('password.request')
+                    ->withErrors([
+                        'email' => 'OTP sudah tidak berlaku. Silakan mulai kembali proses reset password.',
+                    ]);
+            }
+        }
+
         return view('auth.verify-otp', [
-            'email' => $request->session()->get('password_reset_email'),
+            'email' => $email,
         ]);
     }
+
+
 
     public function verifyOtp(Request $request)
     {
         $email = $request->session()->get('password_reset_email');
+        $otpId = $request->session()->get('password_reset_otp_id');
 
         if (!$email) {
+            $this->clearResetSession($request);
+
             return redirect()->route('password.request');
+        }
+
+        if (!$otpId) {
+            return back()->withErrors([
+                'otp' => 'Kode OTP tidak valid atau tidak tersedia. Silakan periksa email atau mulai kembali proses reset password.',
+            ]);
         }
 
         $data = $request->validate([
             'otp' => ['required', 'digits:6'],
         ]);
 
-        $reset = PasswordResetOtp::where('email', $email)
-            ->latest('id')
-            ->first();
+        // Seluruh pemeriksaan dan perubahan status OTP
+        // dilakukan dalam transaksi dengan penguncian record.
+        $result = DB::transaction(function () use ($email, $otpId, $data) {
+            $reset = PasswordResetOtp::where('id', $otpId)
+                ->where('email', $email)
+                ->lockForUpdate()
+                ->first();
 
-        if (!$reset || $reset->isExpired()) {
-            return back()->withErrors(['otp' => 'OTP sudah kedaluwarsa. Silakan kirim OTP baru.']);
+            if (!$reset) {
+                return ['status' => 'invalid'];
+            }
+
+            if ($reset->isExpired()) {
+                return ['status' => 'expired'];
+            }
+
+            if ($reset->isVerified()) {
+                return ['status' => 'verified'];
+            }
+
+            if ($reset->attempts >= self::MAX_ATTEMPTS) {
+                return ['status' => 'max_attempts'];
+            }
+
+            if (!Hash::check($data['otp'], $reset->otp_hash)) {
+                $reset->attempts++;
+                $reset->save();
+
+                return [
+                    'status' => 'wrong',
+                    'remaining' => max(
+                        0,
+                        self::MAX_ATTEMPTS - $reset->attempts
+                    ),
+                ];
+            }
+
+            $reset->verified_at = now();
+            $reset->save();
+
+            return ['status' => 'success'];
+        });
+
+        if ($result['status'] === 'expired' || $result['status'] === 'invalid') {
+            $this->clearResetSession($request);
+
+            return redirect()
+                ->route('password.request')
+                ->withErrors([
+                    'email' => 'OTP tidak valid atau sudah kedaluwarsa. Silakan meminta OTP baru.',
+                ]);
         }
 
-        if ($reset->isVerified()) {
-            $request->session()->put('password_reset_verified', true);
-            return redirect()->route('password.reset');
+        if ($result['status'] === 'max_attempts') {
+            return back()->withErrors([
+                'otp' => 'Terlalu banyak percobaan. Silakan kirim OTP baru.',
+            ]);
         }
 
-        if ($reset->attempts >= self::MAX_ATTEMPTS) {
-            return back()->withErrors(['otp' => 'Terlalu banyak percobaan. Silakan kirim OTP baru.']);
-        }
-
-        if (!Hash::check($data['otp'], $reset->otp_hash)) {
-            $reset->increment('attempts');
-            $remaining = max(0, self::MAX_ATTEMPTS - $reset->attempts);
+        if ($result['status'] === 'wrong') {
+            $remaining = $result['remaining'];
 
             return back()->withErrors([
                 'otp' => $remaining > 0
@@ -122,57 +287,139 @@ class ForgotPasswordController extends Controller
             ]);
         }
 
-        $reset->update(['verified_at' => now()]);
-        $request->session()->put('password_reset_verified', true);
-
         return redirect()->route('password.reset');
     }
+
+
+
 
     public function resendOtp(Request $request)
     {
         $email = $request->session()->get('password_reset_email');
+        $otpId = $request->session()->get('password_reset_otp_id');
 
         if (!$email) {
+            $this->clearResetSession($request);
+
             return redirect()->route('password.request');
         }
 
-        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
-
-        if (!$user) {
-            return redirect()->route('password.request');
-        }
-
-        $otp = (string) random_int(100000, 999999);
-
-        PasswordResetOtp::where('email', $email)->delete();
-
-        PasswordResetOtp::create([
-            'email' => $email,
-            'otp_hash' => Hash::make($otp),
-            'attempts' => 0,
-            'expires_at' => now()->addMinutes(self::OTP_TTL_MINUTES),
-        ]);
+        $genericMessage = 'Jika email terdaftar, kode verifikasi akan dikirim. Silakan periksa kotak masuk Anda.';
 
         try {
+            $otp = (string) random_int(100000, 999999);
+
+            $result = DB::transaction(function () use ($email, $otpId, $otp) {
+                $user = User::whereRaw('LOWER(email) = ?', [$email])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$user) {
+                    return ['status' => 'not_found'];
+                }
+
+                if ($otpId) {
+                    $oldReset = PasswordResetOtp::where('id', $otpId)
+                        ->where('email', $email)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($oldReset && $oldReset->isVerified() && !$oldReset->isExpired()) {
+                        return ['status' => 'verified'];
+                    }
+                }
+
+                PasswordResetOtp::where('email', $email)->delete();
+
+                $newReset = PasswordResetOtp::create([
+                    'email' => $email,
+                    'otp_hash' => Hash::make($otp),
+                    'attempts' => 0,
+                    'expires_at' => now()->addMinutes(self::OTP_TTL_MINUTES),
+                ]);
+
+                return [
+                    'status' => 'created',
+                    'id' => $newReset->id,
+                ];
+            });
+
+            if ($result['status'] === 'verified') {
+                return redirect()->route('password.reset');
+            }
+
+            if ($result['status'] === 'not_found') {
+                $request->session()->put([
+                    'password_reset_email' => $email,
+                    'password_reset_otp_id' => null,
+                ]);
+
+                return redirect()
+                    ->route('password.otp')
+                    ->with('success', $genericMessage);
+            }
+
             $this->otpMailService->sendPasswordResetOtp(
                 $email,
                 $otp,
                 self::OTP_TTL_MINUTES
             );
+
+            $stillActive = PasswordResetOtp::where('id', $result['id'])
+                ->where('email', $email)
+                ->exists();
+
+            if (!$stillActive) {
+                $request->session()->put([
+                    'password_reset_email' => $email,
+                    'password_reset_otp_id' => null,
+                ]);
+
+                return redirect()
+                    ->route('password.otp')
+                    ->with('success', $genericMessage);
+            }
+
+            $request->session()->put([
+                'password_reset_email' => $email,
+                'password_reset_otp_id' => $result['id'],
+            ]);
+
+            return redirect()
+                ->route('password.otp')
+                ->with('success', 'OTP baru telah dikirim.');
         } catch (\Throwable $e) {
             report($e);
-            return back()->withErrors(['otp' => 'Gagal mengirim ulang OTP. Silakan coba sesaat lagi.']);
+
+            if (isset($result['id'])) {
+                PasswordResetOtp::where('id', $result['id'])
+                    ->where('email', $email)
+                    ->delete();
+            }
+
+            $request->session()->put([
+                'password_reset_email' => $email,
+                'password_reset_otp_id' => null,
+            ]);
+
+            return redirect()
+                ->route('password.otp')
+                ->with('success', $genericMessage);
         }
-
-        $request->session()->forget('password_reset_verified');
-
-        return back()->with('success', 'OTP baru telah dikirim.');
     }
+
+
 
     public function showResetForm(Request $request)
     {
-        if (!$request->session()->get('password_reset_verified')) {
-            return redirect()->route('password.otp');
+        if (!$this->getVerifiedResetOtp($request)) {
+            $this->clearResetSession($request);
+
+            return redirect()
+                ->route('password.request')
+                ->withErrors([
+                    'email' => 'Silakan lakukan verifikasi OTP terlebih dahulu.',
+                ]);
         }
 
         return view('auth.reset-password');
@@ -180,45 +427,78 @@ class ForgotPasswordController extends Controller
 
     public function resetPassword(Request $request)
     {
-        if (!$request->session()->get('password_reset_verified')) {
-            return redirect()->route('password.request');
+        $reset = $this->getVerifiedResetOtp($request);
+
+        if (!$reset) {
+            $this->clearResetSession($request);
+
+            return redirect()
+                ->route('password.request')
+                ->withErrors([
+                    'email' => 'Verifikasi OTP tidak valid atau sudah kedaluwarsa.',
+                ]);
         }
 
         $data = $request->validate([
-            'password' => ['required', 'confirmed', Password::min(8)],
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8),
+            ],
         ]);
 
         $email = $request->session()->get('password_reset_email');
-        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+        $otpId = $request->session()->get('password_reset_otp_id');
+
+        // Validasi OTP dan perubahan password dilakukan secara atomik.
+        $user = DB::transaction(function () use ($email, $otpId, $data) {
+            $reset = PasswordResetOtp::where('id', $otpId)
+                ->where('email', $email)
+                ->lockForUpdate()
+                ->first();
+
+            if (
+                !$reset ||
+                !$reset->isVerified() ||
+                $reset->isExpired()
+            ) {
+                return null;
+            }
+
+            $user = User::whereRaw('LOWER(email) = ?', [$email])
+                ->lockForUpdate()
+                ->first();
+
+            if (!$user) {
+                return null;
+            }
+
+            $user->password = Hash::make($data['password']);
+            $user->save();
+
+            // OTP hanya boleh digunakan satu kali.
+            PasswordResetOtp::where('email', $email)->delete();
+
+            return $user;
+        });
 
         if (!$user) {
-            $request->session()->forget([
-                'password_reset_email',
-                'password_reset_verified',
-            ]);
+            $this->clearResetSession($request);
 
-            return redirect()->route('password.request')->withErrors([
-                'email' => 'Akun tidak ditemukan.',
-            ]);
+            return redirect()
+                ->route('password.request')
+                ->withErrors([
+                    'email' => 'Proses reset gagal. Silakan lakukan verifikasi OTP kembali.',
+                ]);
         }
 
-        // Simpan password baru ter-hash
-        $user->password = Hash::make($data['password']);
-        $user->save();
+        $this->clearResetSession($request);
 
-        PasswordResetOtp::where('email', $email)->delete();
-
-        $request->session()->forget([
-            'password_reset_email',
-            'password_reset_verified',
-        ]);
-
-        // Auto login user ("digunakan untuk masuk serta pergantian password baru")
         $isFirstLogin = is_null($user->last_login_at);
 
         Auth::login($user);
         $request->session()->regenerate();
-        $request->session()->flash('just_logged_in', true);
+
         $request->session()->put('just_logged_in', true);
 
         if ($user->role === 'guest') {
@@ -226,14 +506,22 @@ class ForgotPasswordController extends Controller
         }
 
         if ($isFirstLogin) {
-            \App\Services\NotificationService::firstLogin($user, $request->ip(), $request->userAgent());
+            \App\Services\NotificationService::firstLogin(
+                $user,
+                $request->ip(),
+                $request->userAgent()
+            );
         }
 
-        $user->forceFill(['last_login_at' => now()])->save();
+        $user->forceFill([
+            'last_login_at' => now(),
+        ])->save();
 
-        return redirect()->route('dashboard')->with(
-            'success',
-            'Password baru berhasil disimpan. Anda telah otomatis masuk ke sistem.'
-        );
+        return redirect()
+            ->route('dashboard')
+            ->with(
+                'success',
+                'Password baru berhasil disimpan. Anda telah otomatis masuk ke sistem.'
+            );
     }
 }

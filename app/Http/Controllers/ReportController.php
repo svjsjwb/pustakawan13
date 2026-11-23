@@ -263,21 +263,21 @@ class ReportController extends Controller
          */
         $allBorrowings = Borrowing::with([
             'member:id,name,member_number',
-            'details:id,borrowing_id,book_id,quantity',
-            'details.book:id,judul_buku,isbn',
+            'detail:id,borrowing_id,book_id,quantity',
+            'detail.book:id,judul_buku,isbn',
         ])
-        ->where(function ($q) use ($startDate, $endDate) {
-            $q->whereBetween('borrowed_at', [$startDate, $endDate])
-              ->orWhere(function ($sub) use ($startDate, $endDate) {
-                  $sub->whereNotNull('due_at')
-                      ->where('due_at', '<=', $endDate)
-                      ->where(function ($r) use ($startDate) {
-                          $r->whereNull('returned_at')->orWhere('returned_at', '>=', $startDate);
-                      });
-              });
-        })
-        ->latest('borrowed_at')
-        ->get();
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('borrowed_at', [$startDate, $endDate])
+                    ->orWhere(function ($sub) use ($startDate, $endDate) {
+                        $sub->whereNotNull('due_at')
+                            ->where('due_at', '<=', $endDate)
+                            ->where(function ($r) use ($startDate) {
+                                $r->whereNull('returned_at')->orWhere('returned_at', '>=', $startDate);
+                            });
+                    });
+            })
+            ->latest('borrowed_at')
+            ->get();
 
         $borrowings = $allBorrowings->filter(function ($b) use ($startDate, $endDate) {
             return $b->borrowed_at && Carbon::parse($b->borrowed_at)->between($startDate, $endDate);
@@ -358,7 +358,7 @@ class ReportController extends Controller
             );
 
 
-      
+
         [
             $collectionReportData,
             $collectionCounts
@@ -455,19 +455,14 @@ class ReportController extends Controller
             $borrowings
             ->map(function ($item, $index) {
 
-                $bookTitles =
-                    $item->details
-                    ->map(function ($d) {
+                $detail = $item->detail;
 
-                        return ($d->book->judul_buku ?? 'Buku')
-                            .
-                            (
-                                $d->quantity > 1
-                                ? ' (' . $d->quantity . 'x)'
-                                : ''
-                            );
-                    })
-                    ->implode(', ');
+                $bookTitles = $detail
+                    ? (($detail->book->judul_buku ?? 'Buku')
+                        . ($detail->quantity > 1
+                            ? ' (' . $detail->quantity . 'x)'
+                            : ''))
+                    : '';
 
 
                 $lateInfo =
@@ -561,19 +556,14 @@ class ReportController extends Controller
             $historicalLateBorrowings
             ->map(function ($item, $index) {
 
-                $bookTitles =
-                    $item->details
-                    ->map(function ($d) {
+                $detail = $item->detail;
 
-                        return ($d->book->judul_buku ?? 'Buku')
-                            .
-                            (
-                                $d->quantity > 1
-                                ? ' (' . $d->quantity . 'x)'
-                                : ''
-                            );
-                    })
-                    ->implode(', ');
+                $bookTitles = $detail
+                    ? (($detail->book->judul_buku ?? 'Buku')
+                        . ($detail->quantity > 1
+                            ? ' (' . $detail->quantity . 'x)'
+                            : ''))
+                    : '';
 
                 $lateInfo =
                     $this->getLateInfo($item);
@@ -791,18 +781,14 @@ class ReportController extends Controller
                         )
                     )
                 ) {
-                    $bookTitles =
-                        $borrowing->details
-                        ->map(function ($detail) {
-                            return ($detail->book->judul_buku ?? 'Buku')
-                                .
-                                (
-                                    $detail->quantity > 1
-                                    ? ' (' . $detail->quantity . 'x)'
-                                    : ''
-                                );
-                        })
-                        ->implode(', ');
+                    $detail = $borrowing->detail;
+
+                    $bookTitles = $detail
+                        ? (($detail->book->judul_buku ?? 'Buku')
+                            . ($detail->quantity > 1
+                                ? ' (' . $detail->quantity . 'x)'
+                                : ''))
+                        : '';
 
                     $isLate =
                         $borrowing->status === 'dipinjam'
@@ -1547,15 +1533,15 @@ class ReportController extends Controller
             ? $preloadedBorrowings->whereNotNull('due_at')
             : Borrowing::with([
                 'member:id,name',
-                'details:id,borrowing_id,book_id,quantity',
-                'details.book:id,judul_buku,isbn',
+                'detail:id,borrowing_id,book_id,quantity',
+                'detail.book:id,judul_buku,isbn',
             ])
-                ->whereNotNull('due_at')
-                ->where('due_at', '<=', $endDate)
-                ->where(function ($q) use ($startDate) {
-                    $q->whereNull('returned_at')->orWhere('returned_at', '>=', $startDate);
-                })
-                ->get();
+            ->whereNotNull('due_at')
+            ->where('due_at', '<=', $endDate)
+            ->where(function ($q) use ($startDate) {
+                $q->whereNull('returned_at')->orWhere('returned_at', '>=', $startDate);
+            })
+            ->get();
 
         return $borrowings
             ->filter(function ($borrowing) use (
