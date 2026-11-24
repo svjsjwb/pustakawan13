@@ -529,6 +529,13 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         pollUserNotifications();
-        setInterval(pollUserNotifications, 6000);
+
+        setInterval(() => {
+            if (!document.hidden) pollUserNotifications();
+        }, 30000);
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) pollUserNotifications();
+        });
     });
 </script>
