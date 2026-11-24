@@ -327,9 +327,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }).then(() => fetchNotifications());
         };
 
-        // Auto-fetch every 6 seconds
+        // Refresh notification badges every 30 seconds while the tab is visible.
         fetchNotifications();
-        setInterval(fetchNotifications, 6000);
+
+        setInterval(() => {
+            if (!document.hidden) fetchNotifications();
+        }, 30000);
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) fetchNotifications();
+        });
     }
 
     // ── Profile Dropdown ─────────────────────────────────────────────────────
