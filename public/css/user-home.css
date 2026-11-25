@@ -209,10 +209,19 @@
 
     background: #ffffff;
 
+    border: 1.5px solid transparent;
+
     border-radius: 12px;
 
     box-shadow:
         0 8px 30px rgba(0, 0, 0, .15);
+
+    transition: all .25s ease;
+}
+
+.user-search:focus-within {
+    border-color: #287b78;
+    box-shadow: 0 0 0 4px rgba(40, 123, 120, .14), 0 8px 30px rgba(0, 0, 0, .15);
 }
 
 .user-search-wrap {
@@ -328,15 +337,26 @@
 
     margin-left: 11px;
 
-    border: none;
-    outline: none;
+    border: none !important;
+    outline: none !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
 
-    background: transparent;
+    background: transparent !important;
 
     color: #1e293b;
 
     font-family: inherit;
     font-size: 13px;
+}
+
+.user-search input:focus,
+.user-search input:focus-visible {
+    border: none !important;
+    outline: none !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
 
 
@@ -356,7 +376,8 @@
     top: 50% !important;
     transform: translateY(-50%) !important;
     width: 410px;
-    height: 270px;
+    height: auto;
+    min-height: 290px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -587,27 +608,77 @@
     }
 }
 
-/* Badge Kategori */
-.coverflow-card-badge {
+/* =========================================================
+   SINGLE TOP CATEGORY BADGE (HERO CAROUSEL)
+========================================================= */
+.hero-coverflow-badge {
+    position: relative;
+    z-index: 25;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 154px;
+    min-width: 154px;
+    box-sizing: border-box;
+    padding: 6px 14px;
+    background: #113f3d;
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    margin-bottom: 16px;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* Segitiga Panah Menunjuk ke Bagian Atas Cover Buku Utama */
+.hero-coverflow-badge::after {
+    content: '';
     position: absolute;
-    top: 10px;
+    bottom: -6px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 4;
-    font-size: 8.5px;
-    font-weight: 700;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #113f3d;
+    z-index: 2;
+}
+
+.hero-coverflow-badge::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 7.5px solid transparent;
+    border-right: 7.5px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.9);
+    z-index: 1;
+}
+
+.hero-coverflow-badge-text {
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: #e0f2f1;
-    background: rgba(18, 64, 62, 0.92);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    padding: 3px 9px;
-    border-radius: 6px;
-    border: 1px solid rgba(168, 213, 209, 0.35);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    color: #ffffff;
     white-space: nowrap;
-    transition: opacity 0.3s ease, font-size 0.3s ease;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+/* Sembunyikan badge individual pada kartu buku */
+.coverflow-card-badge {
+    display: none !important;
 }
 
 /* Poster Image */

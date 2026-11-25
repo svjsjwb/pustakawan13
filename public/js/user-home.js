@@ -759,6 +759,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const prevBtn = document.getElementById('coverflowPrev');
         const nextBtn = document.getElementById('coverflowNext');
         const pagination = document.getElementById('coverflowPagination');
+        const categoryBadgeText = document.getElementById('heroCoverflowBadgeText');
 
         if (!wrap || !stage) return;
 
@@ -849,6 +850,21 @@ document.addEventListener('DOMContentLoaded', function () {
                     dot.classList.remove('is-active');
                 }
             });
+
+            // Sinkronisasi teks kotak kategori di atas buku utama yang aktif
+            const activeCard = cards[activeIndex];
+            if (activeCard && categoryBadgeText) {
+                const newCategory = (activeCard.dataset.category || 'KOLEKSI').trim().toUpperCase();
+                if (categoryBadgeText.textContent.trim().toUpperCase() !== newCategory) {
+                    categoryBadgeText.style.opacity = '0';
+                    categoryBadgeText.style.transform = 'translateY(-2px)';
+                    setTimeout(() => {
+                        categoryBadgeText.textContent = newCategory;
+                        categoryBadgeText.style.opacity = '1';
+                        categoryBadgeText.style.transform = 'translateY(0)';
+                    }, 120);
+                }
+            }
         }
 
         function goTo(index) {

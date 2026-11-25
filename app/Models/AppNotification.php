@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Events\NotificationCreated;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AppNotification extends Model
 {
@@ -21,6 +24,19 @@ class AppNotification extends Model
         'data' => 'array',
         'is_read' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(function (self $notification): void {
+            DB::afterCommit(function () use ($notification): void {
+                try {
+                    broadcast(new NotificationCreated($notification));
+                } catch (\Throwable $e) {
+                    Log::warning('Gagal broadcast notifikasi Reverb: ' . $e->getMessage());
+                }
+            });
+        });
+    }
 
     public function user(): BelongsTo
     {

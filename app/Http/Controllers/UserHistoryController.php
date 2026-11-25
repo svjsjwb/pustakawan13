@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Borrowing;
 use App\Models\Reservation;
+use App\Services\ReservationCancellationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,6 +12,9 @@ class UserHistoryController extends Controller
 {
     public function index(Request $request)
     {
+        // Jalankan auto-cancel on-demand jika ada reservasi melewati batas waktu 3 hari
+        ReservationCancellationService::cancelExpiredReservations();
+
         $user   = Auth::user();
         $member = $user->member;
 
@@ -157,9 +161,11 @@ class UserHistoryController extends Controller
                     'book'         => $r->book,
                     'date'         => $r->created_at,
                     'date_label'   => $r->created_at?->format('d M Y') ?? '-',
-                    'extra'        => $r->expires_at
-                        ? 'Berlaku s/d: ' . \Carbon\Carbon::parse($r->expires_at)->format('d M Y')
-                        : '-',
+                    'extra'        => $statusRaw === 'dibatalkan'
+                        ? ($r->rejection_reason ?: 'Reservasi dibatalkan otomatis')
+                        : ($r->expires_at
+                            ? 'Batas Pengambilan: ' . \Carbon\Carbon::parse($r->expires_at)->format('d M Y')
+                            : '-'),
                     'status_raw'   => $r->status,
                     'status_label' => $statusLabel,
                     'badge_class'  => $badgeClass,

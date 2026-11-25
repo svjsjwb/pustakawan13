@@ -24,9 +24,11 @@ class ReservationStatusMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->status === 'disetujui'
-                ? 'Reservasi Buku Disetujui'
-                : 'Reservasi Buku Ditolak',
+            subject: match ($this->status) {
+                'disetujui' => 'Reservasi Buku Disetujui',
+                'dibatalkan' => 'Reservasi Buku Dibatalkan Otomatis',
+                default => 'Reservasi Buku Ditolak',
+            },
         );
     }
 

@@ -548,10 +548,10 @@
                     </svg>
                 </div>
                 <div class="res-deadline-info">
-                    <div class="res-deadline-label">Batas Akhir Reservasi (3 Hari)</div>
+                    <div class="res-deadline-label">Batas Persetujuan Admin (3 Hari)</div>
                     <div class="res-deadline-date" id="resDeadlineFormatted">-</div>
                     <div class="res-deadline-note">
-                        Buku akan disiapkan dan disimpan untuk Anda hingga batas akhir di atas. Jika tidak diambil di perpustakaan dalam 3 hari, reservasi otomatis dibatalkan.
+                        Reservasi akan menunggu persetujuan admin maksimal 3 hari sejak pengajuan. Jika admin tidak menyetujui dalam waktu tersebut, reservasi dibatalkan otomatis.
                     </div>
                 </div>
             </div>
@@ -1273,11 +1273,9 @@ function formatIndoDate(d, withDayName = true) {
 }
 
 function updateReservationDeadlineDisplay() {
-    if (!selectedReservationDate) {
-        selectedReservationDate = toISODateString(new Date());
-    }
-    const dateObj = parseISODate(selectedReservationDate);
-    const deadlineObj = new Date(dateObj);
+    // Deadline = hari ini + 3 hari (dari waktu pengajuan, bukan dari tanggal pilihan user)
+    const today = new Date();
+    const deadlineObj = new Date(today);
     deadlineObj.setDate(deadlineObj.getDate() + 3);
 
     const deadlineFormatted = formatIndoDate(deadlineObj, true);
@@ -1522,10 +1520,7 @@ async function submitReservationWithOptions() {
 
         closeReservationDateModal();
         setReservationSuccess();
-        const successMsg = data.expires_at 
-            ? 'Reservasi berhasil! Batas pengambilan s.d. ' + data.expires_at 
-            : 'Reservasi buku berhasil diajukan.';
-        window.showToast?.(successMsg, 'success');
+        window.showToast?.('Reservasi berhasil diajukan! Admin akan memproses dalam 3 hari.', 'success');
 
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalContent;

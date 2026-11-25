@@ -497,9 +497,14 @@
                         <div style="font-weight: 600; color: var(--text);">
                             {{ $res->reserved_at ? \Carbon\Carbon::parse($res->reserved_at)->format('d M Y') : $res->created_at->format('d M Y') }}
                         </div>
-                        @if($res->expires_at)
+                        @if($status === 'menunggu' && $res->expires_at)
                             <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">
-                                Batas Pengambilan: {{ \Carbon\Carbon::parse($res->expires_at)->format('d M Y') }}
+                                Batas Persetujuan Admin: {{ \Carbon\Carbon::parse($res->expires_at)->format('d M Y') }}
+                            </div>
+                        @endif
+                        @if($status === 'dibatalkan' && $res->rejection_reason)
+                            <div style="font-size: 11.5px; color: #dc2626; margin-top: 4px; line-height: 1.35; max-width: 240px;">
+                                {{ $res->rejection_reason }}
                             </div>
                         @endif
                     </td>
@@ -619,8 +624,17 @@
             .catch(() => {});
     }
 
-    // Auto-poll user reservations every 6 seconds
-    setInterval(pollUserReservations, 6000);
+    // Realtime updates via Laravel Echo (Reverb WebSocket)
+    document.addEventListener('DOMContentLoaded', function() {
+        @auth
+        if (window.Echo) {
+            window.Echo.private('user.reservations.{{ auth()->id() }}')
+                .listen('.reservation.updated', function() {
+                    pollUserReservations();
+                });
+        }
+        @endauth
+    });
 })();
 </script>
 @endpush

@@ -412,8 +412,8 @@
 
     <div
         id="memberCreateModal"
-        class="member-create-modal-overlay{{ $errors->any() && old('member_form_action') !== 'edit' ? ' show' : '' }}"
-        aria-hidden="{{ $errors->any() && old('member_form_action') !== 'edit' ? 'false' : 'true' }}">
+        class="member-create-modal-overlay{{ ($openCreateModal ?? false) || ($errors->any() && old('member_form_action') !== 'edit') ? ' show' : '' }}"
+        aria-hidden="{{ ($openCreateModal ?? false) || ($errors->any() && old('member_form_action') !== 'edit') ? 'false' : 'true' }}">
         <div
             class="member-create-modal"
             role="dialog"
@@ -927,7 +927,10 @@
         |--------------------------------------------------------------------------
         */
 
-        function openMemberCreateModal() {
+        const memberCreateUrl = @json(route('members.create'));
+        const memberIndexUrl = @json(route('members.index'));
+
+        function openMemberCreateModal(updateHistory = true) {
             const modal = document.getElementById('memberCreateModal');
             if (!modal) {
                 return;
@@ -937,13 +940,17 @@
             modal.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
 
+            if (updateHistory && window.location.pathname !== new URL(memberCreateUrl, window.location.origin).pathname) {
+                history.pushState({ modal: 'memberCreate' }, '', memberCreateUrl);
+            }
+
             const nameInput = modal.querySelector('#name');
             if (nameInput) {
                 nameInput.focus();
             }
         }
 
-        function closeMemberCreateModal() {
+        function closeMemberCreateModal(updateHistory = true) {
             const modal = document.getElementById('memberCreateModal');
             if (!modal) {
                 return;
@@ -952,7 +959,40 @@
             modal.classList.remove('show');
             modal.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
+
+            if (updateHistory && window.location.pathname === new URL(memberCreateUrl, window.location.origin).pathname) {
+                history.pushState(null, '', memberIndexUrl);
+            }
+
+            const openBtn = document.getElementById('openMemberCreateModal');
+            if (openBtn) {
+                openBtn.focus();
+            }
         }
+
+        window.addEventListener('popstate', () => {
+            const modal = document.getElementById('memberCreateModal');
+            if (!modal) return;
+            if (window.location.pathname === new URL(memberCreateUrl, window.location.origin).pathname) {
+                openMemberCreateModal(false);
+            } else if (modal.classList.contains('show')) {
+                closeMemberCreateModal(false);
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            const modal = document.getElementById('memberCreateModal');
+            if (event.key === 'Escape' && modal && modal.classList.contains('show')) {
+                closeMemberCreateModal(true);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('memberCreateModal');
+            if (modal && modal.classList.contains('show')) {
+                document.body.style.overflow = 'hidden';
+            }
+        });
 
         function openMemberEditModal(button) {
             const modal = document.getElementById('memberEditModal');

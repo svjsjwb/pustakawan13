@@ -426,6 +426,52 @@ class NotificationService
     }
 
     /**
+     * Reservasi dibatalkan otomatis oleh sistem karena melewati batas waktu 3 hari pengambilan buku.
+     */
+    public static function reservationAutoCancelled(Reservation $reservation, ?User $user = null, string $reason = 'Reservasi dibatalkan otomatis oleh sistem karena admin tidak menyetujui dalam batas waktu 3 hari.'): void
+    {
+        $reservation->loadMissing(['book', 'member']);
+        $user = self::resolveUser($reservation, $user);
+        $bookTitle = $reservation->book?->title ?? $reservation->book?->judul_buku ?? 'Buku Perpustakaan';
+        $expiresAtStr = $reservation->expires_at ? \Carbon\Carbon::parse($reservation->expires_at)->translatedFormat('d F Y') : '3 hari';
+
+        // 1. In-app notification ke User
+        if ($user) {
+            AppNotification::notifyUser(
+                $user->id,
+                'reservation_cancelled',
+                'Reservasi Dibatalkan Otomatis',
+                "Reservasi buku \"{$bookTitle}\" dibatalkan otomatis oleh sistem karena admin tidak menyetujui dalam batas waktu 3 hari sejak pengajuan. Stok buku telah dikembalikan ke katalog.",
+                [
+                    'reservation_id' => $reservation->id,
+                    'book_id' => $reservation->book_id,
+                    'reason' => $reason,
+                ]
+            );
+
+            // 2. Email notification ke User
+            if ($user->email && $user->notificationsAllowed('reservation')) {
+                self::queueMailSafely($user->email, new ReservationStatusMail($reservation, 'dibatalkan'));
+            }
+        } elseif ($reservation->member?->email) {
+            self::queueMailSafely($reservation->member->email, new ReservationStatusMail($reservation, 'dibatalkan'));
+        }
+
+        // 3. In-app notification ke Admin
+        $userName = $user?->name ?? $reservation->member?->name ?? 'Anggota';
+        AppNotification::notifyAdmin(
+            'reservation_cancelled',
+            'Reservasi Kadaluarsa Dibatalkan',
+            "Reservasi buku \"{$bookTitle}\" atas nama {$userName} telah dibatalkan otomatis karena admin tidak menyetujui dalam batas waktu 3 hari sejak pengajuan.",
+            [
+                'reservation_id' => $reservation->id,
+                'book_id' => $reservation->book_id,
+                'member_id' => $reservation->member_id,
+            ]
+        );
+    }
+
+    /**
      * Perpanjangan disetujui admin.
      */
     public static function extensionApproved(Borrowing $borrowing, ?User $user = null): void

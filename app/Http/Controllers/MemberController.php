@@ -103,7 +103,31 @@ class MemberController extends Controller
      */
     public function create()
     {
-        return view('members.create');
+        app(MemberStatusService::class)->syncAll();
+
+        $members = Member::with('user')
+            ->orderByRaw("
+                CASE
+                    WHEN user_id IS NOT NULL
+                         AND EXISTS (
+                             SELECT 1
+                             FROM users
+                             WHERE users.id = members.user_id
+                             AND users.role = 'guest'
+                         )
+                    THEN 0
+                    ELSE 1
+                END
+            ")
+            ->orderByDesc('id')
+            ->get();
+
+        $openCreateModal = true;
+
+        return view(
+            'members.index',
+            compact('members', 'openCreateModal')
+        );
     }
 
     /**

@@ -1697,3 +1697,24 @@
     background: transparent !important;
     cursor: not-allowed !important;
 }
+
+[data-theme="dark"] .user-search input,
+[data-theme="dark"] .saas-search-input,
+[data-theme="dark"] .loans-search input,
+[data-theme="dark"] .eg-search-input {
+    outline: none !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+[data-theme="dark"] .eg-search-input-wrapper {
+    background: #292d31 !important;
+    border-color: #484d53 !important;
+}
+
+[data-theme="dark"] .eg-search-input-wrapper:focus-within {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15) !important;
+}

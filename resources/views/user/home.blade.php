@@ -82,6 +82,13 @@
         @endphp
 
         <div class="user-hero-coverflow-wrap" id="heroCoverflowWrap">
+                {{-- SATU KOTAK KATEGORI BUKU AKTIF (POSISI TETAP DI ATAS BUKU UTAMA) --}}
+            <div class="hero-coverflow-badge" id="heroCoverflowBadge" aria-live="polite">
+                <span class="hero-coverflow-badge-text" id="heroCoverflowBadgeText">
+                    {{ strtoupper($heroBooks->first()->main_category ?? $heroBooks->first()->category->name ?? 'KOLEKSI') }}
+                </span>
+            </div>
+
             <div class="user-hero-coverflow" id="heroCoverflow">
                 <div class="user-coverflow-stage" id="coverflowStage">
                     @foreach($heroBooks as $index => $book)
@@ -113,7 +120,7 @@
                              aria-label="Buku {{ $book->title }}"
                              data-title="{{ $book->title }}"
                              data-author="{{ $book->author ?? '-' }}"
-                             data-category="{{ $book->category->name ?? '-' }}"
+                             data-category="{{ $book->main_category ?? $book->category->name ?? 'Koleksi' }}"
                              data-publisher="{{ $book->publisher ?? '-' }}"
                              data-year="{{ $book->publication_year ?? '-' }}"
                              data-isbn="{{ $book->isbn ?? '-' }}"
@@ -128,9 +135,6 @@
                                     <div class="coverflow-book-spine"></div>
 
                                     <div class="coverflow-book-front">
-                                        <span class="coverflow-card-badge">
-                                            {{ $book->main_category ?? $book->category->name ?? 'Koleksi' }}
-                                        </span>
 
                                         <div class="coverflow-poster">
                                             @if($book->cover)
@@ -351,7 +355,7 @@
                         data-id="{{ $book->id }}"
                         data-title="{{ $book->title }}"
                         data-author="{{ $book->author ?? '-' }}"
-                        data-category="{{ $book->category->name ?? '-' }}"
+                        data-category="{{ $book->main_category ?? $book->category->name ?? 'Koleksi' }}"
                         data-publisher="{{ $book->publisher ?? '-' }}"
                         data-year="{{ $book->publication_year ?? '-' }}"
                         data-isbn="{{ $book->isbn ?? '-' }}"

@@ -529,6 +529,14 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         pollUserNotifications();
-        setInterval(pollUserNotifications, 6000);
+
+        @auth
+        if (window.Echo) {
+            window.Echo.private('user.notifications.{{ auth()->id() }}')
+                .listen('.notification.created', () => {
+                    pollUserNotifications();
+                });
+        }
+        @endauth
     });
 </script>

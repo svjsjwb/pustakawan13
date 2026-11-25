@@ -327,9 +327,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }).then(() => fetchNotifications());
         };
 
-        // Auto-fetch every 6 seconds
+        // Initial load + realtime updates via Laravel Echo (Reverb WebSocket)
         fetchNotifications();
-        setInterval(fetchNotifications, 6000);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.Echo) {
+                window.Echo.private('admin.notifications')
+                    .listen('.notification.created', function () {
+                        fetchNotifications();
+                    });
+            }
+        });
     }
 
     // ── Profile Dropdown ─────────────────────────────────────────────────────
