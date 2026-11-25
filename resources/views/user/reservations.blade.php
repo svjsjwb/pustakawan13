@@ -71,12 +71,6 @@
     border-color: rgba(22, 163, 74, .42);
 }
 [data-theme="dark"] .status-badge.status-disetujui .status-badge-icon { background: rgba(22, 163, 74, .24); color: #4ade80; }
-[data-theme="dark"] .status-badge.status-siap_diambil {
-    background: rgba(15, 118, 110, .2);
-    color: #5eead4;
-    border-color: rgba(45, 212, 191, .42);
-}
-[data-theme="dark"] .status-badge.status-siap_diambil .status-badge-icon { background: rgba(45, 212, 191, .2); color: #5eead4; }
 [data-theme="dark"] .status-badge.status-ditolak {
     background: rgba(220, 38, 38, .17);
     color: #f87171;
@@ -214,12 +208,11 @@
     <div class="user-page-hero-pattern"></div>
     <div class="user-page-hero-copy">
         <h1>Daftar Reservasi Buku</h1>
-        <p>Pantau seluruh proses reservasi buku Anda mulai dari pengajuan, persetujuan, hingga buku tersedia dan siap untuk diambil sesuai jadwal yang ditentukan.</p>
+        <p>Pantau seluruh proses reservasi buku Anda mulai dari pengajuan hingga persetujuan sesuai jadwal yang ditentukan.</p>
     </div>
     <div class="user-page-hero-stats" aria-label="Ringkasan reservasi">
         <div><span>Total Reservasi Aktif</span><strong id="statActiveRes">{{ $statusCounts['aktif'] ?? 0 }}</strong><small>reservasi berjalan</small></div>
         <div><span>Menunggu Persetujuan</span><strong id="statWaitingRes">{{ $statusCounts['menunggu'] ?? 0 }}</strong><small>perlu diproses</small></div>
-        <div><span>Siap Diambil</span><strong id="statReadyRes">{{ $statusCounts['siap_diambil'] ?? 0 }}</strong><small>buku tersedia</small></div>
     </div>
 </section>
 
@@ -244,7 +237,6 @@
             $statusTriggerClass = match(request('status')) {
                 'menunggu' => 'reservation-status-menunggu',
                 'disetujui' => 'reservation-status-disetujui',
-                'siap_diambil' => 'reservation-status-siap',
                 'ditolak' => 'reservation-status-ditolak',
                 'dibatalkan' => 'reservation-status-ditolak',
                 default => '',
@@ -257,8 +249,6 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     @elseif(request('status') === 'disetujui')
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    @elseif(request('status') === 'siap_diambil')
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
                     @elseif(in_array(request('status'), ['ditolak', 'dibatalkan'], true))
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                     @else
@@ -268,7 +258,6 @@
                 <span class="pd-trigger-label">
                     @if(request('status') === 'menunggu') Menunggu
                     @elseif(request('status') === 'disetujui') Disetujui
-                    @elseif(request('status') === 'siap_diambil') Siap Diambil
                     @elseif(request('status') === 'ditolak') Ditolak
                     @elseif(request('status') === 'dibatalkan') Dibatalkan
                     @else Semua Status
@@ -279,7 +268,7 @@
                 </span>
             </button>
             {{-- Hidden input to carry value when form submits --}}
-            <input type="hidden" name="status" id="reservationStatusInput" value="{{ request('status', '') }}">
+            <input type="hidden" name="status" id="reservationStatusInput" value="{{ request('status') === 'siap_diambil' ? '' : request('status', '') }}">
             <div class="pd-panel" role="listbox" aria-label="Filter Status Reservasi">
                 <div class="pd-item {{ empty(request('status')) ? 'is-selected' : '' }}" role="option" data-value="" data-label="Semua Status">
                     <span class="pd-item-icon">
@@ -300,13 +289,6 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </span>
                     <span class="pd-item-label">Disetujui</span>
-                    <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-                </div>
-                <div class="pd-item status-ready {{ request('status') === 'siap_diambil' ? 'is-selected' : '' }}" role="option" data-value="siap_diambil" data-label="Siap Diambil">
-                    <span class="pd-item-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-                    </span>
-                    <span class="pd-item-label">Siap Diambil</span>
                     <span class="pd-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
                 </div>
                 <div class="pd-item status-red {{ request('status') === 'ditolak' ? 'is-selected' : '' }}" role="option" data-value="ditolak" data-label="Ditolak">
@@ -383,7 +365,6 @@
         var statusClasses = {
             menunggu: 'reservation-status-menunggu',
             disetujui: 'reservation-status-disetujui',
-            siap_diambil: 'reservation-status-siap',
             ditolak: 'reservation-status-ditolak',
             dibatalkan: 'reservation-status-ditolak'
         };
@@ -465,14 +446,14 @@
                     $badgeClass = match($status) {
                         'menunggu'     => 'status-menunggu',
                         'disetujui'    => 'status-disetujui',
-                        'siap_diambil' => 'status-siap_diambil',
+                        'siap_diambil' => 'status-disetujui',
                         'ditolak', 'dibatalkan' => 'status-ditolak',
                         default        => 'status-menunggu',
                     };
                     $statusLabel = match($status) {
                         'menunggu'     => 'Menunggu',
                         'disetujui'    => 'Disetujui',
-                        'siap_diambil' => 'Siap Diambil',
+                        'siap_diambil' => 'Disetujui',
                         'ditolak'      => 'Ditolak',
                         'dibatalkan'   => 'Dibatalkan',
                         default        => ucfirst($res->status),
@@ -523,14 +504,14 @@
                         @endif
                     </td>
 
-                    {{-- 3. STATUS (BADGE: Menunggu, Disetujui, Siap Diambil, Ditolak) --}}
+                    {{-- 3. STATUS --}}
                     <td>
                         <span class="status-badge {{ $badgeClass }}">
                             @if($res->cancellation_requested_at || $status === 'menunggu')
                                 <span class="status-badge-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                 </span>
-                            @elseif($status === 'disetujui')
+                            @elseif(in_array($status, ['disetujui', 'siap_diambil'], true))
                                 <span class="status-badge-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
                                 </span>
@@ -607,7 +588,7 @@
                             const badge = row.querySelector('.status-badge');
                             if (badge) {
                                 // Clear old status classes
-                                const badgeStatus = cancellationPending ? 'menunggu' : newStatus;
+                                const badgeStatus = cancellationPending ? 'menunggu' : (newStatus === 'siap_diambil' ? 'disetujui' : newStatus);
                                 badge.className = `status-badge status-${badgeStatus}`;
 
                                 const icons = {
@@ -619,7 +600,7 @@
                                 };
 
                                 const iconHtml = icons[badgeStatus] || icons['menunggu'];
-                                const label = item.status_label || (newStatus.charAt(0).toUpperCase() + newStatus.slice(1));
+                                const label = newStatus === 'siap_diambil' ? 'Disetujui' : (item.status_label || (newStatus.charAt(0).toUpperCase() + newStatus.slice(1)));
                                 badge.innerHTML = `${iconHtml}<span>${label}</span>`;
                             }
 

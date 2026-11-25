@@ -19,14 +19,14 @@ start "Queue Worker" cmd /k "php artisan queue:work --tries=3 --timeout=90 --sle
 echo [4/5] Starting Schedule Worker (php artisan schedule:work)...
 start "Scheduler" cmd /k "php artisan schedule:work"
 
-echo [5/5] Starting ngrok tunnel (greeter-undaunted-bath.ngrok-free.dev)...
-start "ngrok Tunnel" cmd /k "C:\laragon\bin\ngrok\ngrok.exe http --domain=greeter-undaunted-bath.ngrok-free.dev 8000"
+echo [5/5] Starting ngrok tunnel (domain akun ngrok)...
+start "ngrok Tunnel" cmd /k "C:\laragon\bin\ngrok\ngrok.exe http 8000"
 
 echo.
 echo All servers started!
 echo.
 echo Local:   http://127.0.0.1:8000
-echo Hosting: https://greeter-undaunted-bath.ngrok-free.dev
+echo Hosting: lihat URL Forwarding di jendela ngrok
 echo.
 echo Queue worker akan mengirim email notifikasi secara otomatis.
 echo ====================================================
