@@ -8,6 +8,7 @@ use App\Models\BookCopy;
 use App\Models\Member;
 use App\Models\Reservation;
 use App\Services\NotificationService;
+use App\Services\ReservationCancellationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,9 @@ class UserReservationController extends Controller
 {
     public function index(Request $request)
     {
+        // Jalankan auto-cancel on-demand jika ada reservasi melewati batas waktu 3 hari
+        ReservationCancellationService::cancelExpiredReservations();
+
         $user = Auth::user();
         $member = $user->member;
         $reservations = collect();
@@ -274,7 +278,9 @@ class UserReservationController extends Controller
         $reservedAt = !empty($validated['reserved_at'])
             ? \Carbon\Carbon::parse($validated['reserved_at'])->toDateString()
             : now()->toDateString();
-        $expiresAt = \Carbon\Carbon::parse($reservedAt)->addDays(3)->toDateString();
+        // expires_at = 3 hari dari SAAT RESERVASI DIBUAT (batas admin untuk menyetujui)
+        // Bukan 3 hari dari reserved_at, karena jika admin menyetujui => langsung menjadi peminjaman
+        $expiresAt = now()->addDays(3)->toDateString();
         $createdReservation = null;
 
         DB::transaction(function () use (
@@ -355,7 +361,7 @@ class UserReservationController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Reservasi buku berhasil diajukan.',
+                'message' => 'Reservasi buku berhasil diajukan. Admin akan menyetujui dalam 3 hari.',
                 'reservation_url' => route('user.reservations'),
                 'reserved_at' => \Carbon\Carbon::parse($createdReservation->reserved_at)->translatedFormat('d M Y'),
                 'expires_at' => \Carbon\Carbon::parse($createdReservation->expires_at)->translatedFormat('d M Y'),
@@ -375,6 +381,9 @@ class UserReservationController extends Controller
      */
     public function statusFeed()
     {
+        // Jalankan auto-cancel on-demand jika ada reservasi melewati batas waktu 3 hari
+        ReservationCancellationService::cancelExpiredReservations();
+
         $user = Auth::user();
         $member = $user->member;
 

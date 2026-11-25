@@ -877,6 +877,7 @@
             $isSelesai = $status === 'selesai';
             $isDitolak = $status === 'ditolak';
             $isDibatalkan = $status === 'dibatalkan';
+            $isAutoCancelled = $isDibatalkan && str_contains(strtolower($reservation->rejection_reason ?? ''), 'sistem');
             $isCancelledBeforeApproval = $isDibatalkan && !$reservation->borrowing_id;
             $isCancellationRejectedAtApproval = $cancellationRequestRejected && $isDisetujui;
             $isCancellationPendingAtPickup = $cancellationRequestPending && $isSiapDiambil;
@@ -899,14 +900,14 @@
             <div class="rsv-tracking-step {{ $isMenunggu ? 'is-active is-warning' : (($isDitolak || $isCancelledBeforeApproval) ? 'is-cancelled' : ($doneVerifikasi ? 'is-done' : 'is-upcoming')) }}">
                 <div class="rsv-step-node">@if($isDitolak) ✕ @elseif($isCancelledBeforeApproval) ● @elseif($doneVerifikasi) ✓ @elseif($isMenunggu) ● @else ○ @endif</div>
                 <div class="rsv-step-label">@if($isDitolak) Verifikasi Perpustakaan @elseif($isCancelledBeforeApproval) ● Verifikasi Perpustakaan @elseif($doneVerifikasi) ✓ Verifikasi Perpustakaan @elseif($isMenunggu) ● Verifikasi Perpustakaan @else ○ Verifikasi Perpustakaan @endif</div>
-                <p class="rsv-step-desc">@if($isDitolak)<svg class="rsv-rejected-inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m9 9 6 6m0-6-6 6"></path></svg>Ditolak @elseif($isCancelledBeforeApproval) Dibatalkan oleh Anggota @elseif($doneVerifikasi) Selesai @else Menunggu Persetujuan @endif</p>
+                <p class="rsv-step-desc">@if($isDitolak)<svg class="rsv-rejected-inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m9 9 6 6m0-6-6 6"></path></svg>Ditolak @elseif($isCancelledBeforeApproval) {{ $isAutoCancelled ? 'Dibatalkan Otomatis Sistem' : 'Dibatalkan oleh Anggota' }} @elseif($doneVerifikasi) Selesai @else Menunggu Persetujuan @endif</p>
             </div>
 
             {{-- Langkah 3: Persetujuan Reservasi --}}
             <div class="rsv-tracking-step {{ $isCancellationRejectedAtApproval ? 'is-done' : (($isDibatalkan && !$isCancelledBeforeApproval) ? 'is-cancelled' : ($cancellationRequestPending && !$isCancellationPendingAtPickup ? 'is-cancellation-pending' : ($isDisetujui ? 'is-active' : ($donePersetujuan ? 'is-done' : 'is-upcoming')))) }}">
                 <div class="rsv-step-node">@if($isCancellationRejectedAtApproval) &#10003; @elseif(($isDibatalkan && !$isCancelledBeforeApproval) || ($cancellationRequestPending && !$isCancellationPendingAtPickup)) ● @elseif($donePersetujuan) ✓ @elseif($isDisetujui) ● @else ○ @endif</div>
                 <div class="rsv-step-label">@if($isCancellationRejectedAtApproval) &#10003; Persetujuan Reservasi @elseif($cancellationRequestPending && !$isCancellationPendingAtPickup) Persetujuan Pembatalan @elseif($isDibatalkan) ○ Persetujuan Reservasi @elseif($donePersetujuan) ✓ Persetujuan Reservasi @elseif($isDisetujui) ● Persetujuan Reservasi @else ○ Persetujuan Reservasi @endif</div>
-                <p class="rsv-step-desc">@if($isCancellationRejectedAtApproval) Disetujui @elseif($cancellationRequestPending && !$isCancellationPendingAtPickup) Menunggu Persetujuan Admin @elseif($isDibatalkan) Dibatalkan oleh Anggota @elseif($donePersetujuan) Selesai @elseif($isDisetujui) Sedang Diproses @else Belum Selesai @endif</p>
+                <p class="rsv-step-desc">@if($isCancellationRejectedAtApproval) Disetujui @elseif($cancellationRequestPending && !$isCancellationPendingAtPickup) Menunggu Persetujuan Admin @elseif($isDibatalkan) {{ $isAutoCancelled ? 'Dibatalkan Otomatis Sistem' : 'Dibatalkan oleh Anggota' }} @elseif($donePersetujuan) Selesai @elseif($isDisetujui) Sedang Diproses @else Belum Selesai @endif</p>
             </div>
 
             {{-- Langkah 4: Pengambilan Buku --}}
@@ -965,7 +966,7 @@
                     <span>✓</span> Tanggal Persetujuan
                 </div>
                 <div class="rsv-info-val">
-                    {{ $cancellationRequestPending ? 'Menunggu Persetujuan Admin' : ($status === 'dibatalkan' ? 'Dibatalkan oleh Anggota' : ($tanggalPersetujuan ?? 'Belum disetujui')) }}
+                    {{ $cancellationRequestPending ? 'Menunggu Persetujuan Admin' : ($status === 'dibatalkan' ? ($isAutoCancelled ? 'Dibatalkan Otomatis Sistem' : ($reservation->rejection_reason ?: 'Dibatalkan')) : ($tanggalPersetujuan ?? 'Belum disetujui')) }}
                 </div>
             </div>
 
@@ -992,6 +993,14 @@
                     <p class="rsv-admin-alert-desc">
                         Buku fisik telah disiapkan di meja layanan sirkulasi. Silakan tunjukkan kode <strong>#{{ $reservationCode }}</strong> kepada petugas sebelum tanggal <strong>{{ $reservation->expires_at ? \Carbon\Carbon::parse($reservation->expires_at)->format('d F Y') : '-' }}</strong>.
                     </p>
+                </div>
+            </div>
+        @elseif($status === 'dibatalkan' && $reservation->rejection_reason)
+            <div class="rsv-admin-alert alert-danger" style="margin-top: 18px;" role="status" aria-live="polite">
+                <div class="rsv-admin-alert-icon" aria-hidden="true">⏱️</div>
+                <div>
+                    <div class="rsv-admin-alert-title">Keterangan Pembatalan:</div>
+                    <p class="rsv-admin-alert-desc">{{ $reservation->rejection_reason }}</p>
                 </div>
             </div>
         @endif

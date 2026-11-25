@@ -210,11 +210,14 @@ class BookController extends Controller
      * |--------------------------------------------------------------------------
      */
 
-    public function create()
+    public function create(\Illuminate\Http\Request $request)
     {
+        $viewData = $this->getIndexViewData($request);
+        $viewData['openCreateModal'] = true;
+
         return view(
-            'books.create-page',
-            $this->getCreateFormData()
+            'books.index',
+            $viewData
         );
     }
 

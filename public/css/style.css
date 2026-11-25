@@ -100,6 +100,24 @@ textarea:disabled {
   box-shadow: 0 0 0 3px rgba(40, 120, 121, 0.2) !important;
 }
 
+/* Hilangkan outline dan border kotak persegi panjang pada search input yang dibungkus wrapper rounded */
+.user-search input:focus-visible,
+.saas-search-input:focus-visible,
+.loans-search input:focus-visible,
+.eg-search-input:focus-visible,
+.ul-topbar-search input:focus-visible,
+.user-search input:focus,
+.saas-search-input:focus,
+.loans-search input:focus,
+.eg-search-input:focus,
+.ul-topbar-search input:focus {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
 button:focus:not(:focus-visible),
 a:focus:not(:focus-visible),
 input:focus:not(:focus-visible),

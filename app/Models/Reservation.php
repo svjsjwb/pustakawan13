@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Events\ReservationStatusUpdated;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Reservation extends Model
 {
@@ -28,6 +31,23 @@ class Reservation extends Model
         'cancellation_requested_at' => 'datetime',
         'cancellation_request_used_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $reservation): void {
+            if (!$reservation->wasRecentlyCreated && !$reservation->wasChanged(['status', 'cancellation_requested_at', 'rejection_reason'])) {
+                return;
+            }
+
+            DB::afterCommit(function () use ($reservation): void {
+                try {
+                    broadcast(new ReservationStatusUpdated($reservation));
+                } catch (\Throwable $e) {
+                    Log::warning('Gagal broadcast status reservasi Reverb: ' . $e->getMessage());
+                }
+            });
+        });
+    }
 
     public function user(): BelongsTo
     {

@@ -13,6 +13,7 @@ use App\Models\Reservation;
 use App\Models\Shelf;
 use App\Services\MemberStatusService;
 use App\Services\NotificationService;
+use App\Services\ReservationCancellationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +28,9 @@ class ReservationController extends Controller
      */
     public function index(Request $request)
     {
+        // Jalankan auto-cancel on-demand jika ada reservasi melewati batas waktu 3 hari
+        ReservationCancellationService::cancelExpiredReservations();
+
         $selectedDate = $request->get(
             'reservation_date',
             now()->format('Y-m-d')
@@ -330,8 +334,10 @@ class ReservationController extends Controller
                 $bookCopy->id,
                 'reserved_at' =>
                 $validated['reserved_at'],
+                // expires_at = 3 hari dari sekarang (batas waktu admin menyetujui)
+                // Jika admin menyetujui, reservasi langsung menjadi peminjaman
                 'expires_at' =>
-                $validated['expires_at'] ?? null,
+                now()->addDays(3)->toDateString(),
                 'seat_number' =>
                 $validated['seat_number'] ?? null,
                 'status' =>
@@ -730,6 +736,9 @@ class ReservationController extends Controller
      */
     public function statusFeed()
     {
+        // Jalankan auto-cancel on-demand jika ada reservasi melewati batas waktu 3 hari
+        ReservationCancellationService::cancelExpiredReservations();
+
         $reservations = Reservation::with(['member', 'book'])
             ->latest()
             ->take(50)

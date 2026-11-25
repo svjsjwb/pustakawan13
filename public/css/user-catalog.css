@@ -263,12 +263,23 @@ animation: saasPulse 2s infinite;
 .saas-search-input {
     flex: 1;
     height: 100%;
-    border: none;
-    outline: none;
+    border: none !important;
+    outline: none !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
     font-size: 15.5px;
     font-family: 'Inter', sans-serif;
     color: var(--saas-text);
-    background: transparent;
+    background: transparent !important;
+}
+
+.saas-search-input:focus,
+.saas-search-input:focus-visible {
+    border: none !important;
+    outline: none !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
 
 .saas-search-input::placeholder {

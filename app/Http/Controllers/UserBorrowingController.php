@@ -287,7 +287,7 @@ class UserBorrowingController extends Controller
             abort(403, 'Akses tidak sah.');
         }
 
-        if ($borrowing->status !== 'dipinjam') {
+        if (!in_array($borrowing->status, ['dipinjam', 'diperpanjang'], true)) {
             return back()->with(
                 'error',
                 'Hanya peminjaman aktif yang dapat diperpanjang.'
@@ -387,7 +387,7 @@ class UserBorrowingController extends Controller
             abort(403, 'Akses tidak sah.');
         }
 
-        if ($borrowing->status !== 'dipinjam') {
+        if (!in_array($borrowing->status, ['dipinjam', 'diperpanjang'], true)) {
             return response()->json([
                 'message' => 'Buku tidak sedang dipinjam.'
             ], 422);

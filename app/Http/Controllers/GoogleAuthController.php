@@ -44,11 +44,29 @@ class GoogleAuthController extends Controller
     }
 
     /**
+     * Membuat instance driver Google Socialite dengan CA bundle lokal jika tersedia.
+     */
+    private function googleDriver()
+    {
+        $driver = Socialite::driver('google');
+        $caBundle = 'C:\\laragon\\etc\\ssl\\cacert.pem';
+
+        if (is_file($caBundle)) {
+            $driver->setHttpClient(new \GuzzleHttp\Client([
+                'verify' => $caBundle,
+            ]));
+        }
+
+        return $driver;
+    }
+
+    /**
      * Redirect user ke halaman login Google.
      */
     public function redirect()
     {
-        return Socialite::driver('google')
+        return $this->googleDriver()
+            ->stateless()
             ->with(['prompt' => 'select_account'])
             ->redirect();
     }
@@ -59,20 +77,21 @@ class GoogleAuthController extends Controller
     public function callback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = $this->googleDriver()
+                ->stateless()
+                ->user();
         } catch (\Throwable $e) {
-            try {
-                $googleUser = Socialite::driver('google')
-                    ->stateless()
-                    ->user();
-            } catch (\Throwable $ex) {
-                return redirect()
-                    ->route('login')
-                    ->with(
-                        'error',
-                        'Sesi login Google sudah kedaluwarsa. Silakan login dengan Google lagi.'
-                    );
-            }
+            Log::warning('Google OAuth callback gagal', [
+                'error' => $e->getMessage(),
+                'url'   => request()->fullUrl(),
+            ]);
+
+            return redirect()
+                ->route('login')
+                ->with(
+                    'error',
+                    'Login Google gagal: ' . $e->getMessage() . '. Silakan coba lagi.'
+                );
         }
 
         $googleId = (string) $googleUser->getId();

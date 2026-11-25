@@ -64,6 +64,12 @@
                     <button onclick="this.parentElement.remove()">×</button>
                 </div>
             @endif
+            @if (session('error'))
+                <div class="ul-flash ul-flash-error" id="ulFlashError" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;padding:12px 16px;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:13.5px;">
+                    <span>⚠️ {{ session('error') }}</span>
+                    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#991b1b;font-size:18px;cursor:pointer;line-height:1;">×</button>
+                </div>
+            @endif
 
             @yield('content')
         </main>
@@ -118,6 +124,7 @@
     <div id="ulToastContainer"></div>
 
     <script src="{{ asset('js/app.js') }}"></script>
+    @vite(['resources/js/echo.js'])
     <script src="{{ asset('js/guest-approval.js') }}?v={{ file_exists(public_path('js/guest-approval.js')) ? filemtime(public_path('js/guest-approval.js')) : '1.0' }}"></script>
     <script>
         // ── Auto-hide flash ───────────────────────────────────────

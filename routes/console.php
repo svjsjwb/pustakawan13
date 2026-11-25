@@ -12,5 +12,8 @@ Artisan::command('inspire', function () {
 Schedule::command('borrowings:update-status')
     ->dailyAt('00:01');
 
+Schedule::command('reservations:cancel-expired')
+    ->hourly();
+
 Schedule::command('library:send-due-reminders')
     ->dailyAt('07:00');

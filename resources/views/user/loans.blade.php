@@ -1311,14 +1311,59 @@
                                  <div class="loan-card-accent" style="background:{{ $statusColor }}"></div>
 
                                  <div class="loan-card-content">
-                                     {{-- Header --}}
-                                     <div class="loan-card-head">
-                                         <div>
-                                             <p class="loan-meta-label">NO. PEMINJAMAN</p>
-                                             <p class="loan-number">#{{ str_pad($borrowing->id, 6, '0', STR_PAD_LEFT) }}
-                                             </p>
+                                     {{-- Baris Atas: Info Buku, Tanggal, dan Status Badges --}}
+                                     <div class="loan-card-top">
+                                         {{-- Books --}}
+                                         <div class="loan-books">
+                                             @php
+                                                 $detail = $borrowing->detail;
+                                             @endphp
+
+                                             @if ($detail)
+                                                 <div class="loan-book-row">
+                                                     @if ($detail->book?->cover)
+                                                         <img src="{{ asset('storage/' . $detail->book->cover) }}"
+                                                             class="loan-cover" alt="{{ $detail->book->title }}">
+                                                     @else
+                                                         <div class="loan-cover loan-cover-fallback">
+                                                             {{ strtoupper(substr($detail->book?->title ?? 'B', 0, 1)) }}
+                                                         </div>
+                                                     @endif
+                                                     <div class="loan-book-info">
+                                                         <p class="loan-book-title">{{ $detail->book?->title ?? '—' }}</p>
+                                                         <p class="loan-book-author">{{ $detail->book?->author ?? '—' }}</p>
+                                                         <span
+                                                             class="loan-category">{{ $detail->book?->category?->name ?? '—' }}</span>
+                                                     </div>
+                                                 </div>
+                                             @endif
                                          </div>
-                                         <div style="display:flex;align-items:center;gap:10px">
+
+                                         {{-- Date info --}}
+                                         <div class="loan-dates">
+                                             <div>
+                                                 <p class="loan-meta-label">TANGGAL PINJAM</p>
+                                                 <p class="loan-date-value">
+                                                     {{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }}</p>
+                                             </div>
+                                             <div class="loan-date-divider"></div>
+                                             <div>
+                                                 <p class="loan-meta-label">BATAS KEMBALI</p>
+                                                 <p class="loan-date-value" style="color:{{ $statusColor }}">
+                                                     {{ $borrowing->due_at?->format('d M Y') ?? '-' }}</p>
+                                             </div>
+                                             @if ($borrowing->returned_at)
+                                                 <div class="loan-date-divider"></div>
+                                                 <div>
+                                                     <p class="loan-meta-label">DIKEMBALIKAN</p>
+                                                     <p class="loan-date-value" style="color:var(--ink)">
+                                                         {{ $borrowing->returned_at->format('d M Y') }}</p>
+                                                 </div>
+                                             @endif
+                                         </div>
+
+                                         {{-- Badges --}}
+                                         <div class="loan-card-badges">
                                              <span class="loan-status"
                                                  style="background:{{ $statusBg }};color:{{ $statusColor }}">
                                                  {{ $statusLabel }}
@@ -1327,108 +1372,90 @@
                                          </div>
                                      </div>
 
-                                     {{-- Date info --}}
-                                     <div class="loan-dates">
-                                         <div>
-                                             <p class="loan-meta-label">TANGGAL PINJAM</p>
-                                             <p class="loan-date-value">
-                                                 {{ $borrowing->borrowed_at?->format('d M Y') ?? '-' }}</p>
-                                         </div>
-                                         <div style="width:1px;background:var(--line)"></div>
-                                         <div>
-                                             <p class="loan-meta-label">BATAS KEMBALI</p>
-                                             <p class="loan-date-value" style="color:{{ $statusColor }}">
-                                                 {{ $borrowing->due_at?->format('d M Y') ?? '-' }}</p>
-                                         </div>
-                                         @if ($borrowing->returned_at)
-                                             <div style="width:1px;background:var(--line)"></div>
-                                             <div>
-                                                 <p
-                                                     style="margin:0;font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--muted-soft)">
-                                                     DIKEMBALIKAN</p>
-                                                 <p style="margin:0;font-size:13px;font-weight:600;color:var(--ink)">
-                                                     {{ $borrowing->returned_at->format('d M Y') }}</p>
+                                     {{-- Divider Pemisah Horizontal --}}
+                                     <div class="loan-card-divider"></div>
+
+                                     {{-- Baris Bawah: Progress, Status Perpanjangan, dan Tombol Aksi --}}
+                                     <div class="loan-card-bottom">
+                                         {{-- Area Kiri: Progress Bar --}}
+                                         <div class="loan-progress-wrap">
+                                             <div class="loan-progress-label">
+                                                 <span>Progress pengembalian</span>
                                              </div>
-                                         @endif
-                                     </div>
+                                             <div class="loan-progress">
+                                                 <span class="{{ $isOverdue ? 'is-danger' : ($isNearDue ? 'is-warning' : 'is-safe') }}"
+                                                     style="width:{{ $progress }}%"></span>
+                                             </div>
+                                         </div>
 
-                                     {{-- Books --}}
-                                     <div class="loan-books">
-                                         @php
-                                             $detail = $borrowing->detail;
-                                         @endphp
-
-                                         @if ($detail)
-                                             <div class="loan-book-row">
-                                                 @if ($detail->book?->cover)
-                                                     <img src="{{ asset('storage/' . $detail->book->cover) }}"
-                                                         class="loan-cover" alt="{{ $detail->book->title }}">
-                                                 @else
-                                                     <div class="loan-cover loan-cover-fallback">
-                                                         {{ strtoupper(substr($detail->book?->title ?? 'B', 0, 1)) }}
+                                         {{-- Area Tengah: Status Perpanjangan --}}
+                                         <div class="loan-extension-area">
+                                             @if ($borrowing->extension_status === 'menunggu')
+                                                 <div class="loan-extension-note is-pending">
+                                                     <span class="loan-ext-icon">⏳</span>
+                                                     <div class="loan-ext-text">
+                                                         <strong>Permintaan perpanjangan diajukan</strong>
+                                                         <span>hingga {{ $borrowing->extension_requested_due_at?->format('d M Y') }} (Menunggu persetujuan Admin)</span>
                                                      </div>
-                                                 @endif
-                                                 <div class="loan-book-info">
-                                                     <p class="loan-book-title">{{ $detail->book?->title ?? '—' }}</p>
-                                                     <p class="loan-book-author">{{ $detail->book?->author ?? '—' }}</p>
-                                                     <span
-                                                         class="loan-category">{{ $detail->book?->category?->name ?? '—' }}</span>
                                                  </div>
-                                             </div>
-                                         @endif
-                                     </div>
-
-                                     <div class="loan-progress-wrap">
-                                         <div class="loan-progress-label"><span>Progress
-                                                 pengembalian</span><strong>{{ $isOverdue ? 'Terlambat ' . abs($daysLeft) . ' hari' : 'Sisa ' . max(0, $daysLeft) . ' hari' }}</strong>
+                                             @elseif($borrowing->extension_status === 'disetujui')
+                                                 <div class="loan-extension-note is-approved">
+                                                      <span class="loan-ext-icon">✓</span>
+                                                      <div class="loan-ext-text">
+                                                          <strong>Perpanjangan disetujui</strong>
+                                                          <span>hingga {{ $borrowing->due_at?->format('d M Y') }}</span>
+                                                      </div>
+                                                 </div>
+                                             @elseif($borrowing->extension_status === 'ditolak')
+                                                 <div class="loan-extension-note is-rejected">
+                                                     <span class="loan-ext-icon">✕</span>
+                                                     <div class="loan-ext-text">
+                                                         <strong>Permintaan perpanjangan ditolak</strong>
+                                                         <span>{{ $borrowing->extension_admin_notes ? '(' . $borrowing->extension_admin_notes . ')' : '' }}</span>
+                                                     </div>
+                                                 </div>
+                                             @endif
                                          </div>
-                                         <div class="loan-progress"><span
-                                                 class="{{ $isOverdue ? 'is-danger' : ($isNearDue ? 'is-warning' : 'is-safe') }}"
-                                                 style="width:{{ $progress }}%"></span></div>
-                                     </div>
 
-                                     {{-- Action & Status Perpanjangan --}}
-                                     <div class="loan-card-actions">
-                                         @if ($borrowing->extension_status === 'menunggu')
-                                             <div class="loan-extension-note is-pending">
-                                                 <span>⏳</span> Permintaan perpanjangan diajukan hingga
-                                                 {{ $borrowing->extension_requested_due_at?->format('d M Y') }} (Menunggu
-                                                 persetujuan Admin)
-                                             </div>
-                                         @elseif($borrowing->extension_status === 'disetujui')
-                                             <div class="loan-extension-note is-approved">
-                                                 ✓ Perpanjangan disetujui hingga {{ $borrowing->due_at?->format('d M Y') }}
-                                             </div>
-                                         @elseif($borrowing->extension_status === 'ditolak')
-                                             <div class="loan-extension-note is-rejected">
-                                                 ✕ Permintaan perpanjangan ditolak
-                                                 {{ $borrowing->extension_admin_notes ? '(' . $borrowing->extension_admin_notes . ')' : '' }}
-                                             </div>
-                                         @endif
-
-                                         @if ($borrowing->extension_status !== 'menunggu')
-                                             <button type="button" class="loans-action-btn js-extension-card-button"
-                                                 data-extension-url="{{ route('user.loans.extend', $borrowing->id) }}"
-                                                 data-book-title="{{ $loanTitle }}"
-                                                 data-due-date="{{ $borrowing->due_at?->format('Y-m-d') }}"
-                                                 data-due-formatted="{{ $borrowing->due_at?->format('d M Y') }}"
-                                                 data-borrowed-formatted="{{ $borrowing->borrowed_at?->format('d M Y') }}"
-                                                 data-borrowed-date="{{ $borrowing->borrowed_at?->format('Y-m-d') }}">
-                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                     stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
-                                                     stroke-linejoin="round">
-                                                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                                                     <path d="M3 3v5h5" />
-                                                 </svg>
-                                                 Ajukan Perpanjangan
-                                             </button>
-                                         @endif
+                                         {{-- Area Kanan: Tombol Aksi --}}
+                                         <div class="loan-card-actions">
+                                             @if ($borrowing->extension_status !== 'menunggu')
+                                                 <button type="button" class="loans-action-btn js-extension-card-button"
+                                                     data-extension-url="{{ route('user.loans.extend', $borrowing->id) }}"
+                                                     data-book-title="{{ $loanTitle }}"
+                                                     data-due-date="{{ $borrowing->due_at?->format('Y-m-d') }}"
+                                                     data-due-formatted="{{ $borrowing->due_at?->format('d M Y') }}"
+                                                     data-borrowed-formatted="{{ $borrowing->borrowed_at?->format('d M Y') }}"
+                                                     data-borrowed-date="{{ $borrowing->borrowed_at?->format('Y-m-d') }}">
+                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                         stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                                                         stroke-linejoin="round">
+                                                         <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                                         <path d="M3 3v5h5" />
+                                                     </svg>
+                                                     <span>Ajukan Perpanjangan</span>
+                                                 </button>
+                                             @endif
+                                         </div>
                                      </div>
 
                                      @if ($isNearDue || $isOverdue)
                                          <div class="loan-alert"
                                              style="background:{{ $isOverdue ? 'var(--danger-soft)' : 'var(--brass-soft)' }};color:{{ $isOverdue ? 'var(--danger)' : '#7a5420' }}">
-                                             {{ $isOverdue ? '⚠️ Buku ini sudah melewati batas pengembalian. Segera hubungi petugas perpustakaan.' : '⏰ Batas pengembalian semakin dekat. Harap kembalikan tepat waktu.' }}
+                                             @if ($isOverdue)
+                                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="loan-alert-icon" aria-hidden="true">
+                                                      <circle cx="12" cy="12" r="10"></circle>
+                                                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                                  </svg>
+                                                  <span>Buku ini sudah melewati batas pengembalian. Segera hubungi petugas perpustakaan.</span>
+                                              @else
+                                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="loan-alert-icon" aria-hidden="true">
+                                                      <circle cx="12" cy="12" r="10"></circle>
+                                                      <polyline points="12 6 12 12 16 14"></polyline>
+                                                  </svg>
+                                                  <span>Batas pengembalian semakin dekat. Harap kembalikan tepat waktu.</span>
+                                              @endif
                                          </div>
                                      @endif
                                  </div>
@@ -1511,7 +1538,7 @@
                              <span>Perpanjang Peminjaman</span>
                          </a>
                      @endif
-                     <a href="{{ route('user.loans') }}" class="loans-side-action" id="btnViewAllLoans">
+                     <a href="{{ route('user.history') }}" class="loans-side-action" id="btnViewAllLoans">
                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
                              class="loans-action-icon">

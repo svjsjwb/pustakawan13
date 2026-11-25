@@ -348,8 +348,8 @@
     </div>
 
     <div id="bookCreateModal"
-        class="book-create-modal-overlay{{ $errors->any() && !isset($editBook) ? ' is-open' : '' }}"
-        aria-hidden="{{ $errors->any() && !isset($editBook) ? 'false' : 'true' }}">
+        class="book-create-modal-overlay{{ ($openCreateModal ?? false) || ($errors->any() && !isset($editBook)) ? ' is-open' : '' }}"
+        aria-hidden="{{ ($openCreateModal ?? false) || ($errors->any() && !isset($editBook)) ? 'false' : 'true' }}">
         <div class="book-create-modal-dialog" role="dialog" aria-modal="true"
             aria-labelledby="bookCreateModalTitle">
             @include('books.create', ['isBookModal' => true])
@@ -498,35 +498,51 @@
                 const modal = document.getElementById('bookCreateModal');
                 const openButton = document.getElementById('openBookCreateModal');
 
-                if (!modal || !openButton) return;
+                if (!modal) return;
 
                 const closeButton = modal.querySelector('.book-create-modal-close');
                 const dialog = modal.querySelector('.book-create-modal-dialog');
+                const createUrl = @json(route('books.create'));
+                const indexUrl = @json(route('books.index'));
 
-                window.openBookCreateModal = () => {
+                window.openBookCreateModal = (updateHistory = true) => {
                     modal.classList.add('is-open');
                     modal.setAttribute('aria-hidden', 'false');
                     document.body.style.overflow = 'hidden';
+                    if (updateHistory && window.location.pathname !== new URL(createUrl, window.location.origin).pathname) {
+                        history.pushState({ modal: 'bookCreate' }, '', createUrl);
+                    }
                     closeButton?.focus();
                 };
 
-                window.closeBookCreateModal = () => {
+                window.closeBookCreateModal = (updateHistory = true) => {
                     modal.classList.remove('is-open');
                     modal.setAttribute('aria-hidden', 'true');
                     document.body.style.overflow = '';
-                    openButton.focus();
+                    if (updateHistory && window.location.pathname === new URL(createUrl, window.location.origin).pathname) {
+                        history.pushState(null, '', indexUrl);
+                    }
+                    openButton?.focus();
                 };
 
-                openButton.addEventListener('click', window.openBookCreateModal);
+                openButton?.addEventListener('click', () => window.openBookCreateModal(true));
                 modal.addEventListener('click', event => {
-                    if (event.target === modal) window.closeBookCreateModal();
+                    if (event.target === modal) window.closeBookCreateModal(true);
                 });
                 document.addEventListener('keydown', event => {
                     if (event.key === 'Escape' && modal.classList.contains('is-open')) {
                         if (document.getElementById('isbnScannerModal')?.classList.contains('is-open')) {
                             return;
                         }
-                        window.closeBookCreateModal();
+                        window.closeBookCreateModal(true);
+                    }
+                });
+
+                window.addEventListener('popstate', () => {
+                    if (window.location.pathname === new URL(createUrl, window.location.origin).pathname) {
+                        window.openBookCreateModal(false);
+                    } else if (modal.classList.contains('is-open')) {
+                        window.closeBookCreateModal(false);
                     }
                 });
 
