@@ -25,11 +25,11 @@ class PasswordResetOtp extends Model
 
     public function isExpired(): bool
     {
-        return $this->expires_at->isPast();
+        return !$this->expires_at || $this->expires_at->isPast();
     }
 
     public function isVerified(): bool
     {
-        return !is_null($this->verified_at);
+        return $this->verified_at !== null;
     }
 }
