@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 class LoginController extends Controller
 {
@@ -25,10 +26,56 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         /*
-        |--------------------------------------------------------------------------
-        | Validasi
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Verifikasi Cloudflare Turnstile
+    |--------------------------------------------------------------------------
+    */
+
+        $request->validate([
+            'cf-turnstile-response' => ['required', 'string'],
+        ], [
+            'cf-turnstile-response.required' =>
+            'Silakan selesaikan verifikasi CAPTCHA terlebih dahulu.',
+        ]);
+
+        try {
+            $captchaResponse = Http::asForm()
+                ->timeout(10)
+                ->post(
+                    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+                    [
+                        'secret' => config('services.turnstile.secret_key'),
+                        'response' => $request->input('cf-turnstile-response'),
+                        'remoteip' => $request->ip(),
+                    ]
+                );
+
+            $captchaResult = $captchaResponse->json();
+        } catch (\Throwable $e) {
+            return back()
+                ->withErrors([
+                    'captcha' => 'Verifikasi CAPTCHA gagal terhubung. Silakan coba lagi.',
+                ])
+                ->withInput($request->only('email'));
+        }
+
+        if (
+            !$captchaResponse->successful() ||
+            !is_array($captchaResult) ||
+            !($captchaResult['success'] ?? false)
+        ) {
+            return back()
+                ->withErrors([
+                    'captcha' => 'Verifikasi CAPTCHA tidak valid atau sudah kedaluwarsa. Silakan coba lagi.',
+                ])
+                ->withInput($request->only('email'));
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Validasi kredensial login
+    |--------------------------------------------------------------------------
+    */
 
         $credentials = $request->validate([
             'email'    => ['required', 'string'],
