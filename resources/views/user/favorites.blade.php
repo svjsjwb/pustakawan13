@@ -3,6 +3,7 @@
 @section('page-title', 'Favorit')
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('css/user-catalog.css') }}?v={{ file_exists(public_path('css/user-catalog.css')) ? filemtime(public_path('css/user-catalog.css')) : time() }}">
 <style>
 /* Empty State Card - Modern, Elegan & Human-Crafted */
 .ufav-empty-card {
@@ -124,9 +125,10 @@
 
 /* Animasi Hapus Kartu (Smooth Exit) */
 .ufav-card-exit {
-    transform: scale(0.88) translateY(-14px) !important;
+    transform: scale(.94) translateY(-10px) rotate(-.6deg) !important;
     opacity: 0 !important;
     pointer-events: none !important;
+    filter: blur(2px);
 }
 
 /* Transisi Empty State */
@@ -177,22 +179,77 @@
 .ufav-remove-btn:hover { background: var(--danger-soft); border-color: var(--danger); }
 .ufav-remove-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .ufav-remove-btn svg { width:13px; height:13px; }
+
+/* Refined collection cards */
+.ufav-page-shell { width:min(100% - 40px,1180px); margin:0 auto; padding:32px 0 60px; }
+.ufav-page-header { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:26px; }
+.ufav-heading h1 { margin:0; color:#172b36; font-size:clamp(28px,3vw,36px); line-height:1.15; letter-spacing:-.035em; }
+.ufav-kicker { margin:0 0 7px; color:#0f766e; font-size:11px; font-weight:800; letter-spacing:.12em; }
+.ufav-summary { margin:10px 0 0; color:#64748b; font-size:14px; }
+.ufav-add-link { flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 16px; border:1px solid #cbdedb; border-radius:10px; color:#176b66; background:#fff; text-decoration:none; font-size:13px; font-weight:700; transition:background .18s ease,border-color .18s ease,transform .18s ease; }
+.ufav-add-link:hover { background:#f0faf8; border-color:#9bc9c3; transform:translateY(-1px); }
+.ufav-grid { grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),280px)); justify-content:start; gap:18px; }
+.ufav-card { display:flex; flex-direction:column; min-width:0; border:1px solid #e1e8e7; border-radius:14px; box-shadow:0 2px 8px rgba(15,23,42,.035); transition:transform .24s ease,border-color .2s ease,box-shadow .22s ease,opacity .34s ease,filter .34s ease; }
+.ufav-card:hover { transform:translateY(-3px); border-color:#bfd8d4; box-shadow:0 8px 22px rgba(20,53,51,.08); }
+.ufav-card-open { display:flex; flex:1; flex-direction:column; min-width:0; color:inherit; text-decoration:none; outline-offset:-3px; cursor:pointer; }
+.ufav-card-open:focus-visible { outline:3px solid #70b8ac; border-radius:12px; }
+.ufav-cover { height:300px; aspect-ratio:auto; display:flex; align-items:center; justify-content:center; padding:8px; background:#f4f7f6; }
+.ufav-cover img { object-fit:contain; transition:transform .28s ease; }
+.ufav-card:hover .ufav-cover img,.ufav-card-open:focus-visible .ufav-cover img { transform:scale(1.035); }
+.ufav-cover::after { content:'Lihat detail'; position:absolute; right:12px; bottom:12px; padding:7px 10px; border:1px solid rgba(212,231,227,.9); border-radius:8px; background:rgba(255,255,255,.96); color:#176b66; font-size:11px; font-weight:700; opacity:0; transform:translateY(4px); transition:opacity .18s ease,transform .18s ease; pointer-events:none; }
+.ufav-card:hover .ufav-cover::after,.ufav-card-open:focus-visible .ufav-cover::after { opacity:1; transform:translateY(0); }
+.ufav-cover-ph { border:1px dashed #cbd5d1; border-radius:8px; background:#edf4f2; color:#52726e; font-size:14px; }
+.ufav-cover-ph[hidden] { display:none !important; }
+.ufav-badge { top:12px; left:12px; padding:5px 9px; font-size:11px; box-shadow:0 1px 3px rgba(15,23,42,.12); }
+.ufav-info { display:flex; flex:1; flex-direction:column; padding:15px 17px 12px; }
+.ufav-cat { width:fit-content; max-width:100%; margin-bottom:7px; padding:4px 8px; border:1px solid #d4e7e3; border-radius:999px; background:#f0f8f6; color:#176b66; font-size:10px; letter-spacing:.04em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ufav-title { margin:0 0 5px; color:#172b36; font-size:16px; line-height:1.35; }
+.ufav-author { margin:0; color:#667781; font-size:13px; line-height:1.45; }
+.ufav-stock { margin-top:13px; color:#176b66; font-size:12px; font-weight:700; }
+.ufav-stock.is-empty { color:#b45345; }
+.ufav-actions { padding:0 17px 16px; }
+.ufav-remove-btn { padding:9px; border:1px solid #eadad6; border-radius:9px; color:#a84b3f; font-weight:650; }
+.ufav-remove-btn:hover { background:#fff7f5; border-color:#d6a49d; }
+.ufav-remove-btn:active { transform:scale(.98); }
+.ufav-remove-btn span { transition:color .18s ease; }
+.ufav-remove-btn.is-loading { background:#fff7f5; border-color:#d6a49d; cursor:wait; }
+.ufav-remove-btn.is-loading svg { animation:ufavTrashWiggle .42s ease-in-out infinite alternate; }
+.ufav-remove-btn.is-loading span { color:#8e4037; }
+@keyframes ufavTrashWiggle { from { transform:rotate(-9deg) scale(.94); } to { transform:rotate(9deg) scale(1.04); } }
+@media (max-width:620px) {
+    .ufav-page-shell { width:min(100% - 28px,520px); padding:24px 0 44px; }
+    .ufav-page-header { align-items:flex-start; flex-direction:column; gap:16px; margin-bottom:22px; }
+    .ufav-add-link { width:100%; }
+    .ufav-grid { grid-template-columns:minmax(0,320px); justify-content:center; gap:14px; }
+    .ufav-cover { height:280px; }
+}
+[data-theme="dark"] .ufav-heading h1 { color:#e7efef; }
+[data-theme="dark"] .ufav-summary,[data-theme="dark"] .ufav-author { color:#a3b4b8; }
+[data-theme="dark"] .ufav-card,[data-theme="dark"] .ufav-add-link,[data-theme="dark"] .ufav-remove-btn { background:#162625; border-color:#2b4442; }
+[data-theme="dark"] .ufav-card:hover { border-color:#47736e; }
+[data-theme="dark"] .ufav-cover { background:#1d302f; }
+[data-theme="dark"] .ufav-title { color:#e7efef; }
+[data-theme="dark"] .ufav-cat { background:#1d3633; border-color:#365650; color:#9ed8cd; }
+[data-theme="dark"] .ufav-stock { color:#75d2b6; }
+[data-theme="dark"] .ufav-stock.is-empty { color:#f2a49a; }
+[data-theme="dark"] .ufav-remove-btn { color:#f0a49a; }
+[data-theme="dark"] .ufav-remove-btn:hover { background:#2b2423; border-color:#84564f; }
+[data-theme="dark"] .ufav-cover::after { background:rgba(22,38,37,.96); border-color:#365650; color:#9ed8cd; }
+@media (prefers-reduced-motion:reduce) { .ufav-card,.ufav-cover img,.ufav-cover::after,.ufav-remove-btn,.ufav-remove-btn svg { transition:none; animation:none !important; } }
 </style>
 @endpush
 
 @section('content')
 
-<div class="ul-page-header">
-    <div>
-        <p class="ul-page-kicker">KOLEKSI SAYA</p>
-        <h1 class="ul-page-h1">Favorit Saya</h1>
+<div class="ufav-page-shell">
+<header class="ufav-page-header">
+    <div class="ufav-heading">
+        <p class="ufav-kicker">KOLEKSI SAYA</p>
+        <h1>Favorit Saya</h1>
+        <p class="ufav-summary"><span id="favCountNum">{{ $books->count() }}</span> buku tersimpan</p>
     </div>
-    @if($books->isNotEmpty())
-    <a href="{{ route('user.catalog') }}" class="ul-btn ul-btn-outline" id="favHeaderAddBtn">
-        + Tambah dari Katalog
-    </a>
-    @endif
-</div>
+    <a href="{{ route('user.catalog') }}" class="ufav-add-link" id="favHeaderAddBtn">+ Tambah dari Katalog</a>
+</header>
 
 {{-- Container Empty State (Tampil jika kosong, atau muncul dengan animasi saat buku terakhir dihapus) --}}
 <div id="favEmptyStateContainer" class="{{ $books->isEmpty() ? '' : 'ufav-hidden' }}">
@@ -291,42 +348,72 @@
 
 @if($books->isNotEmpty())
 <div id="favListContainer">
-    <p id="favCountText" style="color:var(--muted);margin-bottom:20px;font-size:13.5px">
-        <span id="favCountNum">{{ $books->count() }}</span> buku tersimpan
-    </p>
     <div class="ufav-grid" id="favGrid">
         @foreach($books as $book)
-        <div class="ufav-card" id="favCard{{ $book->id }}">
-            <div class="ufav-cover">
-                @if($book->cover)
-                    <img src="{{ asset('storage/'.$book->cover) }}" alt="{{ $book->title }}" loading="lazy" decoding="async">
-                @else
-                    <div class="ufav-cover-ph">{{ Str::limit($book->title, 35) }}</div>
-                @endif
-                @if(($book->available_stock??0) > 0)
-                    <div class="ufav-badge" style="background:var(--success)">Tersedia</div>
-                @else
-                    <div class="ufav-badge" style="background:var(--danger)">Habis</div>
-                @endif
+        <article class="ufav-card" id="favCard{{ $book->id }}">
+            <div class="ufav-card-open"
+                 role="button"
+                 tabindex="0"
+                 aria-haspopup="dialog"
+                 aria-controls="saasBookModalDialog"
+                 aria-label="Lihat detail {{ $book->title }}"
+                 data-id="{{ $book->id }}"
+                 data-title="{{ $book->title }}"
+                 data-author="{{ $book->author ?? '-' }}"
+                 data-category="{{ $book->category?->name ?? 'Umum' }}"
+                 data-main-category="{{ $book->category?->name ?? 'Umum' }}"
+                 data-sub-category="{{ $book->subcategory?->name ?? '' }}"
+                 data-publisher="{{ $book->publisher ?? '-' }}"
+                 data-year="{{ $book->publication_year ?? '-' }}"
+                 data-isbn="{{ $book->isbn ?? '-' }}"
+                 data-ddc="{{ $book->ddc ?? '-' }}"
+                 data-rak="{{ $book->rak ?? '-' }}"
+                 data-stock="{{ $book->available_stock ?? 0 }}"
+                 data-description="{{ $book->description ?? 'Deskripsi buku belum tersedia.' }}"
+                 data-cover="{{ $book->cover ? asset('storage/'.$book->cover) : '' }}"
+                 data-fav="1"
+                 data-borrowed="0"
+                 data-reserved="0"
+                 onclick="openFavoriteBook(this)"
+                 onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openFavoriteBook(this); }">
+                <div class="ufav-cover">
+                    @if($book->cover)
+                        <img src="{{ asset('storage/'.$book->cover) }}" alt="Sampul {{ $book->title }}" loading="lazy" decoding="async" onerror="this.hidden=true; this.nextElementSibling.hidden=false">
+                        <div class="ufav-cover-ph" hidden>{{ Str::limit($book->title, 35) }}</div>
+                    @else
+                        <div class="ufav-cover-ph">{{ Str::limit($book->title, 35) }}</div>
+                    @endif
+                    @if(($book->available_stock ?? 0) > 0)
+                        <div class="ufav-badge" style="background:#167461">Tersedia</div>
+                    @else
+                        <div class="ufav-badge" style="background:#b45345">Habis</div>
+                    @endif
+                </div>
+                <div class="ufav-info">
+                    <span class="ufav-cat">{{ $book->category?->name ?? 'Buku Umum' }}</span>
+                    <h2 class="ufav-title">{{ $book->title }}</h2>
+                    <p class="ufav-author">{{ $book->author ?? 'Penulis tidak diketahui' }}</p>
+                    <span class="ufav-stock {{ ($book->available_stock ?? 0) > 0 ? '' : 'is-empty' }}">
+                        {{ ($book->available_stock ?? 0) > 0 ? $book->available_stock . ' eksemplar tersedia' : 'Stok sedang habis' }}
+                    </span>
+                </div>
             </div>
-            <div class="ufav-info">
-                <span class="ufav-cat">{{ $book->category->name ?? 'Umum' }}</span>
-                <h3 class="ufav-title">{{ $book->title }}</h3>
-                <p class="ufav-author">{{ $book->author ?? '-' }}</p>
-                <div class="ufav-actions">
-                    <button class="ufav-remove-btn" onclick="removeFav(this, {{ $book->id }})">
+            <div class="ufav-actions">
+                <button type="button" class="ufav-remove-btn" onclick="event.stopPropagation(); removeFav(this, {{ $book->id }})" onkeydown="event.stopPropagation()" aria-label="Hapus {{ $book->title }} dari favorit">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
                         </svg>
-                        Hapus
-                    </button>
-                </div>
+                        <span>Hapus</span>
+                </button>
             </div>
-        </div>
+        </article>
         @endforeach
     </div>
 </div>
 @endif
+
+</div>
+@include('user.partials.catalog-book-modal')
 
 @endsection
 
@@ -335,7 +422,13 @@
 const CSRF = document.querySelector('meta[name="csrf-token"]')?.content;
 
 function removeFav(btn, bookId) {
-    if (btn) btn.disabled = true;
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add('is-loading');
+        btn.setAttribute('aria-busy', 'true');
+        const label = btn.querySelector('span');
+        if (label) label.textContent = 'Menghapus...';
+    }
     const card = document.getElementById('favCard' + bookId);
 
     fetch('/user/favorites/toggle', {
@@ -343,11 +436,15 @@ function removeFav(btn, bookId) {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
         body: JSON.stringify({ book_id: bookId }),
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error('Request favorit gagal');
+        return r.json();
+    })
     .then(data => {
         if (!card) return;
+        if (data.favorited !== false) throw new Error('Status favorit tidak berubah menjadi nonaktif');
 
-        // 1. Jalankan animasi halus keluar kartu (shrink + fade out + slide up)
+        // Animate the card out after the server confirms the removal.
         card.classList.add('ufav-card-exit');
 
         setTimeout(() => {
@@ -361,15 +458,6 @@ function removeFav(btn, bookId) {
             if (remainingCards.length === 0) {
                 const listContainer = document.getElementById('favListContainer');
                 const emptyContainer = document.getElementById('favEmptyStateContainer');
-                const headerAddBtn = document.getElementById('favHeaderAddBtn');
-
-                if (headerAddBtn) {
-                    headerAddBtn.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-                    headerAddBtn.style.opacity = '0';
-                    headerAddBtn.style.transform = 'scale(0.9)';
-                    setTimeout(() => headerAddBtn.remove(), 250);
-                }
-
                 if (listContainer) {
                     listContainer.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
                     listContainer.style.opacity = '0';
@@ -383,15 +471,87 @@ function removeFav(btn, bookId) {
                     }, 220);
                 }
             }
-        }, 280);
+        }, 340);
 
         showToast('Buku dihapus dari favorit', 'info');
     })
     .catch(() => {
         if (card) card.classList.remove('ufav-card-exit');
-        if (btn) btn.disabled = false;
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('is-loading');
+            btn.removeAttribute('aria-busy');
+            const label = btn.querySelector('span');
+            if (label) label.textContent = 'Hapus';
+        }
         showToast('Gagal menghapus favorit', 'error');
     });
 }
+
+function removeFavoriteCardFromList(card) {
+    if (!card) return;
+    card.classList.add('ufav-card-exit');
+
+    setTimeout(() => {
+        card.remove();
+        const remainingCards = document.querySelectorAll('.ufav-card');
+        const countNum = document.getElementById('favCountNum');
+        if (countNum) countNum.textContent = remainingCards.length;
+
+        if (remainingCards.length === 0) {
+            const listContainer = document.getElementById('favListContainer');
+            const emptyContainer = document.getElementById('favEmptyStateContainer');
+            if (listContainer) {
+                listContainer.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+                listContainer.style.opacity = '0';
+                listContainer.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    listContainer.remove();
+                    if (emptyContainer) {
+                        emptyContainer.classList.remove('ufav-hidden');
+                        emptyContainer.classList.add('ufav-fade-in');
+                    }
+                }, 220);
+            }
+        }
+    }, 340);
+}
+
+function openFavoriteBook(card) {
+    if (!card) return;
+
+    // Show the shared catalog popup immediately using data already on this favorite card.
+    openCatalogModal(card);
+    refreshFavoriteBookModalData(card);
+}
+
+async function refreshFavoriteBookModalData(card) {
+    try {
+        const params = new URLSearchParams({ ajax: '1', search: card.dataset.title || '' });
+        const response = await fetch(`{{ route('user.catalog') }}?${params.toString()}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        });
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.grid_html) {
+                const catalogDoc = new DOMParser().parseFromString(result.grid_html, 'text/html');
+                const catalogCard = Array.from(catalogDoc.querySelectorAll('.saas-book-card'))
+                    .find(item => item.dataset.id === card.dataset.id);
+                if (catalogCard) {
+                    Object.assign(card.dataset, catalogCard.dataset, { fav: '1' });
+
+                    // Refresh exact availability details only if the user still has this book open.
+                    const modalIsOpen = document.getElementById('saasBookModalBackdrop')?.classList.contains('active');
+                    if (modalIsOpen && String(activeBookId) === String(card.dataset.id)) {
+                        openCatalogModal(card);
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        // Fall back to the favorite card's current book fields if catalog data cannot be refreshed.
+    }
+}
 </script>
+@include('user.partials.catalog-book-modal-scripts')
 @endpush
